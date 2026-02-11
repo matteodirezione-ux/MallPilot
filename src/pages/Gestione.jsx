@@ -32,9 +32,9 @@ export default function Gestione({ user }) {
   });
 
   const [formUtente, setFormUtente] = useState({
+    full_name: '',
     email: '',
-    role: 'user',
-    tipo_account: 'direttore'
+    role: 'user'
   });
 
   const [formBudget, setFormBudget] = useState({
@@ -103,7 +103,20 @@ export default function Gestione({ user }) {
   const handleInvitaUtente = async (e) => {
     e.preventDefault();
     try {
+      // Invita l'utente
       await base44.users.inviteUser(formUtente.email, formUtente.role);
+      
+      // Attendi un momento per permettere la creazione dell'utente
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Aggiorna l'utente con tipo_account e nome
+      const users = await base44.entities.User.filter({ email: formUtente.email });
+      if (users.length > 0) {
+        await base44.entities.User.update(users[0].id, {
+          tipo_account: 'direttore',
+          full_name: formUtente.full_name
+        });
+      }
       
       // Crea le assegnazioni se ci sono centri selezionati
       if (assegnazioniForm.centri_selezionati.length > 0) {
@@ -117,13 +130,13 @@ export default function Gestione({ user }) {
         );
       }
 
-      toast.success('Utente invitato con successo');
+      toast.success('Direttore invitato con successo');
       setDialogUtenteOpen(false);
       resetFormUtente();
       loadData();
     } catch (error) {
       console.error('Errore invito utente:', error);
-      toast.error('Errore nell\'invito dell\'utente');
+      toast.error('Errore nell\'invito del direttore');
     }
   };
 
@@ -204,9 +217,9 @@ export default function Gestione({ user }) {
 
   const resetFormUtente = () => {
     setFormUtente({
+      full_name: '',
       email: '',
-      role: 'user',
-      tipo_account: 'direttore'
+      role: 'user'
     });
     setAssegnazioniForm({
       user_email: '',
@@ -438,52 +451,76 @@ export default function Gestione({ user }) {
                 </DialogHeader>
                 <form onSubmit={handleInvitaUtente} className="space-y-4">
                   <div>
+                    <Label htmlFor="full_name">Nome e Cognome *</Label>
+                    <Input
+                      id="full_name"
+                      value={formUtente.full_name}
+                      onChange={(e) => setFormUtente({ ...formUtente, full_name: e.target.value })}
+                      placeholder="es. Mario Rossi"
+                      required
+                    />
+                  </div>
+                  <div>
                     <Label htmlFor="email">Email *</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formUtente.email}
                       onChange={(e) => setFormUtente({ ...formUtente, email: e.target.value })}
+                      placeholder="email@esempio.com"
                       required
                     />
                   </div>
                   <div>
-                    <Label>Assegna Centri</Label>
+                    <Label>Assegna Centri *</Label>
+                    <p className="text-sm text-slate-500 mb-2">
+                      Seleziona i centri che il direttore potrà gestire
+                    </p>
                     <div className="space-y-2 mt-2 max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                      {centri.filter(c => c.attivo).map(centro => (
-                        <div key={centro.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            id={`centro-${centro.id}`}
-                            checked={assegnazioniForm.centri_selezionati.includes(centro.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setAssegnazioniForm({
-                                  ...assegnazioniForm,
-                                  centri_selezionati: [...assegnazioniForm.centri_selezionati, centro.id]
-                                });
-                              } else {
-                                setAssegnazioniForm({
-                                  ...assegnazioniForm,
-                                  centri_selezionati: assegnazioniForm.centri_selezionati.filter(id => id !== centro.id)
-                                });
-                              }
-                            }}
-                            className="rounded"
-                          />
-                          <Label htmlFor={`centro-${centro.id}`} className="cursor-pointer text-sm">
-                            {centro.nome}
-                          </Label>
-                        </div>
-                      ))}
+                      {centri.filter(c => c.attivo).length > 0 ? (
+                        centri.filter(c => c.attivo).map(centro => (
+                          <div key={centro.id} className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`centro-${centro.id}`}
+                              checked={assegnazioniForm.centri_selezionati.includes(centro.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setAssegnazioniForm({
+                                    ...assegnazioniForm,
+                                    centri_selezionati: [...assegnazioniForm.centri_selezionati, centro.id]
+                                  });
+                                } else {
+                                  setAssegnazioniForm({
+                                    ...assegnazioniForm,
+                                    centri_selezionati: assegnazioniForm.centri_selezionati.filter(id => id !== centro.id)
+                                  });
+                                }
+                              }}
+                              className="rounded"
+                            />
+                            <Label htmlFor={`centro-${centro.id}`} className="cursor-pointer text-sm">
+                              {centro.nome}
+                            </Label>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm text-slate-500 text-center py-2">
+                          Nessun centro disponibile. Crea prima un centro commerciale.
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <Button type="button" variant="outline" onClick={() => setDialogUtenteOpen(false)}>
                       Annulla
                     </Button>
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                      Invita
+                    <Button 
+                      type="submit" 
+                      className="bg-blue-600 hover:bg-blue-700"
+                      disabled={assegnazioniForm.centri_selezionati.length === 0}
+                    >
+                      Invita Direttore
                     </Button>
                   </div>
                 </form>
