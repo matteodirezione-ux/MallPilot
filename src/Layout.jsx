@@ -30,10 +30,17 @@ export default function Layout({ children, currentPageName }) {
   const loadUserAndCentri = async () => {
     try {
       const userData = await base44.auth.me();
+      
+      // Se l'utente non ha tipo_account, impostalo come proprietà di default
+      if (!userData.tipo_account) {
+        await base44.auth.updateMe({ tipo_account: 'proprieta' });
+        userData.tipo_account = 'proprieta';
+      }
+      
       setUser(userData);
 
       if (userData.tipo_account === 'proprieta') {
-        const allCentri = await base44.entities.CentroCommerciale.filter({ attivo: true });
+        const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri);
         if (allCentri.length > 0) {
           const savedCentroId = localStorage.getItem('centroSelezionatoId');
@@ -43,15 +50,17 @@ export default function Layout({ children, currentPageName }) {
       } else if (userData.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
         const centriIds = assegnazioni.map(a => a.centro_id);
-        const centriAssegnati = await Promise.all(
-          centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
-        );
-        const centriFlat = centriAssegnati.flat().filter(c => c.attivo);
-        setCentri(centriFlat);
-        if (centriFlat.length > 0) {
-          const savedCentroId = localStorage.getItem('centroSelezionatoId');
-          const centroIniziale = centriFlat.find(c => c.id === savedCentroId) || centriFlat[0];
-          setCentroSelezionato(centroIniziale);
+        if (centriIds.length > 0) {
+          const centriAssegnati = await Promise.all(
+            centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
+          );
+          const centriFlat = centriAssegnati.flat().filter(c => c && c.attivo);
+          setCentri(centriFlat);
+          if (centriFlat.length > 0) {
+            const savedCentroId = localStorage.getItem('centroSelezionatoId');
+            const centroIniziale = centriFlat.find(c => c.id === savedCentroId) || centriFlat[0];
+            setCentroSelezionato(centroIniziale);
+          }
         }
       }
     } catch (error) {
@@ -82,7 +91,7 @@ export default function Layout({ children, currentPageName }) {
   ];
 
   const filteredNav = navigationItems.filter(item => 
-    item.roles.includes(user?.tipo_account)
+    user?.tipo_account && item.roles.includes(user.tipo_account)
   );
 
   if (loading) {
@@ -218,7 +227,16 @@ export default function Layout({ children, currentPageName }) {
       {/* Main Content */}
       <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-20'}`}>
         <div className="min-h-screen">
-          {React.cloneElement(children, { centroSelezionato, user })}
+          {!user?.tipo_account ? (
+            <div className="flex items-center justify-center min-h-screen p-8">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-slate-600">Configurazione account...</p>
+              </div>
+            </div>
+          ) : (
+            React.cloneElement(children, { centroSelezionato, user })
+          )}
         </div>
       </main>
     </div>
