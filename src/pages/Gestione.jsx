@@ -103,6 +103,13 @@ export default function Gestione({ user }) {
 
   const handleInvitaUtente = async (e) => {
     e.preventDefault();
+    
+    // Validazione: almeno un centro deve essere selezionato
+    if (assegnazioniForm.centri_selezionati.length === 0) {
+      toast.error('Seleziona almeno un centro');
+      return;
+    }
+
     try {
       if (editingDirettore) {
         // Modifica direttore esistente - aggiorna direttamente il nome
