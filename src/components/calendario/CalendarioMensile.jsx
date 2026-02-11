@@ -27,14 +27,13 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
   const getSpazioById = (id) => spazi.find(s => s.id === id);
   const getClienteById = (id) => clienti.find(c => c.id === id);
 
-  const getStatoColor = (stato) => {
-    const colors = {
-      confermata: 'bg-blue-100 text-blue-800 border-blue-300',
-      in_corso: 'bg-green-100 text-green-800 border-green-300',
-      completata: 'bg-slate-100 text-slate-600 border-slate-300',
-      cancellata: 'bg-red-100 text-red-800 border-red-300'
-    };
-    return colors[stato] || colors.confermata;
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : { r: 59, g: 130, b: 246 };
   };
 
   const formatCurrency = (amount) => {
@@ -106,17 +105,27 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                   {prenotazioniGiorno.slice(0, 2).map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);
+                    const spazioColor = spazio?.colore || '#3b82f6';
+                    const rgb = hexToRgb(spazioColor);
                     return (
                       <div
                         key={p.id}
                         onClick={() => onEdit(p)}
-                        className={`text-xs px-2 py-1 rounded cursor-pointer border ${getStatoColor(p.stato)} hover:opacity-80 transition-opacity`}
+                        style={{
+                          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
+                          borderColor: spazioColor,
+                          color: spazioColor
+                        }}
+                        className="text-xs px-2 py-1 rounded cursor-pointer border-2 hover:opacity-80 transition-opacity"
                       >
                         <div className="flex items-center gap-1.5">
-                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white border-2 border-current flex items-center justify-center font-bold text-[10px]">
+                          <div 
+                            className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
+                            style={{ borderColor: spazioColor, color: spazioColor }}
+                          >
                             {spazio?.numero_spazio || '?'}
                           </div>
-                          <div className="font-medium truncate flex-1">
+                          <div className="font-medium truncate flex-1" style={{ color: '#1e293b' }}>
                             {cliente?.ragione_sociale || 'Cliente'}
                           </div>
                         </div>
@@ -134,21 +143,31 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
           })}
         </div>
 
-        {/* Legenda */}
-        <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-slate-200">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-blue-100 border border-blue-300"></div>
-            <span className="text-sm text-slate-600">Confermata</span>
+        {/* Legenda Spazi */}
+        {spazi.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-slate-200">
+            <p className="text-sm font-medium text-slate-700 mb-3">Spazi:</p>
+            <div className="flex flex-wrap gap-3">
+              {spazi.map(spazio => {
+                const rgb = hexToRgb(spazio.colore || '#3b82f6');
+                return (
+                  <div key={spazio.id} className="flex items-center gap-2">
+                    <div 
+                      className="w-4 h-4 rounded border-2" 
+                      style={{ 
+                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
+                        borderColor: spazio.colore || '#3b82f6'
+                      }}
+                    ></div>
+                    <span className="text-sm text-slate-600">
+                      {spazio.numero_spazio} - {spazio.nome || 'Spazio'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-green-100 border border-green-300"></div>
-            <span className="text-sm text-slate-600">In Corso</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-slate-100 border border-slate-300"></div>
-            <span className="text-sm text-slate-600">Completata</span>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
