@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Building, Pencil, Trash2, Users, Building2, Calendar } from 'lucide-react';
+import { Plus, Building, Pencil, Trash2, Users, Building2, Calendar, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -15,7 +15,9 @@ export default function SuperAdmin({ user }) {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogProprietaOpen, setDialogProprietaOpen] = useState(false);
   const [editingAzienda, setEditingAzienda] = useState(null);
+  const [aziendaPerInvito, setAziendaPerInvito] = useState(null);
 
   const [formAzienda, setFormAzienda] = useState({
     nome: '',
@@ -30,6 +32,11 @@ export default function SuperAdmin({ user }) {
     data_attivazione: new Date().toISOString().split('T')[0],
     attiva: true,
     note: ''
+  });
+
+  const [formProprieta, setFormProprieta] = useState({
+    full_name: '',
+    email: ''
   });
 
   useEffect(() => {
@@ -106,6 +113,30 @@ export default function SuperAdmin({ user }) {
     } catch (error) {
       console.error('Errore eliminazione azienda:', error);
       toast.error('Errore nell\'eliminazione');
+    }
+  };
+
+  const handleInvitaProprieta = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await base44.functions.invoke('invitaProprieta', {
+        email: formProprieta.email,
+        full_name: formProprieta.full_name,
+        azienda_id: aziendaPerInvito.id
+      });
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
+
+      toast.success('Proprietà invitato con successo');
+      setDialogProprietaOpen(false);
+      setFormProprieta({ full_name: '', email: '' });
+      setAziendaPerInvito(null);
+      loadData();
+    } catch (error) {
+      console.error('Errore:', error);
+      toast.error(error.message || 'Errore nell\'invito');
     }
   };
 
@@ -335,6 +366,18 @@ export default function SuperAdmin({ user }) {
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => {
+                          setAziendaPerInvito(azienda);
+                          setDialogProprietaOpen(true);
+                        }}
+                        className="text-green-600"
+                        title="Invita Proprietà"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={() => handleEdit(azienda)}
                         className="text-blue-600"
                       >
@@ -400,6 +443,55 @@ export default function SuperAdmin({ user }) {
           })}
         </div>
       )}
+
+      {/* Dialog Invita Proprietà */}
+      <Dialog open={dialogProprietaOpen} onOpenChange={(open) => {
+        setDialogProprietaOpen(open);
+        if (!open) {
+          setFormProprieta({ full_name: '', email: '' });
+          setAziendaPerInvito(null);
+        }
+      }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invita Proprietà per {aziendaPerInvito?.nome}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleInvitaProprieta} className="space-y-4">
+            <div>
+              <Label htmlFor="prop_full_name">Nome e Cognome *</Label>
+              <Input
+                id="prop_full_name"
+                value={formProprieta.full_name}
+                onChange={(e) => setFormProprieta({ ...formProprieta, full_name: e.target.value })}
+                placeholder="es. Mario Rossi"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="prop_email">Email *</Label>
+              <Input
+                id="prop_email"
+                type="email"
+                value={formProprieta.email}
+                onChange={(e) => setFormProprieta({ ...formProprieta, email: e.target.value })}
+                placeholder="email@esempio.com"
+                required
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Verrà inviato un invito via email al proprietario
+              </p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={() => setDialogProprietaOpen(false)}>
+                Annulla
+              </Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                Invita Proprietà
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
