@@ -50,6 +50,7 @@
 import Dashboard from './pages/Dashboard';
 import SpaziExpo from './pages/SpaziExpo';
 import Clienti from './pages/Clienti';
+import Calendario from './pages/Calendario';
 import __Layout from './Layout.jsx';
 
 
@@ -57,6 +58,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "SpaziExpo": SpaziExpo,
     "Clienti": Clienti,
+    "Calendario": Calendario,
 }
 
 export const pagesConfig = {
