@@ -54,6 +54,7 @@ import Documenti from './pages/Documenti';
 import Gestione from './pages/Gestione';
 import SpaziExpo from './pages/SpaziExpo';
 import SuperAdmin from './pages/SuperAdmin';
+import ImpostaSuperAdmin from './pages/ImpostaSuperAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "Gestione": Gestione,
     "SpaziExpo": SpaziExpo,
     "SuperAdmin": SuperAdmin,
+    "ImpostaSuperAdmin": ImpostaSuperAdmin,
 }
 
 export const pagesConfig = {
