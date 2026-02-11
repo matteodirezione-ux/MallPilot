@@ -81,6 +81,7 @@ export default function Gestione({ user }) {
     try {
       const dataToSave = {
         ...formCentro,
+        azienda_id: user.azienda_id,
         numero_spazi_totali: formCentro.numero_spazi_totali ? parseInt(formCentro.numero_spazi_totali) : null
       };
 
