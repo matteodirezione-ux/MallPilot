@@ -111,17 +111,7 @@ export default function Gestione({ user }) {
 
     try {
       if (editingDirettore) {
-        // Aggiorna nome direttore tramite backend function
-        const response = await base44.functions.invoke('updateDirettore', {
-          userId: editingDirettore.id,
-          full_name: formUtente.full_name
-        });
-
-        if (response.data?.error) {
-          throw new Error(response.data.error);
-        }
-
-        // Aggiorna assegnazioni centri
+        // Modifica direttore esistente: aggiorna solo le assegnazioni
         const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === editingDirettore.email);
         const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
         
@@ -136,11 +126,13 @@ export default function Gestione({ user }) {
           }))
         ]);
 
-        toast.success('Direttore aggiornato');
+        toast.success('Assegnazioni direttore aggiornate');
       } else {
         // Invita nuovo direttore
         await base44.users.inviteUser(formUtente.email, formUtente.role);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast.success('Invito inviato via email');
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         const users = await base44.entities.User.filter({ email: formUtente.email });
         if (users.length === 0) {
@@ -162,7 +154,7 @@ export default function Gestione({ user }) {
           )
         );
 
-        toast.success('Direttore invitato');
+        toast.success('Direttore configurato con successo');
       }
       
       setDialogUtenteOpen(false);
@@ -505,32 +497,45 @@ export default function Gestione({ user }) {
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleInvitaUtente} className="space-y-4">
-                  <div>
-                    <Label htmlFor="full_name">Nome e Cognome *</Label>
-                    <Input
-                      id="full_name"
-                      value={formUtente.full_name}
-                      onChange={(e) => setFormUtente({ ...formUtente, full_name: e.target.value })}
-                      placeholder="es. Mario Rossi"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formUtente.email}
-                      onChange={(e) => setFormUtente({ ...formUtente, email: e.target.value })}
-                      placeholder="email@esempio.com"
-                      disabled={editingDirettore ? true : false}
-                      className={editingDirettore ? "bg-slate-50" : ""}
-                      required
-                    />
-                    {editingDirettore && (
-                      <p className="text-xs text-slate-500 mt-1">L'email non può essere modificata dopo la creazione</p>
-                    )}
-                  </div>
+                  {!editingDirettore && (
+                    <>
+                      <div>
+                        <Label htmlFor="full_name">Nome e Cognome *</Label>
+                        <Input
+                          id="full_name"
+                          value={formUtente.full_name}
+                          onChange={(e) => setFormUtente({ ...formUtente, full_name: e.target.value })}
+                          placeholder="es. Mario Rossi"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formUtente.email}
+                          onChange={(e) => setFormUtente({ ...formUtente, email: e.target.value })}
+                          placeholder="email@esempio.com"
+                          required
+                        />
+                        <p className="text-xs text-slate-500 mt-1">
+                          Verrà inviato un invito via email al direttore
+                        </p>
+                      </div>
+                    </>
+                  )}
+                  {editingDirettore && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Users className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-slate-800">{editingDirettore.full_name}</p>
+                          <p className="text-sm text-slate-600">{editingDirettore.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <Label>Assegna Centri *</Label>
                     <p className="text-sm text-slate-500 mb-2">
