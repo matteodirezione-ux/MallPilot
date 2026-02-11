@@ -9,14 +9,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Plus, Building2, MapPin, Pencil, Trash2, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function SpaziExpo({ centroSelezionato }) {
+export default function SpaziExpo({ centroSelezionato, user }) {
   const [spazi, setSpazi] = useState([]);
+  const [centri, setCentri] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSpazio, setEditingSpazio] = useState(null);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
+    centro_id: '',
     numero_spazio: '',
     nome: '',
     descrizione: '',
@@ -31,6 +33,30 @@ export default function SpaziExpo({ centroSelezionato }) {
       loadSpazi();
     }
   }, [centroSelezionato]);
+
+  useEffect(() => {
+    loadCentri();
+  }, [user]);
+
+  const loadCentri = async () => {
+    try {
+      if (user?.tipo_account === 'proprieta') {
+        const allCentri = await base44.entities.CentroCommerciale.list();
+        setCentri(allCentri);
+      } else if (user?.tipo_account === 'direttore') {
+        const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
+        const centriIds = assegnazioni.map(a => a.centro_id);
+        if (centriIds.length > 0) {
+          const centriAssegnati = await Promise.all(
+            centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
+          );
+          setCentri(centriAssegnati.flat().filter(c => c));
+        }
+      }
+    } catch (error) {
+      console.error('Errore caricamento centri:', error);
+    }
+  };
 
   const loadSpazi = async () => {
     try {
@@ -52,7 +78,6 @@ export default function SpaziExpo({ centroSelezionato }) {
     try {
       const dataToSave = {
         ...formData,
-        centro_id: centroSelezionato.id,
         superficie_mq: formData.superficie_mq ? parseFloat(formData.superficie_mq) : null
       };
 
@@ -76,6 +101,7 @@ export default function SpaziExpo({ centroSelezionato }) {
   const handleEdit = (spazio) => {
     setEditingSpazio(spazio);
     setFormData({
+      centro_id: spazio.centro_id,
       numero_spazio: spazio.numero_spazio,
       nome: spazio.nome || '',
       descrizione: spazio.descrizione || '',
@@ -134,6 +160,7 @@ export default function SpaziExpo({ centroSelezionato }) {
 
   const resetForm = () => {
     setFormData({
+      centro_id: centroSelezionato?.id || '',
       numero_spazio: '',
       nome: '',
       descrizione: '',
@@ -184,9 +211,27 @@ export default function SpaziExpo({ centroSelezionato }) {
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="numero_spazio">Numero Spazio *</Label>
+            <div>
+              <Label htmlFor="centro_id">Centro Commerciale *</Label>
+              <select
+                id="centro_id"
+                value={formData.centro_id}
+                onChange={(e) => setFormData({ ...formData, centro_id: e.target.value })}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                required
+              >
+                <option value="">Seleziona centro</option>
+                {centri.map(centro => (
+                  <option key={centro.id} value={centro.id}>
+                    {centro.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="numero_spazio">Numero Spazio *</Label>
                   <Input
                     id="numero_spazio"
                     value={formData.numero_spazio}
