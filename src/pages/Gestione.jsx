@@ -128,33 +128,18 @@ export default function Gestione({ user }) {
 
         toast.success('Assegnazioni direttore aggiornate');
       } else {
-        // Invita nuovo direttore
-        await base44.users.inviteUser(formUtente.email, formUtente.role);
-        toast.success('Invito inviato via email');
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const users = await base44.entities.User.filter({ email: formUtente.email });
-        if (users.length === 0) {
-          throw new Error('Utente non trovato dopo invito');
+        // Invita nuovo direttore tramite backend function
+        const response = await base44.functions.invoke('invitaDirettore', {
+          email: formUtente.email,
+          full_name: formUtente.full_name,
+          centri_ids: assegnazioniForm.centri_selezionati
+        });
+
+        if (response.data?.error) {
+          throw new Error(response.data.error);
         }
 
-        const newUser = users[0];
-        await base44.entities.User.update(newUser.id, {
-          tipo_account: 'direttore',
-          full_name: formUtente.full_name
-        });
-        
-        await Promise.all(
-          assegnazioniForm.centri_selezionati.map(centro_id =>
-            base44.entities.Assegnazione.create({
-              user_email: formUtente.email,
-              centro_id
-            })
-          )
-        );
-
-        toast.success('Direttore configurato con successo');
+        toast.success('Direttore invitato con successo');
       }
       
       setDialogUtenteOpen(false);
