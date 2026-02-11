@@ -105,6 +105,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                 <div className="space-y-1">
                   {prenotazioniGiorno.slice(0, 2).map(p => {
                     const spazio = getSpazioById(p.spazio_id);
+                    const cliente = getClienteById(p.cliente_id);
                     return (
                       <div
                         key={p.id}
@@ -112,7 +113,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                         className={`text-xs px-2 py-1 rounded cursor-pointer border ${getStatoColor(p.stato)} hover:opacity-80 transition-opacity`}
                       >
                         <div className="font-medium truncate">
-                          {spazio?.numero_spazio}
+                          {cliente?.ragione_sociale || 'Cliente'}
                         </div>
                       </div>
                     );
