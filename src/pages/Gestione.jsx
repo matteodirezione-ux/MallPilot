@@ -113,7 +113,7 @@ export default function Gestione({ user }) {
     try {
       if (editingDirettore) {
         // Modifica direttore esistente - aggiorna direttamente il nome
-        await base44.asServiceRole.entities.User.update(editingDirettore.id, {
+        await base44.entities.User.update(editingDirettore.id, {
           full_name: formUtente.full_name
         });
 
