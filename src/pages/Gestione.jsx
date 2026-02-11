@@ -250,17 +250,18 @@ export default function Gestione({ user }) {
   };
 
   const handleEditDirettore = (direttore) => {
-    setEditingDirettore(direttore);
-    setFormUtente({
-      full_name: direttore.full_name,
-      email: direttore.email,
-      role: 'user'
-    });
     const centriAssegnatiIds = assegnazioni
       .filter(a => a.user_email === direttore.email)
       .map(a => a.centro_id);
+    
+    setEditingDirettore(direttore);
+    setFormUtente({
+      full_name: direttore.full_name || '',
+      email: direttore.email || '',
+      role: 'user'
+    });
     setAssegnazioniForm({
-      user_email: direttore.email,
+      user_email: direttore.email || '',
       centri_selezionati: centriAssegnatiIds
     });
     setDialogUtenteOpen(true);
