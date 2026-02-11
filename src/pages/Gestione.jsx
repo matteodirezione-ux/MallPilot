@@ -104,7 +104,6 @@ export default function Gestione({ user }) {
   const handleInvitaUtente = async (e) => {
     e.preventDefault();
     
-    // Validazione: almeno un centro deve essere selezionato
     if (assegnazioniForm.centri_selezionati.length === 0) {
       toast.error('Seleziona almeno un centro');
       return;
@@ -112,70 +111,66 @@ export default function Gestione({ user }) {
 
     try {
       if (editingDirettore) {
-        // Modifica direttore esistente - aggiorna il nome tramite backend function
-        const response = await base44.functions.invoke('updateDirettore', {
+        // Aggiorna nome tramite backend function
+        const updateResponse = await base44.functions.invoke('updateDirettore', {
           userId: editingDirettore.id,
           full_name: formUtente.full_name
         });
-        
-        if (response.data?.error) {
-          throw new Error(response.data.error);
+
+        if (updateResponse.data?.error) {
+          throw new Error(updateResponse.data.error);
         }
 
-        // Aggiorna assegnazioni
+        // Aggiorna assegnazioni centri
         const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === editingDirettore.email);
         const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
         
-        // Rimuovi assegnazioni non più selezionate
         const daRimuovere = assegnazioniAttuali.filter(a => !assegnazioniForm.centri_selezionati.includes(a.centro_id));
-        await Promise.all(daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)));
-        
-        // Aggiungi nuove assegnazioni
         const daAggiungere = assegnazioniForm.centri_selezionati.filter(id => !centriAttualiIds.includes(id));
+        
+        await Promise.all([
+          ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)),
+          ...daAggiungere.map(centro_id => base44.entities.Assegnazione.create({
+            user_email: editingDirettore.email,
+            centro_id
+          }))
+        ]);
+
+        toast.success('Direttore aggiornato');
+      } else {
+        // Invita nuovo direttore
+        await base44.users.inviteUser(formUtente.email, formUtente.role);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const users = await base44.entities.User.filter({ email: formUtente.email });
+        if (users.length === 0) {
+          throw new Error('Utente non trovato dopo invito');
+        }
+
+        const newUser = users[0];
+        await base44.entities.User.update(newUser.id, {
+          tipo_account: 'direttore',
+          full_name: formUtente.full_name
+        });
+        
         await Promise.all(
-          daAggiungere.map(centro_id =>
+          assegnazioniForm.centri_selezionati.map(centro_id =>
             base44.entities.Assegnazione.create({
-              user_email: editingDirettore.email,
+              user_email: formUtente.email,
               centro_id
             })
           )
         );
 
-        toast.success('Direttore aggiornato con successo');
-      } else {
-        // Invita nuovo direttore
-        await base44.users.inviteUser(formUtente.email, formUtente.role);
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const users = await base44.entities.User.filter({ email: formUtente.email });
-        if (users.length > 0) {
-          await base44.entities.User.update(users[0].id, {
-            tipo_account: 'direttore',
-            full_name: formUtente.full_name
-          });
-        }
-        
-        if (assegnazioniForm.centri_selezionati.length > 0) {
-          await Promise.all(
-            assegnazioniForm.centri_selezionati.map(centro_id =>
-              base44.entities.Assegnazione.create({
-                user_email: formUtente.email,
-                centro_id
-              })
-            )
-          );
-        }
-
-        toast.success('Direttore invitato con successo');
+        toast.success('Direttore invitato');
       }
       
       setDialogUtenteOpen(false);
       resetFormUtente();
-      loadData();
+      await loadData();
     } catch (error) {
-      console.error('Errore salvataggio direttore:', error);
-      toast.error('Errore nel salvataggio del direttore');
+      console.error('Errore:', error);
+      toast.error(error.message || 'Errore nel salvataggio');
     }
   };
 
