@@ -17,32 +17,44 @@ Deno.serve(async (req) => {
             }, { status: 400 });
         }
 
-        // Invita l'utente
-        await base44.users.inviteUser(email, 'user');
+        // Verifica se l'utente esiste già
+        const existingUsers = await base44.asServiceRole.entities.User.filter({ email });
+        
+        if (existingUsers.length > 0) {
+            // Utente già esiste, aggiorna solo i dati
+            await base44.asServiceRole.entities.User.update(existingUsers[0].id, {
+                tipo_account: 'proprieta',
+                azienda_id: azienda_id,
+                full_name: full_name
+            });
+        } else {
+            // Invita nuovo utente
+            await base44.users.inviteUser(email, 'user');
 
-        // Attendi che l'utente sia creato nel database (con retry)
-        let newUser = null;
-        for (let i = 0; i < 20; i++) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const users = await base44.asServiceRole.entities.User.filter({ email });
-            if (users.length > 0) {
-                newUser = users[0];
-                break;
+            // Attendi che l'utente sia creato nel database (con retry)
+            let newUser = null;
+            for (let i = 0; i < 30; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const users = await base44.asServiceRole.entities.User.filter({ email });
+                if (users.length > 0) {
+                    newUser = users[0];
+                    break;
+                }
             }
-        }
 
-        if (!newUser) {
-            return Response.json({ 
-                error: 'Utente invitato ma non trovato nel database' 
-            }, { status: 500 });
-        }
+            if (!newUser) {
+                return Response.json({ 
+                    error: 'Utente invitato ma non trovato nel database. Riprova tra qualche istante.' 
+                }, { status: 500 });
+            }
 
-        // Aggiorna il tipo di account e l'azienda
-        await base44.asServiceRole.entities.User.update(newUser.id, {
-            tipo_account: 'proprieta',
-            azienda_id: azienda_id,
-            full_name: full_name
-        });
+            // Aggiorna il tipo di account e l'azienda
+            await base44.asServiceRole.entities.User.update(newUser.id, {
+                tipo_account: 'proprieta',
+                azienda_id: azienda_id,
+                full_name: full_name
+            });
+        }
 
         return Response.json({ 
             success: true,

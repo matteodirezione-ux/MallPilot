@@ -126,17 +126,18 @@ export default function SuperAdmin({ user }) {
       });
 
       if (response.data?.error) {
-        throw new Error(response.data.error);
+        toast.error(response.data.error);
+        return;
       }
 
       toast.success('Proprietà invitato con successo');
       setDialogProprietaOpen(false);
       setFormProprieta({ full_name: '', email: '' });
       setAziendaPerInvito(null);
-      loadData();
+      await loadData();
     } catch (error) {
       console.error('Errore:', error);
-      toast.error(error.message || 'Errore nell\'invito');
+      toast.error(error.response?.data?.error || error.message || 'Errore nell\'invito');
     }
   };
 
