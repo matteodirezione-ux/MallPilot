@@ -23,6 +23,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
     nome: '',
     descrizione: '',
     superficie_mq: '',
+    colore: '#3b82f6',
     foto_urls: [],
     piantina_url: '',
     attivo: true
@@ -108,6 +109,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       nome: spazio.nome || '',
       descrizione: spazio.descrizione || '',
       superficie_mq: spazio.superficie_mq || '',
+      colore: spazio.colore || '#3b82f6',
       foto_urls: spazio.foto_urls || [],
       piantina_url: spazio.piantina_url || '',
       attivo: spazio.attivo
@@ -167,6 +169,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       nome: '',
       descrizione: '',
       superficie_mq: '',
+      colore: '#3b82f6',
       foto_urls: [],
       piantina_url: '',
       attivo: true
@@ -253,6 +256,27 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     placeholder="es. 25.5"
                   />
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="colore">Colore Identificativo</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="colore"
+                    type="color"
+                    value={formData.colore}
+                    onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
+                    className="w-20 h-10"
+                  />
+                  <Input
+                    type="text"
+                    value={formData.colore}
+                    onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
+                    placeholder="#3b82f6"
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">Colore dello spazio nel calendario</p>
               </div>
 
               <div>
