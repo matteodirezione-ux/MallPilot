@@ -49,16 +49,18 @@ export default function Layout({ children, currentPageName }) {
         }
       } else if (userData.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
-        const centriIds = assegnazioni.map(a => a.centro_id);
+        const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))]; // Rimuovi duplicati
         if (centriIds.length > 0) {
           const centriAssegnati = await Promise.all(
             centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
           );
           const centriFlat = centriAssegnati.flat().filter(c => c && c.attivo);
-          setCentri(centriFlat);
-          if (centriFlat.length > 0) {
+          // Rimuovi eventuali duplicati per ID
+          const centriUnique = Array.from(new Map(centriFlat.map(c => [c.id, c])).values());
+          setCentri(centriUnique);
+          if (centriUnique.length > 0) {
             const savedCentroId = localStorage.getItem('centroSelezionatoId');
-            const centroIniziale = centriFlat.find(c => c.id === savedCentroId) || centriFlat[0];
+            const centroIniziale = centriUnique.find(c => c.id === savedCentroId) || centriUnique[0];
             setCentroSelezionato(centroIniziale);
           }
         }
@@ -141,17 +143,24 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Centro Selector */}
-          {centroSelezionato && sidebarOpen && (
+          {centroSelezionato && sidebarOpen && centri.length > 0 && (
             <div className="p-4 border-b border-slate-200">
               <div className="relative">
                 <select
-                  value={centroSelezionato.id}
+                  value={centroSelezionato.id || 'tutti'}
                   onChange={(e) => {
-                    const centro = centri.find(c => c.id === e.target.value);
-                    handleCentroChange(centro);
+                    if (e.target.value === 'tutti') {
+                      handleCentroChange({ id: 'tutti', nome: 'Tutti i Centri' });
+                    } else {
+                      const centro = centri.find(c => c.id === e.target.value);
+                      handleCentroChange(centro);
+                    }
                   }}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
                 >
+                  {centri.length > 1 && (
+                    <option value="tutti">Tutti i Centri</option>
+                  )}
                   {centri.map(centro => (
                     <option key={centro.id} value={centro.id}>
                       {centro.nome}

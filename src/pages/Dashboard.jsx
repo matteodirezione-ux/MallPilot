@@ -40,10 +40,10 @@ export default function Dashboard({ centroSelezionato }) {
       const inizioAnno = startOfYear(now);
       const anno = now.getFullYear();
 
-      // Carica tutte le prenotazioni del centro
-      const prenotazioni = await base44.entities.Prenotazione.filter({ 
-        centro_id: centroSelezionato.id 
-      });
+      // Carica tutte le prenotazioni del centro (o tutti i centri se selezionato "Tutti")
+      const prenotazioni = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Prenotazione.list()
+        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
 
       // Prossimi affitti (prossimo mese)
       const prossimiAffitti = prenotazioni.filter(p => {
@@ -72,10 +72,12 @@ export default function Dashboard({ centroSelezionato }) {
       }).length;
 
       // Spazi totali
-      const spazi = await base44.entities.SpazioExpo.filter({ 
-        centro_id: centroSelezionato.id,
-        attivo: true 
-      });
+      const spazi = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.SpazioExpo.filter({ attivo: true })
+        : await base44.entities.SpazioExpo.filter({ 
+            centro_id: centroSelezionato.id,
+            attivo: true 
+          });
 
       // Incassi mese
       const incassiMese = prenotazioni
@@ -95,11 +97,15 @@ export default function Dashboard({ centroSelezionato }) {
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
       // Budget anno
-      const budgets = await base44.entities.Budget.filter({ 
-        centro_id: centroSelezionato.id,
-        anno: anno
-      });
-      const budgetAnno = budgets[0]?.importo_budget || 0;
+      const budgets = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Budget.filter({ anno: anno })
+        : await base44.entities.Budget.filter({ 
+            centro_id: centroSelezionato.id,
+            anno: anno
+          });
+      const budgetAnno = centroSelezionato?.id === 'tutti'
+        ? budgets.reduce((sum, b) => sum + (b.importo_budget || 0), 0)
+        : budgets[0]?.importo_budget || 0;
 
       // Clienti totali
       const clienti = await base44.entities.Cliente.list();

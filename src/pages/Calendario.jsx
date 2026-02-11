@@ -28,9 +28,14 @@ export default function Calendario({ centroSelezionato }) {
   const loadData = async () => {
     try {
       setLoading(true);
+      const isTutti = centroSelezionato?.id === 'tutti';
       const [prenotazioniData, spaziData, clientiData] = await Promise.all([
-        base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
-        base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id, attivo: true }),
+        isTutti 
+          ? base44.entities.Prenotazione.list()
+          : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
+        isTutti
+          ? base44.entities.SpazioExpo.filter({ attivo: true })
+          : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id, attivo: true }),
         base44.entities.Cliente.list()
       ]);
       setPrenotazioni(prenotazioniData);
@@ -65,9 +70,10 @@ export default function Calendario({ centroSelezionato }) {
         return;
       }
 
+      // Se "Tutti i centri" è selezionato, usa il centro_id dal form
       const prenotazioneData = {
         ...data,
-        centro_id: centroSelezionato.id
+        centro_id: centroSelezionato?.id === 'tutti' ? data.centro_id : centroSelezionato.id
       };
 
       if (editingPrenotazione) {
