@@ -111,10 +111,15 @@ export default function Gestione({ user }) {
 
     try {
       if (editingDirettore) {
-        // Aggiorna nome direttore
-        await base44.entities.User.update(editingDirettore.id, {
+        // Aggiorna nome direttore tramite backend function
+        const response = await base44.functions.invoke('updateDirettore', {
+          userId: editingDirettore.id,
           full_name: formUtente.full_name
         });
+
+        if (response.data?.error) {
+          throw new Error(response.data.error);
+        }
 
         // Aggiorna assegnazioni centri
         const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === editingDirettore.email);
