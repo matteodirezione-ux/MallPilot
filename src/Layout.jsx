@@ -39,8 +39,13 @@ export default function Layout({ children, currentPageName }) {
       
       setUser(userData);
 
-      if (userData.tipo_account === 'proprieta') {
-        const allCentri = await base44.entities.CentroCommerciale.list();
+      if (userData.tipo_account === 'super_admin') {
+        // Super admin non ha centri da selezionare
+        setCentri([]);
+      } else if (userData.tipo_account === 'proprieta') {
+        const allCentri = await base44.entities.CentroCommerciale.filter({ 
+          azienda_id: userData.azienda_id 
+        });
         setCentri(allCentri);
         if (allCentri.length > 0) {
           const savedCentroId = localStorage.getItem('centroSelezionatoId');
@@ -82,8 +87,10 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const isProprieta = user?.tipo_account === 'proprieta';
+  const isSuperAdmin = user?.tipo_account === 'super_admin';
 
   const navigationItems = [
+    { name: 'Super Admin', page: 'SuperAdmin', icon: Settings, roles: ['super_admin'] },
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
     { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
@@ -143,7 +150,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Centro Selector */}
-          {centroSelezionato && sidebarOpen && centri.length > 0 && (
+          {!isSuperAdmin && centroSelezionato && sidebarOpen && centri.length > 0 && (
             <div className="p-4 border-b border-slate-200">
               <div className="relative">
                 <select
