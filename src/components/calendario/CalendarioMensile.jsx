@@ -112,8 +112,13 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                         onClick={() => onEdit(p)}
                         className={`text-xs px-2 py-1 rounded cursor-pointer border ${getStatoColor(p.stato)} hover:opacity-80 transition-opacity`}
                       >
-                        <div className="font-medium truncate">
-                          {cliente?.ragione_sociale || 'Cliente'}
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white border-2 border-current flex items-center justify-center font-bold text-[10px]">
+                            {spazio?.numero_spazio || '?'}
+                          </div>
+                          <div className="font-medium truncate flex-1">
+                            {cliente?.ragione_sociale || 'Cliente'}
+                          </div>
                         </div>
                       </div>
                     );
