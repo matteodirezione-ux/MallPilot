@@ -1,0 +1,444 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileText, Upload, Download, Trash2, FileCheck, Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { it } from 'date-fns/locale';
+
+export default function Documenti({ centroSelezionato }) {
+  const [documenti, setDocumenti] = useState([]);
+  const [prenotazioni, setPrenotazioni] = useState([]);
+  const [clienti, setClienti] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [generatingContract, setGeneratingContract] = useState(false);
+  const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+
+  const [formData, setFormData] = useState({
+    tipo_documento: 'contratto',
+    nome_file: '',
+    file_url: '',
+    prenotazione_id: '',
+    cliente_id: '',
+    note: ''
+  });
+
+  useEffect(() => {
+    if (centroSelezionato) {
+      loadData();
+    }
+  }, [centroSelezionato]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [documentiData, prenotazioniData, clientiData] = await Promise.all([
+        base44.entities.Documento.filter({ centro_id: centroSelezionato.id }),
+        base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
+        base44.entities.Cliente.list()
+      ]);
+      setDocumenti(documentiData);
+      setPrenotazioni(prenotazioniData);
+      setClienti(clientiData);
+    } catch (error) {
+      console.error('Errore caricamento documenti:', error);
+      toast.error('Errore nel caricamento dei documenti');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingFile(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setFormData(prev => ({
+        ...prev,
+        file_url,
+        nome_file: prev.nome_file || file.name
+      }));
+      toast.success('File caricato con successo');
+    } catch (error) {
+      console.error('Errore upload file:', error);
+      toast.error('Errore nel caricamento del file');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleGeneraContratto = async (prenotazione) => {
+    try {
+      setGeneratingContract(true);
+      const cliente = clienti.find(c => c.id === prenotazione.cliente_id);
+      const spazio = await base44.entities.SpazioExpo.filter({ id: prenotazione.spazio_id }).then(r => r[0]);
+
+      // Genera il contenuto del contratto
+      const contenutoContratto = `
+CONTRATTO DI LOCAZIONE SPAZIO ESPOSITIVO
+
+Centro Commerciale: ${centroSelezionato.nome}
+Data: ${format(new Date(), 'dd/MM/yyyy', { locale: it })}
+
+LOCATORE:
+${centroSelezionato.nome}
+${centroSelezionato.indirizzo || ''}
+${centroSelezionato.citta || ''} ${centroSelezionato.cap || ''}
+
+CONDUTTORE:
+${cliente?.ragione_sociale || ''}
+${cliente?.partita_iva ? 'P.IVA: ' + cliente.partita_iva : ''}
+${cliente?.indirizzo || ''}
+${cliente?.citta || ''} ${cliente?.cap || ''}
+Email: ${cliente?.email || ''}
+Telefono: ${cliente?.telefono || ''}
+
+OGGETTO DEL CONTRATTO:
+Spazio Numero: ${spazio?.numero_spazio || ''}
+${spazio?.nome ? 'Nome: ' + spazio.nome : ''}
+${spazio?.superficie_mq ? 'Superficie: ' + spazio.superficie_mq + ' m²' : ''}
+
+DURATA:
+Dal: ${format(new Date(prenotazione.data_inizio), 'dd/MM/yyyy', { locale: it })}
+Al: ${format(new Date(prenotazione.data_fine), 'dd/MM/yyyy', { locale: it })}
+
+CORRISPETTIVO:
+Importo Totale: € ${prenotazione.prezzo_totale?.toFixed(2) || '0.00'}
+${prenotazione.prezzo_mensile ? 'Canone Mensile: € ' + prenotazione.prezzo_mensile.toFixed(2) : ''}
+
+${prenotazione.note ? 'NOTE:\n' + prenotazione.note : ''}
+
+Il presente contratto viene redatto in duplice copia, una per ciascuna delle parti.
+
+Firma Locatore: ________________    Firma Conduttore: ________________
+      `;
+
+      // Crea un blob e scaricalo
+      const blob = new Blob([contenutoContratto], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Contratto_${cliente?.ragione_sociale}_${spazio?.numero_spazio}_${format(new Date(), 'yyyy-MM-dd')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+
+      // Aggiorna la prenotazione
+      await base44.entities.Prenotazione.update(prenotazione.id, {
+        ...prenotazione,
+        contratto_generato: true
+      });
+
+      toast.success('Contratto generato e scaricato');
+      loadData();
+    } catch (error) {
+      console.error('Errore generazione contratto:', error);
+      toast.error('Errore nella generazione del contratto');
+    } finally {
+      setGeneratingContract(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const documentoData = {
+        ...formData,
+        centro_id: centroSelezionato.id
+      };
+
+      await base44.entities.Documento.create(documentoData);
+      toast.success('Documento archiviato con successo');
+
+      setDialogOpen(false);
+      resetForm();
+      loadData();
+    } catch (error) {
+      console.error('Errore salvataggio documento:', error);
+      toast.error('Errore nel salvataggio del documento');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Sei sicuro di voler eliminare questo documento?')) return;
+    try {
+      await base44.entities.Documento.delete(id);
+      toast.success('Documento eliminato');
+      loadData();
+    } catch (error) {
+      console.error('Errore eliminazione documento:', error);
+      toast.error('Errore nell\'eliminazione del documento');
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      tipo_documento: 'contratto',
+      nome_file: '',
+      file_url: '',
+      prenotazione_id: '',
+      cliente_id: '',
+      note: ''
+    });
+  };
+
+  const prenotazioniSenzaContratto = prenotazioni.filter(p => 
+    !p.contratto_generato && p.stato !== 'cancellata'
+  );
+
+  const getTipoIcon = (tipo) => {
+    const icons = {
+      contratto: FileText,
+      fattura: FileCheck,
+      ricevuta: FileCheck,
+      altro: FileText
+    };
+    return icons[tipo] || FileText;
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-slate-200 rounded w-1/4"></div>
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-24 bg-slate-200 rounded-xl"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Documenti</h1>
+          <p className="text-slate-600">{centroSelezionato?.nome}</p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) resetForm();
+        }}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Archivia Documento
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Archivia Nuovo Documento</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="tipo_documento">Tipo Documento *</Label>
+                <Select value={formData.tipo_documento} onValueChange={(value) => setFormData({ ...formData, tipo_documento: value })} required>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contratto">Contratto</SelectItem>
+                    <SelectItem value="fattura">Fattura</SelectItem>
+                    <SelectItem value="ricevuta">Ricevuta</SelectItem>
+                    <SelectItem value="altro">Altro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="nome_file">Nome File *</Label>
+                <Input
+                  id="nome_file"
+                  value={formData.nome_file}
+                  onChange={(e) => setFormData({ ...formData, nome_file: e.target.value })}
+                  placeholder="es. Contratto_Cliente_2026.pdf"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="file">Carica File *</Label>
+                <Input
+                  id="file"
+                  type="file"
+                  onChange={handleFileUpload}
+                  disabled={uploadingFile}
+                  required={!formData.file_url}
+                />
+                {formData.file_url && (
+                  <p className="text-sm text-green-600 mt-2">✓ File caricato</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="prenotazione_id">Prenotazione Collegata</Label>
+                <Select value={formData.prenotazione_id} onValueChange={(value) => setFormData({ ...formData, prenotazione_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona prenotazione (opzionale)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {prenotazioni.map(p => {
+                      const cliente = clienti.find(c => c.id === p.cliente_id);
+                      return (
+                        <SelectItem key={p.id} value={p.id}>
+                          {cliente?.ragione_sociale} - {format(new Date(p.data_inizio), 'dd/MM/yyyy', { locale: it })}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="note">Note</Label>
+                <Textarea
+                  id="note"
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+                  Annulla
+                </Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={uploadingFile}>
+                  Archivia
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Genera Contratti */}
+      {prenotazioniSenzaContratto.length > 0 && (
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Genera Contratti
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-blue-800 mb-4">
+              Prenotazioni senza contratto generato:
+            </p>
+            <div className="space-y-2">
+              {prenotazioniSenzaContratto.map(p => {
+                const cliente = clienti.find(c => c.id === p.cliente_id);
+                return (
+                  <div key={p.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                    <div>
+                      <p className="font-medium text-slate-800">{cliente?.ragione_sociale}</p>
+                      <p className="text-sm text-slate-600">
+                        {format(new Date(p.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(p.data_fine), 'dd MMM yyyy', { locale: it })}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleGeneraContratto(p)}
+                      disabled={generatingContract}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Genera Contratto
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Lista Documenti */}
+      {documenti.length === 0 ? (
+        <Card className="bg-white border-slate-200">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <FileText className="w-16 h-16 text-slate-300 mb-4" />
+            <p className="text-slate-500 text-center mb-4">
+              Nessun documento archiviato
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {documenti.map(doc => {
+            const Icon = getTipoIcon(doc.tipo_documento);
+            const cliente = clienti.find(c => c.id === doc.cliente_id);
+
+            return (
+              <Card key={doc.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">{doc.nome_file}</p>
+                        <p className="text-xs text-slate-500 capitalize">
+                          {doc.tipo_documento.replace('_', ' ')}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(doc.id)}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {cliente && (
+                    <p className="text-sm text-slate-600 mb-3">
+                      Cliente: {cliente.ragione_sociale}
+                    </p>
+                  )}
+
+                  {doc.note && (
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                      {doc.note}
+                    </p>
+                  )}
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => window.open(doc.file_url, '_blank')}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Scarica
+                  </Button>
+
+                  <p className="text-xs text-slate-400 mt-3 text-center">
+                    {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
