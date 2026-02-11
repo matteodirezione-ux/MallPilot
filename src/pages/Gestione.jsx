@@ -19,6 +19,7 @@ export default function Gestione({ user }) {
   const [dialogUtenteOpen, setDialogUtenteOpen] = useState(false);
   const [dialogBudgetOpen, setDialogBudgetOpen] = useState(false);
   const [editingCentro, setEditingCentro] = useState(null);
+  const [editingDirettore, setEditingDirettore] = useState(null);
   const [editingBudget, setEditingBudget] = useState(null);
 
   const [formCentro, setFormCentro] = useState({
@@ -103,40 +104,67 @@ export default function Gestione({ user }) {
   const handleInvitaUtente = async (e) => {
     e.preventDefault();
     try {
-      // Invita l'utente
-      await base44.users.inviteUser(formUtente.email, formUtente.role);
-      
-      // Attendi un momento per permettere la creazione dell'utente
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Aggiorna l'utente con tipo_account e nome
-      const users = await base44.entities.User.filter({ email: formUtente.email });
-      if (users.length > 0) {
-        await base44.entities.User.update(users[0].id, {
-          tipo_account: 'direttore',
-          full_name: formUtente.full_name
+      if (editingDirettore) {
+        // Modifica direttore esistente
+        await base44.entities.User.update(editingDirettore.id, {
+          full_name: formUtente.full_name,
+          email: formUtente.email
         });
-      }
-      
-      // Crea le assegnazioni se ci sono centri selezionati
-      if (assegnazioniForm.centri_selezionati.length > 0) {
+
+        // Aggiorna assegnazioni
+        const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === editingDirettore.email);
+        const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
+        
+        // Rimuovi assegnazioni non più selezionate
+        const daRimuovere = assegnazioniAttuali.filter(a => !assegnazioniForm.centri_selezionati.includes(a.centro_id));
+        await Promise.all(daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)));
+        
+        // Aggiungi nuove assegnazioni
+        const daAggiungere = assegnazioniForm.centri_selezionati.filter(id => !centriAttualiIds.includes(id));
         await Promise.all(
-          assegnazioniForm.centri_selezionati.map(centro_id =>
+          daAggiungere.map(centro_id =>
             base44.entities.Assegnazione.create({
               user_email: formUtente.email,
               centro_id
             })
           )
         );
-      }
 
-      toast.success('Direttore invitato con successo');
+        toast.success('Direttore aggiornato con successo');
+      } else {
+        // Invita nuovo direttore
+        await base44.users.inviteUser(formUtente.email, formUtente.role);
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const users = await base44.entities.User.filter({ email: formUtente.email });
+        if (users.length > 0) {
+          await base44.entities.User.update(users[0].id, {
+            tipo_account: 'direttore',
+            full_name: formUtente.full_name
+          });
+        }
+        
+        if (assegnazioniForm.centri_selezionati.length > 0) {
+          await Promise.all(
+            assegnazioniForm.centri_selezionati.map(centro_id =>
+              base44.entities.Assegnazione.create({
+                user_email: formUtente.email,
+                centro_id
+              })
+            )
+          );
+        }
+
+        toast.success('Direttore invitato con successo');
+      }
+      
       setDialogUtenteOpen(false);
       resetFormUtente();
       loadData();
     } catch (error) {
-      console.error('Errore invito utente:', error);
-      toast.error('Errore nell\'invito del direttore');
+      console.error('Errore salvataggio direttore:', error);
+      toast.error('Errore nel salvataggio del direttore');
     }
   };
 
@@ -215,6 +243,23 @@ export default function Gestione({ user }) {
     setEditingCentro(null);
   };
 
+  const handleEditDirettore = (direttore) => {
+    setEditingDirettore(direttore);
+    setFormUtente({
+      full_name: direttore.full_name,
+      email: direttore.email,
+      role: 'user'
+    });
+    const centriAssegnatiIds = assegnazioni
+      .filter(a => a.user_email === direttore.email)
+      .map(a => a.centro_id);
+    setAssegnazioniForm({
+      user_email: direttore.email,
+      centri_selezionati: centriAssegnatiIds
+    });
+    setDialogUtenteOpen(true);
+  };
+
   const resetFormUtente = () => {
     setFormUtente({
       full_name: '',
@@ -225,6 +270,7 @@ export default function Gestione({ user }) {
       user_email: '',
       centri_selezionati: []
     });
+    setEditingDirettore(null);
   };
 
   const resetFormBudget = () => {
@@ -447,7 +493,9 @@ export default function Gestione({ user }) {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Invita Nuovo Direttore</DialogTitle>
+                  <DialogTitle>
+                    {editingDirettore ? 'Modifica Direttore' : 'Invita Nuovo Direttore'}
+                  </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleInvitaUtente} className="space-y-4">
                   <div>
@@ -520,7 +568,7 @@ export default function Gestione({ user }) {
                       className="bg-blue-600 hover:bg-blue-700"
                       disabled={assegnazioniForm.centri_selezionati.length === 0}
                     >
-                      Invita Direttore
+                      {editingDirettore ? 'Aggiorna' : 'Invita Direttore'}
                     </Button>
                   </div>
                 </form>
@@ -576,6 +624,14 @@ export default function Gestione({ user }) {
                           )}
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditDirettore(utente)}
+                        className="text-blue-600"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
