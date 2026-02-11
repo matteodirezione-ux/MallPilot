@@ -482,7 +482,17 @@ export default function Gestione({ user }) {
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleInvitaUtente} className="space-y-4">
-                  {!editingDirettore && (
+                  {editingDirettore ? (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Users className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-slate-800">{editingDirettore.full_name}</p>
+                          <p className="text-sm text-slate-600">{editingDirettore.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
                     <>
                       <div>
                         <Label htmlFor="full_name">Nome e Cognome *</Label>
@@ -509,17 +519,6 @@ export default function Gestione({ user }) {
                         </p>
                       </div>
                     </>
-                  )}
-                  {editingDirettore && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-slate-800">{editingDirettore.full_name}</p>
-                          <p className="text-sm text-slate-600">{editingDirettore.email}</p>
-                        </div>
-                      </div>
-                    </div>
                   )}
                   <div>
                     <Label>Assegna Centri *</Label>
