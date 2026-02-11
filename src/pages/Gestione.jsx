@@ -571,7 +571,6 @@ export default function Gestione({ user }) {
                     <Button 
                       type="submit" 
                       className="bg-blue-600 hover:bg-blue-700"
-                      disabled={assegnazioniForm.centri_selezionati.length === 0}
                     >
                       {editingDirettore ? 'Aggiorna' : 'Invita Direttore'}
                     </Button>
