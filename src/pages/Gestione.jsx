@@ -106,11 +106,8 @@ export default function Gestione({ user }) {
     try {
       if (editingDirettore) {
         // Modifica direttore esistente
-        const emailCambiata = editingDirettore.email !== formUtente.email;
-        
         await base44.entities.User.update(editingDirettore.id, {
-          full_name: formUtente.full_name,
-          email: formUtente.email
+          full_name: formUtente.full_name
         });
 
         // Aggiorna assegnazioni
@@ -121,25 +118,12 @@ export default function Gestione({ user }) {
         const daRimuovere = assegnazioniAttuali.filter(a => !assegnazioniForm.centri_selezionati.includes(a.centro_id));
         await Promise.all(daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)));
         
-        // Se l'email è cambiata, aggiorna tutte le assegnazioni rimanenti
-        if (emailCambiata) {
-          const assegnazioniDaAggiornare = assegnazioniAttuali.filter(a => assegnazioniForm.centri_selezionati.includes(a.centro_id));
-          await Promise.all(
-            assegnazioniDaAggiornare.map(a =>
-              base44.entities.Assegnazione.update(a.id, {
-                user_email: formUtente.email,
-                centro_id: a.centro_id
-              })
-            )
-          );
-        }
-        
         // Aggiungi nuove assegnazioni
         const daAggiungere = assegnazioniForm.centri_selezionati.filter(id => !centriAttualiIds.includes(id));
         await Promise.all(
           daAggiungere.map(centro_id =>
             base44.entities.Assegnazione.create({
-              user_email: formUtente.email,
+              user_email: editingDirettore.email,
               centro_id
             })
           )
