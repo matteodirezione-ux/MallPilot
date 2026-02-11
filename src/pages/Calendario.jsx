@@ -70,10 +70,19 @@ export default function Calendario({ centroSelezionato }) {
         return;
       }
 
-      // Se "Tutti i centri" è selezionato, usa il centro_id dal form
+      // Determina il centro_id corretto
+      let centro_id;
+      if (centroSelezionato?.id === 'tutti') {
+        // Se "Tutti i centri" è selezionato, trova il centro dallo spazio
+        const spazio = spazi.find(s => s.id === data.spazio_id);
+        centro_id = spazio?.centro_id;
+      } else {
+        centro_id = centroSelezionato.id;
+      }
+
       const prenotazioneData = {
         ...data,
-        centro_id: centroSelezionato?.id === 'tutti' ? data.centro_id : centroSelezionato.id
+        centro_id
       };
 
       if (editingPrenotazione) {
