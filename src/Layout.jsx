@@ -40,8 +40,14 @@ export default function Layout({ children, currentPageName }) {
       setUser(userData);
 
       if (userData.tipo_account === 'super_admin') {
-        // Super admin non ha centri da selezionare
-        setCentri([]);
+        // Super admin vede tutti i centri di tutte le aziende
+        const allCentri = await base44.entities.CentroCommerciale.list();
+        setCentri(allCentri);
+        if (allCentri.length > 0) {
+          const savedCentroId = localStorage.getItem('centroSelezionatoId');
+          const centroIniziale = allCentri.find(c => c.id === savedCentroId) || allCentri[0];
+          setCentroSelezionato(centroIniziale);
+        }
       } else if (userData.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.filter({ 
           azienda_id: userData.azienda_id 
@@ -91,12 +97,12 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationItems = [
     { name: 'Super Admin', page: 'SuperAdmin', icon: Settings, roles: ['super_admin'] },
-    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
-    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
-    { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
-    { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
-    { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
-    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta'] },
+    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'proprieta', 'direttore'] },
+    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['super_admin', 'proprieta', 'direttore'] },
+    { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['super_admin', 'proprieta', 'direttore'] },
+    { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['super_admin', 'proprieta', 'direttore'] },
+    { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['super_admin', 'proprieta', 'direttore'] },
+    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['super_admin', 'proprieta'] },
   ];
 
   const filteredNav = navigationItems.filter(item => 
@@ -150,7 +156,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Centro Selector */}
-          {!isSuperAdmin && centroSelezionato && sidebarOpen && centri.length > 0 && (
+          {centroSelezionato && sidebarOpen && centri.length > 0 && (
             <div className="p-4 border-b border-slate-200">
               <div className="relative">
                 <select
