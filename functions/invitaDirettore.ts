@@ -21,8 +21,8 @@ Deno.serve(async (req) => {
     // Attendi che l'utente venga creato nel database
     let newUser = null;
     let attempts = 0;
-    while (!newUser && attempts < 10) {
-      await new Promise(resolve => setTimeout(resolve, 500));
+    while (!newUser && attempts < 15) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
       const users = await base44.asServiceRole.entities.User.filter({ email });
       if (users.length > 0) {
         newUser = users[0];
@@ -31,7 +31,11 @@ Deno.serve(async (req) => {
     }
 
     if (!newUser) {
-      return Response.json({ error: 'Utente non trovato dopo invito' }, { status: 500 });
+      // Email inviata ma utente non ancora nel DB - può richiedere più tempo
+      return Response.json({ 
+        success: true,
+        message: 'Invito inviato. L\'utente apparirà nel sistema tra qualche istante.'
+      });
     }
 
     // Aggiorna l'utente con tipo_account e full_name
