@@ -599,7 +599,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-slate-800 mb-4">Tutti i Documenti</h2>
           </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documenti.map(doc => {
             const Icon = getTipoIcon(doc.tipo_documento);
             const cliente = clienti.find(c => c.id === doc.cliente_id);
