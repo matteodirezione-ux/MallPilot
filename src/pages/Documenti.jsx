@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Upload, Download, Trash2, FileCheck, Plus } from 'lucide-react';
+import { FileText, Upload, Download, Trash2, FileCheck, Plus, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -21,6 +21,8 @@ export default function Documenti({ centroSelezionato }) {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [generatingContract, setGeneratingContract] = useState(false);
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingDoc, setEditingDoc] = useState(null);
 
   const [formData, setFormData] = useState({
     tipo_documento: 'contratto',
@@ -193,6 +195,37 @@ Firma Locatore: ________________    Firma Conduttore: ________________
     }
   };
 
+  const handleEdit = (doc) => {
+    setEditingDoc(doc);
+    setFormData({
+      tipo_documento: doc.tipo_documento,
+      nome_file: doc.nome_file,
+      file_url: doc.file_url,
+      prenotazione_id: doc.prenotazione_id || '',
+      cliente_id: doc.cliente_id || '',
+      note: doc.note || ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleUpdateDoc = async (e) => {
+    e.preventDefault();
+    try {
+      await base44.entities.Documento.update(editingDoc.id, {
+        ...formData,
+        centro_id: editingDoc.centro_id
+      });
+      toast.success('Documento aggiornato con successo');
+      setEditDialogOpen(false);
+      setEditingDoc(null);
+      resetForm();
+      loadData();
+    } catch (error) {
+      console.error('Errore aggiornamento documento:', error);
+      toast.error('Errore nell\'aggiornamento del documento');
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       tipo_documento: 'contratto',
@@ -348,7 +381,161 @@ Firma Locatore: ________________    Firma Conduttore: ________________
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog Modifica Documento */}
+        <Dialog open={editDialogOpen} onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) {
+            setEditingDoc(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Modifica Documento</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdateDoc} className="space-y-4">
+              <div>
+                <Label htmlFor="tipo_documento_edit">Tipo Documento *</Label>
+                <Select value={formData.tipo_documento} onValueChange={(value) => setFormData({ ...formData, tipo_documento: value })} required>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="contratto">Contratto</SelectItem>
+                    <SelectItem value="fattura">Fattura</SelectItem>
+                    <SelectItem value="ricevuta">Ricevuta</SelectItem>
+                    <SelectItem value="altro">Altro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="nome_file_edit">Nome File *</Label>
+                <Input
+                  id="nome_file_edit"
+                  value={formData.nome_file}
+                  onChange={(e) => setFormData({ ...formData, nome_file: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="file_edit">Sostituisci File (opzionale)</Label>
+                <Input
+                  id="file_edit"
+                  type="file"
+                  onChange={handleFileUpload}
+                  disabled={uploadingFile}
+                />
+                {formData.file_url && (
+                  <p className="text-sm text-green-600 mt-2">✓ File presente</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="prenotazione_id_edit">Prenotazione Collegata</Label>
+                <Select value={formData.prenotazione_id} onValueChange={(value) => setFormData({ ...formData, prenotazione_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleziona prenotazione (opzionale)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {prenotazioni.map(p => {
+                      const cliente = clienti.find(c => c.id === p.cliente_id);
+                      return (
+                        <SelectItem key={p.id} value={p.id}>
+                          {cliente?.ragione_sociale} - {format(new Date(p.data_inizio), 'dd/MM/yyyy', { locale: it })}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="note_edit">Note</Label>
+                <Textarea
+                  id="note_edit"
+                  value={formData.note}
+                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Annulla
+                </Button>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={uploadingFile}>
+                  Salva Modifiche
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {/* Contratti Generati */}
+      <Card className="bg-white border-slate-200 mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Contratti Generati
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {documenti.filter(d => d.tipo_documento === 'contratto').length === 0 ? (
+            <p className="text-slate-500 text-center py-4">
+              Nessun contratto archiviato
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {documenti.filter(d => d.tipo_documento === 'contratto').map(doc => {
+                const cliente = clienti.find(c => c.id === doc.cliente_id);
+                return (
+                  <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">{doc.nome_file}</p>
+                      {cliente && (
+                        <p className="text-sm text-slate-600">Cliente: {cliente.ragione_sociale}</p>
+                      )}
+                      <p className="text-xs text-slate-400 mt-1">
+                        {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(doc)}
+                        className="text-blue-600 hover:bg-blue-50"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => window.open(doc.file_url, '_blank')}
+                        className="text-green-600 hover:bg-green-50"
+                      >
+                        <Download className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(doc.id)}
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Genera Contratti */}
       {prenotazioniSenzaContratto.length > 0 && (
