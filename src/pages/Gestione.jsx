@@ -30,15 +30,15 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [centriData, utentiData, assegnazioniData, budgetsData] = await Promise.all([
+      const [centriData, direttoriData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
-        base44.entities.User.list(),
+        base44.entities.Direttore.list(),
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
       
       setCentri(centriData);
-      setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
+      setDirettori(direttoriData);
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
@@ -87,7 +87,13 @@ export default function Gestione({ user }) {
   const saveDirettore = async (formData) => {
     try {
       if (direttoreDialog.data) {
-        // Aggiorna assegnazioni esistenti
+        // Modifica direttore esistente
+        await base44.entities.Direttore.update(direttoreDialog.data.id, {
+          full_name: formData.full_name,
+          email: formData.email
+        });
+        
+        // Aggiorna assegnazioni
         const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === direttoreDialog.data.email);
         const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
         
@@ -104,19 +110,17 @@ export default function Gestione({ user }) {
           )
         ]);
         
-        toast.success('Assegnazioni aggiornate');
+        toast.success('Direttore aggiornato');
       } else {
-        // Invita il nuovo direttore con ruolo admin (così può accedere all'app)
-        await base44.users.inviteUser(formData.email, 'admin');
+        // Crea nuovo direttore
+        await base44.entities.Direttore.create({
+          full_name: formData.full_name,
+          email: formData.email,
+          invito_accettato: false
+        });
         
-        // Aggiorna l'utente appena invitato per impostarlo come direttore
-        const utenti = await base44.entities.User.filter({ email: formData.email });
-        if (utenti.length > 0) {
-          await base44.entities.User.update(utenti[0].id, { 
-            tipo_account: 'direttore',
-            full_name: formData.full_name
-          });
-        }
+        // Invia invito
+        await base44.users.inviteUser(formData.email, 'user');
         
         // Crea assegnazioni
         await Promise.all(
@@ -292,7 +296,14 @@ export default function Gestione({ user }) {
                             <Users className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="font-semibold">{dir.full_name}</h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{dir.full_name}</h3>
+                              {!dir.invito_accettato && (
+                                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                                  In attesa
+                                </span>
+                              )}
+                            </div>
                             <p className="text-sm text-slate-600">{dir.email}</p>
                           </div>
                         </div>
