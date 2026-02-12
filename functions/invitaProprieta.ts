@@ -28,8 +28,24 @@ Deno.serve(async (req) => {
                 full_name: full_name
             });
         } else {
-            // Invita nuovo utente con service role
-            await base44.asServiceRole.users.inviteUser(email, 'user');
+            // Invita nuovo utente
+            const inviteResult = await fetch(`https://api.base44.com/v1/users/invite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${Deno.env.get('BASE44_SERVICE_ROLE_KEY')}`,
+                    'X-App-Id': Deno.env.get('BASE44_APP_ID')
+                },
+                body: JSON.stringify({
+                    email: email,
+                    role: 'user'
+                })
+            });
+
+            if (!inviteResult.ok) {
+                const errorText = await inviteResult.text();
+                throw new Error(`Errore nell'invito utente: ${errorText}`);
+            }
 
             // Attendi che l'utente sia creato nel database (con retry)
             let newUser = null;
