@@ -124,14 +124,10 @@ export default function Gestione({ user }) {
         
         toast.success('Assegnazioni aggiornate');
       } else {
-        // Crea nuovo direttore direttamente
-        const nuovoDirettore = await base44.entities.User.create({
-          email: formData.email,
-          full_name: formData.full_name,
-          tipo_account: 'direttore'
-        });
+        // Invita il nuovo direttore
+        await base44.users.inviteUser(formData.email, 'user');
         
-        // Crea assegnazioni
+        // Crea assegnazioni subito (quando l'utente accetterà l'invito avrà già i centri)
         await Promise.all(
           formData.centri_ids.map(centro_id =>
             base44.entities.Assegnazione.create({
@@ -141,7 +137,7 @@ export default function Gestione({ user }) {
           )
         );
         
-        toast.success('Direttore creato con successo');
+        toast.success('Invito inviato. L\'utente riceverà una email per completare la registrazione.');
       }
       
       setDirettoreDialog({ open: false, data: null });
@@ -288,7 +284,7 @@ export default function Gestione({ user }) {
           <div className="flex justify-end mb-4">
             <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600">
               <UserPlus className="w-4 h-4 mr-2" />
-              Invita Direttore
+              Nuovo Direttore
             </Button>
           </div>
 
@@ -534,7 +530,7 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{data ? 'Modifica Direttore' : 'Invita Direttore'}</DialogTitle>
+          <DialogTitle>{data ? 'Modifica Direttore' : 'Nuovo Direttore'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {data ? (
