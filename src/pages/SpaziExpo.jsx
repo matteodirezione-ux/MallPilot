@@ -444,7 +444,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     <Building2 className="w-6 h-6 text-blue-600" />
                     {centro.nome}
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                     {spaziCentro.map((spazio) => (
                       <SpazioCard
                         key={spazio.id}
@@ -459,7 +459,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             })
           ) : (
             // Mostra direttamente gli spazi quando un singolo centro è selezionato
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {spazi.map((spazio) => (
                 <SpazioCard
                   key={spazio.id}
