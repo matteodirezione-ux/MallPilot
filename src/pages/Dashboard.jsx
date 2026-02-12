@@ -201,9 +201,9 @@ export default function Dashboard({ centroSelezionato }) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
         {/* Spazi Occupati */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
@@ -231,7 +231,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Incassi Mese */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
@@ -253,7 +253,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Clienti Totali */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
@@ -272,7 +272,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Incassi Anno / Budget */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
@@ -302,27 +302,10 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
-        {/* Placeholder vuoto per mantenere layout */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow invisible">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Clienti Totali
-              </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                <Users className="w-5 h-5 text-purple-600" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              {stats.clientiTotali}
-            </div>
-          </CardContent>
-        </Card>
+
 
         {/* Affitti Correnti */}
-        <Card className="md:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="md:col-span-2 lg:col-span-6 bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
@@ -367,7 +350,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Prossimi Affitti */}
-        <Card className="md:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="md:col-span-2 lg:col-span-6 bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
