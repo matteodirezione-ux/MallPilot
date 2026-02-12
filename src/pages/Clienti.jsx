@@ -438,7 +438,7 @@ export default function Clienti() {
                         <TrendingUp className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-600">Numero Affitti</p>
+                        <p className="text-xs text-slate-600">Numero affitti totali</p>
                         <p className="text-lg font-semibold text-slate-800">
                           {stats.numeroAffitti || 0}
                         </p>
