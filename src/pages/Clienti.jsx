@@ -426,7 +426,7 @@ export default function Clienti() {
                         <DollarSign className="w-5 h-5 text-green-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-slate-600">Incasso Ultimo Anno</p>
+                        <p className="text-xs text-slate-600">Incasso {new Date().getFullYear()}</p>
                         <p className="text-lg font-semibold text-slate-800">
                           {formatCurrency(stats.incassoAnno || 0)}
                         </p>
