@@ -421,6 +421,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             <Card
               key={spazio.id}
               className="bg-white border-slate-200 hover:shadow-lg transition-shadow overflow-hidden"
+              style={{ borderTopWidth: '4px', borderTopColor: spazio.colore || '#3b82f6' }}
             >
               {spazio.foto_urls && spazio.foto_urls.length > 0 ? (
                 <div className="h-48 bg-slate-100 relative">
@@ -429,6 +430,12 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     alt={spazio.numero_spazio}
                     className="w-full h-full object-cover"
                   />
+                  <div 
+                    className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
+                    style={{ backgroundColor: spazio.colore || '#3b82f6' }}
+                  >
+                    {spazio.numero_spazio}
+                  </div>
                   {spazio.foto_urls.length > 1 && (
                     <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
                       <ImageIcon className="w-3 h-3" />
@@ -437,8 +444,14 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                   )}
                 </div>
               ) : (
-                <div className="h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                  <Building2 className="w-16 h-16 text-slate-300" />
+                <div className="h-48 relative flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${spazio.colore || '#3b82f6'}15 0%, ${spazio.colore || '#3b82f6'}30 100%)` }}>
+                  <Building2 className="w-16 h-16" style={{ color: spazio.colore || '#3b82f6', opacity: 0.4 }} />
+                  <div 
+                    className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
+                    style={{ backgroundColor: spazio.colore || '#3b82f6' }}
+                  >
+                    {spazio.numero_spazio}
+                  </div>
                 </div>
               )}
               
