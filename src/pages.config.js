@@ -52,9 +52,7 @@ import Clienti from './pages/Clienti';
 import Dashboard from './pages/Dashboard';
 import Documenti from './pages/Documenti';
 import Gestione from './pages/Gestione';
-import ImpostaSuperAdmin from './pages/ImpostaSuperAdmin';
 import SpaziExpo from './pages/SpaziExpo';
-import SuperAdmin from './pages/SuperAdmin';
 import __Layout from './Layout.jsx';
 
 
@@ -64,9 +62,7 @@ export const PAGES = {
     "Dashboard": Dashboard,
     "Documenti": Documenti,
     "Gestione": Gestione,
-    "ImpostaSuperAdmin": ImpostaSuperAdmin,
     "SpaziExpo": SpaziExpo,
-    "SuperAdmin": SuperAdmin,
 }
 
 export const pagesConfig = {
