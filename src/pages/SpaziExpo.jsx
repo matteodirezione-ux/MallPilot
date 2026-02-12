@@ -65,12 +65,18 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   const loadSpazi = async () => {
     try {
       setLoading(true);
+      
+      if (!centroSelezionato || !centroSelezionato.id || !centroSelezionato.nome) {
+        setLoading(false);
+        return;
+      }
+      
       const data = centroSelezionato?.id === 'tutti'
         ? await base44.entities.SpazioExpo.list()
         : await base44.entities.SpazioExpo.filter({ 
             centro_id: centroSelezionato.id 
           });
-      setSpazi(data);
+      setSpazi(data || []);
     } catch (error) {
       console.error('Errore caricamento spazi:', error);
       toast.error('Errore nel caricamento degli spazi');

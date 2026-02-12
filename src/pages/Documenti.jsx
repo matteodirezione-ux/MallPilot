@@ -40,6 +40,12 @@ export default function Documenti({ centroSelezionato }) {
   const loadData = async () => {
     try {
       setLoading(true);
+      
+      if (!centroSelezionato || !centroSelezionato.id || !centroSelezionato.nome) {
+        setLoading(false);
+        return;
+      }
+      
       const isTutti = centroSelezionato?.id === 'tutti';
       const [documentiData, prenotazioniData, clientiData] = await Promise.all([
         isTutti
@@ -50,9 +56,9 @@ export default function Documenti({ centroSelezionato }) {
           : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
         base44.entities.Cliente.list()
       ]);
-      setDocumenti(documentiData);
-      setPrenotazioni(prenotazioniData);
-      setClienti(clientiData);
+      setDocumenti(documentiData || []);
+      setPrenotazioni(prenotazioniData || []);
+      setClienti(clientiData || []);
     } catch (error) {
       console.error('Errore caricamento documenti:', error);
       toast.error('Errore nel caricamento dei documenti');

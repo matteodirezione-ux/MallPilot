@@ -29,7 +29,7 @@ export default function Calendario({ centroSelezionato }) {
     try {
       setLoading(true);
       
-      if (!centroSelezionato || !centroSelezionato.id) {
+      if (!centroSelezionato || !centroSelezionato.id || !centroSelezionato.nome) {
         setLoading(false);
         return;
       }

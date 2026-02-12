@@ -35,7 +35,7 @@ export default function Dashboard({ centroSelezionato }) {
     try {
       setLoading(true);
       
-      if (!centroSelezionato || !centroSelezionato.id) {
+      if (!centroSelezionato || !centroSelezionato.id || !centroSelezionato.nome) {
         setLoading(false);
         return;
       }
