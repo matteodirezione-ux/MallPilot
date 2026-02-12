@@ -136,16 +136,20 @@ Il presente contratto viene redatto in duplice copia, una per ciascuna delle par
 Firma Locatore: ________________    Firma Conduttore: ________________
       `;
 
-      // Crea un blob e scaricalo
+      // Carica il file
       const blob = new Blob([contenutoContratto], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Contratto_${cliente?.ragione_sociale}_${spazio?.numero_spazio}_${format(new Date(), 'yyyy-MM-dd')}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
+      const fileName = `Contratto_${cliente?.ragione_sociale}_${spazio?.numero_spazio}_${format(new Date(), 'yyyy-MM-dd')}.txt`;
+      const { file_url } = await base44.integrations.Core.UploadFile({ file: blob });
+
+      // Crea il documento nel database
+      await base44.entities.Documento.create({
+        centro_id: centroSelezionato.id,
+        prenotazione_id: prenotazione.id,
+        cliente_id: prenotazione.cliente_id,
+        tipo_documento: 'contratto',
+        nome_file: fileName,
+        file_url: file_url
+      });
 
       // Aggiorna la prenotazione
       await base44.entities.Prenotazione.update(prenotazione.id, {
@@ -153,7 +157,17 @@ Firma Locatore: ________________    Firma Conduttore: ________________
         contratto_generato: true
       });
 
-      toast.success('Contratto generato e scaricato');
+      // Scarica il file
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+
+      toast.success('Contratto generato e archiviato');
       loadData();
     } catch (error) {
       console.error('Errore generazione contratto:', error);
