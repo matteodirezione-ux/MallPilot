@@ -32,7 +32,7 @@ export default function Documenti({ centroSelezionato }) {
   });
 
   useEffect(() => {
-    if (centroSelezionato) {
+    if (centroSelezionato && centroSelezionato.id) {
       loadData();
     }
   }, [centroSelezionato]);
@@ -217,6 +217,19 @@ Firma Locatore: ________________    Firma Conduttore: ________________
     };
     return icons[tipo] || FileText;
   };
+
+  if (!centroSelezionato || !centroSelezionato.id) {
+    return (
+      <div className="p-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">Nessun centro commerciale assegnato</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

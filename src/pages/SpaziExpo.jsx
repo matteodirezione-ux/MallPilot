@@ -30,7 +30,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   });
 
   useEffect(() => {
-    if (centroSelezionato) {
+    if (centroSelezionato && centroSelezionato.id) {
       loadSpazi();
     }
   }, [centroSelezionato]);
@@ -190,6 +190,19 @@ export default function SpaziExpo({ centroSelezionato, user }) {
     });
     setEditingSpazio(null);
   };
+
+  if (!centroSelezionato || !centroSelezionato.id) {
+    return (
+      <div className="p-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">Nessun centro commerciale assegnato</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

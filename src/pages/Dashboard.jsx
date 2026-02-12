@@ -26,7 +26,7 @@ export default function Dashboard({ centroSelezionato }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (centroSelezionato) {
+    if (centroSelezionato && centroSelezionato.id) {
       loadStats();
     }
   }, [centroSelezionato]);
@@ -164,6 +164,19 @@ export default function Dashboard({ centroSelezionato }) {
   const percentualeOccupazione = stats.spaziTotali > 0
     ? ((stats.spaziOccupati / stats.spaziTotali) * 100).toFixed(0)
     : 0;
+
+  if (!centroSelezionato || !centroSelezionato.id) {
+    return (
+      <div className="p-8">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500">Nessun centro commerciale assegnato</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

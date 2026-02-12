@@ -20,7 +20,7 @@ export default function Calendario({ centroSelezionato }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   useEffect(() => {
-    if (centroSelezionato) {
+    if (centroSelezionato && centroSelezionato.id) {
       loadData();
     }
   }, [centroSelezionato]);
