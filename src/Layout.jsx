@@ -31,20 +31,27 @@ export default function Layout({ children, currentPageName }) {
     try {
       const userData = await base44.auth.me();
       
-      // Verifica se l'utente è un direttore registrato
-      if (!userData.tipo_account) {
-        const direttori = await base44.entities.Direttore.filter({ email: userData.email });
-        if (direttori.length > 0) {
+      // Verifica sempre se l'utente è un direttore registrato
+      const direttori = await base44.entities.Direttore.filter({ email: userData.email });
+      
+      if (direttori.length > 0) {
+        // Questo utente è un direttore
+        if (userData.tipo_account !== 'direttore') {
           await base44.auth.updateMe({ 
             tipo_account: 'direttore',
             full_name: direttori[0].full_name
           });
           userData.tipo_account = 'direttore';
           userData.full_name = direttori[0].full_name;
-          
-          // Marca l'invito come accettato
+        }
+        
+        // Marca l'invito come accettato
+        if (!direttori[0].invito_accettato) {
           await base44.entities.Direttore.update(direttori[0].id, { invito_accettato: true });
-        } else {
+        }
+      } else {
+        // Non è un direttore, quindi è proprietà
+        if (!userData.tipo_account) {
           await base44.auth.updateMe({ tipo_account: 'proprieta' });
           userData.tipo_account = 'proprieta';
         }
