@@ -166,8 +166,13 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   };
 
   const resetForm = () => {
+    // Imposta automaticamente il centro selezionato, tranne se è "tutti"
+    const defaultCentroId = centroSelezionato?.id === 'tutti' 
+      ? (centri.length > 0 ? centri[0].id : '')
+      : (centroSelezionato?.id || '');
+    
     setFormData({
-      centro_id: centroSelezionato?.id || '',
+      centro_id: defaultCentroId,
       numero_spazio: '',
       nome: '',
       descrizione: '',
