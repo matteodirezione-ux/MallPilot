@@ -43,7 +43,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
     try {
       if (user?.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.list();
-        setCentri(allCentri);
+        setCentri(allCentri || []);
       } else if (user?.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
@@ -52,10 +52,13 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
           );
           setCentri(centriAssegnati.flat().filter(c => c));
+        } else {
+          setCentri([]);
         }
       }
     } catch (error) {
       console.error('Errore caricamento centri:', error);
+      setCentri([]);
     }
   };
 

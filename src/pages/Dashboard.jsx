@@ -33,6 +33,12 @@ export default function Dashboard({ centroSelezionato }) {
   const loadStats = async () => {
     try {
       setLoading(true);
+      
+      if (!centroSelezionato || !centroSelezionato.id) {
+        setLoading(false);
+        return;
+      }
+      
       const now = new Date();
       const unMeseDopo = addMonths(now, 1);
       const inizioMese = startOfMonth(now);

@@ -28,6 +28,12 @@ export default function Calendario({ centroSelezionato }) {
   const loadData = async () => {
     try {
       setLoading(true);
+      
+      if (!centroSelezionato || !centroSelezionato.id) {
+        setLoading(false);
+        return;
+      }
+      
       const isTutti = centroSelezionato?.id === 'tutti';
       const [prenotazioniData, spaziData, clientiData] = await Promise.all([
         isTutti 
@@ -38,9 +44,9 @@ export default function Calendario({ centroSelezionato }) {
           : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id, attivo: true }),
         base44.entities.Cliente.list()
       ]);
-      setPrenotazioni(prenotazioniData);
-      setSpazi(spaziData);
-      setClienti(clientiData);
+      setPrenotazioni(prenotazioniData || []);
+      setSpazi(spaziData || []);
+      setClienti(clientiData || []);
     } catch (error) {
       console.error('Errore caricamento dati:', error);
       toast.error('Errore nel caricamento dei dati');
