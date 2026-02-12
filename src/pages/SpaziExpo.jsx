@@ -287,22 +287,13 @@ export default function SpaziExpo({ centroSelezionato, user }) {
 
               <div>
                 <Label htmlFor="colore">Colore Identificativo</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="colore"
-                    type="color"
-                    value={formData.colore}
-                    onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={formData.colore}
-                    onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
-                    placeholder="#3b82f6"
-                    className="flex-1"
-                  />
-                </div>
+                <Input
+                  id="colore"
+                  type="color"
+                  value={formData.colore}
+                  onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
+                  className="w-20 h-10"
+                />
                 <p className="text-xs text-slate-500 mt-1">Colore dello spazio nel calendario</p>
               </div>
 
