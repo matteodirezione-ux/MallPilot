@@ -658,8 +658,9 @@ Firma Locatore: ________________    Firma Conduttore: ________________
               </Card>
             );
           })}
-        </div>
-      )}
-    </div>
+          </div>
+          </div>
+          )}
+          </div>
   );
 }
