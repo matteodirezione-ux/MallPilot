@@ -5,287 +5,214 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Gestione({ user }) {
   const [centri, setCentri] = useState([]);
-  const [utenti, setUtenti] = useState([]);
+  const [direttori, setDirettori] = useState([]);
   const [assegnazioni, setAssegnazioni] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dialogCentroOpen, setDialogCentroOpen] = useState(false);
-  const [dialogUtenteOpen, setDialogUtenteOpen] = useState(false);
-  const [dialogBudgetOpen, setDialogBudgetOpen] = useState(false);
-  const [editingCentro, setEditingCentro] = useState(null);
-  const [editingDirettore, setEditingDirettore] = useState(null);
-  const [editingBudget, setEditingBudget] = useState(null);
-
-  const [formCentro, setFormCentro] = useState({
-    nome: '',
-    indirizzo: '',
-    citta: '',
-    provincia: '',
-    cap: '',
-    numero_spazi_totali: '',
-    attivo: true
-  });
-
-  const [formUtente, setFormUtente] = useState({
-    full_name: '',
-    email: '',
-    role: 'user'
-  });
-
-  const [formBudget, setFormBudget] = useState({
-    centro_id: '',
-    anno: new Date().getFullYear(),
-    importo_budget: ''
-  });
-
-  const [assegnazioniForm, setAssegnazioniForm] = useState({
-    user_email: '',
-    centri_selezionati: []
-  });
+  
+  // Dialogs
+  const [centroDialog, setCentroDialog] = useState({ open: false, data: null });
+  const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
+  const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
-    if (user?.tipo_account === 'proprieta') {
+    if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'super_admin') {
       loadData();
     }
   }, [user]);
 
   const loadData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const [centriData, utentiData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.User.list(),
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
-      setCentri(centriData);
-      setUtenti(utentiData.filter(u => u.tipo_account === 'direttore'));
+      
+      setCentri(centriData.filter(c => !user.azienda_id || c.azienda_id === user.azienda_id));
+      setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
-      console.error('Errore caricamento dati:', error);
+      console.error('Errore caricamento:', error);
       toast.error('Errore nel caricamento dei dati');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmitCentro = async (e) => {
-    e.preventDefault();
+  // === CENTRI ===
+  const saveCentro = async (formData) => {
     try {
-      const dataToSave = {
-        ...formCentro,
+      const data = {
+        ...formData,
         azienda_id: user.azienda_id,
-        numero_spazi_totali: formCentro.numero_spazi_totali ? parseInt(formCentro.numero_spazi_totali) : null
+        numero_spazi_totali: formData.numero_spazi_totali ? parseInt(formData.numero_spazi_totali) : null
       };
 
-      if (editingCentro) {
-        await base44.entities.CentroCommerciale.update(editingCentro.id, dataToSave);
+      if (centroDialog.data) {
+        await base44.entities.CentroCommerciale.update(centroDialog.data.id, data);
         toast.success('Centro aggiornato');
       } else {
-        await base44.entities.CentroCommerciale.create(dataToSave);
+        await base44.entities.CentroCommerciale.create(data);
         toast.success('Centro creato');
       }
-
-      setDialogCentroOpen(false);
-      resetFormCentro();
-      loadData();
-    } catch (error) {
-      console.error('Errore salvataggio centro:', error);
-      toast.error('Errore nel salvataggio del centro');
-    }
-  };
-
-  const handleInvitaUtente = async (e) => {
-    e.preventDefault();
-    
-    if (assegnazioniForm.centri_selezionati.length === 0) {
-      toast.error('Seleziona almeno un centro');
-      return;
-    }
-
-    try {
-      if (editingDirettore) {
-        // Modifica direttore esistente: aggiorna solo le assegnazioni
-        const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === editingDirettore.email);
-        const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
-        
-        const daRimuovere = assegnazioniAttuali.filter(a => !assegnazioniForm.centri_selezionati.includes(a.centro_id));
-        const daAggiungere = assegnazioniForm.centri_selezionati.filter(id => !centriAttualiIds.includes(id));
-        
-        await Promise.all([
-          ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)),
-          ...daAggiungere.map(centro_id => base44.entities.Assegnazione.create({
-            user_email: editingDirettore.email,
-            centro_id
-          }))
-        ]);
-
-        toast.success('Assegnazioni direttore aggiornate');
-      } else {
-        // Invita nuovo direttore tramite backend function
-        const response = await base44.functions.invoke('invitaDirettore', {
-          email: formUtente.email,
-          full_name: formUtente.full_name,
-          centri_ids: assegnazioniForm.centri_selezionati
-        });
-
-        if (response.data?.error) {
-          throw new Error(response.data.error);
-        }
-
-        toast.success('Direttore invitato con successo');
-      }
       
-      setDialogUtenteOpen(false);
-      resetFormUtente();
-      await loadData();
-    } catch (error) {
-      console.error('Errore:', error);
-      toast.error(error.message || 'Errore nel salvataggio');
-    }
-  };
-
-  const handleSubmitBudget = async (e) => {
-    e.preventDefault();
-    try {
-      const dataToSave = {
-        ...formBudget,
-        anno: parseInt(formBudget.anno),
-        importo_budget: parseFloat(formBudget.importo_budget)
-      };
-
-      if (editingBudget) {
-        await base44.entities.Budget.update(editingBudget.id, dataToSave);
-        toast.success('Budget aggiornato');
-      } else {
-        await base44.entities.Budget.create(dataToSave);
-        toast.success('Budget creato');
-      }
-
-      setDialogBudgetOpen(false);
-      resetFormBudget();
+      setCentroDialog({ open: false, data: null });
       loadData();
     } catch (error) {
-      console.error('Errore salvataggio budget:', error);
-      toast.error('Errore nel salvataggio del budget');
+      toast.error('Errore: ' + error.message);
     }
   };
 
-  const handleDeleteCentro = async (id) => {
-    if (!confirm('Sei sicuro di voler eliminare questo centro?')) return;
+  const deleteCentro = async (id) => {
+    if (!confirm('Eliminare questo centro?')) return;
     try {
       await base44.entities.CentroCommerciale.delete(id);
       toast.success('Centro eliminato');
       loadData();
     } catch (error) {
-      console.error('Errore eliminazione centro:', error);
-      toast.error('Errore nell\'eliminazione del centro');
+      toast.error('Errore eliminazione');
     }
   };
 
-  const handleDeleteAssegnazione = async (id) => {
-    if (!confirm('Sei sicuro di voler rimuovere questa assegnazione?')) return;
+  // === DIRETTORI ===
+  const saveDirettore = async (formData) => {
+    try {
+      if (direttoreDialog.data) {
+        // Aggiorna assegnazioni esistenti
+        const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === direttoreDialog.data.email);
+        const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
+        
+        const daRimuovere = assegnazioniAttuali.filter(a => !formData.centri_ids.includes(a.centro_id));
+        const daAggiungere = formData.centri_ids.filter(id => !centriAttualiIds.includes(id));
+        
+        await Promise.all([
+          ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)),
+          ...daAggiungere.map(centro_id => 
+            base44.entities.Assegnazione.create({
+              user_email: direttoreDialog.data.email,
+              centro_id
+            })
+          )
+        ]);
+        
+        toast.success('Assegnazioni aggiornate');
+      } else {
+        // Invita nuovo direttore
+        await base44.users.inviteUser(formData.email, 'user');
+        
+        // Attendi che l'utente venga creato
+        let nuovoUtente = null;
+        for (let i = 0; i < 15; i++) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const users = await base44.entities.User.filter({ email: formData.email });
+          if (users.length > 0) {
+            nuovoUtente = users[0];
+            break;
+          }
+        }
+        
+        if (nuovoUtente) {
+          // Aggiorna tipo account
+          await base44.entities.User.update(nuovoUtente.id, {
+            tipo_account: 'direttore',
+            full_name: formData.full_name
+          });
+          
+          // Crea assegnazioni
+          await Promise.all(
+            formData.centri_ids.map(centro_id =>
+              base44.entities.Assegnazione.create({
+                user_email: formData.email,
+                centro_id
+              })
+            )
+          );
+          
+          toast.success('Direttore invitato con successo');
+        } else {
+          toast.success('Invito inviato. L\'utente apparirà a breve nel sistema.');
+        }
+      }
+      
+      setDirettoreDialog({ open: false, data: null });
+      loadData();
+    } catch (error) {
+      toast.error('Errore: ' + error.message);
+    }
+  };
+
+  const deleteAssegnazione = async (id) => {
+    if (!confirm('Rimuovere questa assegnazione?')) return;
     try {
       await base44.entities.Assegnazione.delete(id);
       toast.success('Assegnazione rimossa');
       loadData();
     } catch (error) {
-      console.error('Errore rimozione assegnazione:', error);
-      toast.error('Errore nella rimozione dell\'assegnazione');
+      toast.error('Errore rimozione');
     }
   };
 
-  const handleEditCentro = (centro) => {
-    setEditingCentro(centro);
-    setFormCentro({ ...centro });
-    setDialogCentroOpen(true);
+  // === BUDGET ===
+  const saveBudget = async (formData) => {
+    try {
+      const data = {
+        ...formData,
+        anno: parseInt(formData.anno),
+        importo_budget: parseFloat(formData.importo_budget)
+      };
+
+      if (budgetDialog.data) {
+        await base44.entities.Budget.update(budgetDialog.data.id, data);
+        toast.success('Budget aggiornato');
+      } else {
+        await base44.entities.Budget.create(data);
+        toast.success('Budget creato');
+      }
+      
+      setBudgetDialog({ open: false, data: null });
+      loadData();
+    } catch (error) {
+      toast.error('Errore: ' + error.message);
+    }
   };
 
-  const handleEditBudget = (budget) => {
-    setEditingBudget(budget);
-    setFormBudget({ ...budget });
-    setDialogBudgetOpen(true);
+  const deleteBudget = async (id) => {
+    if (!confirm('Eliminare questo budget?')) return;
+    try {
+      await base44.entities.Budget.delete(id);
+      toast.success('Budget eliminato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore eliminazione');
+    }
   };
 
-  const resetFormCentro = () => {
-    setFormCentro({
-      nome: '',
-      indirizzo: '',
-      citta: '',
-      provincia: '',
-      cap: '',
-      numero_spazi_totali: '',
-      attivo: true
-    });
-    setEditingCentro(null);
-  };
-
-  const handleEditDirettore = (direttore) => {
-    const centriAssegnatiIds = assegnazioni
-      .filter(a => a.user_email === direttore.email)
-      .map(a => a.centro_id);
-    
-    setEditingDirettore(direttore);
-    setFormUtente({
-      full_name: direttore.full_name || '',
-      email: direttore.email || '',
-      role: 'user'
-    });
-    setAssegnazioniForm({
-      user_email: direttore.email || '',
-      centri_selezionati: centriAssegnatiIds
-    });
-    setDialogUtenteOpen(true);
-  };
-
-  const resetFormUtente = () => {
-    setFormUtente({
-      full_name: '',
-      email: '',
-      role: 'user'
-    });
-    setAssegnazioniForm({
-      user_email: '',
-      centri_selezionati: []
-    });
-    setEditingDirettore(null);
-  };
-
-  const resetFormBudget = () => {
-    setFormBudget({
-      centro_id: '',
-      anno: new Date().getFullYear(),
-      importo_budget: ''
-    });
-    setEditingBudget(null);
-  };
-
-  const getCentriAssegnati = (userEmail) => {
-    const centriIds = assegnazioni
-      .filter(a => a.user_email === userEmail)
-      .map(a => a.centro_id);
-    return centri.filter(c => centriIds.includes(c.id));
+  // === UI HELPERS ===
+  const getCentriAssegnati = (email) => {
+    const ids = assegnazioni.filter(a => a.user_email === email).map(a => a.centro_id);
+    return centri.filter(c => ids.includes(c.id));
   };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
   };
 
-  if (user?.tipo_account !== 'proprieta') {
+  if (!user || (user.tipo_account !== 'proprieta' && user.tipo_account !== 'super_admin')) {
     return (
       <div className="p-8">
-        <Card className="bg-white border-slate-200">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-slate-500">Accesso non autorizzato</p>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="py-12 text-center text-slate-500">
+          Accesso non autorizzato
+        </CardContent></Card>
       </div>
     );
   }
@@ -305,7 +232,7 @@ export default function Gestione({ user }) {
     <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Gestione</h1>
-        <p className="text-slate-600">Amministrazione centri commerciali e utenti</p>
+        <p className="text-slate-600">Amministra centri, direttori e budget</p>
       </div>
 
       <Tabs defaultValue="centri" className="w-full">
@@ -315,305 +242,83 @@ export default function Gestione({ user }) {
           <TabsTrigger value="budget">Budget</TabsTrigger>
         </TabsList>
 
-        {/* Tab Centri */}
+        {/* === TAB CENTRI === */}
         <TabsContent value="centri">
           <div className="flex justify-end mb-4">
-            <Dialog open={dialogCentroOpen} onOpenChange={(open) => {
-              setDialogCentroOpen(open);
-              if (!open) resetFormCentro();
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuovo Centro
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingCentro ? 'Modifica Centro' : 'Nuovo Centro Commerciale'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmitCentro} className="space-y-4">
-                  <div>
-                    <Label htmlFor="nome">Nome Centro *</Label>
-                    <Input
-                      id="nome"
-                      value={formCentro.nome}
-                      onChange={(e) => setFormCentro({ ...formCentro, nome: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="col-span-2">
-                      <Label htmlFor="indirizzo">Indirizzo</Label>
-                      <Input
-                        id="indirizzo"
-                        value={formCentro.indirizzo}
-                        onChange={(e) => setFormCentro({ ...formCentro, indirizzo: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="citta">Città *</Label>
-                      <Input
-                        id="citta"
-                        value={formCentro.citta}
-                        onChange={(e) => setFormCentro({ ...formCentro, citta: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="provincia">Provincia</Label>
-                      <Input
-                        id="provincia"
-                        value={formCentro.provincia}
-                        onChange={(e) => setFormCentro({ ...formCentro, provincia: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="cap">CAP</Label>
-                      <Input
-                        id="cap"
-                        value={formCentro.cap}
-                        onChange={(e) => setFormCentro({ ...formCentro, cap: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="numero_spazi_totali">Numero Spazi Totali</Label>
-                      <Input
-                        id="numero_spazi_totali"
-                        type="number"
-                        value={formCentro.numero_spazi_totali}
-                        onChange={(e) => setFormCentro({ ...formCentro, numero_spazi_totali: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="attivo"
-                      checked={formCentro.attivo}
-                      onChange={(e) => setFormCentro({ ...formCentro, attivo: e.target.checked })}
-                      className="rounded"
-                    />
-                    <Label htmlFor="attivo" className="cursor-pointer">Centro attivo</Label>
-                  </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setDialogCentroOpen(false)}>
-                      Annulla
-                    </Button>
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                      {editingCentro ? 'Aggiorna' : 'Crea'}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuovo Centro
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {centri.map(centro => (
-              <Card key={centro.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <Card key={centro.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                  <div className="flex justify-between mb-4">
+                    <div className="flex gap-3">
                       <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
                         <Building2 className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-slate-800">{centro.nome}</h3>
+                        <h3 className="font-semibold">{centro.nome}</h3>
                         <p className="text-sm text-slate-600">{centro.citta}</p>
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditCentro(centro)}
-                        className="text-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => setCentroDialog({ open: true, data: centro })}>
+                        <Pencil className="w-4 h-4 text-blue-600" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteCentro(centro.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => deleteCentro(centro.id)}>
+                        <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>
                     </div>
                   </div>
-                  {centro.indirizzo && (
-                    <p className="text-sm text-slate-600 mb-2">{centro.indirizzo}</p>
-                  )}
-                  {centro.numero_spazi_totali && (
-                    <p className="text-sm text-slate-600">
-                      Spazi totali: {centro.numero_spazi_totali}
-                    </p>
-                  )}
-                  {!centro.attivo && (
-                    <div className="mt-3 px-2 py-1 bg-red-50 text-red-700 text-xs rounded-lg text-center">
-                      Non attivo
-                    </div>
-                  )}
+                  {centro.indirizzo && <p className="text-sm text-slate-600 mb-2">{centro.indirizzo}</p>}
+                  {centro.numero_spazi_totali && <p className="text-sm text-slate-600">Spazi: {centro.numero_spazi_totali}</p>}
+                  {!centro.attivo && <div className="mt-3 px-2 py-1 bg-red-50 text-red-700 text-xs rounded text-center">Non attivo</div>}
                 </CardContent>
               </Card>
             ))}
           </div>
         </TabsContent>
 
-        {/* Tab Direttori */}
+        {/* === TAB DIRETTORI === */}
         <TabsContent value="direttori">
           <div className="flex justify-end mb-4">
-            <Dialog open={dialogUtenteOpen} onOpenChange={(open) => {
-              setDialogUtenteOpen(open);
-              if (!open) resetFormUtente();
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Invita Direttore
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingDirettore ? 'Modifica Direttore' : 'Invita Nuovo Direttore'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleInvitaUtente} className="space-y-4">
-                  {editingDirettore ? (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <Users className="w-5 h-5 text-blue-600 mt-0.5" />
-                        <div>
-                          <p className="font-medium text-slate-800">{editingDirettore.full_name}</p>
-                          <p className="text-sm text-slate-600">{editingDirettore.email}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div>
-                        <Label htmlFor="full_name">Nome e Cognome *</Label>
-                        <Input
-                          id="full_name"
-                          value={formUtente.full_name}
-                          onChange={(e) => setFormUtente({ ...formUtente, full_name: e.target.value })}
-                          placeholder="es. Mario Rossi"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={formUtente.email}
-                          onChange={(e) => setFormUtente({ ...formUtente, email: e.target.value })}
-                          placeholder="email@esempio.com"
-                          required
-                        />
-                        <p className="text-xs text-slate-500 mt-1">
-                          Verrà inviato un invito via email al direttore
-                        </p>
-                      </div>
-                    </>
-                  )}
-                  <div>
-                    <Label>Assegna Centri *</Label>
-                    <p className="text-sm text-slate-500 mb-2">
-                      Seleziona i centri che il direttore potrà gestire
-                    </p>
-                    <div className="space-y-2 mt-2 max-h-48 overflow-y-auto border border-slate-200 rounded-lg p-3">
-                      {centri.filter(c => c.attivo).length > 0 ? (
-                        centri.filter(c => c.attivo).map(centro => (
-                          <div key={centro.id} className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id={`centro-${centro.id}`}
-                              checked={assegnazioniForm.centri_selezionati.includes(centro.id)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setAssegnazioniForm({
-                                    ...assegnazioniForm,
-                                    centri_selezionati: [...assegnazioniForm.centri_selezionati, centro.id]
-                                  });
-                                } else {
-                                  setAssegnazioniForm({
-                                    ...assegnazioniForm,
-                                    centri_selezionati: assegnazioniForm.centri_selezionati.filter(id => id !== centro.id)
-                                  });
-                                }
-                              }}
-                              className="rounded"
-                            />
-                            <Label htmlFor={`centro-${centro.id}`} className="cursor-pointer text-sm">
-                              {centro.nome}
-                            </Label>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-sm text-slate-500 text-center py-2">
-                          Nessun centro disponibile. Crea prima un centro commerciale.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setDialogUtenteOpen(false)}>
-                      Annulla
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      {editingDirettore ? 'Aggiorna' : 'Invita Direttore'}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Invita Direttore
+            </Button>
           </div>
 
           <div className="space-y-4">
-            {utenti.map(utente => {
-              const centriAssegnati = getCentriAssegnati(utente.email);
-              const assegnazioniUtente = assegnazioni.filter(a => a.user_email === utente.email);
-
+            {direttori.map(dir => {
+              const centriAssegnati = getCentriAssegnati(dir.email);
               return (
-                <Card key={utente.id} className="bg-white border-slate-200">
+                <Card key={dir.id}>
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
+                    <div className="flex justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-3">
+                        <div className="flex gap-3 mb-3">
                           <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                             <Users className="w-5 h-5 text-blue-600" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-slate-800">{utente.full_name}</h3>
-                            <p className="text-sm text-slate-600">{utente.email}</p>
+                            <h3 className="font-semibold">{dir.full_name}</h3>
+                            <p className="text-sm text-slate-600">{dir.email}</p>
                           </div>
                         </div>
                         <div className="ml-13">
-                          <p className="text-sm font-medium text-slate-700 mb-2">
-                            Centri Assegnati ({centriAssegnati.length}):
-                          </p>
+                          <p className="text-sm font-medium mb-2">Centri assegnati ({centriAssegnati.length}):</p>
                           {centriAssegnati.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {centriAssegnati.map(centro => {
-                                const assegnazione = assegnazioniUtente.find(a => a.centro_id === centro.id);
+                                const assegnazione = assegnazioni.find(a => a.user_email === dir.email && a.centro_id === centro.id);
                                 return (
-                                  <div
-                                    key={centro.id}
-                                    className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm"
-                                  >
+                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm">
                                     <span>{centro.nome}</span>
-                                    <button
-                                      onClick={() => handleDeleteAssegnazione(assegnazione.id)}
-                                      className="text-blue-600 hover:text-blue-800"
-                                    >
+                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-blue-600">
                                       <Trash2 className="w-3 h-3" />
                                     </button>
                                   </div>
@@ -621,17 +326,12 @@ export default function Gestione({ user }) {
                               })}
                             </div>
                           ) : (
-                            <p className="text-sm text-slate-500">Nessun centro assegnato</p>
+                            <p className="text-sm text-slate-500">Nessun centro</p>
                           )}
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditDirettore(utente)}
-                        className="text-blue-600"
-                      >
-                        <Pencil className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
+                        <Pencil className="w-4 h-4 text-blue-600" />
                       </Button>
                     </div>
                   </CardContent>
@@ -641,99 +341,37 @@ export default function Gestione({ user }) {
           </div>
         </TabsContent>
 
-        {/* Tab Budget */}
+        {/* === TAB BUDGET === */}
         <TabsContent value="budget">
           <div className="flex justify-end mb-4">
-            <Dialog open={dialogBudgetOpen} onOpenChange={(open) => {
-              setDialogBudgetOpen(open);
-              if (!open) resetFormBudget();
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nuovo Budget
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingBudget ? 'Modifica Budget' : 'Nuovo Budget Annuale'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmitBudget} className="space-y-4">
-                  <div>
-                    <Label htmlFor="centro_id">Centro *</Label>
-                    <select
-                      id="centro_id"
-                      value={formBudget.centro_id}
-                      onChange={(e) => setFormBudget({ ...formBudget, centro_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                      required
-                    >
-                      <option value="">Seleziona centro</option>
-                      {centri.map(c => (
-                        <option key={c.id} value={c.id}>{c.nome}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Label htmlFor="anno">Anno *</Label>
-                    <Input
-                      id="anno"
-                      type="number"
-                      value={formBudget.anno}
-                      onChange={(e) => setFormBudget({ ...formBudget, anno: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="importo_budget">Importo Budget (€) *</Label>
-                    <Input
-                      id="importo_budget"
-                      type="number"
-                      step="0.01"
-                      value={formBudget.importo_budget}
-                      onChange={(e) => setFormBudget({ ...formBudget, importo_budget: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button type="button" variant="outline" onClick={() => setDialogBudgetOpen(false)}>
-                      Annulla
-                    </Button>
-                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                      {editingBudget ? 'Aggiorna' : 'Crea'}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600">
+              <Plus className="w-4 h-4 mr-2" />
+              Nuovo Budget
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {budgets.map(budget => {
               const centro = centri.find(c => c.id === budget.centro_id);
               return (
-                <Card key={budget.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+                <Card key={budget.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex justify-between mb-4">
+                      <div className="flex gap-3">
                         <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
                           <Target className="w-5 h-5 text-green-600" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-slate-800">{centro?.nome}</h3>
+                          <h3 className="font-semibold">{centro?.nome}</h3>
                           <p className="text-sm text-slate-600">Anno {budget.anno}</p>
                         </div>
                       </div>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditBudget(budget)}
-                          className="text-blue-600"
-                        >
-                          <Pencil className="w-4 h-4" />
+                        <Button variant="ghost" size="icon" onClick={() => setBudgetDialog({ open: true, data: budget })}>
+                          <Pencil className="w-4 h-4 text-blue-600" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteBudget(budget.id)}>
+                          <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
                       </div>
                     </div>
@@ -747,6 +385,230 @@ export default function Gestione({ user }) {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* === DIALOGS === */}
+      <CentroDialog 
+        open={centroDialog.open} 
+        data={centroDialog.data}
+        onClose={() => setCentroDialog({ open: false, data: null })}
+        onSave={saveCentro}
+      />
+      
+      <DirettoreDialog 
+        open={direttoreDialog.open} 
+        data={direttoreDialog.data}
+        centri={centri}
+        assegnazioni={assegnazioni}
+        onClose={() => setDirettoreDialog({ open: false, data: null })}
+        onSave={saveDirettore}
+      />
+      
+      <BudgetDialog 
+        open={budgetDialog.open} 
+        data={budgetDialog.data}
+        centri={centri}
+        onClose={() => setBudgetDialog({ open: false, data: null })}
+        onSave={saveBudget}
+      />
     </div>
+  );
+}
+
+// === DIALOG COMPONENTS ===
+function CentroDialog({ open, data, onClose, onSave }) {
+  const [form, setForm] = useState({
+    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
+  });
+
+  useEffect(() => {
+    if (data) {
+      setForm(data);
+    } else {
+      setForm({ nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true });
+    }
+  }, [data, open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Centro' : 'Nuovo Centro'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Nome Centro *</Label>
+            <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <Label>Indirizzo</Label>
+              <Input value={form.indirizzo} onChange={(e) => setForm({ ...form, indirizzo: e.target.value })} />
+            </div>
+            <div>
+              <Label>Città *</Label>
+              <Input value={form.citta} onChange={(e) => setForm({ ...form, citta: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Provincia</Label>
+              <Input value={form.provincia} onChange={(e) => setForm({ ...form, provincia: e.target.value })} />
+            </div>
+            <div>
+              <Label>CAP</Label>
+              <Input value={form.cap} onChange={(e) => setForm({ ...form, cap: e.target.value })} />
+            </div>
+            <div>
+              <Label>N. Spazi</Label>
+              <Input type="number" value={form.numero_spazi_totali} onChange={(e) => setForm({ ...form, numero_spazi_totali: e.target.value })} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input type="checkbox" checked={form.attivo} onChange={(e) => setForm({ ...form, attivo: e.target.checked })} />
+            <Label>Attivo</Label>
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
+  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [] });
+
+  useEffect(() => {
+    if (data) {
+      const centriIds = assegnazioni.filter(a => a.user_email === data.email).map(a => a.centro_id);
+      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds });
+    } else {
+      setForm({ full_name: '', email: '', centri_ids: [] });
+    }
+  }, [data, open, assegnazioni]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (form.centri_ids.length === 0) {
+      toast.error('Seleziona almeno un centro');
+      return;
+    }
+    onSave(form);
+  };
+
+  const toggleCentro = (centroId) => {
+    setForm(prev => ({
+      ...prev,
+      centri_ids: prev.centri_ids.includes(centroId)
+        ? prev.centri_ids.filter(id => id !== centroId)
+        : [...prev.centri_ids, centroId]
+    }));
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Direttore' : 'Invita Direttore'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {data ? (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="font-medium">{data.full_name}</p>
+              <p className="text-sm text-slate-600">{data.email}</p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <Label>Nome e Cognome *</Label>
+                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                <p className="text-xs text-slate-500 mt-1">Verrà inviato un invito via email</p>
+              </div>
+            </>
+          )}
+          <div>
+            <Label>Centri Assegnati *</Label>
+            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
+              {centri.filter(c => c.attivo).map(centro => (
+                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.centri_ids.includes(centro.id)}
+                    onChange={() => toggleCentro(centro.id)}
+                  />
+                  <span className="text-sm">{centro.nome}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Invita'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function BudgetDialog({ open, data, centri, onClose, onSave }) {
+  const [form, setForm] = useState({ centro_id: '', anno: new Date().getFullYear(), importo_budget: '' });
+
+  useEffect(() => {
+    if (data) {
+      setForm(data);
+    } else {
+      setForm({ centro_id: '', anno: new Date().getFullYear(), importo_budget: '' });
+    }
+  }, [data, open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Budget' : 'Nuovo Budget'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Centro *</Label>
+            <select
+              value={form.centro_id}
+              onChange={(e) => setForm({ ...form, centro_id: e.target.value })}
+              className="w-full px-3 py-2 border rounded-lg"
+              required
+            >
+              <option value="">Seleziona centro</option>
+              {centri.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+            </select>
+          </div>
+          <div>
+            <Label>Anno *</Label>
+            <Input type="number" value={form.anno} onChange={(e) => setForm({ ...form, anno: e.target.value })} required />
+          </div>
+          <div>
+            <Label>Importo (€) *</Label>
+            <Input type="number" step="0.01" value={form.importo_budget} onChange={(e) => setForm({ ...form, importo_budget: e.target.value })} required />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
