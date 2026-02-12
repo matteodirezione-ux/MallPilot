@@ -28,33 +28,33 @@ Deno.serve(async (req) => {
                 full_name: full_name
             });
         } else {
-            // Invita nuovo utente usando l'SDK
-            await base44.asServiceRole.entities.User.create({
-                email: email,
-                full_name: full_name,
-                role: 'user',
-                tipo_account: 'proprieta',
-                azienda_id: azienda_id
-            });
+            // Invita l'utente usando il metodo corretto
+            await base44.asServiceRole.users.inviteUser(email, 'user');
 
-            
-            // Invia l'invito email separatamente
-            try {
-                await fetch(`https://api.base44.com/api/users/invite`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': req.headers.get('Authorization'),
-                        'X-App-Id': Deno.env.get('BASE44_APP_ID')
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        role: 'user'
-                    })
-                });
-            } catch (emailError) {
-                console.log('Errore invio email (utente comunque creato):', emailError);
+            // Attendi che l'utente venga creato nel database
+            let newUser = null;
+            let attempts = 0;
+            while (!newUser && attempts < 10) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                const users = await base44.asServiceRole.entities.User.filter({ email });
+                if (users.length > 0) {
+                    newUser = users[0];
+                }
+                attempts++;
             }
+
+            if (!newUser) {
+                return Response.json({ 
+                    error: 'Utente invitato ma non trovato nel database. Riprova tra qualche istante.' 
+                }, { status: 500 });
+            }
+
+            // Aggiorna il tipo di account e l'azienda
+            await base44.asServiceRole.entities.User.update(newUser.id, {
+                tipo_account: 'proprieta',
+                azienda_id: azienda_id,
+                full_name: full_name
+            });
         }
 
         return Response.json({ 
