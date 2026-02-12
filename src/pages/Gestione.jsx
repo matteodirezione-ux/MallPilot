@@ -124,10 +124,19 @@ export default function Gestione({ user }) {
         
         toast.success('Assegnazioni aggiornate');
       } else {
-        // Invita il nuovo direttore
-        await base44.users.inviteUser(formData.email, 'user');
+        // Invita il nuovo direttore con ruolo admin (così può accedere all'app)
+        await base44.users.inviteUser(formData.email, 'admin');
         
-        // Crea assegnazioni subito (quando l'utente accetterà l'invito avrà già i centri)
+        // Aggiorna l'utente appena invitato per impostarlo come direttore
+        const utenti = await base44.entities.User.filter({ email: formData.email });
+        if (utenti.length > 0) {
+          await base44.entities.User.update(utenti[0].id, { 
+            tipo_account: 'direttore',
+            full_name: formData.full_name
+          });
+        }
+        
+        // Crea assegnazioni
         await Promise.all(
           formData.centri_ids.map(centro_id =>
             base44.entities.Assegnazione.create({
@@ -137,7 +146,7 @@ export default function Gestione({ user }) {
           )
         );
         
-        toast.success('Invito inviato. L\'utente riceverà una email per completare la registrazione.');
+        toast.success('Direttore invitato con successo');
       }
       
       setDirettoreDialog({ open: false, data: null });
