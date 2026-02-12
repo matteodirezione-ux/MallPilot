@@ -15,6 +15,7 @@ import { it } from 'date-fns/locale';
 export default function Dashboard({ centroSelezionato }) {
   const [stats, setStats] = useState({
     prossimiAffitti: [],
+    affittiCorrenti: [],
     spaziOccupati: 0,
     spaziTotali: 0,
     incassiMese: 0,
@@ -51,23 +52,39 @@ export default function Dashboard({ centroSelezionato }) {
         ? await base44.entities.Prenotazione.list()
         : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
 
-      // Prossimi affitti (prossimo mese)
+      // Affitti correnti (in corso oggi)
+      const affittiCorrentiList = prenotazioni.filter(p => {
+        const dataInizio = new Date(p.data_inizio);
+        const dataFine = new Date(p.data_fine);
+        return isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
+               p.stato !== 'cancellata';
+      });
+
+      // Prossimi affitti (prossimo mese, esclusi quelli già in corso)
       const prossimiAffitti = prenotazioni.filter(p => {
         const dataInizio = new Date(p.data_inizio);
-        return isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && 
+        return dataInizio > now &&
+               isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && 
                p.stato !== 'cancellata';
       }).slice(0, 5);
 
       // Arricchisci con dati cliente e spazio
-      const prossimiConDettagli = await Promise.all(
-        prossimiAffitti.map(async (p) => {
+      const [prossimiConDettagli, affittiCorrentiConDettagli] = await Promise.all([
+        Promise.all(prossimiAffitti.map(async (p) => {
           const [cliente, spazio] = await Promise.all([
             base44.entities.Cliente.filter({ id: p.cliente_id }).then(r => r[0]),
             base44.entities.SpazioExpo.filter({ id: p.spazio_id }).then(r => r[0])
           ]);
           return { ...p, cliente, spazio };
-        })
-      );
+        })),
+        Promise.all(affittiCorrentiList.map(async (p) => {
+          const [cliente, spazio] = await Promise.all([
+            base44.entities.Cliente.filter({ id: p.cliente_id }).then(r => r[0]),
+            base44.entities.SpazioExpo.filter({ id: p.spazio_id }).then(r => r[0])
+          ]);
+          return { ...p, cliente, spazio };
+        }))
+      ]);
 
       // Spazi occupati (prenotazioni attive oggi)
       const spaziOccupatiOggi = prenotazioni.filter(p => {
@@ -118,6 +135,7 @@ export default function Dashboard({ centroSelezionato }) {
       
       setStats({
         prossimiAffitti: prossimiConDettagli,
+        affittiCorrenti: affittiCorrentiConDettagli,
         spaziOccupati: spaziOccupatiOggi,
         spaziTotali: spazi.length,
         incassiMese,
@@ -268,6 +286,51 @@ export default function Dashboard({ centroSelezionato }) {
             <div className="text-3xl font-bold text-slate-800">
               {stats.clientiTotali}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Affitti Correnti */}
+        <Card className="md:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              <CardTitle className="text-lg font-semibold text-slate-800">
+                Affitti Correnti
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {stats.affittiCorrenti?.length === 0 ? (
+              <p className="text-slate-500 text-center py-4">
+                Nessun affitto attivo al momento
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {stats.affittiCorrenti?.map((prenotazione) => (
+                  <div 
+                    key={prenotazione.id}
+                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100 hover:bg-green-100 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">
+                        {prenotazione.cliente?.ragione_sociale}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Spazio {prenotazione.spazio?.numero_spazio}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-slate-700">
+                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}
+                      </p>
+                      <p className="text-sm font-semibold text-green-600">
+                        {formatCurrency(prenotazione.prezzo_totale)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
