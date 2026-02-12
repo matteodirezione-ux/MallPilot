@@ -21,10 +21,8 @@ export default function Gestione({ user }) {
   const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
-  const [aziende, setAziende] = useState([]);
-
   useEffect(() => {
-    if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'super_admin') {
+    if (user?.tipo_account === 'proprieta') {
       loadData();
     }
   }, [user]);
@@ -32,32 +30,17 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const isSuperAdmin = user.tipo_account === 'super_admin';
-      
-      const [centriData, utentiData, assegnazioniData, budgetsData, aziendeData] = await Promise.all([
+      const [centriData, utentiData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.User.list(),
         base44.entities.Assegnazione.list(),
-        base44.entities.Budget.list(),
-        isSuperAdmin ? base44.entities.Azienda.list() : Promise.resolve([])
+        base44.entities.Budget.list()
       ]);
       
-      // Filtra in base al ruolo
-      if (isSuperAdmin) {
-        setCentri(centriData);
-        setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
-        setAssegnazioni(assegnazioniData);
-        setBudgets(budgetsData);
-        setAziende(aziendeData);
-      } else {
-        // Proprietà vede solo i propri centri
-        setCentri(centriData.filter(c => c.azienda_id === user.azienda_id));
-        setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
-        // Filtra assegnazioni solo per i centri della propria azienda
-        const centriIds = centriData.filter(c => c.azienda_id === user.azienda_id).map(c => c.id);
-        setAssegnazioni(assegnazioniData.filter(a => centriIds.includes(a.centro_id)));
-        setBudgets(budgetsData.filter(b => centriIds.includes(b.centro_id)));
-      }
+      setCentri(centriData);
+      setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
+      setAssegnazioni(assegnazioniData);
+      setBudgets(budgetsData);
     } catch (error) {
       console.error('Errore caricamento:', error);
       toast.error('Errore nel caricamento dei dati');
@@ -71,7 +54,6 @@ export default function Gestione({ user }) {
     try {
       const data = {
         ...formData,
-        azienda_id: user.azienda_id,
         numero_spazi_totali: formData.numero_spazi_totali ? parseInt(formData.numero_spazi_totali) : null
       };
 
@@ -212,7 +194,7 @@ export default function Gestione({ user }) {
     return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
   };
 
-  if (!user || (user.tipo_account !== 'proprieta' && user.tipo_account !== 'super_admin')) {
+  if (!user || user.tipo_account !== 'proprieta') {
     return (
       <div className="p-8">
         <Card><CardContent className="py-12 text-center text-slate-500">
@@ -395,9 +377,6 @@ export default function Gestione({ user }) {
       <CentroDialog 
         open={centroDialog.open} 
         data={centroDialog.data}
-        aziende={aziende}
-        isSuperAdmin={user?.tipo_account === 'super_admin'}
-        currentAziendaId={user?.azienda_id}
         onClose={() => setCentroDialog({ open: false, data: null })}
         onSave={saveCentro}
       />
@@ -423,9 +402,9 @@ export default function Gestione({ user }) {
 }
 
 // === DIALOG COMPONENTS ===
-function CentroDialog({ open, data, aziende, isSuperAdmin, currentAziendaId, onClose, onSave }) {
+function CentroDialog({ open, data, onClose, onSave }) {
   const [form, setForm] = useState({
-    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true, azienda_id: ''
+    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
   });
 
   useEffect(() => {
@@ -433,11 +412,10 @@ function CentroDialog({ open, data, aziende, isSuperAdmin, currentAziendaId, onC
       setForm(data);
     } else {
       setForm({ 
-        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true,
-        azienda_id: isSuperAdmin ? '' : currentAziendaId
+        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
       });
     }
-  }, [data, open, isSuperAdmin, currentAziendaId]);
+  }, [data, open]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -451,20 +429,6 @@ function CentroDialog({ open, data, aziende, isSuperAdmin, currentAziendaId, onC
           <DialogTitle>{data ? 'Modifica Centro' : 'Nuovo Centro'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSuperAdmin && (
-            <div>
-              <Label>Azienda *</Label>
-              <select
-                value={form.azienda_id}
-                onChange={(e) => setForm({ ...form, azienda_id: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg"
-                required
-              >
-                <option value="">Seleziona azienda</option>
-                {aziende.map(az => <option key={az.id} value={az.id}>{az.nome}</option>)}
-              </select>
-            </div>
-          )}
           <div>
             <Label>Nome Centro *</Label>
             <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />

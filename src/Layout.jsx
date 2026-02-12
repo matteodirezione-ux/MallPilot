@@ -39,19 +39,8 @@ export default function Layout({ children, currentPageName }) {
       
       setUser(userData);
 
-      if (userData.tipo_account === 'super_admin') {
-        // Super admin vede tutti i centri di tutte le aziende
+      if (userData.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.list();
-        setCentri(allCentri);
-        if (allCentri.length > 0) {
-          const savedCentroId = localStorage.getItem('centroSelezionatoId');
-          const centroIniziale = allCentri.find(c => c.id === savedCentroId) || allCentri[0];
-          setCentroSelezionato(centroIniziale);
-        }
-      } else if (userData.tipo_account === 'proprieta') {
-        const allCentri = await base44.entities.CentroCommerciale.filter({ 
-          azienda_id: userData.azienda_id 
-        });
         setCentri(allCentri);
         if (allCentri.length > 0) {
           const savedCentroId = localStorage.getItem('centroSelezionatoId');
@@ -60,13 +49,12 @@ export default function Layout({ children, currentPageName }) {
         }
       } else if (userData.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
-        const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))]; // Rimuovi duplicati
+        const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
         if (centriIds.length > 0) {
           const centriAssegnati = await Promise.all(
             centriIds.map(id => base44.entities.CentroCommerciale.filter({ id }))
           );
           const centriFlat = centriAssegnati.flat().filter(c => c && c.attivo);
-          // Rimuovi eventuali duplicati per ID
           const centriUnique = Array.from(new Map(centriFlat.map(c => [c.id, c])).values());
           setCentri(centriUnique);
           if (centriUnique.length > 0) {
@@ -92,17 +80,13 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
-  const isProprieta = user?.tipo_account === 'proprieta';
-  const isSuperAdmin = user?.tipo_account === 'super_admin';
-
   const navigationItems = [
-    { name: 'Super Admin', page: 'SuperAdmin', icon: Settings, roles: ['super_admin'] },
-    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'proprieta', 'direttore'] },
-    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['super_admin', 'proprieta', 'direttore'] },
-    { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['super_admin', 'proprieta', 'direttore'] },
-    { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['super_admin', 'proprieta', 'direttore'] },
-    { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['super_admin', 'proprieta', 'direttore'] },
-    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['super_admin', 'proprieta'] },
+    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
+    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
+    { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
+    { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
+    { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
+    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta'] },
   ];
 
   const filteredNav = navigationItems.filter(item => 

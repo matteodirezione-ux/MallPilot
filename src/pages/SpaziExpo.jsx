@@ -41,14 +41,9 @@ export default function SpaziExpo({ centroSelezionato, user }) {
 
   const loadCentri = async () => {
     try {
-      if (user?.tipo_account === 'super_admin') {
+      if (user?.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri);
-      } else if (user?.tipo_account === 'proprieta') {
-        const centriProprieta = await base44.entities.CentroCommerciale.filter({ 
-          azienda_id: user.azienda_id 
-        });
-        setCentri(centriProprieta);
       } else if (user?.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
