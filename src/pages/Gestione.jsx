@@ -21,6 +21,8 @@ export default function Gestione({ user }) {
   const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
+  const [aziende, setAziende] = useState([]);
+
   useEffect(() => {
     if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'super_admin') {
       loadData();
@@ -30,17 +32,32 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [centriData, utentiData, assegnazioniData, budgetsData] = await Promise.all([
+      const isSuperAdmin = user.tipo_account === 'super_admin';
+      
+      const [centriData, utentiData, assegnazioniData, budgetsData, aziendeData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.User.list(),
         base44.entities.Assegnazione.list(),
-        base44.entities.Budget.list()
+        base44.entities.Budget.list(),
+        isSuperAdmin ? base44.entities.Azienda.list() : Promise.resolve([])
       ]);
       
-      setCentri(centriData.filter(c => !user.azienda_id || c.azienda_id === user.azienda_id));
-      setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
-      setAssegnazioni(assegnazioniData);
-      setBudgets(budgetsData);
+      // Filtra in base al ruolo
+      if (isSuperAdmin) {
+        setCentri(centriData);
+        setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
+        setAssegnazioni(assegnazioniData);
+        setBudgets(budgetsData);
+        setAziende(aziendeData);
+      } else {
+        // Proprietà vede solo i propri centri
+        setCentri(centriData.filter(c => c.azienda_id === user.azienda_id));
+        setDirettori(utentiData.filter(u => u.tipo_account === 'direttore'));
+        // Filtra assegnazioni solo per i centri della propria azienda
+        const centriIds = centriData.filter(c => c.azienda_id === user.azienda_id).map(c => c.id);
+        setAssegnazioni(assegnazioniData.filter(a => centriIds.includes(a.centro_id)));
+        setBudgets(budgetsData.filter(b => centriIds.includes(b.centro_id)));
+      }
     } catch (error) {
       console.error('Errore caricamento:', error);
       toast.error('Errore nel caricamento dei dati');
@@ -107,40 +124,17 @@ export default function Gestione({ user }) {
         
         toast.success('Assegnazioni aggiornate');
       } else {
-        // Invita nuovo direttore
-        await base44.users.inviteUser(formData.email, 'user');
+        // Invita nuovo direttore usando la funzione backend
+        const response = await base44.functions.invoke('invitaDirettore', {
+          email: formData.email,
+          full_name: formData.full_name,
+          centri_ids: formData.centri_ids
+        });
         
-        // Attendi che l'utente venga creato
-        let nuovoUtente = null;
-        for (let i = 0; i < 15; i++) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const users = await base44.entities.User.filter({ email: formData.email });
-          if (users.length > 0) {
-            nuovoUtente = users[0];
-            break;
-          }
-        }
-        
-        if (nuovoUtente) {
-          // Aggiorna tipo account
-          await base44.entities.User.update(nuovoUtente.id, {
-            tipo_account: 'direttore',
-            full_name: formData.full_name
-          });
-          
-          // Crea assegnazioni
-          await Promise.all(
-            formData.centri_ids.map(centro_id =>
-              base44.entities.Assegnazione.create({
-                user_email: formData.email,
-                centro_id
-              })
-            )
-          );
-          
+        if (response.data.success) {
           toast.success('Direttore invitato con successo');
         } else {
-          toast.success('Invito inviato. L\'utente apparirà a breve nel sistema.');
+          toast.error(response.data.error || 'Errore durante l\'invito');
         }
       }
       
@@ -390,6 +384,9 @@ export default function Gestione({ user }) {
       <CentroDialog 
         open={centroDialog.open} 
         data={centroDialog.data}
+        aziende={aziende}
+        isSuperAdmin={user?.tipo_account === 'super_admin'}
+        currentAziendaId={user?.azienda_id}
         onClose={() => setCentroDialog({ open: false, data: null })}
         onSave={saveCentro}
       />
@@ -415,18 +412,21 @@ export default function Gestione({ user }) {
 }
 
 // === DIALOG COMPONENTS ===
-function CentroDialog({ open, data, onClose, onSave }) {
+function CentroDialog({ open, data, aziende, isSuperAdmin, currentAziendaId, onClose, onSave }) {
   const [form, setForm] = useState({
-    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
+    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true, azienda_id: ''
   });
 
   useEffect(() => {
     if (data) {
       setForm(data);
     } else {
-      setForm({ nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true });
+      setForm({ 
+        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true,
+        azienda_id: isSuperAdmin ? '' : currentAziendaId
+      });
     }
-  }, [data, open]);
+  }, [data, open, isSuperAdmin, currentAziendaId]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -440,6 +440,20 @@ function CentroDialog({ open, data, onClose, onSave }) {
           <DialogTitle>{data ? 'Modifica Centro' : 'Nuovo Centro'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isSuperAdmin && (
+            <div>
+              <Label>Azienda *</Label>
+              <select
+                value={form.azienda_id}
+                onChange={(e) => setForm({ ...form, azienda_id: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              >
+                <option value="">Seleziona azienda</option>
+                {aziende.map(az => <option key={az.id} value={az.id}>{az.nome}</option>)}
+              </select>
+            </div>
+          )}
           <div>
             <Label>Nome Centro *</Label>
             <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
