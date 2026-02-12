@@ -116,7 +116,7 @@ export default function Gestione({ user }) {
           ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)),
           ...daAggiungere.map(centro_id => 
             base44.entities.Assegnazione.create({
-              user_email: direttoreDialog.data.email,
+              user_email: formData.email,
               centro_id
             })
           )
@@ -124,18 +124,24 @@ export default function Gestione({ user }) {
         
         toast.success('Assegnazioni aggiornate');
       } else {
-        // Invita nuovo direttore usando la funzione backend
-        const response = await base44.functions.invoke('invitaDirettore', {
+        // Crea nuovo direttore direttamente
+        const nuovoDirettore = await base44.entities.User.create({
           email: formData.email,
           full_name: formData.full_name,
-          centri_ids: formData.centri_ids
+          tipo_account: 'direttore'
         });
         
-        if (response.data.success) {
-          toast.success('Direttore invitato con successo');
-        } else {
-          toast.error(response.data.error || 'Errore durante l\'invito');
-        }
+        // Crea assegnazioni
+        await Promise.all(
+          formData.centri_ids.map(centro_id =>
+            base44.entities.Assegnazione.create({
+              user_email: formData.email,
+              centro_id
+            })
+          )
+        );
+        
+        toast.success('Direttore creato con successo');
       }
       
       setDirettoreDialog({ open: false, data: null });
@@ -545,7 +551,6 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
               <div>
                 <Label>Email *</Label>
                 <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-                <p className="text-xs text-slate-500 mt-1">Verrà inviato un invito via email</p>
               </div>
             </>
           )}
@@ -566,7 +571,7 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
-            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Invita'}</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea'}</Button>
           </div>
         </form>
       </DialogContent>
