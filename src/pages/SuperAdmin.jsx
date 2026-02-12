@@ -31,7 +31,9 @@ export default function SuperAdmin({ user }) {
     cap: '',
     data_attivazione: new Date().toISOString().split('T')[0],
     attiva: true,
-    note: ''
+    note: '',
+    proprieta_email: '',
+    proprieta_nome: ''
   });
 
   const [formProprieta, setFormProprieta] = useState({
@@ -82,11 +84,29 @@ export default function SuperAdmin({ user }) {
     e.preventDefault();
     try {
       if (editingAzienda) {
-        await base44.entities.Azienda.update(editingAzienda.id, formAzienda);
+        const { proprieta_email, proprieta_nome, ...aziendaData } = formAzienda;
+        await base44.entities.Azienda.update(editingAzienda.id, aziendaData);
         toast.success('Azienda aggiornata');
       } else {
-        await base44.entities.Azienda.create(formAzienda);
-        toast.success('Azienda creata');
+        const { proprieta_email, proprieta_nome, ...aziendaData } = formAzienda;
+        const nuovaAzienda = await base44.entities.Azienda.create(aziendaData);
+        
+        // Invita automaticamente la proprietà se email e nome sono forniti
+        if (proprieta_email && proprieta_nome) {
+          const response = await base44.functions.invoke('invitaProprieta', {
+            email: proprieta_email,
+            full_name: proprieta_nome,
+            azienda_id: nuovaAzienda.id
+          });
+          
+          if (response.data?.error) {
+            toast.warning(`Azienda creata, ma errore nell'invito: ${response.data.error}`);
+          } else {
+            toast.success('Azienda creata e proprietà invitato con successo');
+          }
+        } else {
+          toast.success('Azienda creata');
+        }
       }
 
       setDialogOpen(false);
@@ -154,7 +174,9 @@ export default function SuperAdmin({ user }) {
       cap: '',
       data_attivazione: new Date().toISOString().split('T')[0],
       attiva: true,
-      note: ''
+      note: '',
+      proprieta_email: '',
+      proprieta_nome: ''
     });
     setEditingAzienda(null);
   };
@@ -304,6 +326,35 @@ export default function SuperAdmin({ user }) {
                     rows={3}
                   />
                 </div>
+                {!editingAzienda && (
+                  <>
+                    <div className="col-span-2 pt-4 border-t border-slate-200">
+                      <h3 className="font-medium text-slate-800 mb-3">Invita Proprietà (Opzionale)</h3>
+                    </div>
+                    <div>
+                      <Label htmlFor="proprieta_nome">Nome Proprietà</Label>
+                      <Input
+                        id="proprieta_nome"
+                        value={formAzienda.proprieta_nome}
+                        onChange={(e) => setFormAzienda({ ...formAzienda, proprieta_nome: e.target.value })}
+                        placeholder="es. Mario Rossi"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="proprieta_email">Email Proprietà</Label>
+                      <Input
+                        id="proprieta_email"
+                        type="email"
+                        value={formAzienda.proprieta_email}
+                        onChange={(e) => setFormAzienda({ ...formAzienda, proprieta_email: e.target.value })}
+                        placeholder="email@esempio.com"
+                      />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Se compilato, verrà automaticamente inviato un invito via email
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <input
