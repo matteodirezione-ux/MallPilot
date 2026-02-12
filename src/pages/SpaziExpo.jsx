@@ -77,6 +77,11 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             centro_id: centroSelezionato.id 
           });
       setSpazi(data || []);
+      
+      // Carica tutti i centri per avere i nomi quando mostriamo "tutti"
+      if (centroSelezionato?.id === 'tutti') {
+        await loadCentri();
+      }
     } catch (error) {
       console.error('Errore caricamento spazi:', error);
       toast.error('Errore nel caricamento degli spazi');
@@ -426,8 +431,150 @@ export default function SpaziExpo({ centroSelezionato, user }) {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {spazi.map((spazio) => (
+        <div className="space-y-8">
+          {centroSelezionato?.id === 'tutti' ? (
+            // Raggruppa per centro quando "Tutti i centri" è selezionato
+            centri.map(centro => {
+              const spaziCentro = spazi.filter(s => s.centro_id === centro.id);
+              if (spaziCentro.length === 0) return null;
+              
+              return (
+                <div key={centro.id}>
+                  <h2 className="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <Building2 className="w-6 h-6 text-blue-600" />
+                    {centro.nome}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {spaziCentro.map((spazio) => (
+                      <SpazioCard
+                        key={spazio.id}
+                        spazio={spazio}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            // Mostra direttamente gli spazi quando un singolo centro è selezionato
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {spazi.map((spazio) => (
+                <SpazioCard
+                  key={spazio.id}
+                  spazio={spazio}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente separato per la card dello spazio
+function SpazioCard({ spazio, onEdit, onDelete }) {
+  return (
+    <Card
+      className="bg-white border-slate-200 hover:shadow-lg transition-shadow overflow-hidden"
+      style={{ borderTopWidth: '4px', borderTopColor: spazio.colore || '#3b82f6' }}
+    >
+      {spazio.foto_urls && spazio.foto_urls.length > 0 ? (
+        <div className="h-48 bg-slate-100 relative">
+          <img
+            src={spazio.foto_urls[0]}
+            alt={spazio.numero_spazio}
+            className="w-full h-full object-cover"
+          />
+          <div 
+            className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
+            style={{ backgroundColor: spazio.colore || '#3b82f6' }}
+          >
+            {spazio.numero_spazio}
+          </div>
+          {spazio.foto_urls.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              +{spazio.foto_urls.length - 1}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="h-48 relative flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${spazio.colore || '#3b82f6'}15 0%, ${spazio.colore || '#3b82f6'}30 100%)` }}>
+          <Building2 className="w-16 h-16" style={{ color: spazio.colore || '#3b82f6', opacity: 0.4 }} />
+          <div 
+            className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
+            style={{ backgroundColor: spazio.colore || '#3b82f6' }}
+          >
+            {spazio.numero_spazio}
+          </div>
+        </div>
+      )}
+      
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800">
+              Spazio {spazio.numero_spazio}
+            </h3>
+            {spazio.nome && (
+              <p className="text-sm text-slate-600">{spazio.nome}</p>
+            )}
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEdit(spazio)}
+              className="h-8 w-8 text-blue-600"
+            >
+              <Pencil className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onDelete(spazio.id)}
+              className="h-8 w-8 text-red-600"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {spazio.descrizione && (
+          <p className="text-sm text-slate-600 mb-3 line-clamp-2">
+            {spazio.descrizione}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {spazio.superficie_mq && (
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <Building2 className="w-4 h-4" />
+              <span>{spazio.superficie_mq} m²</span>
+            </div>
+          )}
+          {spazio.piantina_url && (
+            <div className="flex items-center gap-2 text-sm text-blue-600">
+              <MapPin className="w-4 h-4" />
+              <span>Piantina disponibile</span>
+            </div>
+          )}
+        </div>
+
+        {!spazio.attivo && (
+          <div className="mt-3 px-2 py-1 bg-red-50 text-red-700 text-xs rounded-lg text-center">
+            Non attivo
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
             <Card
               key={spazio.id}
               className="bg-white border-slate-200 hover:shadow-lg transition-shadow overflow-hidden"
@@ -522,10 +669,3 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
