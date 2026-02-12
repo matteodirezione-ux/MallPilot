@@ -119,9 +119,6 @@ export default function Gestione({ user }) {
           invito_accettato: false
         });
         
-        // Invia invito
-        await base44.users.inviteUser(formData.email, 'user');
-        
         // Crea assegnazioni
         await Promise.all(
           formData.centri_ids.map(centro_id =>
@@ -132,7 +129,7 @@ export default function Gestione({ user }) {
           )
         );
         
-        toast.success('Direttore invitato con successo');
+        toast.success('Direttore creato con successo');
       }
       
       setDirettoreDialog({ open: false, data: null });
