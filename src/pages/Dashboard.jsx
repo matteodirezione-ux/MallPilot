@@ -207,7 +207,7 @@ export default function Dashboard({ centroSelezionato }) {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
-                Spazi Affittati
+                Spazi affittati attualmente
               </CardTitle>
               <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-blue-600" />
