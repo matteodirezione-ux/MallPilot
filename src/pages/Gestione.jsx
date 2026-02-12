@@ -514,23 +514,14 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
           <DialogTitle>{data ? 'Modifica Direttore' : 'Nuovo Direttore'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {data ? (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="font-medium">{data.full_name}</p>
-              <p className="text-sm text-slate-600">{data.email}</p>
-            </div>
-          ) : (
-            <>
-              <div>
-                <Label>Nome e Cognome *</Label>
-                <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
-              </div>
-              <div>
-                <Label>Email *</Label>
-                <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-              </div>
-            </>
-          )}
+          <div>
+            <Label>Nome e Cognome *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+          </div>
+          <div>
+            <Label>Email *</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={!!data} />
+          </div>
           <div>
             <Label>Centri Assegnati *</Label>
             <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
