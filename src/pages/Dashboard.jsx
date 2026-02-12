@@ -270,28 +270,6 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
-        {/* Affitti Correnti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Affitti Correnti
-              </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-orange-600" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
-              {stats.affittiCorrenti?.length || 0}
-            </div>
-            <p className="text-xs text-slate-500">
-              In corso oggi
-            </p>
-          </CardContent>
-        </Card>
-
         {/* Clienti Totali */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader className="pb-3">
@@ -308,6 +286,51 @@ export default function Dashboard({ centroSelezionato }) {
             <div className="text-3xl font-bold text-slate-800">
               {stats.clientiTotali}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Affitti Correnti */}
+        <Card className="md:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              <CardTitle className="text-lg font-semibold text-slate-800">
+                Affitti Correnti
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {stats.affittiCorrenti?.length === 0 ? (
+              <p className="text-slate-500 text-center py-4">
+                Nessun affitto attivo al momento
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {stats.affittiCorrenti?.map((prenotazione) => (
+                  <div 
+                    key={prenotazione.id}
+                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100 hover:bg-green-100 transition-colors"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium text-slate-800">
+                        {prenotazione.cliente?.ragione_sociale}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        Spazio {prenotazione.spazio?.numero_spazio}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-slate-700">
+                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}
+                      </p>
+                      <p className="text-sm font-semibold text-green-600">
+                        {formatCurrency(prenotazione.prezzo_totale)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
