@@ -581,6 +581,12 @@ Firma Locatore: ________________    Firma Conduttore: ________________
       {/* Lista Documenti */}
       {documenti.length === 0 ? (
         <Card className="bg-white border-slate-200">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Tutti i Documenti
+            </CardTitle>
+          </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <FileText className="w-16 h-16 text-slate-300 mb-4" />
             <p className="text-slate-500 text-center mb-4">
@@ -589,6 +595,10 @@ Firma Locatore: ________________    Firma Conduttore: ________________
           </CardContent>
         </Card>
       ) : (
+        <div>
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold text-slate-800 mb-4">Tutti i Documenti</h2>
+          </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documenti.map(doc => {
             const Icon = getTipoIcon(doc.tipo_documento);
