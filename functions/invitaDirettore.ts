@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me();
 
-    if (!user || user.tipo_account !== 'proprieta') {
+    if (!user || (user.tipo_account !== 'proprieta' && user.tipo_account !== 'super_admin')) {
       return Response.json({ error: 'Non autorizzato' }, { status: 403 });
     }
 
