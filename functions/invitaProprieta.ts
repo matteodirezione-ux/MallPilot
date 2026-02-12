@@ -28,8 +28,8 @@ Deno.serve(async (req) => {
                 full_name: full_name
             });
         } else {
-            // Invita nuovo utente
-            await base44.users.inviteUser(email, 'user');
+            // Invita nuovo utente con service role
+            await base44.asServiceRole.users.inviteUser(email, 'user');
 
             // Attendi che l'utente sia creato nel database (con retry)
             let newUser = null;
