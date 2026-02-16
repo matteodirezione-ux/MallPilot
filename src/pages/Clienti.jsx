@@ -47,11 +47,21 @@ export default function Clienti({ centroSelezionato }) {
     try {
       setLoading(true);
       const data = await base44.entities.Cliente.list();
-      setClienti(data);
+      
+      // Filtra clienti in base al centro selezionato
+      const isTutti = centroSelezionato?.id === 'tutti';
+      const prenotazioni = isTutti 
+        ? await base44.entities.Prenotazione.list()
+        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
+      
+      // Ottieni solo i clienti che hanno prenotazioni nel centro selezionato
+      const clientiIds = new Set(prenotazioni.map(p => p.cliente_id));
+      const clientiFiltrati = isTutti ? data : data.filter(c => clientiIds.has(c.id));
+      
+      setClienti(clientiFiltrati);
       
       // Calcola statistiche per ogni cliente
       const stats = {};
-      const prenotazioni = await base44.entities.Prenotazione.list();
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
