@@ -374,13 +374,25 @@ export default function Clienti() {
         </Dialog>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex gap-4 items-center">
         <Input
           placeholder="Cerca clienti per ragione sociale, email o P.IVA..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md"
         />
+        <div className="flex items-center gap-2">
+          <ArrowUpDown className="w-4 h-4 text-slate-500" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="px-3 py-2 border border-slate-200 rounded-md text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors"
+          >
+            <option value="incassoAnno">Incasso Anno</option>
+            <option value="numeroAffitti">Numero Affitti</option>
+            <option value="ultimoAffitto">Ultimo Affitto</option>
+          </select>
+        </div>
       </div>
 
       {filteredClienti.length === 0 ? (
