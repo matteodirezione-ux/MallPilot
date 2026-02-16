@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -35,9 +36,26 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    console.log('Form data:', formData);
+    
     // Validazione campi obbligatori
-    if (!formData.spazio_id || !formData.cliente_id) {
-      alert('Seleziona sia lo spazio che il cliente');
+    if (!formData.spazio_id) {
+      toast.error('Seleziona uno spazio');
+      return;
+    }
+    
+    if (!formData.cliente_id) {
+      toast.error('Seleziona un cliente');
+      return;
+    }
+    
+    if (!formData.data_inizio || !formData.data_fine) {
+      toast.error('Inserisci le date di inizio e fine');
+      return;
+    }
+    
+    if (!formData.prezzo_totale || parseFloat(formData.prezzo_totale) <= 0) {
+      toast.error('Inserisci un prezzo totale valido');
       return;
     }
     
