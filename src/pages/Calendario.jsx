@@ -43,7 +43,7 @@ export default function Calendario({ centroSelezionato }) {
           : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
         isTutti
           ? base44.entities.SpazioExpo.filter({ attivo: true })
-          : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id, attivo: true }),
+          : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id }),
         base44.entities.Cliente.list()
       ]);
       setPrenotazioni(prenotazioniData || []);
