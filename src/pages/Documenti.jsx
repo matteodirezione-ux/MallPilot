@@ -517,6 +517,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
                 const cliente = clienti.find(c => c.id === doc.cliente_id);
                 const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
                 const spazio = prenotazione ? spazi.find(s => s.id === prenotazione.spazio_id) : null;
+                const centro = centri.find(c => c.id === doc.centro_id);
                 const Icon = getTipoIcon(doc.tipo_documento);
                 return (
                   <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
@@ -586,7 +587,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
                         </div>
                         <div>
                           <p className="text-xs text-slate-500">Centro</p>
-                          <p className="font-medium text-slate-700">{centroSelezionato?.nome}</p>
+                          <p className="font-medium text-slate-700">{centro?.nome || '-'}</p>
                         </div>
                         <div>
                           <p className="text-xs text-slate-500">Data Creazione</p>
