@@ -58,6 +58,7 @@ export default function Calendario({ centroSelezionato }) {
   };
 
   const handleSavePrenotazione = async (data) => {
+    console.log('handleSavePrenotazione chiamato con data:', data);
     try {
       // Verifica sovrapposizioni
       const sovrapposizioni = prenotazioni.filter(p => {

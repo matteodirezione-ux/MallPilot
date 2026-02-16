@@ -37,6 +37,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     e.preventDefault();
     
     console.log('Form data:', formData);
+    console.log('onSave function:', onSave);
     
     // Validazione campi obbligatori
     if (!formData.spazio_id) {
@@ -59,11 +60,14 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       return;
     }
     
-    onSave({
+    const dataToSave = {
       ...formData,
       prezzo_totale: parseFloat(formData.prezzo_totale),
       prezzo_mensile: formData.prezzo_mensile ? parseFloat(formData.prezzo_mensile) : null
-    });
+    };
+    
+    console.log('Chiamando onSave con:', dataToSave);
+    onSave(dataToSave);
   };
 
   return (
