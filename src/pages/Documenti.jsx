@@ -495,32 +495,43 @@ Firma Locatore: ________________    Firma Conduttore: ________________
         </Dialog>
       </div>
 
-      {/* Contratti Generati */}
+      {/* Documenti Archiviati */}
       <Card className="bg-white border-slate-200 mb-6">
         <CardHeader>
           <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Contratti Generati
+            Documenti Archiviati
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {documenti.filter(d => d.tipo_documento === 'contratto').length === 0 ? (
+          {documenti.length === 0 ? (
             <p className="text-slate-500 text-center py-4">
-              Nessun contratto archiviato
+              Nessun documento archiviato
             </p>
           ) : (
             <div className="space-y-3">
-              {documenti.filter(d => d.tipo_documento === 'contratto').map(doc => {
+              {documenti.map(doc => {
                 const cliente = clienti.find(c => c.id === doc.cliente_id);
                 const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
                 const spazio = prenotazione ? spazi.find(s => s.id === prenotazione.spazio_id) : null;
+                const Icon = getTipoIcon(doc.tipo_documento);
                 return (
                   <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <p className="font-semibold text-slate-800 mb-1">{doc.nome_file}</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Icon className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800">{doc.nome_file}</p>
+                            <p className="text-xs text-slate-500 capitalize">
+                              {doc.tipo_documento.replace('_', ' ')}
+                            </p>
+                          </div>
+                        </div>
                         {cliente && (
-                          <p className="text-sm text-slate-600">Cliente: {cliente.ragione_sociale}</p>
+                          <p className="text-sm text-slate-600 ml-10">Cliente: {cliente.ragione_sociale}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-2">
@@ -551,7 +562,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
                       </div>
                     </div>
                     {prenotazione && (
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm ml-10">
                         <div>
                           <p className="text-xs text-slate-500">Postazione</p>
                           <p className="font-medium text-slate-700">
