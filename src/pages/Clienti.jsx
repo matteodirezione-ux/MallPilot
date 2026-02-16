@@ -394,10 +394,50 @@ export default function Clienti() {
                       <h3 className="text-xl font-semibold text-slate-800 mb-1">
                         {cliente.ragione_sociale}
                       </h3>
-                      <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+                      <div className="flex flex-wrap gap-4 text-sm text-slate-600 mb-4">
                         {cliente.email && <span>📧 {cliente.email}</span>}
                         {cliente.telefono && <span>📞 {cliente.telefono}</span>}
                         {cliente.partita_iva && <span>P.IVA: {cliente.partita_iva}</span>}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                          <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-600">Incasso {new Date().getFullYear()}</p>
+                            <p className="text-lg font-semibold text-slate-800">
+                              {formatCurrency(stats.incassoAnno || 0)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <TrendingUp className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-600">Numero affitti totali</p>
+                            <p className="text-lg font-semibold text-slate-800">
+                              {stats.numeroAffitti || 0}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                          <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <Calendar className="w-5 h-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-slate-600">Ultimo Affitto</p>
+                            <p className="text-lg font-semibold text-slate-800">
+                              {stats.giorniDaUltimoAffitto !== null
+                                ? `${stats.giorniDaUltimoAffitto} giorni fa`
+                                : 'Mai'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -417,46 +457,6 @@ export default function Clienti() {
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                        <DollarSign className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-600">Incasso {new Date().getFullYear()}</p>
-                        <p className="text-lg font-semibold text-slate-800">
-                          {formatCurrency(stats.incassoAnno || 0)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-600">Numero affitti totali</p>
-                        <p className="text-lg font-semibold text-slate-800">
-                          {stats.numeroAffitti || 0}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                      <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                        <Calendar className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-600">Ultimo Affitto</p>
-                        <p className="text-lg font-semibold text-slate-800">
-                          {stats.giorniDaUltimoAffitto !== null
-                            ? `${stats.giorniDaUltimoAffitto} giorni fa`
-                            : 'Mai'}
-                        </p>
-                      </div>
                     </div>
                   </div>
 
