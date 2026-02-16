@@ -65,7 +65,7 @@ export default function Clienti({ centroSelezionato }) {
       const oneYearAgo = new Date();
       oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-      for (const cliente of data) {
+      for (const cliente of clientiFiltrati) {
         const clientePrenotazioni = prenotazioni.filter(
           p => p.cliente_id === cliente.id && p.stato !== 'cancellata'
         );
