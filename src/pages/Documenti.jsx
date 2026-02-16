@@ -139,7 +139,8 @@ Firma Locatore: ________________    Firma Conduttore: ________________
       // Carica il file
       const blob = new Blob([contenutoContratto], { type: 'text/plain' });
       const fileName = `Contratto_${cliente?.ragione_sociale}_${spazio?.numero_spazio}_${format(new Date(), 'yyyy-MM-dd')}.txt`;
-      const { file_url } = await base44.integrations.Core.UploadFile({ file: blob });
+      const file = new File([blob], fileName, { type: 'text/plain' });
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
       // Crea il documento nel database
       await base44.entities.Documento.create({
