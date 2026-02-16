@@ -504,46 +504,72 @@ Firma Locatore: ________________    Firma Conduttore: ________________
               Nessun contratto archiviato
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {documenti.filter(d => d.tipo_documento === 'contratto').map(doc => {
                 const cliente = clienti.find(c => c.id === doc.cliente_id);
+                const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
                 return (
-                  <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">{doc.nome_file}</p>
-                      {cliente && (
-                        <p className="text-sm text-slate-600">Cliente: {cliente.ragione_sociale}</p>
-                      )}
-                      <p className="text-xs text-slate-400 mt-1">
-                        {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
-                      </p>
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <p className="font-semibold text-slate-800 mb-1">{doc.nome_file}</p>
+                        {cliente && (
+                          <p className="text-sm text-slate-600">Cliente: {cliente.ragione_sociale}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(doc)}
+                          className="text-blue-600 hover:bg-blue-50"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => window.open(doc.file_url, '_blank')}
+                          className="text-green-600 hover:bg-green-50"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(doc.id)}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(doc)}
-                        className="text-blue-600 hover:bg-blue-50"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => window.open(doc.file_url, '_blank')}
-                        className="text-green-600 hover:bg-green-50"
-                      >
-                        <Download className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(doc.id)}
-                        className="text-red-600 hover:bg-red-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {prenotazione && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <p className="text-xs text-slate-500">Periodo</p>
+                          <p className="font-medium text-slate-700">
+                            {format(new Date(prenotazione.data_inizio), 'dd/MM/yy', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd/MM/yy', { locale: it })}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Prezzo Totale</p>
+                          <p className="font-medium text-slate-700">
+                            € {prenotazione.prezzo_totale?.toFixed(2) || '0.00'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Centro</p>
+                          <p className="font-medium text-slate-700">{centroSelezionato?.nome}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Data Creazione</p>
+                          <p className="font-medium text-slate-700">
+                            {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
