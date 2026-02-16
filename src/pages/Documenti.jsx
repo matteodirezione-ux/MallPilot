@@ -17,6 +17,7 @@ export default function Documenti({ centroSelezionato }) {
   const [prenotazioni, setPrenotazioni] = useState([]);
   const [clienti, setClienti] = useState([]);
   const [spazi, setSpazi] = useState([]);
+  const [centri, setCentri] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
