@@ -35,6 +35,8 @@ export default function Calendario({ centroSelezionato }) {
       }
       
       const isTutti = centroSelezionato?.id === 'tutti';
+      
+      // Carica sempre tutti i clienti per permettere la creazione di prenotazioni
       const [prenotazioniData, spaziData, clientiData] = await Promise.all([
         isTutti 
           ? base44.entities.Prenotazione.list()
