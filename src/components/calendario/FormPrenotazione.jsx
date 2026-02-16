@@ -34,6 +34,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Validazione campi obbligatori
+    if (!formData.spazio_id || !formData.cliente_id) {
+      alert('Seleziona sia lo spazio che il cliente');
+      return;
+    }
+    
     onSave({
       ...formData,
       prezzo_totale: parseFloat(formData.prezzo_totale),
