@@ -513,6 +513,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
               {documenti.filter(d => d.tipo_documento === 'contratto').map(doc => {
                 const cliente = clienti.find(c => c.id === doc.cliente_id);
                 const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
+                const spazio = prenotazione ? spazi.find(s => s.id === prenotazione.spazio_id) : null;
                 return (
                   <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
                     <div className="flex items-start justify-between mb-3">
@@ -550,7 +551,13 @@ Firma Locatore: ________________    Firma Conduttore: ________________
                       </div>
                     </div>
                     {prenotazione && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                        <div>
+                          <p className="text-xs text-slate-500">Postazione</p>
+                          <p className="font-medium text-slate-700">
+                            {spazio ? `${spazio.numero_spazio}${spazio.nome ? ' - ' + spazio.nome : ''}` : '-'}
+                          </p>
+                        </div>
                         <div>
                           <p className="text-xs text-slate-500">Periodo</p>
                           <p className="font-medium text-slate-700">
