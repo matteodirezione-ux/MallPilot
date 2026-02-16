@@ -155,11 +155,29 @@ export default function Clienti() {
     }).format(amount);
   };
 
-  const filteredClienti = clienti.filter(cliente =>
-    cliente.ragione_sociale?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.partita_iva?.includes(searchTerm)
-  );
+  const filteredClienti = clienti
+    .filter(cliente =>
+      cliente.ragione_sociale?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.partita_iva?.includes(searchTerm)
+    )
+    .sort((a, b) => {
+      const statsA = clientiStats[a.id] || {};
+      const statsB = clientiStats[b.id] || {};
+      
+      switch (sortBy) {
+        case 'incassoAnno':
+          return (statsB.incassoAnno || 0) - (statsA.incassoAnno || 0);
+        case 'numeroAffitti':
+          return (statsB.numeroAffitti || 0) - (statsA.numeroAffitti || 0);
+        case 'ultimoAffitto':
+          const giorniA = statsA.giorniDaUltimoAffitto !== null ? statsA.giorniDaUltimoAffitto : Infinity;
+          const giorniB = statsB.giorniDaUltimoAffitto !== null ? statsB.giorniDaUltimoAffitto : Infinity;
+          return giorniA - giorniB;
+        default:
+          return 0;
+      }
+    });
 
   if (loading) {
     return (
