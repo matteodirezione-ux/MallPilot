@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-export default function Clienti() {
+export default function Clienti({ centroSelezionato }) {
   const [clienti, setClienti] = useState([]);
   const [clientiStats, setClientiStats] = useState({});
   const [loading, setLoading] = useState(true);
