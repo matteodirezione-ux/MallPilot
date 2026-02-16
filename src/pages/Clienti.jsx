@@ -38,8 +38,10 @@ export default function Clienti({ centroSelezionato }) {
   });
 
   useEffect(() => {
-    loadClienti();
-  }, []);
+    if (centroSelezionato && centroSelezionato.id) {
+      loadClienti();
+    }
+  }, [centroSelezionato]);
 
   const loadClienti = async () => {
     try {
