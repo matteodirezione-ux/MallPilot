@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Users, Pencil, Trash2, TrendingUp, Calendar, DollarSign } from 'lucide-react';
+import { Plus, Users, Pencil, Trash2, TrendingUp, Calendar, DollarSign, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
