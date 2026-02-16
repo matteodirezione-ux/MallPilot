@@ -49,18 +49,22 @@ export default function Documenti({ centroSelezionato }) {
       }
       
       const isTutti = centroSelezionato?.id === 'tutti';
-      const [documentiData, prenotazioniData, clientiData] = await Promise.all([
+      const [documentiData, prenotazioniData, clientiData, spaziData] = await Promise.all([
         isTutti
           ? base44.entities.Documento.list()
           : base44.entities.Documento.filter({ centro_id: centroSelezionato.id }),
         isTutti
           ? base44.entities.Prenotazione.list()
           : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
-        base44.entities.Cliente.list()
+        base44.entities.Cliente.list(),
+        isTutti
+          ? base44.entities.SpazioExpo.list()
+          : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id })
       ]);
       setDocumenti(documentiData || []);
       setPrenotazioni(prenotazioniData || []);
       setClienti(clientiData || []);
+      setSpazi(spaziData || []);
     } catch (error) {
       console.error('Errore caricamento documenti:', error);
       toast.error('Errore nel caricamento dei documenti');
