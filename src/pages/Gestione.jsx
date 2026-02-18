@@ -412,7 +412,7 @@ export default function Gestione({ user }) {
 // === DIALOG COMPONENTS ===
 function CentroDialog({ open, data, onClose, onSave }) {
   const [form, setForm] = useState({
-    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
+    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', attivo: true
   });
 
   useEffect(() => {
@@ -420,7 +420,7 @@ function CentroDialog({ open, data, onClose, onSave }) {
       setForm(data);
     } else {
       setForm({ 
-        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', attivo: true
+        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', attivo: true
       });
     }
   }, [data, open]);
