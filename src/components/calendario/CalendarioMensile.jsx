@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isWithinInterval, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete }) {
@@ -36,10 +36,6 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
     } : { r: 59, g: 130, b: 246 };
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
-  };
-
   return (
     <Card className="bg-white border-slate-200">
       <CardHeader>
@@ -48,25 +44,13 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             {format(currentMonth, 'MMMM yyyy', { locale: it })}
           </CardTitle>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            >
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentMonth(new Date())}
-            >
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>
               Oggi
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            >
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
@@ -79,18 +63,18 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
               {giorno}
             </div>
           ))}
-          
+
           {/* Padding iniziale */}
           {Array.from({ length: (giorni[0]?.getDay() + 6) % 7 }).map((_, i) => (
             <div key={`pad-${i}`} className="min-h-24 bg-slate-50 rounded-lg"></div>
           ))}
-          
+
           {/* Giorni del mese */}
           {giorni.map(giorno => {
             const dataKey = format(giorno, 'yyyy-MM-dd');
             const prenotazioniGiorno = prenotazioniPerGiorno[dataKey] || [];
-            const isToday = format(giorno, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-            
+            const isToday = isSameDay(giorno, new Date());
+
             return (
               <div
                 key={dataKey}
@@ -102,7 +86,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                   {format(giorno, 'd')}
                 </div>
                 <div className="space-y-1">
-                  {prenotazioniGiorno.slice(0, 2).map(p => {
+                  {prenotazioniGiorno.map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);
                     const spazioColor = spazio?.colore || '#3b82f6';
@@ -119,7 +103,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                         className="text-xs px-2 py-1 rounded cursor-pointer border-2 hover:opacity-80 transition-opacity"
                       >
                         <div className="flex items-center gap-1.5">
-                          <div 
+                          <div
                             className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
                             style={{ borderColor: spazioColor, color: spazioColor }}
                           >
@@ -132,11 +116,6 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                       </div>
                     );
                   })}
-                  {prenotazioniGiorno.length > 2 && (
-                    <div className="text-xs text-slate-500 px-2">
-                      +{prenotazioniGiorno.length - 2} altro/i
-                    </div>
-                  )}
                 </div>
               </div>
             );
@@ -152,13 +131,13 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                 const rgb = hexToRgb(spazio.colore || '#3b82f6');
                 return (
                   <div key={spazio.id} className="flex items-center gap-2">
-                    <div 
-                      className="w-4 h-4 rounded border-2" 
-                      style={{ 
+                    <div
+                      className="w-4 h-4 rounded border-2"
+                      style={{
                         backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
                         borderColor: spazio.colore || '#3b82f6'
                       }}
-                    ></div>
+                    />
                     <span className="text-sm text-slate-600">
                       {spazio.numero_spazio} - {spazio.nome || 'Spazio'}
                     </span>
