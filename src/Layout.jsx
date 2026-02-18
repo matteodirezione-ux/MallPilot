@@ -161,7 +161,7 @@ export default function Layout({ children, currentPageName }) {
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
-                  <span className="font-bold text-lg text-slate-800">GalleriaSpace</span>
+                  <span className="font-bold text-lg text-slate-800">MallSpace</span>
                 </div>
               )}
               <Button
