@@ -6,7 +6,8 @@ import CalendarioMensile from '../components/calendario/CalendarioMensile';
 import CalendarioSettimanale from '../components/calendario/CalendarioSettimanale';
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
-import { Plus, Calendar as CalendarIcon, CalendarDays, List } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid } from 'lucide-react';
+import DisponibilitaSpazi from '../components/calendario/DisponibilitaSpazi';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
