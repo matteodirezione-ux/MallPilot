@@ -277,7 +277,21 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Main Content */}
       <main className={`transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} ml-0`}>
-        <div className="min-h-screen">
+        {/* Mobile Header */}
+        <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-30 h-16 flex items-center px-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-slate-600"
+          >
+            {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </Button>
+          <div className="ml-3">
+            <h1 className="font-bold text-slate-800">MallSpace</h1>
+          </div>
+        </div>
+        <div className="min-h-screen pt-16 md:pt-0">
           {!user?.tipo_account ? (
             <div className="flex items-center justify-center min-h-screen p-8">
               <div className="text-center">
