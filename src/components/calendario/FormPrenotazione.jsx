@@ -158,7 +158,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
 
         <div className="col-span-2">
-          <Label htmlFor="materiale_dimostrativo">Materiale Dimostrativo</Label>
+          <Label htmlFor="materiale_dimostrativo">Materiale Dimostrativo *</Label>
           <Textarea
             id="materiale_dimostrativo"
             value={formData.materiale_dimostrativo}
