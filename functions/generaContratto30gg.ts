@@ -41,6 +41,23 @@ function formatEuro(importo) {
   };
 }
 
+function sanitize(str) {
+  if (!str) return '';
+  return str
+    .replace(/à/g, 'a\'').replace(/À/g, 'A\'')
+    .replace(/è/g, 'e\'').replace(/È/g, 'E\'')
+    .replace(/é/g, 'e\'').replace(/É/g, 'E\'')
+    .replace(/ì/g, 'i\'').replace(/Ì/g, 'I\'')
+    .replace(/í/g, 'i\'').replace(/Í/g, 'I\'')
+    .replace(/ò/g, 'o\'').replace(/Ò/g, 'O\'')
+    .replace(/ó/g, 'o\'').replace(/Ó/g, 'O\'')
+    .replace(/ù/g, 'u\'').replace(/Ù/g, 'U\'')
+    .replace(/ú/g, 'u\'').replace(/Ú/g, 'U\'')
+    .replace(/–/g, '-').replace(/—/g, '-')
+    .replace(/"/g, '"').replace(/"/g, '"')
+    .replace(/'/g, '\'').replace(/'/g, '\'');
+}
+
 function formatData(dateStr) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
