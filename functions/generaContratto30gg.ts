@@ -151,8 +151,11 @@ Deno.serve(async (req) => {
     text('GESTIONE COMPLESSI COMMERCIALI', rm - 60, y);
     doc.setFont('helvetica', 'normal');
     addLine(6);
-    if (centro.indirizzo) { text(centro.indirizzo.toUpperCase(), rm - 60, y); addLine(6); }
-    text(`${centro.cap || ''} ${centro.citta?.toUpperCase() || ''}${centro.provincia ? ' (' + centro.provincia.toUpperCase() + ')' : ''}`, rm - 60, y);
+    text('VIA DEI MERCANTI 3', rm - 60, y);
+    addLine(6);
+    text('47122', rm - 60, y);
+    addLine(6);
+    text("FORLI' (FC)", rm - 60, y);
     addLine(10);
 
     // --- OGGETTO ---
