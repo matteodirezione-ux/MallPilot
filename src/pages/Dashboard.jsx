@@ -340,8 +340,55 @@ export default function Dashboard({ centroSelezionato }) {
 
 
 
+        {/* Affitto Medio Giornaliero */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Affitto Medio Giornaliero
+              </CardTitle>
+              <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
+                <BarChart2 className="w-5 h-5 text-orange-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-slate-800 mb-2">
+              {formatCurrency(stats.affittoMedioGiornaliero)}
+            </div>
+            <p className="text-xs text-slate-500">Media su tutti gli affitti</p>
+          </CardContent>
+        </Card>
+
+        {/* Tasso Occupazione Annuale */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-slate-600">
+                Tasso Occupazione Annuale
+              </CardTitle>
+              <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+                <Percent className="w-5 h-5 text-teal-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-slate-800 mb-2">
+              {stats.tassoOccupazioneAnnuale.toFixed(1)}%
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all"
+                  style={{ width: `${Math.min(stats.tassoOccupazioneAnnuale, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Affitti Correnti */}
-        <Card className="md:col-span-2 lg:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="md:col-span-2 lg:col-span-3 bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
