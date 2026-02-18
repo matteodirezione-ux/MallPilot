@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
+  const [displayName, setDisplayName] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [centri, setCentri] = useState([]);
   const [centroSelezionato, setCentroSelezionato] = useState(null);
