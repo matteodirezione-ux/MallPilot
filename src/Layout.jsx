@@ -201,7 +201,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Centro Selector */}
           {centroSelezionato && sidebarOpen && centri.length > 0 && (
-            <div className="p-4 border-b border-slate-200">
+            <div className="p-4 border-b border-slate-200 hidden md:block">
               <div className="relative">
                 <select
                   value={centroSelezionato.id || 'tutti'}
