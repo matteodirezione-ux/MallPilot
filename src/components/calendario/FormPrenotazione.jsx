@@ -153,6 +153,17 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
 
         <div className="col-span-2">
+          <Label htmlFor="materiale_dimostrativo">Materiale Dimostrativo</Label>
+          <Textarea
+            id="materiale_dimostrativo"
+            value={formData.materiale_dimostrativo}
+            onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })}
+            placeholder="Descrizione del materiale dimostrativo/pubblicitario da esporre"
+            rows={2}
+          />
+        </div>
+
+        <div className="col-span-2">
           <Label htmlFor="stato">Stato</Label>
           <Select value={formData.stato} onValueChange={(value) => setFormData({ ...formData, stato: value })}>
             <SelectTrigger>
