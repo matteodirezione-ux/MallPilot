@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CalendarioMensile from '../components/calendario/CalendarioMensile';
+import CalendarioSettimanale from '../components/calendario/CalendarioSettimanale';
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
-import { Plus, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CalendarDays, List } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -18,6 +18,7 @@ export default function Calendario({ centroSelezionato }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrenotazione, setEditingPrenotazione] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentWeek, setCurrentWeek] = useState(new Date());
 
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
@@ -28,16 +29,13 @@ export default function Calendario({ centroSelezionato }) {
   const loadData = async () => {
     try {
       setLoading(true);
-      
       if (!centroSelezionato || !centroSelezionato.id || !centroSelezionato.nome) {
         setLoading(false);
         return;
       }
-      
       const isTutti = centroSelezionato?.id === 'tutti';
-      
       const [prenotazioniData, spaziData, clientiData] = await Promise.all([
-        isTutti 
+        isTutti
           ? base44.entities.Prenotazione.list()
           : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
         isTutti
@@ -59,19 +57,15 @@ export default function Calendario({ centroSelezionato }) {
   };
 
   const handleSavePrenotazione = async (data) => {
-    console.log('handleSavePrenotazione chiamato con data:', data);
     try {
-      // Verifica sovrapposizioni
       const sovrapposizioni = prenotazioni.filter(p => {
         if (editingPrenotazione && p.id === editingPrenotazione.id) return false;
         if (p.spazio_id !== data.spazio_id) return false;
         if (p.stato === 'cancellata') return false;
-        
         const dataInizio = new Date(data.data_inizio);
         const dataFine = new Date(data.data_fine);
         const pInizio = new Date(p.data_inizio);
         const pFine = new Date(p.data_fine);
-        
         return (dataInizio <= pFine && dataFine >= pInizio);
       });
 
@@ -80,20 +74,15 @@ export default function Calendario({ centroSelezionato }) {
         return;
       }
 
-      // Determina il centro_id corretto
       let centro_id;
       if (centroSelezionato?.id === 'tutti') {
-        // Se "Tutti i centri" è selezionato, trova il centro dallo spazio
         const spazio = spazi.find(s => s.id === data.spazio_id);
         centro_id = spazio?.centro_id;
       } else {
         centro_id = centroSelezionato.id;
       }
 
-      const prenotazioneData = {
-        ...data,
-        centro_id
-      };
+      const prenotazioneData = { ...data, centro_id };
 
       if (editingPrenotazione) {
         await base44.entities.Prenotazione.update(editingPrenotazione.id, prenotazioneData);
@@ -124,19 +113,16 @@ export default function Calendario({ centroSelezionato }) {
       toast.success('Prenotazione eliminata');
       loadData();
     } catch (error) {
-      console.error('Errore eliminazione prenotazione:', error);
       toast.error('Errore nell\'eliminazione della prenotazione');
     }
   };
 
   if (!centroSelezionato || !centroSelezionato.id) {
     return (
-      <div className="p-8">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <CalendarIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">Nessun centro commerciale assegnato</p>
-          </div>
+      <div className="p-8 flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <CalendarIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-500">Nessun centro commerciale assegnato</p>
         </div>
       </div>
     );
@@ -190,18 +176,23 @@ export default function Calendario({ centroSelezionato }) {
         </Dialog>
       </div>
 
-      <Tabs defaultValue="calendario" className="w-full">
+      <Tabs defaultValue="mensile" className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="calendario" className="flex items-center gap-2">
+          <TabsTrigger value="mensile" className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />
-            Calendario Mensile
+            Mensile
           </TabsTrigger>
-          <TabsTrigger value="lista">
-            Lista Prenotazioni
+          <TabsTrigger value="settimanale" className="flex items-center gap-2">
+            <CalendarDays className="w-4 h-4" />
+            Settimanale
+          </TabsTrigger>
+          <TabsTrigger value="lista" className="flex items-center gap-2">
+            <List className="w-4 h-4" />
+            Lista
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calendario">
+        <TabsContent value="mensile">
           <CalendarioMensile
             prenotazioni={prenotazioni}
             spazi={spazi}
@@ -210,6 +201,17 @@ export default function Calendario({ centroSelezionato }) {
             setCurrentMonth={setCurrentMonth}
             onEdit={handleEdit}
             onDelete={handleDelete}
+          />
+        </TabsContent>
+
+        <TabsContent value="settimanale">
+          <CalendarioSettimanale
+            prenotazioni={prenotazioni}
+            spazi={spazi}
+            clienti={clienti}
+            currentWeek={currentWeek}
+            setCurrentWeek={setCurrentWeek}
+            onEdit={handleEdit}
           />
         </TabsContent>
 
