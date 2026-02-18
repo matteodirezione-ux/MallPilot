@@ -15,7 +15,7 @@ export default function DisponibilitaSpazi({ prenotazioni, spazi }) {
 
   // Per ogni spazio e ogni mese: calcola giorni occupati / totali
   const tabella = useMemo(() => {
-    return spazi.map(spazio => {
+    return [...spazi].sort((a, b) => (a.numero_spazio || '').localeCompare(b.numero_spazio || '', 'it', { numeric: true })).map(spazio => {
       const rigaMesi = mesi.map(mese => {
         const giorni = eachDayOfInterval({ start: startOfMonth(mese), end: endOfMonth(mese) });
         const totGiorni = giorni.length;
