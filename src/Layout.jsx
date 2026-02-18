@@ -238,7 +238,7 @@ export default function Layout({ children, currentPageName }) {
                     {user?.full_name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{user?.full_name}</p>
+                    <p className="text-sm font-medium text-slate-800 truncate">{displayName || user?.full_name}</p>
                     <p className="text-xs text-slate-500 capitalize">{user?.tipo_account}</p>
                   </div>
                 </div>
