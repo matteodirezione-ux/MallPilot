@@ -178,7 +178,7 @@ export default function Layout({ children, currentPageName }) {
         ${sidebarOpen ? 'w-64' : 'w-0 md:w-20'} overflow-hidden md:top-0`} style={{ top: '64px' }}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-slate-200">
+          <div className="p-6 border-b border-slate-200 hidden md:block">
             <div className="flex items-center justify-between">
               {sidebarOpen && (
                 <div className="flex items-center gap-2">
