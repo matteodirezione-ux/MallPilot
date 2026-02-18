@@ -77,19 +77,35 @@ Deno.serve(async (req) => {
     const prenotazione = prenotazioni[0];
     if (!prenotazione) return Response.json({ error: 'Prenotazione non trovata' }, { status: 404 });
 
-    const [clientiArr, spaziArr, centriArr] = await Promise.all([
+    // Determina gli ID degli spazi (supporta spazi_ids multipli o il vecchio spazio_id)
+    const spaziIds = (prenotazione.spazi_ids && prenotazione.spazi_ids.length > 0)
+      ? prenotazione.spazi_ids
+      : (prenotazione.spazio_id ? [prenotazione.spazio_id] : []);
+
+    if (spaziIds.length === 0) {
+      return Response.json({ error: 'Nessuno spazio associato alla prenotazione' }, { status: 400 });
+    }
+
+    const [clientiArr, tuttiSpaziArr, centriArr] = await Promise.all([
       base44.entities.Cliente.filter({ id: prenotazione.cliente_id }),
-      base44.entities.SpazioExpo.filter({ id: prenotazione.spazio_id }),
+      base44.entities.SpazioExpo.list(),
       base44.entities.CentroCommerciale.filter({ id: prenotazione.centro_id })
     ]);
 
     const cliente = clientiArr[0];
-    const spazio = spaziArr[0];
     const centro = centriArr[0];
+    // Filtra solo gli spazi della prenotazione, nell'ordine corretto
+    const spaziPrenotati = spaziIds.map(id => tuttiSpaziArr.find(s => s.id === id)).filter(Boolean);
+    const spazio = spaziPrenotati[0]; // spazio principale (per compatibilità)
 
-    if (!cliente || !spazio || !centro) {
+    if (!cliente || spaziPrenotati.length === 0 || !centro) {
       return Response.json({ error: 'Dati mancanti' }, { status: 400 });
     }
+
+    // Stringa descrittiva degli spazi: "N.2 di 25 mq + N.1 di 25 mq"
+    const spaziStr = spaziPrenotati
+      .map(s => `N.${s.numero_spazio}${s.superficie_mq ? ' di ' + s.superficie_mq + ' mq' : ''}`)
+      .join(' + ');
 
     // Calcoli economici
     const prezzoNetto = prenotazione.prezzo_totale;
