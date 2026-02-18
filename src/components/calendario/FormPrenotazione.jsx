@@ -135,6 +135,25 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {Object.keys(conflittiDisponibilita).length > 0 && (
+        <Alert className="border-red-200 bg-red-50">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800 ml-2">
+            <div className="font-medium mb-2">Postazioni non disponibili nei giorni selezionati:</div>
+            {Object.entries(conflittiDisponibilita).map(([spazioId, conflitti]) => {
+              const spazio = spazi.find(s => s.id === spazioId);
+              const dateRange = conflitti[0] 
+                ? `${new Date(conflitti[0].data_inizio).toLocaleDateString('it-IT')} - ${new Date(conflitti[0].data_fine).toLocaleDateString('it-IT')}`
+                : '';
+              return (
+                <div key={spazioId} className="text-sm">
+                  Spazio {spazio?.numero_spazio}: occupato dal {dateRange}
+                </div>
+              );
+            })}
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="grid grid-cols-2 gap-4">
 
         {/* Spazi multipli */}
