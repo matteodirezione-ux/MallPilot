@@ -365,6 +365,26 @@ export default function Dashboard({ centroSelezionato }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Clienti Totali */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Clienti Totali
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 text-violet-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800">
+              {stats.clientiTotali}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Clienti registrati</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Bottom cards - full width on mobile */}
