@@ -186,7 +186,7 @@ Deno.serve(async (req) => {
     // --- TESTO INTRODUTTIVO ---
     doc.setFontSize(10.5);
     const introLines = doc.splitTextToSize(
-      sanitize(`Facendo seguito ai colloqui intercorsi e premesso che avete la disponibilita' e la gestione di spazi e servizi comuni siti all'interno della "galleria" del Centro Commerciale ${centro.nome.toUpperCase()} posto in ${centro.citta?.toUpperCase() || ''} ${centro.indirizzo ? centro.indirizzo : ''}, siamo con la presente a chiederVi l'autorizzazione ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione N.${spazio.numero_spazio}${spazio.superficie_mq ? ' di ' + spazio.superficie_mq + ' mq' : ''}, indicati nella planimetria in allegato sub A, alle seguenti`),
+      sanitize(`Facendo seguito ai colloqui intercorsi e premesso che avete la disponibilita' e la gestione di spazi e servizi comuni siti all'interno della "galleria" del Centro Commerciale ${centro.nome.toUpperCase()} posto in ${centro.citta?.toUpperCase() || ''} ${centro.indirizzo ? centro.indirizzo : ''}, siamo con la presente a chiederVi l'autorizzazione ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione ${spaziStr}, indicati nella planimetria in allegato sub A, alle seguenti`),
       pw
     );
     doc.text(introLines, lm, y);
