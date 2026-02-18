@@ -229,6 +229,13 @@ export default function Calendario({ centroSelezionato }) {
             onDelete={handleDelete}
           />
         </TabsContent>
+
+        <TabsContent value="disponibilita">
+          <DisponibilitaSpazi
+            prenotazioni={prenotazioni}
+            spazi={spazi}
+          />
+        </TabsContent>
       </Tabs>
     </div>
   );
