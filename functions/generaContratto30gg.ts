@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
     };
 
     const text = (str, x, yy, opts = {}) => {
-      doc.text(str || '', x, yy, opts);
+      doc.text(sanitize(str || ''), x, yy, opts);
     };
 
     // Font
