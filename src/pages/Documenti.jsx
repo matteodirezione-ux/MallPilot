@@ -189,17 +189,20 @@ export default function Documenti({ centroSelezionato }) {
     }
   };
 
-  const handleEdit = (doc) => {
-    setEditingDoc(doc);
-    setFormData({
-      tipo_documento: doc.tipo_documento,
-      nome_file: doc.nome_file,
-      file_url: doc.file_url,
-      prenotazione_id: doc.prenotazione_id || '',
-      cliente_id: doc.cliente_id || '',
-      note: doc.note || ''
-    });
-    setEditDialogOpen(true);
+  const handleUploadContratto = async (e, doc) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      setUploadingFirmato(doc.id);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.Documento.update(doc.id, { contratto_firmato_url: file_url });
+      toast.success('Contratto firmato caricato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore nel caricamento del contratto firmato');
+    } finally {
+      setUploadingFirmato(null);
+    }
   };
 
   const handleUpdateDoc = async (e) => {
