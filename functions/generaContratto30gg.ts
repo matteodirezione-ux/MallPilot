@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
       const paragrafi = art.testo.split('\n\n');
       for (const par of paragrafi) {
         checkPage(10);
-        const lines = doc.splitTextToSize(par.replace(/\n/g, ' '), pw);
+        const lines = doc.splitTextToSize(sanitize(par.replace(/\n/g, ' ')), pw);
         doc.text(lines, lm, y);
         y += lines.length * 5.5;
         addLine(3);
