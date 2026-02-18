@@ -476,10 +476,83 @@ export default function Documenti({ centroSelezionato }) {
             Documenti Archiviati
           </CardTitle>
         </CardHeader>
-...
+        <CardContent>
+          {documenti.length === 0 ? (
+            <p className="text-slate-500 text-center py-4">Nessun documento archiviato</p>
+          ) : (
+            <div className="space-y-3">
+              {documenti.map(doc => {
+                const cliente = clienti.find(c => c.id === doc.cliente_id);
+                const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
+                const spazio = prenotazione ? spazi.find(s => s.id === prenotazione.spazio_id) : null;
+                const centro = centri.find(c => c.id === doc.centro_id);
+                const Icon = getTipoIcon(doc.tipo_documento);
+                return (
+                  <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Icon className="w-4 h-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-800">{doc.nome_file}</p>
+                            <p className="text-xs text-slate-500 capitalize">{doc.tipo_documento.replace('_', ' ')}</p>
+                          </div>
+                        </div>
+                        {cliente && (
+                          <p className="text-sm text-slate-600 ml-10">Cliente: {cliente.ragione_sociale}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(doc)} className="text-blue-600 hover:bg-blue-50">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => window.open(doc.file_url, '_blank')} className="text-green-600 hover:bg-green-50">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(doc.id)} className="text-red-600 hover:bg-red-50">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    {prenotazione && (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm ml-10">
+                        <div>
+                          <p className="text-xs text-slate-500">Postazione</p>
+                          <p className="font-medium text-slate-700">
+                            {spazio ? `${spazio.numero_spazio}${spazio.nome ? ' - ' + spazio.nome : ''}` : '-'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Periodo</p>
+                          <p className="font-medium text-slate-700">
+                            {format(new Date(prenotazione.data_inizio), 'dd/MM/yy', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd/MM/yy', { locale: it })}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Prezzo Totale</p>
+                          <p className="font-medium text-slate-700">€ {prenotazione.prezzo_totale?.toFixed(2) || '0.00'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Centro</p>
+                          <p className="font-medium text-slate-700">{centro?.nome || '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Data Creazione</p>
+                          <p className="font-medium text-slate-700">
+                            {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
       </Card>
-
-
-          </div>
+    </div>
   );
 }
