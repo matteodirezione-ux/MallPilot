@@ -534,19 +534,34 @@ export default function Documenti({ centroSelezionato }) {
                 const spazio = prenotazione ? spazi.find(s => s.id === prenotazione.spazio_id) : null;
                 const centro = centri.find(c => c.id === doc.centro_id);
                 const Icon = getTipoIcon(doc.tipo_documento);
+                const isFirmato = !!doc.contratto_firmato_url;
+                const isContratto = doc.tipo_documento === 'contratto';
                 return (
-                  <div key={doc.id} className="p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                  <div key={doc.id} className={`p-4 rounded-lg transition-colors ${isContratto ? (isFirmato ? 'bg-green-50 border border-green-200 hover:bg-green-100' : 'bg-red-50 border border-red-200 hover:bg-red-100') : 'bg-slate-50 hover:bg-slate-100'}`}>
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                            <Icon className="w-4 h-4 text-blue-600" />
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isContratto ? (isFirmato ? 'bg-green-100' : 'bg-red-100') : 'bg-blue-50'}`}>
+                            <Icon className={`w-4 h-4 ${isContratto ? (isFirmato ? 'text-green-600' : 'text-red-600') : 'text-blue-600'}`} />
                           </div>
                           <div>
                             <p className="font-semibold text-slate-800">{doc.nome_file}</p>
-                            <p className="text-xs text-slate-500 capitalize">
-                              {doc.tipo_documento.replace('_', ' ')}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs text-slate-500 capitalize">
+                                {doc.tipo_documento.replace('_', ' ')}
+                              </p>
+                              {isContratto && (
+                                isFirmato ? (
+                                  <span className="flex items-center gap-1 text-xs font-semibold text-green-700">
+                                    <CheckCircle2 className="w-3 h-3" /> Firmato
+                                  </span>
+                                ) : (
+                                  <span className="flex items-center gap-1 text-xs font-semibold text-red-600">
+                                    <XCircle className="w-3 h-3" /> Non firmato
+                                  </span>
+                                )
+                              )}
+                            </div>
                           </div>
                         </div>
                         {cliente && (
@@ -554,19 +569,29 @@ export default function Documenti({ centroSelezionato }) {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(doc)}
-                          className="text-blue-600 hover:bg-blue-50"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        {isContratto && (
+                          <label className={`cursor-pointer inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-blue-50 text-blue-600 transition-colors ${uploadingFirmato === doc.id ? 'opacity-50 pointer-events-none' : ''}`} title="Carica contratto firmato">
+                            <Upload className="w-4 h-4" />
+                            <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={(e) => handleUploadContratto(e, doc)} disabled={uploadingFirmato === doc.id} />
+                          </label>
+                        )}
+                        {isFirmato && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => window.open(doc.contratto_firmato_url, '_blank')}
+                            className="text-green-600 hover:bg-green-50"
+                            title="Scarica contratto firmato"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => window.open(doc.file_url, '_blank')}
-                          className="text-green-600 hover:bg-green-50"
+                          className="text-slate-600 hover:bg-slate-200"
+                          title="Scarica documento originale"
                         >
                           <Download className="w-4 h-4" />
                         </Button>
