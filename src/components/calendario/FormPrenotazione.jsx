@@ -4,11 +4,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { X, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel }) {
   const [formData, setFormData] = useState({
-    spazio_id: '',
+    spazi_ids: [],
     cliente_id: '',
     data_inizio: '',
     data_fine: '',
@@ -21,8 +23,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
   useEffect(() => {
     if (prenotazione) {
+      // Supporta sia il vecchio campo spazio_id che il nuovo spazi_ids
+      let spaziIds = prenotazione.spazi_ids || [];
+      if (spaziIds.length === 0 && prenotazione.spazio_id) {
+        spaziIds = [prenotazione.spazio_id];
+      }
       setFormData({
-        spazio_id: prenotazione.spazio_id,
+        spazi_ids: spaziIds,
         cliente_id: prenotazione.cliente_id,
         data_inizio: prenotazione.data_inizio,
         data_fine: prenotazione.data_fine,
@@ -35,70 +42,96 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     }
   }, [prenotazione]);
 
+  const handleAddSpazio = (spazioId) => {
+    if (!spazioId || formData.spazi_ids.includes(spazioId)) return;
+    setFormData({ ...formData, spazi_ids: [...formData.spazi_ids, spazioId] });
+  };
+
+  const handleRemoveSpazio = (spazioId) => {
+    setFormData({ ...formData, spazi_ids: formData.spazi_ids.filter(id => id !== spazioId) });
+  };
+
+  const spaziDisponibili = spazi.filter(s => !formData.spazi_ids.includes(s.id));
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    console.log('Form data:', formData);
-    console.log('onSave function:', onSave);
-    
-    // Validazione campi obbligatori
-    if (!formData.spazio_id) {
-      toast.error('Seleziona uno spazio');
+
+    if (formData.spazi_ids.length === 0) {
+      toast.error('Seleziona almeno uno spazio');
       return;
     }
-    
     if (!formData.cliente_id) {
       toast.error('Seleziona un cliente');
       return;
     }
-    
     if (!formData.data_inizio || !formData.data_fine) {
       toast.error('Inserisci le date di inizio e fine');
       return;
     }
-    
     if (!formData.prezzo_totale || parseFloat(formData.prezzo_totale) <= 0) {
       toast.error('Inserisci un prezzo totale valido');
       return;
     }
-
     if (!formData.materiale_dimostrativo) {
       toast.error('Inserisci il materiale dimostrativo');
       return;
     }
-    
+
     const dataToSave = {
       ...formData,
+      spazio_id: formData.spazi_ids[0], // manteniamo compatibilità col campo principale
       prezzo_totale: parseFloat(formData.prezzo_totale),
       prezzo_mensile: formData.prezzo_mensile ? parseFloat(formData.prezzo_mensile) : null
     };
-    
-    console.log('Chiamando onSave con:', dataToSave);
+
     onSave(dataToSave);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
+
+        {/* Spazi multipli */}
         <div className="col-span-2">
-          <Label htmlFor="spazio_id">Spazio *</Label>
-          <Select value={formData.spazio_id} onValueChange={(value) => setFormData({ ...formData, spazio_id: value })} required>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleziona uno spazio" />
-            </SelectTrigger>
-            <SelectContent>
-              {spazi.map((spazio) => (
-                <SelectItem key={spazio.id} value={spazio.id}>
-                  Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Spazi * <span className="text-slate-400 font-normal text-xs">(puoi selezionare più spazi)</span></Label>
+          
+          {/* Spazi già selezionati */}
+          {formData.spazi_ids.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2 mt-1">
+              {formData.spazi_ids.map(id => {
+                const spazio = spazi.find(s => s.id === id);
+                return spazio ? (
+                  <Badge key={id} variant="secondary" className="flex items-center gap-1 px-2 py-1">
+                    <span>N.{spazio.numero_spazio}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}</span>
+                    <button type="button" onClick={() => handleRemoveSpazio(id)} className="ml-1 hover:text-red-500">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ) : null;
+              })}
+            </div>
+          )}
+
+          {/* Dropdown per aggiungere spazio */}
+          {spaziDisponibili.length > 0 && (
+            <Select onValueChange={handleAddSpazio} value="">
+              <SelectTrigger>
+                <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona uno spazio" : "Aggiungi un altro spazio..."} />
+              </SelectTrigger>
+              <SelectContent>
+                {spaziDisponibili.map((spazio) => (
+                  <SelectItem key={spazio.id} value={spazio.id}>
+                    Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         <div className="col-span-2">
           <Label htmlFor="cliente_id">Cliente *</Label>
-          <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })} required>
+          <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
             <SelectTrigger>
               <SelectValue placeholder="Seleziona un cliente" />
             </SelectTrigger>
@@ -119,7 +152,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             type="date"
             value={formData.data_inizio}
             onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })}
-            required
           />
         </div>
 
@@ -130,7 +162,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             type="date"
             value={formData.data_fine}
             onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })}
-            required
           />
         </div>
 
@@ -142,7 +173,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             step="0.01"
             value={formData.prezzo_totale}
             onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })}
-            required
           />
         </div>
 
