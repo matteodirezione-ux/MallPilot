@@ -150,21 +150,6 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Mobile navbar */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-30 md:hidden flex items-center px-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="text-slate-600"
-        >
-          {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </Button>
-        <div className="ml-4">
-          <span className="font-bold text-lg text-slate-800">MallSpace</span>
-        </div>
-      </div>
-
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div 
@@ -175,10 +160,10 @@ export default function Layout({ children, currentPageName }) {
 
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 transition-all duration-300 z-50 
-        ${sidebarOpen ? 'w-64' : 'w-0 md:w-20'} overflow-hidden md:top-0`} style={{ top: '64px' }}>
+        ${sidebarOpen ? 'w-64' : 'w-0 md:w-20'} overflow-hidden`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-slate-200 hidden md:block">
+          <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
               {sidebarOpen && (
                 <div className="flex items-center gap-2">
@@ -201,7 +186,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Centro Selector */}
           {centroSelezionato && sidebarOpen && centri.length > 0 && (
-            <div className="p-4 border-b border-slate-200 hidden md:block">
+            <div className="p-4 border-b border-slate-200">
               <div className="relative">
                 <select
                   value={centroSelezionato.id || 'tutti'}
@@ -291,7 +276,7 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* Main Content */}
-      <main className={`transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} ml-0 pt-16 md:pt-0`}>
+      <main className={`transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} ml-0`}>
         <div className="min-h-screen">
           {!user?.tipo_account ? (
             <div className="flex items-center justify-center min-h-screen p-8">
