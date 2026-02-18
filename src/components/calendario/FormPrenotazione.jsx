@@ -27,6 +27,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const [allPrenotazioni, setAllPrenotazioni] = useState([]);
 
   useEffect(() => {
+    loadPrenotazioni();
     if (prenotazione) {
       // Supporta sia il vecchio campo spazio_id che il nuovo spazi_ids
       let spaziIds = prenotazione.spazi_ids || [];
@@ -46,6 +47,46 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       });
     }
   }, [prenotazione]);
+
+  const loadPrenotazioni = async () => {
+    const prenotazioni = await base44.entities.Prenotazione.list();
+    setAllPrenotazioni(prenotazioni);
+  };
+
+  useEffect(() => {
+    if (formData.data_inizio && formData.data_fine && formData.spazi_ids.length > 0) {
+      verificaDisponibilita();
+    }
+  }, [formData.data_inizio, formData.data_fine, formData.spazi_ids]);
+
+  const verificaDisponibilita = () => {
+    const dataInizio = new Date(formData.data_inizio);
+    const dataFine = new Date(formData.data_fine);
+    const nuoviConflitti = {};
+
+    formData.spazi_ids.forEach(spazioId => {
+      const conflittiSpazio = allPrenotazioni.filter(p => {
+        if (prenotazione && p.id === prenotazione.id) return false; // escludi prenotazione in modifica
+        if (p.stato === 'cancellata') return false;
+        
+        const pInizio = new Date(p.data_inizio);
+        const pFine = new Date(p.data_fine);
+        
+        const spazioConflitto = p.spazi_ids?.includes(spazioId) || p.spazio_id === spazioId;
+        const dateConflitto = isWithinInterval(dataInizio, { start: pInizio, end: pFine }) ||
+                             isWithinInterval(dataFine, { start: pInizio, end: pFine }) ||
+                             isWithinInterval(pInizio, { start: dataInizio, end: dataFine });
+        
+        return spazioConflitto && dateConflitto;
+      });
+
+      if (conflittiSpazio.length > 0) {
+        nuoviConflitti[spazioId] = conflittiSpazio;
+      }
+    });
+
+    setConflittiDisponibilita(nuoviConflitti);
+  };
 
   const handleAddSpazio = (spazioId) => {
     if (!spazioId || formData.spazi_ids.includes(spazioId)) return;
