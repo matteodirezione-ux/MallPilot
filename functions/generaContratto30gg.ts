@@ -139,6 +139,68 @@ Deno.serve(async (req) => {
       doc.text(sanitize(str || ''), x, yy, opts);
     };
 
+    // Stampa una riga mista con segmenti [{text, bold}], restituisce la larghezza totale usata
+    // Usata per evidenziare i valori variabili in grassetto inline
+    const textMixed = (segments, x, yy, fontSize = 10.5) => {
+      doc.setFontSize(fontSize);
+      let cx = x;
+      for (const seg of segments) {
+        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
+        const str = sanitize(seg.text || '');
+        doc.text(str, cx, yy);
+        cx += doc.getTextWidth(str);
+      }
+      doc.setFont('helvetica', 'normal');
+    };
+
+    // Stampa paragrafo con segmenti bold inline, con word-wrap
+    const textMixedWrapped = (segments, x, yy, maxW, lineH = 5.5) => {
+      // Costruisce una lista di token {word, bold, space}
+      const tokens = [];
+      for (const seg of segments) {
+        const words = sanitize(seg.text || '').split(' ');
+        for (let i = 0; i < words.length; i++) {
+          tokens.push({ word: words[i], bold: !!seg.bold, space: i < words.length - 1 });
+        }
+      }
+      doc.setFontSize(10.5);
+      let lineTokens = [];
+      let lineW = 0;
+      const spaceW = doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
+
+      const flushLine = (toks, ly) => {
+        let cx = x;
+        for (let i = 0; i < toks.length; i++) {
+          const t = toks[i];
+          doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+          doc.text(t.word, cx, ly);
+          cx += doc.getTextWidth(t.word);
+          if (i < toks.length - 1) cx += doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
+        }
+      };
+
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+        const ww = doc.getTextWidth(t.word);
+        const needSpace = lineTokens.length > 0 ? doc.setFont('helvetica','normal') && doc.getTextWidth(' ') : 0;
+        if (lineTokens.length > 0 && lineW + needSpace + ww > maxW) {
+          flushLine(lineTokens, yy);
+          yy += lineH;
+          lineTokens = [t];
+          lineW = ww;
+        } else {
+          if (lineTokens.length > 0) lineW += doc.setFont('helvetica','normal') && doc.getTextWidth(' ');
+          lineTokens.push(t);
+          lineW += ww;
+        }
+      }
+      if (lineTokens.length > 0) flushLine(lineTokens, yy);
+      // conta le righe usate
+      doc.setFont('helvetica', 'normal');
+      return yy;
+    };
+
     // Font
     doc.setFont('helvetica');
 
