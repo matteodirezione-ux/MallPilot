@@ -136,7 +136,37 @@ export default function Dashboard({ centroSelezionato }) {
 
       // Clienti totali
       const clienti = await base44.entities.Cliente.list();
-      
+
+      // Affitto medio giornaliero (solo prenotazioni non cancellate con durata > 0)
+      const prenotazioniValide = prenotazioni.filter(p => p.stato !== 'cancellata' && p.prezzo_totale > 0);
+      let affittoMedioGiornaliero = 0;
+      if (prenotazioniValide.length > 0) {
+        const totaleGiorni = prenotazioniValide.reduce((sum, p) => {
+          const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio)) + 1;
+          return sum + Math.max(giorni, 1);
+        }, 0);
+        const totalePrezzi = prenotazioniValide.reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
+        affittoMedioGiornaliero = totalePrezzi / totaleGiorni;
+      }
+
+      // Tasso di occupazione annuale (giorni occupati / (spazi * giorni anno) * 100)
+      const inizioAnnoDate = startOfYear(now);
+      const fineAnnoDate = endOfYear(now);
+      const giorniAnno = differenceInDays(fineAnnoDate, inizioAnnoDate) + 1;
+      const totaleGiorniDisponibili = spazi.length * giorniAnno;
+      let tassoOccupazioneAnnuale = 0;
+      if (totaleGiorniDisponibili > 0) {
+        const giorniOccupati = prenotazioni
+          .filter(p => p.stato !== 'cancellata')
+          .reduce((sum, p) => {
+            const inizio = new Date(Math.max(new Date(p.data_inizio), inizioAnnoDate));
+            const fine = new Date(Math.min(new Date(p.data_fine), fineAnnoDate));
+            const giorni = differenceInDays(fine, inizio) + 1;
+            return sum + Math.max(giorni, 0);
+          }, 0);
+        tassoOccupazioneAnnuale = (giorniOccupati / totaleGiorniDisponibili) * 100;
+      }
+
       setStats({
         prossimiAffitti: prossimiConDettagli,
         affittiCorrenti: affittiCorrentiConDettagli,
@@ -145,7 +175,9 @@ export default function Dashboard({ centroSelezionato }) {
         incassiMese,
         incassiAnno,
         budgetAnno,
-        clientiTotali: clienti.length
+        clientiTotali: clienti.length,
+        affittoMedioGiornaliero,
+        tassoOccupazioneAnnuale
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
