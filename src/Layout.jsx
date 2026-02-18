@@ -291,7 +291,7 @@ export default function Layout({ children, currentPageName }) {
       </aside>
 
       {/* Main Content */}
-      <main className={`transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} ml-0`}>
+      <main className={`transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'} ml-0 pt-16 md:pt-0`}>
         <div className="min-h-screen">
           {!user?.tipo_account ? (
             <div className="flex items-center justify-center min-h-screen p-8">
