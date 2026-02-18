@@ -37,6 +37,7 @@ export default function Layout({ children, currentPageName }) {
       
       if (direttori.length > 0) {
         // Questo utente è un direttore
+        setDisplayName(direttori[0].full_name);
         if (userData.tipo_account !== 'direttore') {
           await base44.auth.updateMe({ 
             tipo_account: 'direttore',
