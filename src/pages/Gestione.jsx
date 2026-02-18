@@ -139,6 +139,21 @@ export default function Gestione({ user }) {
     }
   };
 
+  const deleteDirettore = async (dir) => {
+    if (!confirm(`Eliminare il direttore ${dir.full_name}? Verranno rimosse anche tutte le sue assegnazioni.`)) return;
+    try {
+      const assegnazioniDir = assegnazioni.filter(a => a.user_email === dir.email);
+      await Promise.all([
+        base44.entities.Direttore.delete(dir.id),
+        ...assegnazioniDir.map(a => base44.entities.Assegnazione.delete(a.id))
+      ]);
+      toast.success('Direttore eliminato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore eliminazione');
+    }
+  };
+
   const deleteAssegnazione = async (id) => {
     if (!confirm('Rimuovere questa assegnazione?')) return;
     try {
