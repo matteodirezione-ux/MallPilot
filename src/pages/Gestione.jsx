@@ -462,6 +462,10 @@ function CentroDialog({ open, data, onClose, onSave }) {
               <Label>N. Spazi</Label>
               <Input type="number" value={form.numero_spazi_totali} onChange={(e) => setForm({ ...form, numero_spazi_totali: e.target.value })} />
             </div>
+            <div className="col-span-2">
+              <Label>IBAN</Label>
+              <Input value={form.iban || ''} onChange={(e) => setForm({ ...form, iban: e.target.value })} placeholder="es. IT29H0538713202000001501918" />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={form.attivo} onChange={(e) => setForm({ ...form, attivo: e.target.checked })} />
