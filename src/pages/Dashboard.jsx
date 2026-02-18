@@ -7,7 +7,9 @@ import {
   Building2, 
   DollarSign, 
   Users,
-  Target
+  Target,
+  BarChart2,
+  Percent
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
