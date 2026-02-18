@@ -36,7 +36,6 @@ export default function Calendario({ centroSelezionato }) {
       
       const isTutti = centroSelezionato?.id === 'tutti';
       
-      // Carica sempre tutti i clienti per permettere la creazione di prenotazioni
       const [prenotazioniData, spaziData, clientiData] = await Promise.all([
         isTutti 
           ? base44.entities.Prenotazione.list()
@@ -44,7 +43,9 @@ export default function Calendario({ centroSelezionato }) {
         isTutti
           ? base44.entities.SpazioExpo.filter({ attivo: true })
           : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id }),
-        base44.entities.Cliente.list()
+        isTutti
+          ? base44.entities.Cliente.list()
+          : base44.entities.Cliente.filter({ centro_id: centroSelezionato.id })
       ]);
       setPrenotazioni(prenotazioniData || []);
       setSpazi(spaziData || []);
