@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
       },
       {
         titolo: '3) Durata.',
-        testo: `Il presente contratto avrà durata dal ${formatData(prenotazione.data_inizio)} al ${formatData(prenotazione.data_fine)}.\n\nEntro e non oltre la scadenza suindicata, il materiale espositivo dovrà essere completamente rimosso ed asportato a cure e spese dell'utilizzatore. Per ogni giorno di ritardo nella liberazione rispetto al termine suindicato, l'utilizzatore si obbliga a pagare una penale consensualmente convenuta nella misura di € 100,00 (euro cento/00) per ciascun giorno di ritardo.`
+        testo: `Il presente contratto avrà durata dal ${formatData(prenotazione.data_inizio)} al ${formatData(prenotazione.data_fine)}.\n\nEntro e non oltre la scadenza suindicata, il materiale espositivo dovrà essere completamente rimosso ed asportato a cure e spese dell'utilizzatore. Per ogni giorno di ritardo nella liberazione rispetto al termine suindicato, l'utilizzatore si obbliga a pagare una penale consensualmente convenuta nella misura di Euro 100,00 (euro cento/00) per ciascun giorno di ritardo.`
       },
       {
         titolo: '4) Corrispettivo.',
