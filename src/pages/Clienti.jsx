@@ -109,7 +109,12 @@ export default function Clienti({ centroSelezionato }) {
         await base44.entities.Cliente.update(editingCliente.id, formData);
         toast.success('Cliente aggiornato con successo');
       } else {
-        await base44.entities.Cliente.create(formData);
+        const centroId = centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : null;
+        if (!centroId) {
+          toast.error('Seleziona un centro specifico per creare un cliente');
+          return;
+        }
+        await base44.entities.Cliente.create({ ...formData, centro_id: centroId });
         toast.success('Cliente creato con successo');
       }
 
