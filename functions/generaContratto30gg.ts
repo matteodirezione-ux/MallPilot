@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
     // --- CLAUSOLA SPECIFICA ---
     checkPage(20);
     const clausolaLines = doc.splitTextToSize(
-      'Ai sensi e per gli effetti degli artt.1341 e 1342 del Cod.Civile (se ed in quanto applicabili alla presente fattispecie), dichiariamo di accettare specificatamente gli articoli: art. 2 (Uso), art. 3 (Durata e penale), art. 5 (Allestimento), art. 7 (Esonero-Assicurazione), art. 10 (Clausola risolutiva espressa).',
+      sanitize('Ai sensi e per gli effetti degli artt.1341 e 1342 del Cod.Civile (se ed in quanto applicabili alla presente fattispecie), dichiariamo di accettare specificatamente gli articoli: art. 2 (Uso), art. 3 (Durata e penale), art. 5 (Allestimento), art. 7 (Esonero-Assicurazione), art. 10 (Clausola risolutiva espressa).'),
       pw
     );
     doc.text(clausolaLines, lm, y);
