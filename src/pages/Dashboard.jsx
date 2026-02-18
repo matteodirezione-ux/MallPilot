@@ -9,7 +9,7 @@ import {
   Users,
   Target
 } from 'lucide-react';
-import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear } from 'date-fns';
+import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function Dashboard({ centroSelezionato }) {
