@@ -46,17 +46,17 @@ export default function Clienti({ centroSelezionato }) {
   const loadClienti = async () => {
     try {
       setLoading(true);
-      const data = await base44.entities.Cliente.list();
-      
-      // Filtra clienti in base al centro selezionato
       const isTutti = centroSelezionato?.id === 'tutti';
-      const prenotazioni = isTutti 
-        ? await base44.entities.Prenotazione.list()
-        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
-      
-      // Ottieni solo i clienti che hanno prenotazioni nel centro selezionato
-      const clientiIds = new Set(prenotazioni.map(p => p.cliente_id));
-      const clientiFiltrati = isTutti ? data : data.filter(c => clientiIds.has(c.id));
+
+      // Filtra clienti direttamente per centro_id
+      const [clientiFiltrati, prenotazioni] = await Promise.all([
+        isTutti
+          ? base44.entities.Cliente.list()
+          : base44.entities.Cliente.filter({ centro_id: centroSelezionato.id }),
+        isTutti
+          ? base44.entities.Prenotazione.list()
+          : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id })
+      ]);
       
       setClienti(clientiFiltrati);
       
