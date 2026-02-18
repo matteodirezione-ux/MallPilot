@@ -340,9 +340,14 @@ export default function Gestione({ user }) {
                           )}
                         </div>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
-                        <Pencil className="w-4 h-4 text-blue-600" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
+                          <Pencil className="w-4 h-4 text-blue-600" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteDirettore(dir)}>
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
