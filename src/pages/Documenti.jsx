@@ -103,8 +103,13 @@ export default function Documenti({ centroSelezionato }) {
       setGeneratingContract(true);
       const cliente = clienti.find(c => c.id === prenotazione.cliente_id);
 
-      // Chiama la funzione backend che genera il PDF
-      const response = await base44.functions.invoke('generaContratto30gg', {
+      // Sceglie il modello in base alla durata: oltre 30 giorni → contratto di locazione
+      const dataInizio = new Date(prenotazione.data_inizio);
+      const dataFine = new Date(prenotazione.data_fine);
+      const durataGiorni = Math.round((dataFine - dataInizio) / (1000 * 60 * 60 * 24));
+      const functionName = durataGiorni > 30 ? 'generaContrattoOltre30gg' : 'generaContratto30gg';
+
+      const response = await base44.functions.invoke(functionName, {
         prenotazione_id: prenotazione.id
       });
 
