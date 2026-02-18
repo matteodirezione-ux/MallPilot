@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
     // --- TESTO FINALE ---
     checkPage(30);
     const finaleLines = doc.splitTextToSize(
-      'La sua stessa proposta rimarrà ferma ed irrevocabile per il termine di quindici giorni dal ricevimento della presente da parte Vostra; decorso tale termine senza che ci pervenga la Vostra formale accettazione, la stessa sarà ritenuta automaticamente revocata.\n\nCostituirà accettazione della presente proposta anche il ritiro dell\'assegno da parte di persona autorizzata o comunque l\'incasso del corrispettivo di cui alla clausola 4, salvo che, qualora il pagamento sia effettuato con disposizione di bonifico bancario, la somma accreditata ci venga restituita nel termine di 8 (otto) giorni dall\'accredito stesso.',
+      sanitize("La sua stessa proposta rimarra' ferma ed irrevocabile per il termine di quindici giorni dal ricevimento della presente da parte Vostra; decorso tale termine senza che ci pervenga la Vostra formale accettazione, la stessa sara' ritenuta automaticamente revocata.\n\nCostituira' accettazione della presente proposta anche il ritiro dell'assegno da parte di persona autorizzata o comunque l'incasso del corrispettivo di cui alla clausola 4, salvo che, qualora il pagamento sia effettuato con disposizione di bonifico bancario, la somma accreditata ci venga restituita nel termine di 8 (otto) giorni dall'accredito stesso."),
       pw
     );
     doc.text(finaleLines, lm, y);
