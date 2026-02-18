@@ -191,6 +191,10 @@ export default function Calendario({ centroSelezionato }) {
             <List className="w-4 h-4" />
             Lista
           </TabsTrigger>
+          <TabsTrigger value="disponibilita" className="flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            Disponibilità
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="mensile">
