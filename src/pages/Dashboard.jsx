@@ -23,7 +23,9 @@ export default function Dashboard({ centroSelezionato }) {
     incassiMese: 0,
     incassiAnno: 0,
     budgetAnno: 0,
-    clientiTotali: 0
+    clientiTotali: 0,
+    affittoMedioGiornaliero: 0,
+    tassoOccupazioneAnnuale: 0
   });
   const [loading, setLoading] = useState(true);
 
