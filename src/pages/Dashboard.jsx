@@ -201,9 +201,9 @@ export default function Dashboard({ centroSelezionato }) {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {/* Spazi Occupati */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
