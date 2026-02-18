@@ -468,6 +468,47 @@ export default function Documenti({ centroSelezionato }) {
         </Dialog>
       </div>
 
+      {/* Genera Contratti */}
+      {prenotazioniSenzaContratto.length > 0 && (
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 mb-6">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-blue-900 flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Genera Contratti
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-blue-800 mb-4">
+              Prenotazioni senza contratto generato:
+            </p>
+            <div className="space-y-2">
+              {prenotazioniSenzaContratto.map(p => {
+                const cliente = clienti.find(c => c.id === p.cliente_id);
+                return (
+                  <div key={p.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                    <div>
+                      <p className="font-medium text-slate-800">{cliente?.ragione_sociale}</p>
+                      <p className="text-sm text-slate-600">
+                        {format(new Date(p.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(p.data_fine), 'dd MMM yyyy', { locale: it })}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleGeneraContratto(p)}
+                      disabled={generatingContract}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Genera Contratto
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Documenti Archiviati */}
       <Card className="bg-white border-slate-200 mb-6">
         <CardHeader>
