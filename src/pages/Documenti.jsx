@@ -102,57 +102,22 @@ export default function Documenti({ centroSelezionato }) {
     try {
       setGeneratingContract(true);
       const cliente = clienti.find(c => c.id === prenotazione.cliente_id);
-      const spazio = await base44.entities.SpazioExpo.filter({ id: prenotazione.spazio_id }).then(r => r[0]);
 
-      // Genera il contenuto del contratto
-      const contenutoContratto = `
-CONTRATTO DI LOCAZIONE SPAZIO ESPOSITIVO
+      // Chiama la funzione backend che genera il PDF
+      const response = await base44.functions.invoke('generaContratto30gg', {
+        prenotazione_id: prenotazione.id
+      });
 
-Centro Commerciale: ${centroSelezionato.nome}
-Data: ${format(new Date(), 'dd/MM/yyyy', { locale: it })}
+      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+      const fileName = `Contratto_${cliente?.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}.pdf`;
 
-LOCATORE:
-${centroSelezionato.nome}
-${centroSelezionato.indirizzo || ''}
-${centroSelezionato.citta || ''} ${centroSelezionato.cap || ''}
-
-CONDUTTORE:
-${cliente?.ragione_sociale || ''}
-${cliente?.partita_iva ? 'P.IVA: ' + cliente.partita_iva : ''}
-${cliente?.indirizzo || ''}
-${cliente?.citta || ''} ${cliente?.cap || ''}
-Email: ${cliente?.email || ''}
-Telefono: ${cliente?.telefono || ''}
-
-OGGETTO DEL CONTRATTO:
-Spazio Numero: ${spazio?.numero_spazio || ''}
-${spazio?.nome ? 'Nome: ' + spazio.nome : ''}
-${spazio?.superficie_mq ? 'Superficie: ' + spazio.superficie_mq + ' m²' : ''}
-
-DURATA:
-Dal: ${format(new Date(prenotazione.data_inizio), 'dd/MM/yyyy', { locale: it })}
-Al: ${format(new Date(prenotazione.data_fine), 'dd/MM/yyyy', { locale: it })}
-
-CORRISPETTIVO:
-Importo Totale: € ${prenotazione.prezzo_totale?.toFixed(2) || '0.00'}
-${prenotazione.prezzo_mensile ? 'Canone Mensile: € ' + prenotazione.prezzo_mensile.toFixed(2) : ''}
-
-${prenotazione.note ? 'NOTE:\n' + prenotazione.note : ''}
-
-Il presente contratto viene redatto in duplice copia, una per ciascuna delle parti.
-
-Firma Locatore: ________________    Firma Conduttore: ________________
-      `;
-
-      // Carica il file
-      const blob = new Blob([contenutoContratto], { type: 'text/plain' });
-      const fileName = `Contratto_${cliente?.ragione_sociale}_${spazio?.numero_spazio}_${format(new Date(), 'yyyy-MM-dd')}.txt`;
-      const file = new File([blob], fileName, { type: 'text/plain' });
+      // Carica il PDF su storage
+      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
 
       // Crea il documento nel database
       await base44.entities.Documento.create({
-        centro_id: centroSelezionato.id,
+        centro_id: prenotazione.centro_id,
         prenotazione_id: prenotazione.id,
         cliente_id: prenotazione.cliente_id,
         tipo_documento: 'contratto',
@@ -166,8 +131,8 @@ Firma Locatore: ________________    Firma Conduttore: ________________
         contratto_generato: true
       });
 
-      // Scarica il file
-      const url = window.URL.createObjectURL(blob);
+      // Scarica il PDF
+      const url = window.URL.createObjectURL(pdfBlob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -176,7 +141,7 @@ Firma Locatore: ________________    Firma Conduttore: ________________
       window.URL.revokeObjectURL(url);
       a.remove();
 
-      toast.success('Contratto generato e archiviato');
+      toast.success('Contratto PDF generato e archiviato');
       loadData();
     } catch (error) {
       console.error('Errore generazione contratto:', error);
