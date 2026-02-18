@@ -253,7 +253,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Clienti Totali */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-slate-600">
