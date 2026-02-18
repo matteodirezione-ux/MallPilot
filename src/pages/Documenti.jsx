@@ -25,6 +25,7 @@ export default function Documenti({ centroSelezionato }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState(null);
+  const [uploadingFirmato, setUploadingFirmato] = useState(null);
 
   const [formData, setFormData] = useState({
     tipo_documento: 'contratto',
