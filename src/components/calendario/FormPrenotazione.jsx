@@ -61,6 +61,11 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Inserisci un prezzo totale valido');
       return;
     }
+
+    if (!formData.materiale_dimostrativo) {
+      toast.error('Inserisci il materiale dimostrativo');
+      return;
+    }
     
     const dataToSave = {
       ...formData,
