@@ -76,7 +76,8 @@ export default function SpaziExpo({ centroSelezionato, user }) {
         : await base44.entities.SpazioExpo.filter({ 
             centro_id: centroSelezionato.id 
           });
-      setSpazi(data || []);
+      const sorted = (data || []).sort((a, b) => (a.numero_spazio || '').localeCompare(b.numero_spazio || '', 'it', { numeric: true }));
+      setSpazi(sorted);
       
       // Carica tutti i centri per avere i nomi quando mostriamo "tutti"
       if (centroSelezionato?.id === 'tutti') {
