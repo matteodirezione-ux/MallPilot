@@ -259,47 +259,173 @@ Deno.serve(async (req) => {
     doc.setFont('helvetica', 'normal');
     addLine(10);
 
-    // --- ARTICOLI ---
+    // Helper: stampa paragrafo con segmenti {text, bold}, con word-wrap manuale
+    const printMixedParagraph = (segments, lineH = 5.5) => {
+      doc.setFontSize(10.5);
+      // Tokenizza in parole mantenendo il flag bold
+      const tokens = [];
+      for (const seg of segments) {
+        const words = sanitize(seg.text || '').split(' ').filter(w => w !== '');
+        for (const word of words) {
+          tokens.push({ word, bold: !!seg.bold });
+        }
+      }
+      doc.setFont('helvetica', 'normal');
+      const spaceW = doc.getTextWidth(' ');
+      let lineTokens = [];
+      let lineW = 0;
+
+      const flushLine = (toks) => {
+        let cx = lm;
+        for (let i = 0; i < toks.length; i++) {
+          doc.setFont('helvetica', toks[i].bold ? 'bold' : 'normal');
+          doc.text(toks[i].word, cx, y);
+          cx += doc.getTextWidth(toks[i].word);
+          if (i < toks.length - 1) { doc.setFont('helvetica','normal'); cx += spaceW; }
+        }
+      };
+
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+        const ww = doc.getTextWidth(t.word);
+        const gap = lineTokens.length > 0 ? spaceW : 0;
+        if (lineTokens.length > 0 && lineW + gap + ww > pw) {
+          checkPage(lineH + 3);
+          flushLine(lineTokens);
+          y += lineH;
+          lineTokens = [t];
+          lineW = ww;
+        } else {
+          lineW += gap + ww;
+          lineTokens.push(t);
+        }
+      }
+      if (lineTokens.length > 0) {
+        checkPage(lineH + 3);
+        flushLine(lineTokens);
+        y += lineH;
+      }
+      doc.setFont('helvetica', 'normal');
+    };
+
+    // Helper: stampa testo semplice (normale) con wrap
+    const printParagraph = (str) => {
+      doc.setFontSize(10.5);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(sanitize(str.replace(/\n/g, ' ')), pw);
+      checkPage(lines.length * 5.5 + 3);
+      doc.text(lines, lm, y);
+      y += lines.length * 5.5;
+    };
+
+    // Struttura articoli: array di {titolo, paragrafi}
+    // Ogni paragrafo è: string (testo normale) oppure array di segmenti [{text, bold}] (misto)
+    const materiale = prenotazione.materiale_dimostrativo || '';
     const articoli = [
       {
         titolo: '1) Oggetto.',
-        testo: `GESTIONE COMPLESSI COMMERCIALI autorizza l'utilizzatore ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione ${spaziStr}, indicati nella planimetria in allegato sub A${prenotazione.materiale_dimostrativo ? ': ' + prenotazione.materiale_dimostrativo : ''}.\n\nIn conseguenza fattuale di tale autorizzazione, l'utilizzatore potrà usufruire dei servizi di allacciamento all'impianto di corrente elettrica, riscaldamento/condizionamento, illuminazione, vigilanza esterna, pulizia.\n\nGESTIONE COMPLESSI COMMERCIALI si rende disponibile a fornire (a semplice richiesta dell'utilizzatore e senza alcun incremento del corrispettivo di cui all'art. 4, poiché in esso il relativo costo è già ricompreso) ulteriori servizi quali: consulenza per il miglior allestimento dell'area espositiva onde fare in modo che lo stesso sia conforme e coerente con l'immagine del Centro, informazioni in ordine all'attività promo-pubblicitaria del Centro stesso, alle relative iniziative, agli orari ed ai giorni di maggiore affluenza di persone all'interno del Centro.`
+        paragrafi: [
+          [
+            { text: "GESTIONE COMPLESSI COMMERCIALI autorizza l'utilizzatore ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione " },
+            { text: spaziStr, bold: true },
+            { text: ", indicati nella planimetria in allegato sub A" },
+            ...(materiale ? [{ text: ': ' }, { text: materiale, bold: true }] : []),
+            { text: "." }
+          ],
+          "In conseguenza fattuale di tale autorizzazione, l'utilizzatore potra' usufruire dei servizi di allacciamento all'impianto di corrente elettrica, riscaldamento/condizionamento, illuminazione, vigilanza esterna, pulizia.",
+          "GESTIONE COMPLESSI COMMERCIALI si rende disponibile a fornire (a semplice richiesta dell'utilizzatore e senza alcun incremento del corrispettivo di cui all'art. 4, poiche' in esso il relativo costo e' gia' ricompreso) ulteriori servizi quali: consulenza per il miglior allestimento dell'area espositiva onde fare in modo che lo stesso sia conforme e coerente con l'immagine del Centro, informazioni in ordine all'attivita' promo-pubblicitaria del Centro stesso, alle relative iniziative, agli orari ed ai giorni di maggiore affluenza di persone all'interno del Centro."
+        ]
       },
       {
         titolo: '2) Uso.',
-        testo: `L'oggetto del contratto non contempla per l'utilizzatore alcuna possibilità di utilizzo in via esclusiva della porzione di parti comuni temporaneamente assegnata, che potrà inoltre essere alternata – a discrezione della Concedente - con altra porzione di parti comuni.\n\nL'oggetto del contratto consente all'utilizzatore solo lo svolgimento di attività promozionale volta ad incrementare le vendite dei propri prodotti, con espressa esclusione della vendita diretta alla clientela.\n\nLa violazione dei suddetti divieti costituirà grave inadempimento e motivo di risoluzione ex art. 1456 c.c. del rapporto.`
+        paragrafi: [
+          "L'oggetto del contratto non contempla per l'utilizzatore alcuna possibilita' di utilizzo in via esclusiva della porzione di parti comuni temporaneamente assegnata, che potra' inoltre essere alternata - a discrezione della Concedente - con altra porzione di parti comuni.",
+          "L'oggetto del contratto consente all'utilizzatore solo lo svolgimento di attivita' promozionale volta ad incrementare le vendite dei propri prodotti, con espressa esclusione della vendita diretta alla clientela.",
+          "La violazione dei suddetti divieti costituira' grave inadempimento e motivo di risoluzione ex art. 1456 c.c. del rapporto."
+        ]
       },
       {
         titolo: '3) Durata.',
-        testo: `Il presente contratto avrà durata dal ${formatData(prenotazione.data_inizio)} al ${formatData(prenotazione.data_fine)}.\n\nEntro e non oltre la scadenza suindicata, il materiale espositivo dovrà essere completamente rimosso ed asportato a cure e spese dell'utilizzatore. Per ogni giorno di ritardo nella liberazione rispetto al termine suindicato, l'utilizzatore si obbliga a pagare una penale consensualmente convenuta nella misura di Euro 100,00 (euro cento/00) per ciascun giorno di ritardo.`
+        paragrafi: [
+          [
+            { text: "Il presente contratto avra' durata dal " },
+            { text: formatData(prenotazione.data_inizio), bold: true },
+            { text: " al " },
+            { text: formatData(prenotazione.data_fine), bold: true },
+            { text: "." }
+          ],
+          "Entro e non oltre la scadenza suindicata, il materiale espositivo dovra' essere completamente rimosso ed asportato a cure e spese dell'utilizzatore. Per ogni giorno di ritardo nella liberazione rispetto al termine suindicato, l'utilizzatore si obbliga a pagare una penale consensualmente convenuta nella misura di Euro 100,00 (euro cento/00) per ciascun giorno di ritardo."
+        ]
       },
       {
         titolo: '4) Corrispettivo.',
-        testo: `Il corrispettivo per le prestazioni di cui al precedente articolo 1) e per l'intera durata, viene stabilito in Euro ${prezzoNettoFmt.numerico} (Euro ${prezzoNettoFmt.lettere}) piu' IVA (Euro ${ivaFmt.numerico}) per un importo totale pari ad Euro ${prezzoTotaleFmt.numerico} (Euro ${prezzoTotaleFmt.lettere}) e dovra' essere corrisposto anticipatamente, con rimessa diretta al momento della sottoscrizione del presente atto, sul conto corrente bancario con IBAN ${centro.iban || '________________________'}.`
+        paragrafi: [
+          [
+            { text: "Il corrispettivo per le prestazioni di cui al precedente articolo 1) e per l'intera durata, viene stabilito in Euro " },
+            { text: `${prezzoNettoFmt.numerico} (Euro ${prezzoNettoFmt.lettere})`, bold: true },
+            { text: " piu' IVA (Euro " },
+            { text: ivaFmt.numerico, bold: true },
+            { text: ") per un importo totale pari ad Euro " },
+            { text: `${prezzoTotaleFmt.numerico} (Euro ${prezzoTotaleFmt.lettere})`, bold: true },
+            { text: " e dovra' essere corrisposto anticipatamente, con rimessa diretta al momento della sottoscrizione del presente atto, sul conto corrente bancario con IBAN " },
+            { text: centro.iban || '________________________', bold: true },
+            { text: "." }
+          ]
+        ]
       },
       {
         titolo: '5) Allestimento.',
-        testo: `L'utilizzatore si obbliga a presentare almeno una settimana prima dell'inizio dell'esposizione al Direttore del Centro Commerciale il progetto di allestimento delle attrezzature e del materiale espositivo.\n\nL'allestimento non dovrà superare gli ingombri previsti in planimetria e non dovrà superare l'altezza massima di mt.\n\nNel rispetto della buona immagine del Centro Commerciale, l'utilizzatore si obbliga a predisporre l'allestimento utilizzando moquettes o pedane, a non diffondere comunicazioni scritte a mano e volantinaggio, a non esporre insegne luminose o scritte pubblicitarie diverse da quelle concordate con il Direttore del Centro Commerciale, ad effettuare i pagamenti delle imposte pubblicitarie sui cartelli esposti qualora dovute.\n\nE' fatto divieto all'utilizzatore di apportare modifiche, innovazioni e trasformazioni al progetto di allestimento presentato ed approvato, senza il consenso scritto della parte concedente espresso per il tramite della persona del Direttore del Centro Commerciale.\n\nSe l'allestimento non corrisponderà a quanto autorizzato dal Direttore del Centro Commerciale, la parte concedente avrà il diritto di risolvere ex art. 1456 c.c. il presente contratto ed il corrispettivo pattuito sarà trattenuto a titolo di penale.\n\nL'utilizzatore si impegna irrevocabilmente a sospendere temporaneamente il proprio rapporto di locazione dietro semplice richiesta della Direzione effettuata con un preavviso di sette giorni, qualora questa si trovi nella necessità di disporre diversamente dell'area in questione. In tal caso l'utilizzatore avrà diritto di recuperare i giorni di sospensione, prorogando per uguale periodo la durata del rapporto.`
+        paragrafi: [
+          "L'utilizzatore si obbliga a presentare almeno una settimana prima dell'inizio dell'esposizione al Direttore del Centro Commerciale il progetto di allestimento delle attrezzature e del materiale espositivo.",
+          "L'allestimento non dovra' superare gli ingombri previsti in planimetria e non dovra' superare l'altezza massima di mt.",
+          "Nel rispetto della buona immagine del Centro Commerciale, l'utilizzatore si obbliga a predisporre l'allestimento utilizzando moquettes o pedane, a non diffondere comunicazioni scritte a mano e volantinaggio, a non esporre insegne luminose o scritte pubblicitarie diverse da quelle concordate con il Direttore del Centro Commerciale, ad effettuare i pagamenti delle imposte pubblicitarie sui cartelli esposti qualora dovute.",
+          "E' fatto divieto all'utilizzatore di apportare modifiche, innovazioni e trasformazioni al progetto di allestimento presentato ed approvato, senza il consenso scritto della parte concedente espresso per il tramite della persona del Direttore del Centro Commerciale.",
+          "Se l'allestimento non corrisponders' a quanto autorizzato dal Direttore del Centro Commerciale, la parte concedente avra' il diritto di risolvere ex art. 1456 c.c. il presente contratto ed il corrispettivo pattuito sara' trattenuto a titolo di penale.",
+          "L'utilizzatore si impegna irrevocabilmente a sospendere temporaneamente il proprio rapporto di locazione dietro semplice richiesta della Direzione effettuata con un preavviso di sette giorni, qualora questa si trovi nella necessita' di disporre diversamente dell'area in questione. In tal caso l'utilizzatore avra' diritto di recuperare i giorni di sospensione, prorogando per uguale periodo la durata del rapporto."
+        ]
       },
       {
         titolo: '6) Spese.',
-        testo: `Ad esclusione dei servizi accessori previsti all'articolo 1, tutte le spese inerenti e conseguenti all'esposizione saranno ad esclusivo carico dell'utilizzatore, ivi comprese quelle dell'eventuale personale impiegato, che l'utilizzatore dichiara di aver regolarmente assunto, amministrato e retribuito.\n\nTutti gli oneri ed autorizzazioni richieste dalle normative vigenti relativamente all'esposizione (quali ad es. assicurazioni, tasse per la pubblicità, affissioni, ecc.) sono ad esclusivo carico dell'utilizzatore, il quale dichiara di esonerare e si obbliga a manlevare la parte concedente da qualsiasi responsabilità al riguardo.`
+        paragrafi: [
+          "Ad esclusione dei servizi accessori previsti all'articolo 1, tutte le spese inerenti e conseguenti all'esposizione saranno ad esclusivo carico dell'utilizzatore, ivi comprese quelle dell'eventuale personale impiegato, che l'utilizzatore dichiara di aver regolarmente assunto, amministrato e retribuito.",
+          "Tutti gli oneri ed autorizzazioni richieste dalle normative vigenti relativamente all'esposizione (quali ad es. assicurazioni, tasse per la pubblicita', affissioni, ecc.) sono ad esclusivo carico dell'utilizzatore, il quale dichiara di esonerare e si obbliga a manlevare la parte concedente da qualsiasi responsabilita' al riguardo."
+        ]
       },
       {
         titolo: '7) Esonero - Assicurazione.',
-        testo: `L'utilizzatore dichiara di esonerare GESTIONE COMPLESSI COMMERCIALI da qualsiasi responsabilità per danni di qualsivoglia genere arrecati alla merce/attrezzature esposte e/o per impossibilità dell'utilizzatore di utilizzare i servizi accessori di cui all'articolo 1.\n\nTuttavia, se dovessero sussistere gravi responsabilità della concedente, l'eventuale risarcimento sara' ricompreso in una cifra contenuta entro il corrispettivo fissato all'articolo 4, dedotta la parte di corrispettivo per i giorni di esposizione e godimento dei servizi accessori trascorsi regolarmente prima e dopo il verificarsi dell'evento dannoso.\n\nE' impegno e onere dell'utilizzatore sottoscrivere e mantenere attiva per la durata del presente contratto, con primaria compagnia, una polizza assicurativa RCT/RCO con massimale unico minimo di Euro 2.500.000,00 (duemilionicinquecentomila/00), con estensione ai danni a cose di terzi a seguito di incendio, esplosione o scoppio di cose dell'assicurato o da lui detenute e polizza incendio pari al valore a nuovo o di rimpiazzo, a garanzia delle attrezzature, dell'arredo e della merce di proprietà della concedente.\n\nDurante il periodo di allestimento l'utilizzatore si obbliga ad essere munito di estintore.\n\nLa polizza conterrà inoltre espressamente la rinuncia dell'assicuratore alla rivalsa verso la concedente, la Proprietà ed i singoli Operatori del Centro.`
+        paragrafi: [
+          "L'utilizzatore dichiara di esonerare GESTIONE COMPLESSI COMMERCIALI da qualsiasi responsabilita' per danni di qualsivoglia genere arrecati alla merce/attrezzature esposte e/o per impossibilita' dell'utilizzatore di utilizzare i servizi accessori di cui all'articolo 1.",
+          "Tuttavia, se dovessero sussistere gravi responsabilita' della concedente, l'eventuale risarcimento sara' ricompreso in una cifra contenuta entro il corrispettivo fissato all'articolo 4, dedotta la parte di corrispettivo per i giorni di esposizione e godimento dei servizi accessori trascorsi regolarmente prima e dopo il verificarsi dell'evento dannoso.",
+          "E' impegno e onere dell'utilizzatore sottoscrivere e mantenere attiva per la durata del presente contratto, con primaria compagnia, una polizza assicurativa RCT/RCO con massimale unico minimo di Euro 2.500.000,00 (duemilionicinquecentomila/00), con estensione ai danni a cose di terzi a seguito di incendio, esplosione o scoppio di cose dell'assicurato o da lui detenute e polizza incendio pari al valore a nuovo o di rimpiazzo, a garanzia delle attrezzature, dell'arredo e della merce di proprieta' della concedente.",
+          "Durante il periodo di allestimento l'utilizzatore si obbliga ad essere munito di estintore.",
+          "La polizza conterra' inoltre espressamente la rinuncia dell'assicuratore alla rivalsa verso la concedente, la Proprieta' ed i singoli Operatori del Centro."
+        ]
       },
       {
         titolo: '8) Regolamento Interno.',
-        testo: `L'utilizzatore si obbliga a rispettare puntualmente gli orari di apertura e di chiusura del Centro, così come determinati nel Regolamento Interno del Centro, ed ogni altra prescrizione contenuta nel Regolamento stesso, che dichiara di avere ricevuto in copia, di avere attentamente letto ed accettato in ogni sua parte per quanto di sua competenza.`
+        paragrafi: [
+          "L'utilizzatore si obbliga a rispettare puntualmente gli orari di apertura e di chiusura del Centro, cosi' come determinati nel Regolamento Interno del Centro, ed ogni altra prescrizione contenuta nel Regolamento stesso, che dichiara di avere ricevuto in copia, di avere attentamente letto ed accettato in ogni sua parte per quanto di sua competenza."
+        ]
       },
       {
-        titolo: '9) Misure di contenimento e distanziamento sociale a carico dell\'utilizzatore',
-        testo: `a) Ogni operatore deve gestire autonomamente la distribuzione dei DPI al proprio personale;\n\nb) Eventuali file presso l'area espositiva devono essere gestite autonomamente;\n\nc) Ogni operatore deve gestire la propria comunicazione di servizio e di cortesia da apporre all'ingresso dell'area espositiva;\n\nd) Ogni operatore dovrà prevedere un doppio turno di pulizie ed igienizzazione della propria area espositiva.`
+        titolo: "9) Misure di contenimento e distanziamento sociale a carico dell'utilizzatore",
+        paragrafi: [
+          "a) Ogni operatore deve gestire autonomamente la distribuzione dei DPI al proprio personale;",
+          "b) Eventuali file presso l'area espositiva devono essere gestite autonomamente;",
+          "c) Ogni operatore deve gestire la propria comunicazione di servizio e di cortesia da apporre all'ingresso dell'area espositiva;",
+          "d) Ogni operatore dovra' prevedere un doppio turno di pulizie ed igienizzazione della propria area espositiva."
+        ]
       },
       {
         titolo: '10) Clausola risolutiva espressa.',
-        testo: `Viene espressamente convenuto che il verificarsi anche di uno solo dei comportamenti e/o delle circostanze di seguito descritte costituirà grave inadempimento e motivo di risoluzione del rapporto ai sensi e per gli effetti di cui all'art. 1456 c.c.:\n\nviolazione del disposto di cui all'art. 2 (esclusiva e destinazione d'uso)\n\nmodifiche al progetto di allestimento autorizzato, non consentite per iscritto (art. 5).\n\nNel caso in cui si verifichi una delle situazioni previste nel presente atto come inadempimento sanzionato con la clausola risolutiva espressa, e, comunque, alla cessazione del pattuito termine di cui all'art. 3, l'utilizzatore dovrà rimuovere tutto il materiale espositivo, dimostrativo e/o di arredo collocato nella porzione indicata nell'allegata planimetria sub A), entro e non oltre due giorni dal ricevimento della raccomandata contenente la dichiarazione della parte concedente di avvalersi della clausola risolutiva espressa.\n\nTrascorso il termine di due giorni dal ricevimento della raccomandata o trascorso il termine di durata indicato all'art. 3, senza che l'utilizzatore abbia provveduto a rimuovere il materiale espositivo, quest'ultimo presta sin d'ora il proprio consenso ed autorizzazione alla parte concedente (alla quale dà mandato irrevocabile ex art. 1723, II comma, c.c. al riguardo) a provvedervi direttamente mediante suoi incaricati, autorizzandola a rimuovere quanto ancora dovesse occupare gli spazi comuni ed a collocarlo in locali adibiti a deposito, il tutto a spese dell'utilizzatore. Decorsi ulteriori trenta giorni dalla rimozione senza che il materiale venga ritirato dall'utilizzatore, GESTIONE COMPLESSI COMMERCIALI è sin d'ora autorizzata a smaltirlo presso una pubblica discarica.`
+        paragrafi: [
+          "Viene espressamente convenuto che il verificarsi anche di uno solo dei comportamenti e/o delle circostanze di seguito descritte costituira' grave inadempimento e motivo di risoluzione del rapporto ai sensi e per gli effetti di cui all'art. 1456 c.c.:",
+          "violazione del disposto di cui all'art. 2 (esclusiva e destinazione d'uso)",
+          "modifiche al progetto di allestimento autorizzato, non consentite per iscritto (art. 5).",
+          "Nel caso in cui si verifichi una delle situazioni previste nel presente atto come inadempimento sanzionato con la clausola risolutiva espressa, e, comunque, alla cessazione del pattuito termine di cui all'art. 3, l'utilizzatore dovra' rimuovere tutto il materiale espositivo, dimostrativo e/o di arredo collocato nella porzione indicata nell'allegata planimetria sub A), entro e non oltre due giorni dal ricevimento della raccomandata contenente la dichiarazione della parte concedente di avvalersi della clausola risolutiva espressa.",
+          "Trascorso il termine di due giorni dal ricevimento della raccomandata o trascorso il termine di durata indicato all'art. 3, senza che l'utilizzatore abbia provveduto a rimuovere il materiale espositivo, quest'ultimo presta sin d'ora il proprio consenso ed autorizzazione alla parte concedente (alla quale da' mandato irrevocabile ex art. 1723, II comma, c.c. al riguardo) a provvedervi direttamente mediante suoi incaricati, autorizzandola a rimuovere quanto ancora dovesse occupare gli spazi comuni ed a collocarlo in locali adibiti a deposito, il tutto a spese dell'utilizzatore. Decorsi ulteriori trenta giorni dalla rimozione senza che il materiale venga ritirato dall'utilizzatore, GESTIONE COMPLESSI COMMERCIALI e' sin d'ora autorizzata a smaltirlo presso una pubblica discarica."
+        ]
       }
     ];
 
@@ -311,12 +437,13 @@ Deno.serve(async (req) => {
       doc.setFont('helvetica', 'normal');
       addLine(6);
 
-      const paragrafi = art.testo.split('\n\n');
-      for (const par of paragrafi) {
+      for (const par of art.paragrafi) {
         checkPage(10);
-        const lines = doc.splitTextToSize(sanitize(par.replace(/\n/g, ' ')), pw);
-        doc.text(lines, lm, y);
-        y += lines.length * 5.5;
+        if (Array.isArray(par)) {
+          printMixedParagraph(par);
+        } else {
+          printParagraph(par);
+        }
         addLine(3);
       }
       addLine(4);
