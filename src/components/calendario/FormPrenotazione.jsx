@@ -23,6 +23,8 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     stato: 'confermata',
     note: ''
   });
+  const [conflittiDisponibilita, setConflittiDisponibilita] = useState({});
+  const [allPrenotazioni, setAllPrenotazioni] = useState([]);
 
   useEffect(() => {
     if (prenotazione) {
