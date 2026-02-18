@@ -230,135 +230,133 @@ export default function Dashboard({ centroSelezionato }) {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Dashboard</h1>
-        <p className="text-slate-600">{centroSelezionato?.nome}</p>
+    <div className="p-4 md:p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-1">Dashboard</h1>
+        <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
+      {/* Stats Grid - 2 cols on mobile, 3 on md, 6 on lg */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-6">
         {/* Spazi Occupati */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1 md:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Spazi affittati attualmente
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Spazi affittati
               </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-blue-600" />
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-blue-600" />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800 mb-2">
               {stats.spaziOccupati} / {stats.spaziTotali}
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
                   style={{ width: `${percentualeOccupazione}%` }}
                 ></div>
               </div>
-              <span className="text-sm font-medium text-blue-600">{percentualeOccupazione}%</span>
+              <span className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</span>
             </div>
           </CardContent>
         </Card>
 
         {/* Incassi Mese */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
                 Incassi Mese
               </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-green-600" />
+              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4 text-green-600" />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
               {formatCurrency(stats.incassiMese)}
             </div>
             <p className="text-xs text-slate-500">
-              {format(new Date(), 'MMMM yyyy', { locale: it })}
+              {format(new Date(), 'MMM yyyy', { locale: it })}
             </p>
           </CardContent>
         </Card>
 
         {/* Incassi Anno / Budget */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Incassi Anno / Budget
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Incassi Anno
               </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <Target className="w-5 h-5 text-emerald-600" />
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                <Target className="w-4 h-4 text-emerald-600" />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
               {formatCurrency(stats.incassiAnno)}
             </div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all"
                   style={{ width: `${Math.min(percentualeBudget, 100)}%` }}
                 ></div>
               </div>
-              <span className="text-sm font-medium text-emerald-600">{percentualeBudget}%</span>
+              <span className="text-xs font-medium text-emerald-600">{percentualeBudget}%</span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 truncate">
               Budget: {formatCurrency(stats.budgetAnno)}
             </p>
           </CardContent>
         </Card>
 
-
-
         {/* Affitto Medio Giornaliero */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Affitto Medio Giornaliero
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Affitto Medio / gg
               </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center">
-                <BarChart2 className="w-5 h-5 text-orange-600" />
+              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                <BarChart2 className="w-4 h-4 text-orange-600" />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
               {formatCurrency(stats.affittoMedioGiornaliero)}
             </div>
-            <p className="text-xs text-slate-500">Media su tutti gli affitti</p>
+            <p className="text-xs text-slate-500">Media affitti</p>
           </CardContent>
         </Card>
 
         {/* Tasso Occupazione Annuale */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                Tasso Occupazione Annuale
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Tasso Occupaz.
               </CardTitle>
-              <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
-                <Percent className="w-5 h-5 text-teal-600" />
+              <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                <Percent className="w-4 h-4 text-teal-600" />
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-2">
               {stats.tassoOccupazioneAnnuale.toFixed(1)}%
             </div>
             <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all"
                   style={{ width: `${Math.min(stats.tassoOccupazioneAnnuale, 100)}%` }}
@@ -367,40 +365,43 @@ export default function Dashboard({ centroSelezionato }) {
             </div>
           </CardContent>
         </Card>
+      </div>
 
+      {/* Bottom cards - full width on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         {/* Affitti Correnti */}
-        <Card className="md:col-span-2 lg:col-span-3 bg-white border-slate-200 hover:shadow-lg transition-shadow">
-          <CardHeader>
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
-              <CardTitle className="text-lg font-semibold text-slate-800">
+              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
                 Affitti Correnti
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {stats.affittiCorrenti?.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">
+              <p className="text-slate-500 text-center py-4 text-sm">
                 Nessun affitto attivo al momento
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {stats.affittiCorrenti?.map((prenotazione) => (
                   <div 
                     key={prenotazione.id}
-                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100 hover:bg-green-100 transition-colors"
+                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 text-sm truncate">
                         {prenotazione.cliente?.ragione_sociale}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-xs text-slate-600">
                         Spazio {prenotazione.spazio?.numero_spazio}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-slate-700">
-                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-slate-700">
+                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
                       <p className="text-sm font-semibold text-green-600">
                         {formatCurrency(prenotazione.prezzo_totale)}
@@ -414,38 +415,38 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Prossimi Affitti */}
-        <Card className="md:col-span-2 lg:col-span-3 bg-white border-slate-200 hover:shadow-lg transition-shadow">
-          <CardHeader>
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
-              <CardTitle className="text-lg font-semibold text-slate-800">
+              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
                 Prossimi Affitti (1 Mese)
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {stats.prossimiAffitti.length === 0 ? (
-              <p className="text-slate-500 text-center py-4">
+              <p className="text-slate-500 text-center py-4 text-sm">
                 Nessun affitto nei prossimi 30 giorni
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {stats.prossimiAffitti.map((prenotazione) => (
                   <div 
                     key={prenotazione.id}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-800">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 text-sm truncate">
                         {prenotazione.cliente?.ragione_sociale}
                       </p>
-                      <p className="text-sm text-slate-600">
+                      <p className="text-xs text-slate-600">
                         Spazio {prenotazione.spazio?.numero_spazio}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-slate-700">
-                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-slate-700">
+                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
                       <p className="text-sm font-semibold text-green-600">
                         {formatCurrency(prenotazione.prezzo_totale)}
