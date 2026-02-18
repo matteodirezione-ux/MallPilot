@@ -153,9 +153,7 @@ Deno.serve(async (req) => {
     addLine(6);
     text('VIA DEI MERCANTI 3', rm - 60, y);
     addLine(6);
-    text('47122', rm - 60, y);
-    addLine(6);
-    text("FORLI' (FC)", rm - 60, y);
+    text("47122 FORLI' (FC)", rm - 60, y);
     addLine(10);
 
     // --- OGGETTO ---
