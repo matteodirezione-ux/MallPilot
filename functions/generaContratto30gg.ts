@@ -197,7 +197,7 @@ Deno.serve(async (req) => {
       },
       {
         titolo: '4) Corrispettivo.',
-        testo: `Il corrispettivo per le prestazioni di cui al precedente articolo 1) e per l'intera durata, viene stabilito in € ${prezzoNettoFmt.numerico} (Euro ${prezzoNettoFmt.lettere}) più IVA (€ ${ivaFmt.numerico}) per un importo totale pari ad € ${prezzoTotaleFmt.numerico} (Euro ${prezzoTotaleFmt.lettere}) e dovrà essere corrisposto anticipatamente, con rimessa diretta al momento della sottoscrizione del presente atto, sul conto corrente bancario con IBAN ${centro.iban || '________________________'}.`
+        testo: `Il corrispettivo per le prestazioni di cui al precedente articolo 1) e per l'intera durata, viene stabilito in Euro ${prezzoNettoFmt.numerico} (Euro ${prezzoNettoFmt.lettere}) piu' IVA (Euro ${ivaFmt.numerico}) per un importo totale pari ad Euro ${prezzoTotaleFmt.numerico} (Euro ${prezzoTotaleFmt.lettere}) e dovra' essere corrisposto anticipatamente, con rimessa diretta al momento della sottoscrizione del presente atto, sul conto corrente bancario con IBAN ${centro.iban || '________________________'}.`
       },
       {
         titolo: '5) Allestimento.',
