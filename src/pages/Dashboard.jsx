@@ -305,7 +305,7 @@ export default function Dashboard({ centroSelezionato }) {
 
 
         {/* Affitti Correnti */}
-        <Card className="md:col-span-2 lg:col-span-6 bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="md:col-span-2 lg:col-span-2 bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
