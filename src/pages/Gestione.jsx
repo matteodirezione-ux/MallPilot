@@ -304,12 +304,12 @@ export default function Gestione({ user }) {
         <p className="text-slate-600">Amministra centri, direttori e budget</p>
       </div>
 
-      <Tabs defaultValue="centri" className="w-full">
+      <Tabs defaultValue={isDirettore ? "vigilanza" : "centri"} className="w-full">
         <TabsList className="mb-6">
-          <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>
-          <TabsTrigger value="direttori">Direttori</TabsTrigger>
+          {isPropieta && <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>}
+          {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
           <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
-          <TabsTrigger value="budget">Budget</TabsTrigger>
+          {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
         </TabsList>
 
         {/* === TAB CENTRI === */}
