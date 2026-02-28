@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
+import TasksDashboard from '@/components/dashboard/TasksDashboard';
 
 export default function Dashboard({ centroSelezionato }) {
   const [stats, setStats] = useState({
