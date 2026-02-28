@@ -135,13 +135,17 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     onSave(dataToSave);
   };
 
+  const rowClass = "flex items-start gap-3";
+  const labelClass = "w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
+  const fieldClass = "flex-1 min-w-0";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {Object.keys(conflittiDisponibilita).length > 0 && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
           <AlertDescription className="text-red-800 ml-2">
-            <div className="font-medium mb-2">Postazioni non disponibili nei giorni selezionati:</div>
+            <div className="font-medium mb-1">Postazioni non disponibili:</div>
             {Object.entries(conflittiDisponibilita).map(([spazioId, conflitti]) => {
               const spazio = spazi.find(s => s.id === spazioId);
               const dateRange = conflitti[0] 
@@ -156,19 +160,17 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           </AlertDescription>
         </Alert>
       )}
-      <div className="grid grid-cols-2 gap-4">
 
-        {/* Spazi multipli */}
-        <div className="col-span-2">
-          <Label>Spazi * <span className="text-slate-400 font-normal text-xs">(puoi selezionare più spazi)</span></Label>
-          
-          {/* Spazi già selezionati */}
+      {/* Spazi */}
+      <div className={rowClass}>
+        <span className={labelClass}>Spazi *<span className="block text-xs text-slate-400 font-normal">(più spazi)</span></span>
+        <div className={fieldClass}>
           {formData.spazi_ids.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2 mt-1">
+            <div className="flex flex-wrap gap-1 mb-1">
               {formData.spazi_ids.map(id => {
                 const spazio = spazi.find(s => s.id === id);
                 return spazio ? (
-                  <Badge key={id} variant="secondary" className="flex items-center gap-1 px-2 py-1">
+                  <Badge key={id} variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-xs">
                     <span>N.{spazio.numero_spazio}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}</span>
                     <button type="button" onClick={() => handleRemoveSpazio(id)} className="ml-1 hover:text-red-500">
                       <X className="w-3 h-3" />
@@ -178,12 +180,10 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
               })}
             </div>
           )}
-
-          {/* Dropdown per aggiungere spazio */}
           {spaziDisponibili.length > 0 && (
             <Select onValueChange={handleAddSpazio} value="">
-              <SelectTrigger>
-                <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona uno spazio" : "Aggiungi un altro spazio..."} />
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona spazio" : "Aggiungi spazio..."} />
               </SelectTrigger>
               <SelectContent>
                 {spaziDisponibili.map((spazio) => (
@@ -195,11 +195,14 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             </Select>
           )}
         </div>
+      </div>
 
-        <div className="col-span-2">
-          <Label htmlFor="cliente_id">Cliente *</Label>
+      {/* Cliente */}
+      <div className={rowClass}>
+        <label htmlFor="cliente_id" className={labelClass}>Cliente *</label>
+        <div className={fieldClass}>
           <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue placeholder="Seleziona un cliente" />
             </SelectTrigger>
             <SelectContent>
@@ -211,64 +214,76 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="data_inizio">Data Inizio *</Label>
+      {/* Date */}
+      <div className={rowClass}>
+        <label className={labelClass}>Periodo *</label>
+        <div className={`${fieldClass} flex gap-2`}>
           <Input
-            id="data_inizio"
             type="date"
             value={formData.data_inizio}
             onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })}
+            className="h-8 text-sm flex-1"
           />
-        </div>
-
-        <div>
-          <Label htmlFor="data_fine">Data Fine *</Label>
+          <span className="pt-1.5 text-slate-400 text-sm">→</span>
           <Input
-            id="data_fine"
             type="date"
             value={formData.data_fine}
             onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })}
+            className="h-8 text-sm flex-1"
           />
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="prezzo_totale">Prezzo Totale (€) *</Label>
-          <Input
-            id="prezzo_totale"
-            type="number"
-            step="0.01"
-            value={formData.prezzo_totale}
-            onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })}
-          />
+      {/* Prezzi */}
+      <div className={rowClass}>
+        <label className={labelClass}>Prezzo *</label>
+        <div className={`${fieldClass} flex gap-2`}>
+          <div className="flex-1">
+            <Input
+              type="number"
+              step="0.01"
+              value={formData.prezzo_totale}
+              onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })}
+              placeholder="Totale (€)"
+              className="h-8 text-sm"
+            />
+          </div>
+          <div className="flex-1">
+            <Input
+              type="number"
+              step="0.01"
+              value={formData.prezzo_mensile}
+              onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })}
+              placeholder="Mensile (€)"
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
+      </div>
 
-        <div>
-          <Label htmlFor="prezzo_mensile">Prezzo Mensile (€)</Label>
-          <Input
-            id="prezzo_mensile"
-            type="number"
-            step="0.01"
-            value={formData.prezzo_mensile}
-            onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })}
-          />
-        </div>
-
-        <div className="col-span-2">
-          <Label htmlFor="materiale_dimostrativo">Materiale Dimostrativo *</Label>
+      {/* Materiale dimostrativo */}
+      <div className={rowClass}>
+        <label htmlFor="materiale_dimostrativo" className={labelClass}>Materiale *</label>
+        <div className={fieldClass}>
           <Textarea
             id="materiale_dimostrativo"
             value={formData.materiale_dimostrativo}
             onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })}
-            placeholder="Descrizione del materiale dimostrativo/pubblicitario da esporre"
+            placeholder="Materiale dimostrativo/pubblicitario"
             rows={2}
+            className="text-sm"
           />
         </div>
+      </div>
 
-        <div className="col-span-2">
-          <Label htmlFor="stato">Stato</Label>
+      {/* Stato */}
+      <div className={rowClass}>
+        <label htmlFor="stato" className={labelClass}>Stato</label>
+        <div className={fieldClass}>
           <Select value={formData.stato} onValueChange={(value) => setFormData({ ...formData, stato: value })}>
-            <SelectTrigger>
+            <SelectTrigger className="h-8 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -279,9 +294,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             </SelectContent>
           </Select>
         </div>
+      </div>
 
-        <div className="col-span-2">
-          <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+      {/* Elettricità */}
+      <div className={rowClass}>
+        <span className={labelClass}>Elettricità</span>
+        <div className={`${fieldClass} flex items-center pt-1.5`}>
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={formData.necessita_elettricita}
@@ -289,26 +308,30 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
               className="w-4 h-4 accent-yellow-500"
             />
             <Zap className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm font-medium text-slate-700">Necessita di elettricità</span>
+            <span className="text-sm text-slate-700">Necessita di elettricità</span>
           </label>
         </div>
+      </div>
 
-        <div className="col-span-2">
-          <Label htmlFor="note">Note</Label>
+      {/* Note */}
+      <div className={rowClass}>
+        <label htmlFor="note" className={labelClass}>Note</label>
+        <div className={fieldClass}>
           <Textarea
             id="note"
             value={formData.note}
             onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-            rows={3}
+            rows={2}
+            className="text-sm"
           />
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+      <div className="flex justify-end gap-3 pt-2">
+        <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           Annulla
         </Button>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
           {prenotazione ? 'Aggiorna' : 'Crea'}
         </Button>
       </div>
