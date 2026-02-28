@@ -54,6 +54,7 @@ import Documenti from './pages/Documenti';
 import Gestione from './pages/Gestione';
 import SpaziExpo from './pages/SpaziExpo';
 import CalendarioVigilanza from './pages/CalendarioVigilanza';
+import Task from './pages/Task';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "Gestione": Gestione,
     "SpaziExpo": SpaziExpo,
     "CalendarioVigilanza": CalendarioVigilanza,
+    "Task": Task,
 }
 
 export const pagesConfig = {
