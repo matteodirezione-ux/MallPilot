@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { X, Plus, AlertTriangle, Zap } from 'lucide-react';
+import { X, Plus, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval } from 'date-fns';
