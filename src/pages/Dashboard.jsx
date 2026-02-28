@@ -477,50 +477,48 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
-        {/* Riepilogo Eventi */}
+        {/* Prossimi Eventi */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
               <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
-                Riepilogo Eventi
+                Prossimi Eventi
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {/* Giorni Evento */}
-              <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100">
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-medium text-slate-700">Giorni Evento</span>
-                </div>
-                <span className="text-lg font-bold text-purple-600">{stats.eventStats.giorniEvento}</span>
-              </div>
-
-              {/* Eventi Correnti */}
-              <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-indigo-600" />
-                  <span className="text-sm font-medium text-slate-700">Oggi</span>
-                </div>
-                <span className="text-lg font-bold text-indigo-600">{stats.eventStats.eventiCorrenti}</span>
-              </div>
-
-              {/* Prossimi Eventi */}
-              {stats.eventStats.prossimiEventi.length > 0 && (
-                <div className="space-y-2 mt-3 pt-3 border-t border-slate-200">
-                  {stats.eventStats.prossimiEventi.map(evento => (
-                    <div key={evento.id} className="text-xs text-slate-600">
-                      <p className="font-medium text-slate-700">{evento.cliente?.ragione_sociale || 'N.A.'}</p>
-                      <p className="text-slate-500">
-                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
+            {stats.eventStats.prossimiEventi.length === 0 ? (
+              <p className="text-slate-500 text-center py-4 text-sm">
+                Nessun evento nei prossimi giorni
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {stats.eventStats.prossimiEventi.map((evento) => (
+                  <div 
+                    key={evento.id}
+                    className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100"
+                  >
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 text-sm truncate">
+                        {evento.cliente?.ragione_sociale || 'N.A.'}
+                      </p>
+                      <p className="text-xs text-slate-600">
+                        {stats.eventStats.eventiCorrenti > 0 && evento.data_inizio === new Date().toISOString().split('T')[0] ? 'In corso' : 'Prossimo'}
                       </p>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-slate-700">
+                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
+                      </p>
+                      <p className="text-sm font-semibold text-purple-600">
+                        {stats.eventStats.giorniEvento} giorni
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
