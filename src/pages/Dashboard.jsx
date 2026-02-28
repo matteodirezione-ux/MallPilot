@@ -42,7 +42,8 @@ export default function Dashboard({ centroSelezionato }) {
       giorniEvento: 0,
       eventiCorrenti: 0,
       prossimiEventi: []
-    }
+    },
+    tasksList: []
   });
   const [loading, setLoading] = useState(true);
 
