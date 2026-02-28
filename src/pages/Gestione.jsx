@@ -32,15 +32,17 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [centriData, direttoriData, assegnazioniData, budgetsData] = await Promise.all([
+      const [centriData, direttoriData, vigilanzeData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.Direttore.list(),
+        base44.entities.Vigilanza.list(),
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
       
       setCentri(centriData);
       setDirettori(direttoriData);
+      setVigilanze(vigilanzeData);
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
