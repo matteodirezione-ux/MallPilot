@@ -46,10 +46,18 @@ export default function TaskPage({ centroSelezionato, user }) {
         const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri.filter(c => centriIds.includes(c.id)));
 
-        const assegnazioniCentri = await Promise.all(centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id })));
-        const emails = [...new Set(assegnazioniCentri.flat().map(a => a.user_email).filter(e => e !== user.email))];
+        // Carica TUTTE le vigilanze (non solo quelle assegnate agli stessi centri)
         const allVigilanze = await base44.entities.Vigilanza.list();
-        setVigilanze(allVigilanze.filter(v => emails.includes(v.email)));
+        setVigilanze(allVigilanze);
+
+        // Carica i dati del direttore dall'entità per avere il nome corretto
+        const direttoreData = await base44.entities.Direttore.filter({ email: user.email });
+        if (direttoreData.length > 0) {
+          setDirettori(direttoreData);
+        } else {
+          setDirettori([{ email: user.email, full_name: user.full_name }]);
+        }
+
         setLoading(false);
         return;
 
