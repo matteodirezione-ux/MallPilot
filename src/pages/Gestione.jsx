@@ -710,6 +710,81 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
   );
 }
 
+function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
+  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [] });
+
+  useEffect(() => {
+    if (data) {
+      const centriIds = assegnazioni.filter(a => a.user_email === data.email).map(a => a.centro_id);
+      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds });
+    } else {
+      setForm({ full_name: '', email: '', centri_ids: [] });
+    }
+  }, [data, open, assegnazioni]);
+
+  const toggleCentro = (centroId) => {
+    setForm(prev => ({
+      ...prev,
+      centri_ids: prev.centri_ids.includes(centroId)
+        ? prev.centri_ids.filter(id => id !== centroId)
+        : [...prev.centri_ids, centroId]
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (form.centri_ids.length === 0) {
+      toast.error('Seleziona almeno un centro');
+      return;
+    }
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Account Vigilanza' : 'Nuovo Account Vigilanza'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Nome e Cognome *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+          </div>
+          <div>
+            <Label>Email *</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={!!data} />
+          </div>
+          <div>
+            <Label>Centri da visualizzare *</Label>
+            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
+              {centri.filter(c => c.attivo).map(centro => (
+                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.centri_ids.includes(centro.id)}
+                    onChange={() => toggleCentro(centro.id)}
+                  />
+                  <span className="text-sm">{centro.nome}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          {!data && (
+            <p className="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg">
+              Verrà inviato un invito via email all'indirizzo specificato. L'utente potrà accedere solo al Calendario Vigilanza.
+            </p>
+          )}
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea e Invita'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function BudgetDialog({ open, data, centri, onClose, onSave }) {
   const [form, setForm] = useState({ centro_id: '', anno: new Date().getFullYear(), importo_budget: '' });
 
