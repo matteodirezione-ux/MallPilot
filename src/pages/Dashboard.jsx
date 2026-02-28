@@ -72,18 +72,18 @@ export default function Dashboard({ centroSelezionato }) {
         ? await base44.entities.Prenotazione.list()
         : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
 
-      // Affitti correnti (in corso oggi)
+      // Affitti correnti (in corso oggi) - escludi eventi
       const affittiCorrentiList = prenotazioni.filter(p => {
         const dataInizio = new Date(p.data_inizio);
         const dataFine = new Date(p.data_fine);
-        return isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
+        return !p.is_event && isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
                p.stato !== 'cancellata';
       });
 
-      // Prossimi affitti (prossimo mese, esclusi quelli già in corso)
+      // Prossimi affitti (prossimo mese, esclusi quelli già in corso e gli eventi)
       const prossimiAffitti = prenotazioni.filter(p => {
         const dataInizio = new Date(p.data_inizio);
-        return dataInizio > now &&
+        return !p.is_event && dataInizio > now &&
                isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && 
                p.stato !== 'cancellata';
       });
