@@ -530,24 +530,30 @@ function SpazioCard({ spazio, onEdit, onDelete }) {
               <p className="text-sm text-slate-600">{spazio.nome}</p>
             )}
           </div>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onEdit(spazio)}
-              className="h-8 w-8 text-blue-600"
-            >
-              <Pencil className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onDelete(spazio.id)}
-              className="h-8 w-8 text-red-600"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
+          {(onEdit || onDelete) && (
+            <div className="flex gap-1">
+              {onEdit && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(spazio)}
+                  className="h-8 w-8 text-blue-600"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(spazio.id)}
+                  className="h-8 w-8 text-red-600"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         {spazio.descrizione && (
