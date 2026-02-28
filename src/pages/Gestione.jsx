@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target } from 'lucide-react';
+import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Gestione({ user }) {
