@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import CalendarioVigilanzaMensile from '@/components/calendario/CalendarioVigilanzaMensile';
 import { Building2, ChevronDown } from 'lucide-react';
 
-export default function CalendarioVigilanza() {
+export default function CalendarioVigilanza({ centroSelezionato: centroFromLayout, user }) {
   const [prenotazioni, setPrenotazioni] = useState([]);
   const [spazi, setSpazi] = useState([]);
   const [clienti, setClienti] = useState([]);
@@ -27,19 +27,38 @@ export default function CalendarioVigilanza() {
 
   useEffect(() => {
     const init = async () => {
-      const allCentri = await base44.entities.CentroCommerciale.list();
-      setCentri(allCentri);
-      if (allCentri.length > 0) {
-        const savedId = localStorage.getItem('vigilanza_centro_id');
-        const centro = allCentri.find(c => c.id === savedId) || allCentri[0];
-        setCentroSelezionato(centro);
-        await loadCentroData(centro);
+      // Se l'utente è vigilanza, usa i centri assegnati passati dal layout
+      if (user?.tipo_account === 'vigilanza') {
+        if (centroFromLayout) {
+          // Carica tutti i centri assegnati tramite assegnazioni
+          const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
+          const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
+          const allCentri = await base44.entities.CentroCommerciale.list();
+          const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id) && c.attivo);
+          setCentri(centriAssegnati);
+          const savedId = localStorage.getItem('vigilanza_centro_id');
+          const centro = centriAssegnati.find(c => c.id === savedId) || centroFromLayout;
+          setCentroSelezionato(centro);
+          await loadCentroData(centro);
+        } else {
+          setLoading(false);
+        }
       } else {
-        setLoading(false);
+        // Proprietà o direttore: vede tutti i centri
+        const allCentri = await base44.entities.CentroCommerciale.list();
+        setCentri(allCentri);
+        if (allCentri.length > 0) {
+          const savedId = localStorage.getItem('vigilanza_centro_id');
+          const centro = allCentri.find(c => c.id === savedId) || allCentri[0];
+          setCentroSelezionato(centro);
+          await loadCentroData(centro);
+        } else {
+          setLoading(false);
+        }
       }
     };
     init();
-  }, []);
+  }, [user]);
 
   const handleCentroChange = async (centroId) => {
     const centro = centri.find(c => c.id === centroId);
