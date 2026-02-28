@@ -461,7 +461,7 @@ export default function Dashboard({ centroSelezionato }) {
       </div>
 
       {/* Bottom cards - full width on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:gap-6">
         {/* Task per Giorno */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 lg:col-span-2">
           <CardHeader className="pb-3">
