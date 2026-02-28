@@ -29,59 +29,48 @@ export default function TaskPage({ centroSelezionato, user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      let taskFilter = {};
-
       if (user?.tipo_account === 'vigilanza') {
-        taskFilter = { assegnato_a_email: user.email };
+        const assegnati = await base44.entities.Task.filter({ assegnato_a_email: user.email });
+        setTasks(assegnati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+
       } else if (user?.tipo_account === 'direttore') {
-        // Direttore vede i task assegnati a lui e quelli che ha creato
         const [assegnati, creati] = await Promise.all([
           base44.entities.Task.filter({ assegnato_a_email: user.email }),
           base44.entities.Task.filter({ assegnato_da_email: user.email }),
         ]);
-        const tutti = [...assegnati, ...creati];
-        const unici = Array.from(new Map(tutti.map(t => [t.id, t])).values());
+        const unici = Array.from(new Map([...assegnati, ...creati].map(t => [t.id, t])).values());
         setTasks(unici.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
 
-        // Carica vigilanze assegnate ai centri del direttore
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
         const allCentri = await base44.entities.CentroCommerciale.list();
-        const centriDirettore = allCentri.filter(c => centriIds.includes(c.id));
-        setCentri(centriDirettore);
+        setCentri(allCentri.filter(c => centriIds.includes(c.id)));
 
-        // Carica vigilanze dei centri del direttore
-        const assegnazioniCentri = await Promise.all(
-          centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id }))
-        );
+        const assegnazioniCentri = await Promise.all(centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id })));
         const emails = [...new Set(assegnazioniCentri.flat().map(a => a.user_email).filter(e => e !== user.email))];
         const allVigilanze = await base44.entities.Vigilanza.list();
         setVigilanze(allVigilanze.filter(v => emails.includes(v.email)));
         setLoading(false);
         return;
+
       } else if (user?.tipo_account === 'proprieta') {
-        // Proprietà vede tutti i task
-        const allCentri = await base44.entities.CentroCommerciale.list();
+        const [allCentri, allDirettori, allVigilanze] = await Promise.all([
+          base44.entities.CentroCommerciale.list(),
+          base44.entities.Direttore.list(),
+          base44.entities.Vigilanza.list(),
+        ]);
         setCentri(allCentri);
-        const allDirettori = await base44.entities.Direttore.list();
-        const allVigilanze = await base44.entities.Vigilanza.list();
         setDirettori(allDirettori);
         setVigilanze(allVigilanze);
       }
 
-      // Filtra per centro se selezionato
+      const allTask = await base44.entities.Task.list();
+      let filtrati = allTask;
       if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') {
-        taskFilter.centro_id = centroSelezionato.id;
-        const allTask = await base44.entities.Task.list();
-        const filtrati = allTask.filter(t =>
-          t.centro_id === centroSelezionato.id ||
-          (!t.centro_id && user?.tipo_account === 'proprieta')
-        );
-        setTasks(filtrati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
-      } else {
-        const allTask = await base44.entities.Task.list();
-        setTasks(allTask.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+        filtrati = allTask.filter(t => t.centro_id === centroSelezionato.id || !t.centro_id);
       }
+      setTasks(filtrati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+
     } catch (err) {
       console.error(err);
     }
@@ -90,14 +79,11 @@ export default function TaskPage({ centroSelezionato, user }) {
 
   const generaTaskRicorrenti = async (task, savedId) => {
     if (!task.ricorrente || !task.data_scadenza) return;
-
     const occorrenze = [];
     let data = parseISO(task.data_scadenza);
     const fineRicorrenza = task.ricorrenza_fine ? parseISO(task.ricorrenza_fine) : addYears(data, 1);
     let count = 0;
-    const maxOccorrenze = 52;
-
-    while (count < maxOccorrenze) {
+    while (count < 52) {
       let prossima;
       switch (task.ricorrenza_tipo) {
         case 'giornaliero': prossima = addDays(data, 1); break;
@@ -113,54 +99,42 @@ export default function TaskPage({ centroSelezionato, user }) {
         }
         default: prossima = addWeeks(data, 1);
       }
-
       if (prossima > fineRicorrenza) break;
       data = prossima;
       count++;
-
-      occorrenze.push({
-        ...task,
-        data_scadenza: format(data, 'yyyy-MM-dd'),
-        stato: 'da_fare',
-        ricorrente: false,
-        task_padre_id: savedId,
-        id: undefined,
-        created_date: undefined,
-        updated_date: undefined,
-      });
+      occorrenze.push({ ...task, data_scadenza: format(data, 'yyyy-MM-dd'), stato: 'da_fare', ricorrente: false, task_padre_id: savedId, id: undefined, created_date: undefined, updated_date: undefined });
     }
-
-    if (occorrenze.length > 0) {
-      await base44.entities.Task.bulkCreate(occorrenze);
-    }
+    if (occorrenze.length > 0) await base44.entities.Task.bulkCreate(occorrenze);
   };
 
   const handleSave = async (data) => {
-    if (taskSelezionato) {
+    if (taskSelezionato?.id) {
+      // Modifica task esistente
       await base44.entities.Task.update(taskSelezionato.id, data);
+    } else if (Array.isArray(data)) {
+      // Task multipli: crea con stesso gruppo_id
+      const gruppoId = `gruppo_${Date.now()}`;
+      const taskConGruppo = data.map(t => ({ ...t, gruppo_id: gruppoId }));
+      const saved = await Promise.all(taskConGruppo.map(t => base44.entities.Task.create(t)));
+      // Gestisci ricorrenza per ognuno
+      await Promise.all(saved.map((s, i) => data[i].ricorrente ? generaTaskRicorrenti(data[i], s.id) : Promise.resolve()));
     } else {
+      // Task singolo
       const saved = await base44.entities.Task.create(data);
-      if (data.ricorrente) {
-        await generaTaskRicorrenti(data, saved.id);
-      }
+      if (data.ricorrente) await generaTaskRicorrenti(data, saved.id);
     }
     setDialogOpen(false);
     setTaskSelezionato(null);
     loadData();
   };
 
-  const handleEdit = (task) => {
-    setTaskSelezionato(task);
-    setDialogOpen(true);
-  };
-
+  const handleEdit = (task) => { setTaskSelezionato(task); setDialogOpen(true); };
   const handleDelete = async (id) => {
     if (window.confirm('Eliminare questo task?')) {
       await base44.entities.Task.delete(id);
       loadData();
     }
   };
-
   const handleToggleStato = async (task) => {
     const nuovoStato = task.stato === 'completato' ? 'da_fare' : 'completato';
     await base44.entities.Task.update(task.id, { stato: nuovoStato });
@@ -170,24 +144,57 @@ export default function TaskPage({ centroSelezionato, user }) {
   const canEdit = (task) => {
     if (user?.tipo_account === 'vigilanza') return false;
     if (user?.tipo_account === 'proprieta') return true;
-    // Direttore può modificare solo i task che ha creato
     return task.assegnato_da_email === user?.email;
   };
 
-  const taskFiltrati = tasks.filter(t => {
+  // Per la proprietà: accorpa i task con stesso gruppo_id in un unico task virtuale
+  const taskPerVista = React.useMemo(() => {
+    if (user?.tipo_account !== 'proprieta') return tasks;
+
+    const gruppi = {};
+    const singoli = [];
+
+    for (const t of tasks) {
+      if (t.gruppo_id) {
+        if (!gruppi[t.gruppo_id]) gruppi[t.gruppo_id] = [];
+        gruppi[t.gruppo_id].push(t);
+      } else {
+        singoli.push(t);
+      }
+    }
+
+    const accorpati = Object.entries(gruppi).map(([gruppoId, lista]) => {
+      const tutti_completati = lista.every(t => t.stato === 'completato');
+      const qualcuno_completato = lista.some(t => t.stato === 'completato');
+      const statoAccorpato = tutti_completati ? 'completato' : (qualcuno_completato ? 'in_corso' : lista[0].stato);
+      return {
+        ...lista[0],
+        id: `gruppo_${gruppoId}`,
+        _gruppo_id: gruppoId,
+        _task_figli: lista,
+        _count: lista.length,
+        _completati: lista.filter(t => t.stato === 'completato').length,
+        stato: statoAccorpato,
+        assegnato_a_nome: `${lista.length} persone/centri`,
+        _is_gruppo: true,
+      };
+    });
+
+    return [...singoli, ...accorpati].sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
+  }, [tasks, user]);
+
+  const taskFiltrati = taskPerVista.filter(t => {
     if (filtroStato !== 'tutti' && t.stato !== filtroStato) return false;
     if (filtroPriorita !== 'tutti' && t.priorita !== filtroPriorita) return false;
-    if (cerca && !t.titolo.toLowerCase().includes(cerca.toLowerCase())) return false;
+    if (cerca && !t.titolo?.toLowerCase().includes(cerca.toLowerCase())) return false;
     return true;
   });
 
   const canCreate = user?.tipo_account !== 'vigilanza';
-
   if (!user) return null;
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -206,7 +213,6 @@ export default function TaskPage({ centroSelezionato, user }) {
         )}
       </div>
 
-      {/* Filtri */}
       <div className="flex flex-wrap gap-2 mb-5">
         <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -234,7 +240,6 @@ export default function TaskPage({ centroSelezionato, user }) {
         </Select>
       </div>
 
-      {/* Vista lista / calendario */}
       <Tabs defaultValue="lista">
         <TabsList className="mb-4">
           <TabsTrigger value="lista" className="gap-2">
@@ -275,7 +280,7 @@ export default function TaskPage({ centroSelezionato, user }) {
         open={dialogOpen}
         onClose={() => { setDialogOpen(false); setTaskSelezionato(null); }}
         onSave={handleSave}
-        task={taskSelezionato}
+        task={taskSelezionato?._is_gruppo ? null : taskSelezionato}
         user={user}
         centri={centri}
         direttori={direttori}
