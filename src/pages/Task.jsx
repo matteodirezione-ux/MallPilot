@@ -263,6 +263,10 @@ export default function TaskPage({ centroSelezionato, user }) {
           <CalendarioTask
             tasks={taskFiltrati}
             onTaskClick={handleEdit}
+            onDayClick={(giorno) => {
+              setTaskSelezionato({ data_scadenza: format(giorno, 'yyyy-MM-dd') });
+              setDialogOpen(true);
+            }}
           />
         </TabsContent>
       </Tabs>
