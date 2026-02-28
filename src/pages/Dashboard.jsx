@@ -165,6 +165,33 @@ export default function Dashboard({ centroSelezionato }) {
         totali: tasksList.length
       };
 
+      // Event statistics
+      const allPrenotazioni = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Prenotazione.list()
+        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
+      
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      
+      const eventiCorrenti = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
+      const prossimiEventi = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
+      
+      let giorniEvento = 0;
+      allPrenotazioni.forEach(p => {
+        if (p.is_event && (p.stato === 'confermata' || p.stato === 'in_corso')) {
+          const inizio = new Date(p.data_inizio);
+          const fine = new Date(p.data_fine);
+          const giorni = Math.ceil((fine - inizio) / (1000 * 60 * 60 * 24)) + 1;
+          giorniEvento += giorni;
+        }
+      });
+
+      const eventStats = {
+        giorniEvento,
+        eventiCorrenti: eventiCorrenti.length,
+        prossimiEventi
+      };
+
       // Affitto medio giornaliero (solo prenotazioni non cancellate con durata > 0)
       const prenotazioniValide = prenotazioni.filter(p => p.stato !== 'cancellata' && p.prezzo_totale > 0);
       let affittoMedioGiornaliero = 0;
