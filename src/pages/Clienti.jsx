@@ -132,6 +132,7 @@ export default function Clienti({ centroSelezionato }) {
   const handleEdit = (cliente) => {
     setEditingCliente(cliente);
     setFormData({ ...cliente });
+    setWizardStep(0);
     setDialogOpen(true);
   };
 
