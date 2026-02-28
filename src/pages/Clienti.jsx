@@ -37,6 +37,7 @@ export default function Clienti({ centroSelezionato }) {
     referente_email: '',
     note: ''
   });
+  const [wizardStep, setWizardStep] = useState(0);
 
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
