@@ -153,6 +153,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
     { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
+    { name: 'Calendario Vigilanza', page: 'CalendarioVigilanza', icon: Calendar, roles: ['vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta'] },
