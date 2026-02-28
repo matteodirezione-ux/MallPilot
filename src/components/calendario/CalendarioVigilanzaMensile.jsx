@@ -1,11 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth }) {
+  const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
   const giorni = useMemo(() => {
     return eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
   }, [currentMonth]);
