@@ -88,6 +88,20 @@ export default function Layout({ children, currentPageName }) {
           const centroIniziale = allCentri.find(c => c.id === savedCentroId) || allCentri[0];
           setCentroSelezionato(centroIniziale);
         }
+      } else if (userData.tipo_account === 'vigilanza') {
+        const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
+        const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
+        
+        if (centriIds.length > 0) {
+          const allCentri = await base44.entities.CentroCommerciale.list();
+          const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id) && c.attivo);
+          setCentri(centriAssegnati);
+          if (centriAssegnati.length > 0) {
+            const savedCentroId = localStorage.getItem('centroSelezionatoId');
+            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati[0];
+            setCentroSelezionato(centroIniziale);
+          }
+        }
       } else if (userData.tipo_account === 'direttore') {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
