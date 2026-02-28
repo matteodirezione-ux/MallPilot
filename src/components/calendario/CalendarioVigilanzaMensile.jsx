@@ -108,6 +108,72 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
           })}
         </div>
 
+        {/* Dialog dettaglio prenotazione */}
+        {selectedPrenotazione && (
+          <Dialog open={!!selectedPrenotazione} onOpenChange={() => setSelectedPrenotazione(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Dettaglio Prenotazione</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm flex-shrink-0 bg-white"
+                    style={{ borderColor: selectedPrenotazione.spazio?.colore || '#3b82f6', color: selectedPrenotazione.spazio?.colore || '#3b82f6' }}
+                  >
+                    {selectedPrenotazione.spazio?.numero_spazio || '?'}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-800">{selectedPrenotazione.cliente?.ragione_sociale || 'Cliente'}</p>
+                    <p className="text-sm text-slate-500">{selectedPrenotazione.spazio?.nome || `Spazio ${selectedPrenotazione.spazio?.numero_spazio}`}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <CalendarDays className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">Periodo</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {format(new Date(selectedPrenotazione.prenotazione.data_inizio), 'd MMMM yyyy', { locale: it })}
+                      {' → '}
+                      {format(new Date(selectedPrenotazione.prenotazione.data_fine), 'd MMMM yyyy', { locale: it })}
+                    </p>
+                  </div>
+                </div>
+
+                {selectedPrenotazione.spazio?.piantina_url && (
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium mb-1">Posizione</p>
+                      <img src={selectedPrenotazione.spazio.piantina_url} alt="Piantina" className="max-h-48 rounded-lg object-contain" />
+                    </div>
+                  </div>
+                )}
+                {!selectedPrenotazione.spazio?.piantina_url && selectedPrenotazione.spazio?.descrizione && (
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Posizione</p>
+                      <p className="text-sm text-slate-700">{selectedPrenotazione.spazio.descrizione}</p>
+                    </div>
+                  </div>
+                )}
+
+                {selectedPrenotazione.prenotazione.note && (
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium">Note</p>
+                      <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
         {spazi.length > 0 && (
           <div className="mt-6 pt-6 border-t border-slate-200">
             <p className="text-sm font-medium text-slate-700 mb-3">Spazi:</p>
