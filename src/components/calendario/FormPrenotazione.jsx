@@ -21,6 +21,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     prezzo_mensile: '',
     materiale_dimostrativo: '',
     necessita_elettricita: false,
+    is_event: false,
     stato: 'confermata',
     note: ''
   });
