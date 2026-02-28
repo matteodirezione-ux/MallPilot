@@ -297,6 +297,23 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
       </div>
 
+      {/* Evento */}
+      <div className={rowClass}>
+        <span className={labelClass}>Evento</span>
+        <div className={`${fieldClass} flex items-center pt-1.5`}>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.is_event}
+              onChange={(e) => setFormData({ ...formData, is_event: e.target.checked })}
+              className="w-4 h-4 accent-purple-500"
+            />
+            <Sparkles className="w-4 h-4 text-purple-500" />
+            <span className="text-sm text-slate-700">Questa è una prenotazione per un evento</span>
+          </label>
+        </div>
+      </div>
+
       {/* Note */}
       <div className={rowClass}>
         <label htmlFor="note" className={labelClass}>Note</label>
