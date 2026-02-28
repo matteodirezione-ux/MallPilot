@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { X, Plus, AlertTriangle } from 'lucide-react';
+import { X, Plus, AlertTriangle, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval } from 'date-fns';
@@ -20,6 +20,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     prezzo_totale: '',
     prezzo_mensile: '',
     materiale_dimostrativo: '',
+    necessita_elettricita: false,
     stato: 'confermata',
     note: ''
   });
@@ -42,6 +43,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         prezzo_totale: prenotazione.prezzo_totale,
         prezzo_mensile: prenotazione.prezzo_mensile || '',
         materiale_dimostrativo: prenotazione.materiale_dimostrativo || '',
+        necessita_elettricita: prenotazione.necessita_elettricita || false,
         stato: prenotazione.stato,
         note: prenotazione.note || ''
       });
