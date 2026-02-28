@@ -412,6 +412,54 @@ export default function Dashboard({ centroSelezionato }) {
 
       {/* Bottom cards - full width on mobile */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        {/* Riepilogo Task */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ListTodo className="w-5 h-5 text-slate-600" />
+              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
+                Riepilogo Task
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {/* Task Urgenti */}
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm font-medium text-slate-700">Urgenti</span>
+                </div>
+                <span className="text-lg font-bold text-red-600">{stats.taskStats.urgenti}</span>
+              </div>
+
+              {/* Task In Corso */}
+              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-medium text-slate-700">In Corso</span>
+                </div>
+                <span className="text-lg font-bold text-blue-600">{stats.taskStats.inCorso}</span>
+              </div>
+
+              {/* Task Completati */}
+              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                  <span className="text-sm font-medium text-slate-700">Completati</span>
+                </div>
+                <span className="text-lg font-bold text-green-600">{stats.taskStats.completati}</span>
+              </div>
+
+              {/* Total Task */}
+              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 mt-2 pt-2 border-t-2">
+                <span className="text-sm font-medium text-slate-700">Totali</span>
+                <span className="text-lg font-bold text-slate-800">{stats.taskStats.totali}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Affitti Correnti */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
           <CardHeader className="pb-3">
