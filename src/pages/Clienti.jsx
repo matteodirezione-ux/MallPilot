@@ -254,7 +254,7 @@ export default function Clienti({ centroSelezionato }) {
                 <div className="space-y-3">
                   {[
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
-                    { label: 'Partita IVA', key: 'partita_iva' },
+                    { label: 'Partita IVA *', key: 'partita_iva', required: true },
                     { label: 'Codice Fiscale', key: 'codice_fiscale' },
                     { label: 'Email *', key: 'email', type: 'email', required: true },
                     { label: 'PEC', key: 'pec' },
