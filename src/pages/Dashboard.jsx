@@ -106,11 +106,11 @@ export default function Dashboard({ centroSelezionato }) {
         }))
       ]);
 
-      // Spazi occupati (prenotazioni attive oggi)
+      // Spazi occupati (prenotazioni attive oggi) - escludi eventi
       const spaziOccupatiOggi = prenotazioni.filter(p => {
         const dataInizio = new Date(p.data_inizio);
         const dataFine = new Date(p.data_fine);
-        return isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
+        return !p.is_event && isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
                p.stato !== 'cancellata';
       }).length;
 
