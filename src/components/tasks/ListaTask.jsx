@@ -106,41 +106,33 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit }) {
 }
 
 export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canEdit }) {
-  // Raggruppa per scadenza
-  const oggi = new Date();
-  oggi.setHours(0, 0, 0, 0);
+  // Separa completati/annullati
+  const attivi = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
+  const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
+    .sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
 
-  const scaduti = tasks.filter(t => {
-    if (!t.data_scadenza || t.stato === 'completato' || t.stato === 'annullato') return false;
-    return isPast(parseISO(t.data_scadenza)) && !isToday(parseISO(t.data_scadenza));
+  // Raggruppa attivi per data
+  const gruppi = {};
+  const senzaData = [];
+
+  attivi.forEach(t => {
+    if (!t.data_scadenza) {
+      senzaData.push(t);
+    } else {
+      const key = t.data_scadenza; // formato YYYY-MM-DD
+      if (!gruppi[key]) gruppi[key] = [];
+      gruppi[key].push(t);
+    }
   });
 
-  const oggiList = tasks.filter(t => t.data_scadenza && isToday(parseISO(t.data_scadenza)) && t.stato !== 'completato' && t.stato !== 'annullato');
+  const dateOrdinate = Object.keys(gruppi).sort();
 
-  const prossimi = tasks.filter(t => {
-    if (!t.data_scadenza || t.stato === 'completato' || t.stato === 'annullato') return false;
-    const d = parseISO(t.data_scadenza);
-    return !isPast(d) && !isToday(d);
-  }).sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
-
-  const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
-    .sort((a, b) => new Date(b.updated_date || b.data_scadenza) - new Date(a.updated_date || a.data_scadenza));
-
-  const renderGroup = (label, list, colorClass) => {
-    if (list.length === 0) return null;
-    return (
-      <div className="mb-5">
-        <h3 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${colorClass}`}>
-          <span>{label}</span>
-          <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{list.length}</span>
-        </h3>
-        <div className="space-y-2">
-          {list.map(t => (
-            <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
-          ))}
-        </div>
-      </div>
-    );
+  const getLabelData = (dateStr) => {
+    const d = parseISO(dateStr);
+    if (isPast(d) && !isToday(d)) return { label: `⚠ ${format(d, 'd MMM yyyy', { locale: it })}`, color: 'text-red-600' };
+    if (isToday(d)) return { label: `📅 Oggi — ${format(d, 'd MMM yyyy', { locale: it })}`, color: 'text-orange-600' };
+    if (isTomorrow(d)) return { label: `📋 Domani — ${format(d, 'd MMM yyyy', { locale: it })}`, color: 'text-blue-600' };
+    return { label: `📋 ${format(d, 'd MMM yyyy', { locale: it })}`, color: 'text-slate-700' };
   };
 
   if (tasks.length === 0) {
@@ -154,10 +146,51 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
 
   return (
     <div>
-      {renderGroup('⚠ Scaduti', scaduti, 'text-red-600')}
-      {renderGroup('📅 Oggi', oggiList, 'text-orange-600')}
-      {renderGroup('📋 Prossimi', prossimi, 'text-slate-700')}
-      {renderGroup('✓ Completati / Annullati', completati, 'text-slate-400')}
+      {dateOrdinate.map(dateStr => {
+        const { label, color } = getLabelData(dateStr);
+        const list = gruppi[dateStr];
+        return (
+          <div key={dateStr} className="mb-5">
+            <h3 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${color}`}>
+              <span>{label}</span>
+              <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{list.length}</span>
+            </h3>
+            <div className="space-y-2">
+              {list.map(t => (
+                <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {senzaData.length > 0 && (
+        <div className="mb-5">
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-500">
+            <span>📋 Senza scadenza</span>
+            <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{senzaData.length}</span>
+          </h3>
+          <div className="space-y-2">
+            {senzaData.map(t => (
+              <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {completati.length > 0 && (
+        <div className="mb-5">
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-400">
+            <span>✓ Completati / Annullati</span>
+            <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{completati.length}</span>
+          </h3>
+          <div className="space-y-2">
+            {completati.map(t => (
+              <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
