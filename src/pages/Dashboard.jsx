@@ -13,7 +13,8 @@ import {
   ListTodo,
   Clock,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Sparkles
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
