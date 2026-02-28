@@ -59,7 +59,7 @@ export default function CalendarioTask({ tasks, onTaskClick, onDayClick }) {
           const isOggi = isToday(giorno);
 
           return (
-            <div key={giorno.toISOString()} className={`min-h-[80px] border-b border-r border-slate-100 p-1.5 ${isOggi ? 'bg-blue-50' : ''}`}>
+            <div key={giorno.toISOString()} onClick={() => onDayClick && onDayClick(giorno)} className={`min-h-[80px] border-b border-r border-slate-100 p-1.5 cursor-pointer hover:bg-slate-50 transition-colors ${isOggi ? 'bg-blue-50 hover:bg-blue-100' : ''}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mb-1 ${
                 isOggi ? 'bg-blue-600 text-white' : 'text-slate-600'
               }`}>
