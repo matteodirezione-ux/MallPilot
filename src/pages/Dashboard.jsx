@@ -36,6 +36,11 @@ export default function Dashboard({ centroSelezionato }) {
       inCorso: 0,
       completati: 0,
       totali: 0
+    },
+    eventStats: {
+      giorniEvento: 0,
+      eventiCorrenti: 0,
+      prossimiEventi: []
     }
   });
   const [loading, setLoading] = useState(true);
