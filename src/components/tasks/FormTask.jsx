@@ -244,18 +244,19 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
           {/* Selezione assegnatari */}
           {assegnatari.length > 0 && (
-            <div>
-              <Label>{isMultipla ? 'Assegna a (seleziona uno o più)' : 'Assegna a'}</Label>
+            <div className="flex items-start gap-3">
+              <Label className="w-28 shrink-0 text-right text-xs mt-1">Assegna a</Label>
+              <div className="flex-1">
               {isMultipla ? (
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="flex flex-wrap gap-2">
                   {assegnatari.map(a => (
                     <button
                       key={a.email}
                       type="button"
                       onClick={() => toggleAssegnato(a)}
-                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                      className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
                     >
-                      {a.nome} <span className="opacity-70 text-xs">({a.ruolo})</span>
+                      {a.nome} <span className="opacity-70">({a.ruolo})</span>
                     </button>
                   ))}
                 </div>
@@ -267,7 +268,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                     setAssegnatiSelezionati(trovato ? [trovato] : []);
                   }}
                 >
-                  <SelectTrigger><SelectValue placeholder="Seleziona persona..." /></SelectTrigger>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Seleziona persona..." /></SelectTrigger>
                   <SelectContent>
                     {assegnatari.map(a => (
                       <SelectItem key={a.email} value={a.email}>
@@ -277,30 +278,31 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                   </SelectContent>
                 </Select>
               )}
+              </div>
             </div>
           )}
 
           {/* Riepilogo task che verranno creati */}
           {isMultipla && (
-            <div className="bg-blue-50 rounded-lg p-3 text-sm text-blue-800">
+            <div className="bg-blue-50 rounded-lg p-2.5 text-xs text-blue-800 ml-31">
               Verranno creati <strong>
                 {Math.max(centriSelezionati.length, 1) * Math.max(assegnatiSelezionati.length, 1)}
-              </strong> task separati (uno per ogni combinazione centro/persona), visibili come un unico task accorpato dalla proprietà.
+              </strong> task separati per ogni combinazione centro/persona.
             </div>
           )}
 
           {/* Ricorrenza */}
-          <div className="flex items-center gap-3 pt-1">
+          <div className="flex items-center gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs">Ricorrente</Label>
             <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} id="ricorrente" />
-            <Label htmlFor="ricorrente">Task ricorrente</Label>
           </div>
 
           {form.ricorrente && (
-            <div className="bg-slate-50 rounded-lg p-3 space-y-3">
-              <div>
-                <Label>Tipo ricorrenza</Label>
+            <div className="bg-slate-50 rounded-lg p-3 space-y-2.5 ml-1">
+              <div className="flex items-center gap-3">
+                <Label className="w-28 shrink-0 text-right text-xs">Tipo</Label>
                 <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="giornaliero">Giornaliero</SelectItem>
                     <SelectItem value="settimanale">Settimanale</SelectItem>
@@ -312,15 +314,15 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
               </div>
 
               {form.ricorrenza_tipo === 'personalizzato' && (
-                <div className="flex items-center gap-2">
-                  <Label className="whitespace-nowrap">Ogni</Label>
+                <div className="flex items-center gap-3">
+                  <Label className="w-28 shrink-0 text-right text-xs">Ogni</Label>
                   <Input
-                    type="number" min="1" className="w-20"
+                    type="number" min="1" className="h-8 text-sm w-16"
                     value={form.ricorrenza_ogni}
                     onChange={e => set('ricorrenza_ogni', parseInt(e.target.value) || 1)}
                   />
                   <Select value={form.ricorrenza_unita} onValueChange={v => set('ricorrenza_unita', v)}>
-                    <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="giorni">Giorni</SelectItem>
                       <SelectItem value="settimane">Settimane</SelectItem>
@@ -330,21 +332,21 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                 </div>
               )}
 
-              <div>
-                <Label>Fine ricorrenza (opzionale)</Label>
-                <Input type="date" value={form.ricorrenza_fine} onChange={e => set('ricorrenza_fine', e.target.value)} />
+              <div className="flex items-center gap-3">
+                <Label className="w-28 shrink-0 text-right text-xs">Fine ricorrenza</Label>
+                <Input type="date" value={form.ricorrenza_fine} onChange={e => set('ricorrenza_fine', e.target.value)} className="h-8 text-sm flex-1" />
               </div>
             </div>
           )}
 
-          <div>
-            <Label>Note</Label>
-            <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} />
+          <div className="flex items-start gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs mt-1.5">Note</Label>
+            <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="text-sm" />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>Annulla</Button>
+            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
         </form>
       </DialogContent>
