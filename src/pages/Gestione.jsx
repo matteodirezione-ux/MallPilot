@@ -273,7 +273,10 @@ export default function Gestione({ user }) {
     return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(amount);
   };
 
-  if (!user || user.tipo_account !== 'proprieta') {
+  const isDirettore = user?.tipo_account === 'direttore';
+  const isPropieta = user?.tipo_account === 'proprieta';
+
+  if (!user || (!isPropieta && !isDirettore)) {
     return (
       <div className="p-8">
         <Card><CardContent className="py-12 text-center text-slate-500">
