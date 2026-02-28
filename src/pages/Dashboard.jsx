@@ -29,7 +29,13 @@ export default function Dashboard({ centroSelezionato }) {
     budgetAnno: 0,
     clientiTotali: 0,
     affittoMedioGiornaliero: 0,
-    tassoOccupazioneAnnuale: 0
+    tassoOccupazioneAnnuale: 0,
+    taskStats: {
+      urgenti: 0,
+      inCorso: 0,
+      completati: 0,
+      totali: 0
+    }
   });
   const [loading, setLoading] = useState(true);
 
