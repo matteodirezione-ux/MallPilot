@@ -153,6 +153,12 @@ export default function Calendario({ centroSelezionato }) {
           setDialogOpen(open);
           if (!open) setEditingPrenotazione(null);
         }}>
+          <Link to={createPageUrl('CalendarioVigilanza')} target="_blank">
+            <Button variant="outline" className="gap-2">
+              <ExternalLink className="w-4 h-4" />
+              Calendario Vigilanza
+            </Button>
+          </Link>
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
