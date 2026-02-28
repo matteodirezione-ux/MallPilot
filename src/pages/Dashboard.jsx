@@ -223,6 +223,19 @@ export default function Dashboard({ centroSelezionato }) {
         tassoOccupazioneAnnuale = (giorniOccupati / totaleGiorniDisponibili) * 100;
       }
 
+      // Enrich tasks with additional data if needed
+      const tasksConDettagli = await Promise.all(
+        tasksList.map(async (t) => {
+          if (t.assegnato_a_email && !t.assegnato_a_nome) {
+            const [utente] = await Promise.all([
+              base44.entities.User.filter({ email: t.assegnato_a_email })
+            ]);
+            return { ...t, assegnato_a_nome: utente?.[0]?.full_name };
+          }
+          return t;
+        })
+      );
+
       setStats({
         prossimiAffitti: prossimiConDettagli,
         affittiCorrenti: affittiCorrentiConDettagli,
@@ -235,7 +248,8 @@ export default function Dashboard({ centroSelezionato }) {
         affittoMedioGiornaliero,
         tassoOccupazioneAnnuale,
         taskStats,
-        eventStats
+        eventStats,
+        tasksList: tasksConDettagli
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
