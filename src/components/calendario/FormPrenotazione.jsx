@@ -45,6 +45,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         prezzo_mensile: prenotazione.prezzo_mensile || '',
         materiale_dimostrativo: prenotazione.materiale_dimostrativo || '',
         necessita_elettricita: prenotazione.necessita_elettricita || false,
+        is_event: prenotazione.is_event || false,
         stato: prenotazione.stato,
         note: prenotazione.note || ''
       });
