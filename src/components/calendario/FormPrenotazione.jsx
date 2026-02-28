@@ -278,24 +278,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
       </div>
 
-      {/* Stato */}
-      <div className={rowClass}>
-        <label htmlFor="stato" className={labelClass}>Stato</label>
-        <div className={fieldClass}>
-          <Select value={formData.stato} onValueChange={(value) => setFormData({ ...formData, stato: value })}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="confermata">Confermata</SelectItem>
-              <SelectItem value="in_corso">In Corso</SelectItem>
-              <SelectItem value="completata">Completata</SelectItem>
-              <SelectItem value="cancellata">Cancellata</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       {/* Elettricità */}
       <div className={rowClass}>
         <span className={labelClass}>Elettricità</span>
