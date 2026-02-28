@@ -469,8 +469,8 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                 <SpazioCard
                   key={spazio.id}
                   spazio={spazio}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onEdit={user?.tipo_account !== 'vigilanza' ? handleEdit : null}
+                  onDelete={user?.tipo_account !== 'vigilanza' ? handleDelete : null}
                 />
               ))}
             </div>
