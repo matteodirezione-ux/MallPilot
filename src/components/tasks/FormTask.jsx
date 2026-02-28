@@ -4,8 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -36,10 +34,9 @@ const defaultForm = {
 
 export default function FormTask({ open, onClose, onSave, task, user, centri, direttori, vigilanze }) {
   const [form, setForm] = useState(defaultForm);
-  // Selezione multipla per proprietà
-  const [centriSelezionati, setCentriSelezionati] = useState([]); // [] = tutti
-  const [assegnatiSelezionati, setAssegnatiSelezionati] = useState([]); // [] = nessuno specifico
-  const [modalitaAssegnazione, setModalitaAssegnazione] = useState('singola'); // 'singola' | 'multipla'
+  const [centriSelezionati, setCentriSelezionati] = useState([]);
+  const [assegnatiSelezionati, setAssegnatiSelezionati] = useState([]);
+  const [modalitaAssegnazione, setModalitaAssegnazione] = useState('singola');
 
   const isProprieta = user?.tipo_account === 'proprieta';
 
@@ -59,19 +56,15 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }));
 
-  // Lista assegnatari disponibili
   const assegnatari = React.useMemo(() => {
     const list = [];
     if (isProprieta) {
       direttori?.forEach(d => list.push({ email: d.email, nome: d.full_name, ruolo: 'Direttore' }));
     } else if (user?.tipo_account === 'direttore') {
-      // Direttore può assegnare a se stesso e alla vigilanza
-      // Usa il nome dal record Direttore se disponibile, altrimenti full_name dell'utente
       const nomeDirettore = direttori?.find(d => d.email === user.email)?.full_name || user.full_name;
       list.push({ email: user.email, nome: nomeDirettore, ruolo: 'Direttore (tu)' });
       vigilanze?.forEach(v => list.push({ email: v.email, nome: v.full_name, ruolo: 'Vigilanza' }));
     } else if (user?.tipo_account === 'vigilanza') {
-      // Vigilanza può assegnare solo a se stessa
       list.push({ email: user.email, nome: user.full_name, ruolo: 'Vigilanza (tu)' });
     }
     return list;
@@ -105,12 +98,9 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
       delete base.ricorrenza_fine;
     }
 
-    // Modalità multipla: genera combinazioni centro x assegnato
     if (isProprieta && modalitaAssegnazione === 'multipla' && !task) {
       const centriDaSalvare = centriSelezionati.length > 0 ? centriSelezionati : [''];
       const assegnatiDaSalvare = assegnatiSelezionati.length > 0 ? assegnatiSelezionati : [null];
-
-      // Ogni combinazione centro/assegnato → task separato con stesso gruppo_id
       const combinazioni = [];
       for (const centroId of centriDaSalvare) {
         for (const persona of assegnatiDaSalvare) {
@@ -124,11 +114,10 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
           });
         }
       }
-      onSave(combinazioni); // array di task
+      onSave(combinazioni);
       return;
     }
 
-    // Singola assegnazione (direttore o proprietà singola)
     const singolo = {
       ...base,
       centro_id: centriSelezionati[0] || form.centro_id || '',
@@ -137,10 +126,14 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
       singolo.assegnato_a_email = assegnatiSelezionati[0].email;
       singolo.assegnato_a_nome = assegnatiSelezionati[0].nome;
     }
-    onSave(singolo); // oggetto singolo
+    onSave(singolo);
   };
 
   const isMultipla = isProprieta && modalitaAssegnazione === 'multipla' && !task;
+
+  const rowClass = "flex items-start gap-3";
+  const labelClass = "w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
+  const fieldClass = "flex-1 min-w-0";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -148,55 +141,64 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
         <DialogHeader>
           <DialogTitle>{task ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-2.5">
-          <div className="flex items-center gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs">Titolo *</Label>
-            <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="h-8 text-sm" />
+        <form onSubmit={handleSubmit} className="space-y-3">
+
+          <div className={rowClass}>
+            <label className={labelClass}>Titolo *</label>
+            <div className={fieldClass}>
+              <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="h-8 text-sm" />
+            </div>
           </div>
 
-          <div className="flex items-start gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs mt-1.5">Descrizione</Label>
-            <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="text-sm" />
+          <div className={rowClass}>
+            <label className={labelClass}>Descrizione</label>
+            <div className={fieldClass}>
+              <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="text-sm" />
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs">Priorità</Label>
-            <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
-              <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bassa">Bassa</SelectItem>
-                <SelectItem value="media">Media</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="urgente">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className={rowClass}>
+            <label className={labelClass}>Priorità</label>
+            <div className={fieldClass}>
+              <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bassa">Bassa</SelectItem>
+                  <SelectItem value="media">Media</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                  <SelectItem value="urgente">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs">Data scadenza *</Label>
-            <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required className="h-8 text-sm flex-1" />
+          <div className={rowClass}>
+            <label className={labelClass}>Data scadenza *</label>
+            <div className={fieldClass}>
+              <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required className="h-8 text-sm w-full" />
+            </div>
           </div>
 
-          {/* Modalità assegnazione (solo proprietà, solo nuovo task) */}
           {isProprieta && !task && (
-            <div className="flex items-center gap-3">
-              <Label className="w-28 shrink-0 text-right text-xs">Multi-assegnazione</Label>
-              <Switch
-                checked={modalitaAssegnazione === 'multipla'}
-                onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')}
-                id="multi"
-              />
-              <Label htmlFor="multi" className="text-xs text-slate-500">Più centri / persone</Label>
+            <div className={rowClass}>
+              <span className={labelClass}>Multi-assegnazione</span>
+              <div className={`${fieldClass} flex items-center pt-1.5 gap-2`}>
+                <Switch
+                  checked={modalitaAssegnazione === 'multipla'}
+                  onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')}
+                  id="multi"
+                />
+                <Label htmlFor="multi" className="text-sm text-slate-500">Più centri / persone</Label>
+              </div>
             </div>
           )}
 
-          {/* Selezione centri */}
           {isProprieta && centri?.length > 0 && (
-            <div className="flex items-start gap-3">
-              <Label className="w-28 shrink-0 text-right text-xs mt-1">{isMultipla ? 'Centri' : 'Centro'}</Label>
-              <div className="flex-1">
+            <div className={rowClass}>
+              <label className={labelClass}>{isMultipla ? 'Centri' : 'Centro'}</label>
+              <div className={fieldClass}>
                 {isMultipla ? (
-                  <div className="flex flex-wrap gap-2 mt-1">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setCentriSelezionati([])}
@@ -230,21 +232,20 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             </div>
           )}
 
-          {/* Selezione assegnatari */}
           {assegnatari.length > 0 && (
-            <div className="flex items-start gap-3">
-              <Label className="w-28 shrink-0 text-right text-xs mt-1">Assegna a</Label>
-              <div className="flex-1">
+            <div className={rowClass}>
+              <label className={labelClass}>Assegna a</label>
+              <div className={fieldClass}>
                 {isMultipla ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     {assegnatari.map(a => (
                       <button
                         key={a.email}
                         type="button"
                         onClick={() => toggleAssegnato(a)}
-                        className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                        className={`px-2.5 py-1 rounded-full text-sm border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
                       >
-                        {a.nome} <span className="opacity-70">({a.ruolo})</span>
+                        {a.nome} <span className="opacity-70 text-xs">({a.ruolo})</span>
                       </button>
                     ))}
                   </div>
@@ -270,69 +271,77 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             </div>
           )}
 
-          {/* Riepilogo task che verranno creati */}
           {isMultipla && (
-            <div className="bg-blue-50 rounded-lg p-2.5 text-xs text-blue-800 ml-31">
+            <div className="bg-blue-50 rounded-lg p-2.5 text-sm text-blue-800 ml-[144px]">
               Verranno creati <strong>
                 {Math.max(centriSelezionati.length, 1) * Math.max(assegnatiSelezionati.length, 1)}
               </strong> task separati per ogni combinazione centro/persona.
             </div>
           )}
 
-          {/* Ricorrenza */}
-          <div className="flex items-center gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs">Ricorrente</Label>
-            <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} id="ricorrente" />
+          <div className={rowClass}>
+            <span className={labelClass}>Ricorrente</span>
+            <div className={`${fieldClass} flex items-center pt-1.5`}>
+              <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} id="ricorrente" />
+            </div>
           </div>
 
           {form.ricorrente && (
-            <div className="bg-slate-50 rounded-lg p-3 space-y-2.5 ml-1">
-              <div className="flex items-center gap-3">
-                <Label className="w-28 shrink-0 text-right text-xs">Tipo</Label>
-                <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
-                  <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="giornaliero">Giornaliero</SelectItem>
-                    <SelectItem value="settimanale">Settimanale</SelectItem>
-                    <SelectItem value="mensile">Mensile</SelectItem>
-                    <SelectItem value="annuale">Annuale</SelectItem>
-                    <SelectItem value="personalizzato">Personalizzato</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {form.ricorrenza_tipo === 'personalizzato' && (
-                <div className="flex items-center gap-3">
-                  <Label className="w-28 shrink-0 text-right text-xs">Ogni</Label>
-                  <Input
-                    type="number" min="1" className="h-8 text-sm w-16"
-                    value={form.ricorrenza_ogni}
-                    onChange={e => set('ricorrenza_ogni', parseInt(e.target.value) || 1)}
-                  />
-                  <Select value={form.ricorrenza_unita} onValueChange={v => set('ricorrenza_unita', v)}>
-                    <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
+            <div className="bg-slate-50 rounded-lg p-3 space-y-3 ml-[144px]">
+              <div className={rowClass}>
+                <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Tipo</label>
+                <div className="flex-1">
+                  <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="giorni">Giorni</SelectItem>
-                      <SelectItem value="settimane">Settimane</SelectItem>
-                      <SelectItem value="mesi">Mesi</SelectItem>
+                      <SelectItem value="giornaliero">Giornaliero</SelectItem>
+                      <SelectItem value="settimanale">Settimanale</SelectItem>
+                      <SelectItem value="mensile">Mensile</SelectItem>
+                      <SelectItem value="annuale">Annuale</SelectItem>
+                      <SelectItem value="personalizzato">Personalizzato</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              {form.ricorrenza_tipo === 'personalizzato' && (
+                <div className={rowClass}>
+                  <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Ogni</label>
+                  <div className="flex-1 flex gap-2">
+                    <Input
+                      type="number" min="1" className="h-8 text-sm w-20"
+                      value={form.ricorrenza_ogni}
+                      onChange={e => set('ricorrenza_ogni', parseInt(e.target.value) || 1)}
+                    />
+                    <Select value={form.ricorrenza_unita} onValueChange={v => set('ricorrenza_unita', v)}>
+                      <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="giorni">Giorni</SelectItem>
+                        <SelectItem value="settimane">Settimane</SelectItem>
+                        <SelectItem value="mesi">Mesi</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               )}
 
-              <div className="flex items-center gap-3">
-                <Label className="w-28 shrink-0 text-right text-xs">Fine ricorrenza</Label>
-                <Input type="date" value={form.ricorrenza_fine} onChange={e => set('ricorrenza_fine', e.target.value)} className="h-8 text-sm flex-1" />
+              <div className={rowClass}>
+                <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Fine</label>
+                <div className="flex-1">
+                  <Input type="date" value={form.ricorrenza_fine} onChange={e => set('ricorrenza_fine', e.target.value)} className="h-8 text-sm w-full" />
+                </div>
               </div>
             </div>
           )}
 
-          <div className="flex items-start gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs mt-1.5">Note</Label>
-            <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="text-sm" />
+          <div className={rowClass}>
+            <label className={labelClass}>Note</label>
+            <div className={fieldClass}>
+              <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="text-sm" />
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>Annulla</Button>
             <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
