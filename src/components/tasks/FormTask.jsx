@@ -208,78 +208,77 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             <div className="flex items-start gap-3">
               <Label className="w-28 shrink-0 text-right text-xs mt-1">{isMultipla ? 'Centri' : 'Centro'}</Label>
               <div className="flex-1">
-              {isMultipla ? (
-                <div className="flex flex-wrap gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => setCentriSelezionati([])}
-                    className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-                  >
-                    Tutti
-                  </button>
-                  {centri.map(c => (
+                {isMultipla ? (
+                  <div className="flex flex-wrap gap-2 mt-1">
                     <button
-                      key={c.id}
                       type="button"
-                      onClick={() => toggleCentro(c.id)}
-                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.includes(c.id) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                      onClick={() => setCentriSelezionati([])}
+                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
                     >
-                      {c.nome}
+                      Tutti
                     </button>
-                  ))}
-                </div>
-              ) : (
-                <Select value={centriSelezionati[0] || ''} onValueChange={v => setCentriSelezionati(v ? [v] : [])}>
-                  <SelectTrigger><SelectValue placeholder="Tutti i centri" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={null}>Tutti i centri</SelectItem>
                     {centri.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => toggleCentro(c.id)}
+                        className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.includes(c.id) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                      >
+                        {c.nome}
+                      </button>
                     ))}
-                  </SelectContent>
-                </Select>
-              )}
+                  </div>
+                ) : (
+                  <Select value={centriSelezionati[0] || ''} onValueChange={v => setCentriSelezionati(v ? [v] : [])}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Tutti i centri" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={null}>Tutti i centri</SelectItem>
+                      {centri.map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
           )}
 
           {/* Selezione assegnatari */}
-
           {assegnatari.length > 0 && (
             <div className="flex items-start gap-3">
               <Label className="w-28 shrink-0 text-right text-xs mt-1">Assegna a</Label>
               <div className="flex-1">
-              {isMultipla ? (
-                <div className="flex flex-wrap gap-2">
-                  {assegnatari.map(a => (
-                    <button
-                      key={a.email}
-                      type="button"
-                      onClick={() => toggleAssegnato(a)}
-                      className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-                    >
-                      {a.nome} <span className="opacity-70">({a.ruolo})</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <Select
-                  value={assegnatiSelezionati[0]?.email || ''}
-                  onValueChange={v => {
-                    const trovato = assegnatari.find(a => a.email === v);
-                    setAssegnatiSelezionati(trovato ? [trovato] : []);
-                  }}
-                >
-                  <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Seleziona persona..." /></SelectTrigger>
-                  <SelectContent>
+                {isMultipla ? (
+                  <div className="flex flex-wrap gap-2">
                     {assegnatari.map(a => (
-                      <SelectItem key={a.email} value={a.email}>
-                        {a.nome} <span className="text-slate-400 text-xs">({a.ruolo})</span>
-                      </SelectItem>
+                      <button
+                        key={a.email}
+                        type="button"
+                        onClick={() => toggleAssegnato(a)}
+                        className={`px-2.5 py-1 rounded-full text-xs border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
+                      >
+                        {a.nome} <span className="opacity-70">({a.ruolo})</span>
+                      </button>
                     ))}
-                  </SelectContent>
-                </Select>
-              )}
+                  </div>
+                ) : (
+                  <Select
+                    value={assegnatiSelezionati[0]?.email || ''}
+                    onValueChange={v => {
+                      const trovato = assegnatari.find(a => a.email === v);
+                      setAssegnatiSelezionati(trovato ? [trovato] : []);
+                    }}
+                  >
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Seleziona persona..." /></SelectTrigger>
+                    <SelectContent>
+                      {assegnatari.map(a => (
+                        <SelectItem key={a.email} value={a.email}>
+                          {a.nome} <span className="text-slate-400 text-xs">({a.ruolo})</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
           )}
