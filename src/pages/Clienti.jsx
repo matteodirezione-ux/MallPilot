@@ -166,6 +166,7 @@ export default function Clienti({ centroSelezionato }) {
       note: ''
     });
     setEditingCliente(null);
+    setWizardStep(0);
   };
 
   const formatCurrency = (amount) => {
