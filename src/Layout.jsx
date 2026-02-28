@@ -33,7 +33,10 @@ export default function Layout({ children, currentPageName }) {
       const userData = await base44.auth.me();
       
       // Verifica sempre se l'utente è un direttore registrato
-      const direttori = await base44.entities.Direttore.filter({ email: userData.email });
+      const [direttori, vigilanze] = await Promise.all([
+        base44.entities.Direttore.filter({ email: userData.email }),
+        base44.entities.Vigilanza.filter({ email: userData.email })
+      ]);
       
       if (direttori.length > 0) {
         // Questo utente è un direttore
@@ -51,8 +54,24 @@ export default function Layout({ children, currentPageName }) {
         if (!direttori[0].invito_accettato) {
           await base44.entities.Direttore.update(direttori[0].id, { invito_accettato: true });
         }
+      } else if (vigilanze.length > 0) {
+        // Questo utente è vigilanza
+        setDisplayName(vigilanze[0].full_name);
+        if (userData.tipo_account !== 'vigilanza') {
+          await base44.auth.updateMe({ 
+            tipo_account: 'vigilanza',
+            full_name: vigilanze[0].full_name
+          });
+          userData.tipo_account = 'vigilanza';
+          userData.full_name = vigilanze[0].full_name;
+        }
+        
+        // Marca l'invito come accettato
+        if (!vigilanze[0].invito_accettato) {
+          await base44.entities.Vigilanza.update(vigilanze[0].id, { invito_accettato: true });
+        }
       } else {
-        // Non è un direttore, quindi è proprietà
+        // Non è un direttore né vigilanza, quindi è proprietà
         if (!userData.tipo_account) {
           await base44.auth.updateMe({ tipo_account: 'proprieta' });
           userData.tipo_account = 'proprieta';
