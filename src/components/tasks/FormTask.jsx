@@ -239,6 +239,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                   </SelectContent>
                 </Select>
               )}
+              </div>
             </div>
           )}
 
