@@ -122,20 +122,20 @@ export default function Dashboard({ centroSelezionato }) {
             attivo: true 
           });
 
-      // Incassi mese
+      // Incassi mese - escludi eventi
       const incassiMese = prenotazioni
         .filter(p => {
           const dataInizio = new Date(p.data_inizio);
-          return isWithinInterval(dataInizio, { start: inizioMese, end: fineMese }) && 
+          return !p.is_event && isWithinInterval(dataInizio, { start: inizioMese, end: fineMese }) && 
                  p.stato !== 'cancellata';
         })
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
-      // Incassi anno
+      // Incassi anno - escludi eventi
       const incassiAnno = prenotazioni
         .filter(p => {
           const dataInizio = new Date(p.data_inizio);
-          return dataInizio >= inizioAnno && p.stato !== 'cancellata';
+          return !p.is_event && dataInizio >= inizioAnno && p.stato !== 'cancellata';
         })
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
