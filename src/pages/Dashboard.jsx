@@ -199,7 +199,8 @@ export default function Dashboard({ centroSelezionato }) {
         budgetAnno,
         clientiTotali: clienti.length,
         affittoMedioGiornaliero,
-        tassoOccupazioneAnnuale
+        tassoOccupazioneAnnuale,
+        taskStats
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
