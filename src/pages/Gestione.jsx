@@ -298,6 +298,7 @@ export default function Gestione({ user }) {
         <TabsList className="mb-6">
           <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>
           <TabsTrigger value="direttori">Direttori</TabsTrigger>
+          <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
           <TabsTrigger value="budget">Budget</TabsTrigger>
         </TabsList>
 
