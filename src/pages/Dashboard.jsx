@@ -70,7 +70,7 @@ export default function Dashboard({ centroSelezionato }) {
         return dataInizio > now &&
                isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && 
                p.stato !== 'cancellata';
-      }).slice(0, 5);
+      });
 
       // Arricchisci con dati cliente e spazio
       const [prossimiConDettagli, affittiCorrentiConDettagli] = await Promise.all([
