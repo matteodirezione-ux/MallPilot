@@ -315,6 +315,7 @@ export default function Clienti({ centroSelezionato }) {
                           type={type}
                           value={formData[key] || ''}
                           onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          required={required}
                           className="h-8 text-sm"
                         />
                       </div>
