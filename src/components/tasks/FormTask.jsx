@@ -67,7 +67,9 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
       vigilanze?.forEach(v => list.push({ email: v.email, nome: v.full_name, ruolo: 'Vigilanza' }));
     } else if (user?.tipo_account === 'direttore') {
       // Direttore può assegnare a se stesso e alla vigilanza
-      list.push({ email: user.email, nome: user.full_name, ruolo: 'Direttore (tu)' });
+      // Usa il nome dal record Direttore se disponibile, altrimenti full_name dell'utente
+      const nomeDirettore = direttori?.find(d => d.email === user.email)?.full_name || user.full_name;
+      list.push({ email: user.email, nome: nomeDirettore, ruolo: 'Direttore (tu)' });
       vigilanze?.forEach(v => list.push({ email: v.email, nome: v.full_name, ruolo: 'Vigilanza' }));
     } else if (user?.tipo_account === 'vigilanza') {
       // Vigilanza può assegnare solo a se stessa
