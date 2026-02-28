@@ -192,20 +192,22 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
           {/* Modalità assegnazione (solo proprietà, solo nuovo task) */}
           {isProprieta && !task && (
-            <div className="flex items-center gap-3 pt-1">
+            <div className="flex items-center gap-3">
+              <Label className="w-28 shrink-0 text-right text-xs">Multi-assegnazione</Label>
               <Switch
                 checked={modalitaAssegnazione === 'multipla'}
                 onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')}
                 id="multi"
               />
-              <Label htmlFor="multi">Assegna a più centri / persone</Label>
+              <Label htmlFor="multi" className="text-xs text-slate-500">Più centri / persone</Label>
             </div>
           )}
 
           {/* Selezione centri */}
           {isProprieta && centri?.length > 0 && (
-            <div>
-              <Label>{isMultipla ? 'Centri (seleziona uno o più)' : 'Centro commerciale'}</Label>
+            <div className="flex items-start gap-3">
+              <Label className="w-28 shrink-0 text-right text-xs mt-1">{isMultipla ? 'Centri' : 'Centro'}</Label>
+              <div className="flex-1">
               {isMultipla ? (
                 <div className="flex flex-wrap gap-2 mt-1">
                   <button
