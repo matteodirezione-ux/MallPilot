@@ -64,7 +64,6 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
     const list = [];
     if (isProprieta) {
       direttori?.forEach(d => list.push({ email: d.email, nome: d.full_name, ruolo: 'Direttore' }));
-      vigilanze?.forEach(v => list.push({ email: v.email, nome: v.full_name, ruolo: 'Vigilanza' }));
     } else if (user?.tipo_account === 'direttore') {
       // Direttore può assegnare a se stesso e alla vigilanza
       // Usa il nome dal record Direttore se disponibile, altrimenti full_name dell'utente
