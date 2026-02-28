@@ -156,7 +156,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Calendario Vigilanza', page: 'CalendarioVigilanza', icon: Calendar, roles: ['vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
-    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta'] },
+    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
   ];
 
   const filteredNav = navigationItems.filter(item => 
