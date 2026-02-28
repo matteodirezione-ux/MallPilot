@@ -238,16 +238,20 @@ export default function Clienti({ centroSelezionato }) {
                 {editingCliente ? 'Modifica Cliente' : 'Nuovo Cliente'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <Tabs defaultValue="azienda" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-4">
-                  <TabsTrigger value="azienda">Dati Azienda</TabsTrigger>
-                  <TabsTrigger value="indirizzo">Indirizzo</TabsTrigger>
-                  <TabsTrigger value="referente">Referente</TabsTrigger>
-                </TabsList>
+            <form onSubmit={wizardStep === 2 ? handleSubmit : (e) => { e.preventDefault(); setWizardStep(wizardStep + 1); }}>
+              {/* Progress Indicator */}
+              <div className="mb-6 flex gap-2">
+                {['Dati Azienda', 'Indirizzo', 'Referente'].map((label, idx) => (
+                  <div key={idx} className="flex-1">
+                    <div className={`h-1 rounded-full transition-colors ${idx <= wizardStep ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
+                    <p className={`text-xs mt-1 font-medium ${idx <= wizardStep ? 'text-blue-600' : 'text-slate-500'}`}>{label}</p>
+                  </div>
+                ))}
+              </div>
 
-                {/* Dati Azienda */}
-                <TabsContent value="azienda" className="space-y-3">
+              {/* Step 0: Dati Azienda */}
+              {wizardStep === 0 && (
+                <div className="space-y-3">
                   {[
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
                     { label: 'Partita IVA', key: 'partita_iva' },
@@ -269,10 +273,12 @@ export default function Clienti({ centroSelezionato }) {
                       </div>
                     </div>
                   ))}
-                </TabsContent>
+                </div>
+              )}
 
-                {/* Indirizzo */}
-                <TabsContent value="indirizzo" className="space-y-3">
+              {/* Step 1: Indirizzo */}
+              {wizardStep === 1 && (
+                <div className="space-y-3">
                   {[
                     { label: 'Indirizzo', key: 'indirizzo' },
                     { label: 'Città', key: 'citta' },
@@ -290,10 +296,12 @@ export default function Clienti({ centroSelezionato }) {
                       </div>
                     </div>
                   ))}
-                </TabsContent>
+                </div>
+              )}
 
-                {/* Referente e Note */}
-                <TabsContent value="referente" className="space-y-3">
+              {/* Step 2: Referente */}
+              {wizardStep === 2 && (
+                <div className="space-y-3">
                   {[
                     { label: 'Nome Referente', key: 'referente_nome' },
                     { label: 'Telefono', key: 'referente_telefono' },
@@ -322,15 +330,22 @@ export default function Clienti({ centroSelezionato }) {
                       />
                     </div>
                   </div>
-                </TabsContent>
-              </Tabs>
+                </div>
+              )}
 
-              <div className="flex justify-end gap-3 pt-4 mt-4 border-t">
-                <Button type="button" variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>
-                  Annulla
-                </Button>
+              <div className="flex justify-between gap-3 pt-4 mt-4 border-t">
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>
+                    Annulla
+                  </Button>
+                  {wizardStep > 0 && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => setWizardStep(wizardStep - 1)}>
+                      Indietro
+                    </Button>
+                  )}
+                </div>
                 <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
-                  {editingCliente ? 'Aggiorna' : 'Crea'}
+                  {wizardStep === 2 ? (editingCliente ? 'Aggiorna' : 'Crea') : 'Avanti'}
                 </Button>
               </div>
             </form>
