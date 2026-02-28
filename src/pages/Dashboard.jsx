@@ -147,6 +147,18 @@ export default function Dashboard({ centroSelezionato }) {
       // Clienti totali
       const clienti = await base44.entities.Cliente.list();
 
+      // Task statistics
+      const tasksList = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Task.list()
+        : await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+      
+      const taskStats = {
+        urgenti: tasksList.filter(t => t.priorita === 'urgente' && t.stato !== 'completato' && t.stato !== 'annullato').length,
+        inCorso: tasksList.filter(t => t.stato === 'in_corso').length,
+        completati: tasksList.filter(t => t.stato === 'completato').length,
+        totali: tasksList.length
+      };
+
       // Affitto medio giornaliero (solo prenotazioni non cancellate con durata > 0)
       const prenotazioniValide = prenotazioni.filter(p => p.stato !== 'cancellata' && p.prezzo_totale > 0);
       let affittoMedioGiornaliero = 0;
