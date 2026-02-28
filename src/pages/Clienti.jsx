@@ -235,88 +235,94 @@ export default function Clienti({ centroSelezionato }) {
                 {editingCliente ? 'Modifica Cliente' : 'Nuovo Cliente'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Dati Azienda */}
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-1">Dati Azienda</div>
+            <form onSubmit={handleSubmit}>
+              <Tabs defaultValue="azienda" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-4">
+                  <TabsTrigger value="azienda">Dati Azienda</TabsTrigger>
+                  <TabsTrigger value="indirizzo">Indirizzo</TabsTrigger>
+                  <TabsTrigger value="referente">Referente</TabsTrigger>
+                </TabsList>
 
-              {[
-                { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
-                { label: 'Partita IVA', key: 'partita_iva' },
-                { label: 'Codice Fiscale', key: 'codice_fiscale' },
-                { label: 'Email *', key: 'email', type: 'email', required: true },
-                { label: 'PEC', key: 'pec' },
-                { label: 'Telefono', key: 'telefono' },
-              ].map(({ label, key, type = 'text', required }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      type={type}
-                      value={formData[key] || ''}
-                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                      required={required}
-                      className="h-8 text-sm"
-                    />
+                {/* Dati Azienda */}
+                <TabsContent value="azienda" className="space-y-3">
+                  {[
+                    { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
+                    { label: 'Partita IVA', key: 'partita_iva' },
+                    { label: 'Codice Fiscale', key: 'codice_fiscale' },
+                    { label: 'Email *', key: 'email', type: 'email', required: true },
+                    { label: 'PEC', key: 'pec' },
+                    { label: 'Telefono', key: 'telefono' },
+                  ].map(({ label, key, type = 'text', required }) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          type={type}
+                          value={formData[key] || ''}
+                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          required={required}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                {/* Indirizzo */}
+                <TabsContent value="indirizzo" className="space-y-3">
+                  {[
+                    { label: 'Indirizzo', key: 'indirizzo' },
+                    { label: 'Città', key: 'citta' },
+                    { label: 'Provincia', key: 'provincia' },
+                    { label: 'CAP', key: 'cap' },
+                  ].map(({ label, key }) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          value={formData[key] || ''}
+                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+
+                {/* Referente e Note */}
+                <TabsContent value="referente" className="space-y-3">
+                  {[
+                    { label: 'Nome Referente', key: 'referente_nome' },
+                    { label: 'Telefono', key: 'referente_telefono' },
+                    { label: 'Email Referente', key: 'referente_email', type: 'email' },
+                  ].map(({ label, key, type = 'text' }) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                      <div className="flex-1 min-w-0">
+                        <Input
+                          type={type}
+                          value={formData[key] || ''}
+                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex items-start gap-3 pt-1">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Note</label>
+                    <div className="flex-1 min-w-0">
+                      <Textarea
+                        value={formData.note || ''}
+                        onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                        rows={2}
+                        className="text-sm"
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                </TabsContent>
+              </Tabs>
 
-              {/* Indirizzo */}
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-2">Indirizzo</div>
-
-              {[
-                { label: 'Indirizzo', key: 'indirizzo' },
-                { label: 'Città', key: 'citta' },
-                { label: 'Provincia', key: 'provincia' },
-                { label: 'CAP', key: 'cap' },
-              ].map(({ label, key }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      value={formData[key] || ''}
-                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {/* Referente */}
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-2">Referente</div>
-
-              {[
-                { label: 'Nome Referente', key: 'referente_nome' },
-                { label: 'Telefono', key: 'referente_telefono' },
-                { label: 'Email Referente', key: 'referente_email', type: 'email' },
-              ].map(({ label, key, type = 'text' }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      type={type}
-                      value={formData[key] || ''}
-                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                      className="h-8 text-sm"
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {/* Note */}
-              <div className="flex items-start gap-3">
-                <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Note</label>
-                <div className="flex-1 min-w-0">
-                  <Textarea
-                    value={formData.note || ''}
-                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                    rows={2}
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-3 pt-4 mt-4 border-t">
                 <Button type="button" variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>
                   Annulla
                 </Button>
