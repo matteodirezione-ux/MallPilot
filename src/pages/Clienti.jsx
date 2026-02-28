@@ -234,155 +234,92 @@ export default function Clienti({ centroSelezionato }) {
                 {editingCliente ? 'Modifica Cliente' : 'Nuovo Cliente'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Dati Azienda</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="ragione_sociale">Ragione Sociale *</Label>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {/* Dati Azienda */}
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-1">Dati Azienda</div>
+
+              {[
+                { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
+                { label: 'Partita IVA', key: 'partita_iva' },
+                { label: 'Codice Fiscale', key: 'codice_fiscale' },
+                { label: 'Email *', key: 'email', type: 'email', required: true },
+                { label: 'PEC', key: 'pec' },
+                { label: 'Telefono', key: 'telefono' },
+              ].map(({ label, key, type = 'text', required }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                  <div className="flex-1 min-w-0">
                     <Input
-                      id="ragione_sociale"
-                      value={formData.ragione_sociale}
-                      onChange={(e) => setFormData({ ...formData, ragione_sociale: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="partita_iva">Partita IVA</Label>
-                    <Input
-                      id="partita_iva"
-                      value={formData.partita_iva}
-                      onChange={(e) => setFormData({ ...formData, partita_iva: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="codice_fiscale">Codice Fiscale</Label>
-                    <Input
-                      id="codice_fiscale"
-                      value={formData.codice_fiscale}
-                      onChange={(e) => setFormData({ ...formData, codice_fiscale: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="pec">PEC</Label>
-                    <Input
-                      id="pec"
-                      value={formData.pec}
-                      onChange={(e) => setFormData({ ...formData, pec: e.target.value })}
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Label htmlFor="telefono">Telefono</Label>
-                    <Input
-                      id="telefono"
-                      value={formData.telefono}
-                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                      type={type}
+                      value={formData[key] || ''}
+                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                      required={required}
+                      className="h-8 text-sm"
                     />
                   </div>
                 </div>
-              </div>
+              ))}
 
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Indirizzo</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="indirizzo">Indirizzo</Label>
+              {/* Indirizzo */}
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-2">Indirizzo</div>
+
+              {[
+                { label: 'Indirizzo', key: 'indirizzo' },
+                { label: 'Città', key: 'citta' },
+                { label: 'Provincia', key: 'provincia' },
+                { label: 'CAP', key: 'cap' },
+              ].map(({ label, key }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                  <div className="flex-1 min-w-0">
                     <Input
-                      id="indirizzo"
-                      value={formData.indirizzo}
-                      onChange={(e) => setFormData({ ...formData, indirizzo: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="citta">Città</Label>
-                    <Input
-                      id="citta"
-                      value={formData.citta}
-                      onChange={(e) => setFormData({ ...formData, citta: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="provincia">Provincia</Label>
-                    <Input
-                      id="provincia"
-                      value={formData.provincia}
-                      onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cap">CAP</Label>
-                    <Input
-                      id="cap"
-                      value={formData.cap}
-                      onChange={(e) => setFormData({ ...formData, cap: e.target.value })}
+                      value={formData[key] || ''}
+                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                      className="h-8 text-sm"
                     />
                   </div>
                 </div>
-              </div>
+              ))}
 
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Referente</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <Label htmlFor="referente_nome">Nome Referente</Label>
+              {/* Referente */}
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide pt-2">Referente</div>
+
+              {[
+                { label: 'Nome Referente', key: 'referente_nome' },
+                { label: 'Telefono', key: 'referente_telefono' },
+                { label: 'Email Referente', key: 'referente_email', type: 'email' },
+              ].map(({ label, key, type = 'text' }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                  <div className="flex-1 min-w-0">
                     <Input
-                      id="referente_nome"
-                      value={formData.referente_nome}
-                      onChange={(e) => setFormData({ ...formData, referente_nome: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="referente_telefono">Telefono Referente</Label>
-                    <Input
-                      id="referente_telefono"
-                      value={formData.referente_telefono}
-                      onChange={(e) => setFormData({ ...formData, referente_telefono: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="referente_email">Email Referente</Label>
-                    <Input
-                      id="referente_email"
-                      type="email"
-                      value={formData.referente_email}
-                      onChange={(e) => setFormData({ ...formData, referente_email: e.target.value })}
+                      type={type}
+                      value={formData[key] || ''}
+                      onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                      className="h-8 text-sm"
                     />
                   </div>
                 </div>
+              ))}
+
+              {/* Note */}
+              <div className="flex items-start gap-3">
+                <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Note</label>
+                <div className="flex-1 min-w-0">
+                  <Textarea
+                    value={formData.note || ''}
+                    onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                    rows={2}
+                    className="text-sm"
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="note">Note</Label>
-                <Textarea
-                  id="note"
-                  value={formData.note}
-                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    resetForm();
-                  }}
-                >
+              <div className="flex justify-end gap-3 pt-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>
                   Annulla
                 </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
                   {editingCliente ? 'Aggiorna' : 'Crea'}
                 </Button>
               </div>
