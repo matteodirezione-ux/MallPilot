@@ -69,7 +69,7 @@ export default function CalendarioTask({ tasks, onTaskClick, onDayClick }) {
                 {taskGiorno.slice(0, 3).map(t => (
                   <button
                     key={t.id}
-                    onClick={() => onTaskClick(t)}
+                    onClick={(e) => { e.stopPropagation(); onTaskClick(t); }}
                     className={`w-full text-left text-xs px-1.5 py-0.5 rounded truncate font-medium ${prioritaColors[t.priorita] || prioritaColors.media} ${t.stato === 'completato' ? 'opacity-40 line-through' : ''}`}
                     title={t.titolo}
                   >
