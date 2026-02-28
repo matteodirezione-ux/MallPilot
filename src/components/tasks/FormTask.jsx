@@ -148,47 +148,46 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
         <DialogHeader>
           <DialogTitle>{task ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Titolo *</Label>
-            <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required />
+        <form onSubmit={handleSubmit} className="space-y-2.5">
+          <div className="flex items-center gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs">Titolo *</Label>
+            <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="h-8 text-sm" />
           </div>
 
-          <div>
-            <Label>Descrizione</Label>
-            <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} />
+          <div className="flex items-start gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs mt-1.5">Descrizione</Label>
+            <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="text-sm" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Priorità</Label>
-              <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="bassa">Bassa</SelectItem>
-                  <SelectItem value="media">Media</SelectItem>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="urgente">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Stato</Label>
-              <Select value={form.stato} onValueChange={v => set('stato', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="da_fare">Da fare</SelectItem>
-                  <SelectItem value="in_corso">In corso</SelectItem>
-                  <SelectItem value="completato">Completato</SelectItem>
-                  <SelectItem value="annullato">Annullato</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs">Priorità</Label>
+            <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
+              <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="bassa">Bassa</SelectItem>
+                <SelectItem value="media">Media</SelectItem>
+                <SelectItem value="alta">Alta</SelectItem>
+                <SelectItem value="urgente">Urgente</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div>
-            <Label>Data scadenza *</Label>
-            <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required />
+          <div className="flex items-center gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs">Stato</Label>
+            <Select value={form.stato} onValueChange={v => set('stato', v)}>
+              <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="da_fare">Da fare</SelectItem>
+                <SelectItem value="in_corso">In corso</SelectItem>
+                <SelectItem value="completato">Completato</SelectItem>
+                <SelectItem value="annullato">Annullato</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Label className="w-28 shrink-0 text-right text-xs">Data scadenza *</Label>
+            <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required className="h-8 text-sm flex-1" />
           </div>
 
           {/* Modalità assegnazione (solo proprietà, solo nuovo task) */}
