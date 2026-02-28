@@ -280,11 +280,11 @@ export default function Clienti({ centroSelezionato }) {
               {wizardStep === 1 && (
                 <div className="space-y-3">
                   {[
-                    { label: 'Indirizzo', key: 'indirizzo' },
-                    { label: 'Città', key: 'citta' },
-                    { label: 'Provincia', key: 'provincia' },
-                    { label: 'CAP', key: 'cap' },
-                  ].map(({ label, key }) => (
+                    { label: 'Indirizzo *', key: 'indirizzo', required: true },
+                    { label: 'Città *', key: 'citta', required: true },
+                    { label: 'Provincia *', key: 'provincia', required: true },
+                    { label: 'CAP *', key: 'cap', required: true },
+                  ].map(({ label, key, required }) => (
                     <div key={key} className="flex items-center gap-3">
                       <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
                       <div className="flex-1 min-w-0">
