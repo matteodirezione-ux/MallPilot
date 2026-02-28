@@ -281,6 +281,19 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
 
         <div className="col-span-2">
+          <label className="flex items-center gap-3 p-3 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+            <input
+              type="checkbox"
+              checked={formData.necessita_elettricita}
+              onChange={(e) => setFormData({ ...formData, necessita_elettricita: e.target.checked })}
+              className="w-4 h-4 accent-yellow-500"
+            />
+            <Zap className="w-4 h-4 text-yellow-500" />
+            <span className="text-sm font-medium text-slate-700">Necessita di elettricità</span>
+          </label>
+        </div>
+
+        <div className="col-span-2">
           <Label htmlFor="note">Note</Label>
           <Textarea
             id="note"
