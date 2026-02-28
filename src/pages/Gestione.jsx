@@ -169,6 +169,58 @@ export default function Gestione({ user }) {
     }
   };
 
+  // === VIGILANZA ===
+  const saveVigilanza = async (formData) => {
+    try {
+      if (vigilanzaDialog.data) {
+        await base44.entities.Vigilanza.update(vigilanzaDialog.data.id, {
+          full_name: formData.full_name,
+          email: formData.email
+        });
+        
+        const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === vigilanzaDialog.data.email);
+        const centriAttualiIds = assegnazioniAttuali.map(a => a.centro_id);
+        const daRimuovere = assegnazioniAttuali.filter(a => !formData.centri_ids.includes(a.centro_id));
+        const daAggiungere = formData.centri_ids.filter(id => !centriAttualiIds.includes(id));
+        
+        await Promise.all([
+          ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id)),
+          ...daAggiungere.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
+        ]);
+        
+        toast.success('Vigilanza aggiornata');
+      } else {
+        await base44.entities.Vigilanza.create({ full_name: formData.full_name, email: formData.email, invito_accettato: false });
+        await Promise.all(
+          formData.centri_ids.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
+        );
+        // Invita l'utente
+        await base44.users.inviteUser(formData.email, 'user');
+        toast.success('Account vigilanza creato, invito inviato via email');
+      }
+      
+      setVigilanzaDialog({ open: false, data: null });
+      loadData();
+    } catch (error) {
+      toast.error('Errore: ' + error.message);
+    }
+  };
+
+  const deleteVigilanza = async (vig) => {
+    if (!confirm(`Eliminare l'account vigilanza ${vig.full_name}?`)) return;
+    try {
+      const assegnazioniVig = assegnazioni.filter(a => a.user_email === vig.email);
+      await Promise.all([
+        base44.entities.Vigilanza.delete(vig.id),
+        ...assegnazioniVig.map(a => base44.entities.Assegnazione.delete(a.id))
+      ]);
+      toast.success('Account vigilanza eliminato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore eliminazione');
+    }
+  };
+
   // === BUDGET ===
   const saveBudget = async (formData) => {
     try {
