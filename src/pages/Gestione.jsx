@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 export default function Gestione({ user }) {
   const [centri, setCentri] = useState([]);
   const [direttori, setDirettori] = useState([]);
+  const [vigilanze, setVigilanze] = useState([]);
   const [assegnazioni, setAssegnazioni] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +20,7 @@ export default function Gestione({ user }) {
   // Dialogs
   const [centroDialog, setCentroDialog] = useState({ open: false, data: null });
   const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
+  const [vigilanzaDialog, setVigilanzaDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
