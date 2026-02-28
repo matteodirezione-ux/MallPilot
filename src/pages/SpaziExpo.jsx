@@ -236,12 +236,14 @@ export default function SpaziExpo({ centroSelezionato, user }) {
           setDialogOpen(open);
           if (!open) resetForm();
         }}>
+          {user?.tipo_account !== 'vigilanza' && (
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Spazio
             </Button>
           </DialogTrigger>
+          )}
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
