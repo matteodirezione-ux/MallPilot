@@ -173,19 +173,6 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
           </div>
 
           <div className="flex items-center gap-3">
-            <Label className="w-28 shrink-0 text-right text-xs">Stato</Label>
-            <Select value={form.stato} onValueChange={v => set('stato', v)}>
-              <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="da_fare">Da fare</SelectItem>
-                <SelectItem value="in_corso">In corso</SelectItem>
-                <SelectItem value="completato">Completato</SelectItem>
-                <SelectItem value="annullato">Annullato</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-3">
             <Label className="w-28 shrink-0 text-right text-xs">Data scadenza *</Label>
             <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required className="h-8 text-sm flex-1" />
           </div>
