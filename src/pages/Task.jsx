@@ -52,8 +52,10 @@ export default function TaskPage({ centroSelezionato, user }) {
         const allVigilanze = await base44.entities.Vigilanza.list();
         setVigilanze(allVigilanze.filter(v => emailsVigilanza.includes(v.email)));
 
-        // Il direttore vede solo se stesso (non gli altri direttori)
-        setDirettori([{ email: user.email, full_name: user.full_name }]);
+        // Il direttore vede solo se stesso - carica il nome corretto dall'entità Direttore
+        const direttoreRecord = await base44.entities.Direttore.filter({ email: user.email });
+        const nomeDirettore = direttoreRecord.length > 0 ? direttoreRecord[0].full_name : user.full_name;
+        setDirettori([{ email: user.email, full_name: nomeDirettore }]);
 
         setLoading(false);
         return;
