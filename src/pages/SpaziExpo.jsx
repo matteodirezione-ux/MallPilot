@@ -248,168 +248,168 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                 {editingSpazio ? 'Modifica Spazio' : 'Nuovo Spazio'}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="centro_id">Centro Commerciale *</Label>
-              <select
-                id="centro_id"
-                value={formData.centro_id}
-                onChange={(e) => setFormData({ ...formData, centro_id: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                required
-              >
-                <option value="">Seleziona centro</option>
-                {centri.map(centro => (
-                  <option key={centro.id} value={centro.id}>
-                    {centro.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {(() => {
+                const row = "flex items-start gap-3";
+                const lbl = "w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
+                const fld = "flex-1 min-w-0";
+                return (
+                  <>
+                    <div className={row}>
+                      <label htmlFor="centro_id" className={lbl}>Centro *</label>
+                      <div className={fld}>
+                        <select
+                          id="centro_id"
+                          value={formData.centro_id}
+                          onChange={(e) => setFormData({ ...formData, centro_id: e.target.value })}
+                          className="w-full h-8 px-3 text-sm border border-slate-300 rounded-lg"
+                          required
+                        >
+                          <option value="">Seleziona centro</option>
+                          {centri.map(centro => (
+                            <option key={centro.id} value={centro.id}>{centro.nome}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="numero_spazio">Numero Spazio *</Label>
-                  <Input
-                    id="numero_spazio"
-                    value={formData.numero_spazio}
-                    onChange={(e) => setFormData({ ...formData, numero_spazio: e.target.value })}
-                    placeholder="es. A12"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="superficie_mq">Superficie (m²)</Label>
-                  <Input
-                    id="superficie_mq"
-                    type="number"
-                    step="0.01"
-                    value={formData.superficie_mq}
-                    onChange={(e) => setFormData({ ...formData, superficie_mq: e.target.value })}
-                    placeholder="es. 25.5"
-                  />
-                </div>
-              </div>
+                    <div className={row}>
+                      <label className={lbl}>Numero / m²</label>
+                      <div className={`${fld} flex gap-2`}>
+                        <Input
+                          value={formData.numero_spazio}
+                          onChange={(e) => setFormData({ ...formData, numero_spazio: e.target.value })}
+                          placeholder="es. A12"
+                          required
+                          className="h-8 text-sm"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={formData.superficie_mq}
+                          onChange={(e) => setFormData({ ...formData, superficie_mq: e.target.value })}
+                          placeholder="m²"
+                          className="h-8 text-sm w-24"
+                        />
+                      </div>
+                    </div>
 
-              <div>
-                <Label htmlFor="colore">Colore Identificativo</Label>
-                <Input
-                  id="colore"
-                  type="color"
-                  value={formData.colore}
-                  onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
-                  className="w-20 h-10"
-                />
-                <p className="text-xs text-slate-500 mt-1">Colore dello spazio nel calendario</p>
-              </div>
+                    <div className={row}>
+                      <label htmlFor="nome" className={lbl}>Nome</label>
+                      <div className={fld}>
+                        <Input
+                          id="nome"
+                          value={formData.nome}
+                          onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                          placeholder="es. Ingresso principale"
+                          className="h-8 text-sm"
+                        />
+                      </div>
+                    </div>
 
-              <div>
-                <Label htmlFor="nome">Nome Spazio</Label>
-                <Input
-                  id="nome"
-                  value={formData.nome}
-                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                  placeholder="es. Ingresso principale"
-                />
-              </div>
+                    <div className={row}>
+                      <label htmlFor="colore" className={lbl}>Colore</label>
+                      <div className={`${fld} flex items-center gap-2`}>
+                        <Input
+                          id="colore"
+                          type="color"
+                          value={formData.colore}
+                          onChange={(e) => setFormData({ ...formData, colore: e.target.value })}
+                          className="w-14 h-8 p-1"
+                        />
+                        <span className="text-xs text-slate-500">Colore nel calendario</span>
+                      </div>
+                    </div>
 
-              <div>
-                <Label htmlFor="descrizione">Descrizione</Label>
-                <Textarea
-                  id="descrizione"
-                  value={formData.descrizione}
-                  onChange={(e) => setFormData({ ...formData, descrizione: e.target.value })}
-                  placeholder="Descrizione dello spazio..."
-                  rows={3}
-                />
-              </div>
+                    <div className={row}>
+                      <label htmlFor="descrizione" className={lbl}>Descrizione</label>
+                      <div className={fld}>
+                        <Textarea
+                          id="descrizione"
+                          value={formData.descrizione}
+                          onChange={(e) => setFormData({ ...formData, descrizione: e.target.value })}
+                          placeholder="Descrizione dello spazio..."
+                          rows={2}
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
 
-              <div>
-                <Label>Foto Spazio</Label>
-                <div className="mt-2 space-y-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'foto')}
-                    disabled={uploading}
-                  />
-                  {formData.foto_urls.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {formData.foto_urls.map((url, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={url}
-                            alt={`Foto ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg"
+                    <div className={row}>
+                      <label className={lbl}>Foto</label>
+                      <div className={fld}>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'foto')}
+                          disabled={uploading}
+                          className="h-8 text-sm"
+                        />
+                        {formData.foto_urls.length > 0 && (
+                          <div className="grid grid-cols-4 gap-1 mt-1">
+                            {formData.foto_urls.map((url, index) => (
+                              <div key={index} className="relative group">
+                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-16 object-cover rounded" />
+                                <button type="button" onClick={() => removeFoto(index)}
+                                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <Trash2 className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={row}>
+                      <label className={lbl}>Piantina</label>
+                      <div className={fld}>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'piantina')}
+                          disabled={uploading}
+                          className="h-8 text-sm"
+                        />
+                        {formData.piantina_url && (
+                          <div className="relative mt-1">
+                            <img src={formData.piantina_url} alt="Piantina" className="w-full h-24 object-cover rounded" />
+                            <button type="button" onClick={() => setFormData({ ...formData, piantina_url: '' })}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={row}>
+                      <span className={lbl}>Stato</span>
+                      <div className={`${fld} flex items-center pt-1.5`}>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            id="attivo"
+                            checked={formData.attivo}
+                            onChange={(e) => setFormData({ ...formData, attivo: e.target.checked })}
+                            className="rounded"
                           />
-                          <button
-                            type="button"
-                            onClick={() => removeFoto(index)}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
+                          <span className="text-sm text-slate-700">Spazio attivo</span>
+                        </label>
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              <div>
-                <Label>Piantina Posizione</Label>
-                <div className="mt-2 space-y-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileUpload(e, 'piantina')}
-                    disabled={uploading}
-                  />
-                  {formData.piantina_url && (
-                    <div className="relative">
-                      <img
-                        src={formData.piantina_url}
-                        alt="Piantina"
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, piantina_url: '' })}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <Button type="button" variant="outline" size="sm" onClick={() => { setDialogOpen(false); resetForm(); }}>
+                        Annulla
+                      </Button>
+                      <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
+                        {editingSpazio ? 'Aggiorna' : 'Crea'}
+                      </Button>
                     </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="attivo"
-                  checked={formData.attivo}
-                  onChange={(e) => setFormData({ ...formData, attivo: e.target.checked })}
-                  className="rounded"
-                />
-                <Label htmlFor="attivo" className="cursor-pointer">Spazio attivo</Label>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setDialogOpen(false);
-                    resetForm();
-                  }}
-                >
-                  Annulla
-                </Button>
-                <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-                  {editingSpazio ? 'Aggiorna' : 'Crea'}
-                </Button>
-              </div>
+                  </>
+                );
+              })()}
             </form>
           </DialogContent>
         </Dialog>
