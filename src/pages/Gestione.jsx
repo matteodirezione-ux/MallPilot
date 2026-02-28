@@ -548,6 +548,15 @@ export default function Gestione({ user }) {
         onSave={saveDirettore}
       />
       
+      <VigilanzaDialog
+        open={vigilanzaDialog.open}
+        data={vigilanzaDialog.data}
+        centri={centri}
+        assegnazioni={assegnazioni}
+        onClose={() => setVigilanzaDialog({ open: false, data: null })}
+        onSave={saveVigilanza}
+      />
+
       <BudgetDialog 
         open={budgetDialog.open} 
         data={budgetDialog.data}
