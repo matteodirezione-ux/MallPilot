@@ -244,6 +244,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
           )}
 
           {/* Selezione assegnatari */}
+
           {assegnatari.length > 0 && (
             <div className="flex items-start gap-3">
               <Label className="w-28 shrink-0 text-right text-xs mt-1">Assegna a</Label>
