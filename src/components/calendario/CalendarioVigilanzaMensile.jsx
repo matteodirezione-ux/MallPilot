@@ -85,7 +85,8 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
                       <div
                         key={p.id}
                         style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`, borderColor: spazioColor }}
-                        className="text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded border-2"
+                        className="text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded border-2 cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => setSelectedPrenotazione({ prenotazione: p, spazio, cliente })}
                       >
                         <div className="flex items-center gap-1">
                           <div
