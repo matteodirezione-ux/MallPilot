@@ -570,7 +570,7 @@ export default function Dashboard({ centroSelezionato }) {
         </Card>
 
         {/* Prossimi Affitti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
