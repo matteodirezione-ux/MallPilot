@@ -1,0 +1,117 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import CalendarioVigilanzaMensile from '@/components/calendario/CalendarioVigilanzaMensile';
+import { Building2, ChevronDown } from 'lucide-react';
+
+export default function CalendarioVigilanza() {
+  const [prenotazioni, setPrenotazioni] = useState([]);
+  const [spazi, setSpazi] = useState([]);
+  const [clienti, setClienti] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [loading, setLoading] = useState(true);
+  const [centri, setCentri] = useState([]);
+  const [centroSelezionato, setCentroSelezionato] = useState(null);
+
+  const loadCentroData = async (centro) => {
+    setLoading(true);
+    const [prenotaz, spaziData, clientiData] = await Promise.all([
+      base44.entities.Prenotazione.filter({ centro_id: centro.id }),
+      base44.entities.SpazioExpo.filter({ centro_id: centro.id }),
+      base44.entities.Cliente.filter({ centro_id: centro.id }),
+    ]);
+    setPrenotazioni(prenotaz);
+    setSpazi(spaziData);
+    setClienti(clientiData);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      const allCentri = await base44.entities.CentroCommerciale.list();
+      setCentri(allCentri);
+      if (allCentri.length > 0) {
+        const savedId = localStorage.getItem('vigilanza_centro_id');
+        const centro = allCentri.find(c => c.id === savedId) || allCentri[0];
+        setCentroSelezionato(centro);
+        await loadCentroData(centro);
+      } else {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
+
+  const handleCentroChange = async (centroId) => {
+    const centro = centri.find(c => c.id === centroId);
+    if (!centro) return;
+    setCentroSelezionato(centro);
+    localStorage.setItem('vigilanza_centro_id', centroId);
+    await loadCentroData(centro);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600">Caricamento...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (centri.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <p className="text-slate-500">Nessun centro commerciale disponibile.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+              <Building2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">Calendario Vigilanza</h1>
+              {centroSelezionato && (
+                <p className="text-sm text-slate-500">{centroSelezionato.nome}</p>
+              )}
+            </div>
+          </div>
+
+          {centri.length > 1 && (
+            <div className="relative">
+              <select
+                value={centroSelezionato?.id || ''}
+                onChange={(e) => handleCentroChange(e.target.value)}
+                className="appearance-none px-4 py-2 pr-10 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer hover:bg-slate-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {centri.map(c => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+          )}
+        </div>
+
+        <CalendarioVigilanzaMensile
+          prenotazioni={prenotazioni}
+          spazi={spazi}
+          clienti={clienti}
+          currentMonth={currentMonth}
+          setCurrentMonth={setCurrentMonth}
+        />
+      </div>
+    </div>
+  );
+}
