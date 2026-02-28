@@ -424,13 +424,15 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             <p className="text-slate-500 text-center mb-4">
               Nessuno spazio creato per questo centro
             </p>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Crea il primo spazio
-            </Button>
+            {user?.tipo_account !== 'vigilanza' && (
+              <Button
+                onClick={() => setDialogOpen(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Crea il primo spazio
+              </Button>
+            )}
           </CardContent>
         </Card>
       ) : (
