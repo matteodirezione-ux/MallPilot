@@ -12,7 +12,7 @@ const prioritaColors = {
   urgente: 'bg-red-300 text-red-900',
 };
 
-export default function CalendarioTask({ tasks, onTaskClick }) {
+export default function CalendarioTask({ tasks, onTaskClick, onDayClick }) {
   const [mese, setMese] = useState(new Date());
 
   const inizioMese = startOfMonth(mese);
