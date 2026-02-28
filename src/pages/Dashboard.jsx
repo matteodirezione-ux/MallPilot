@@ -9,7 +9,11 @@ import {
   Users,
   Target,
   BarChart2,
-  Percent
+  Percent,
+  ListTodo,
+  Clock,
+  AlertCircle,
+  CheckCircle
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
