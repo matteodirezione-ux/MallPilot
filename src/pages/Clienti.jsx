@@ -304,10 +304,10 @@ export default function Clienti({ centroSelezionato }) {
               {wizardStep === 2 && (
                 <div className="space-y-3">
                   {[
-                    { label: 'Nome Referente', key: 'referente_nome' },
+                    { label: 'Nome Referente *', key: 'referente_nome', required: true },
                     { label: 'Telefono', key: 'referente_telefono' },
-                    { label: 'Email Referente', key: 'referente_email', type: 'email' },
-                  ].map(({ label, key, type = 'text' }) => (
+                    { label: 'Email Referente *', key: 'referente_email', type: 'email', required: true },
+                  ].map(({ label, key, type = 'text', required }) => (
                     <div key={key} className="flex items-center gap-3">
                       <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
                       <div className="flex-1 min-w-0">
