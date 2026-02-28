@@ -24,7 +24,7 @@ export default function Gestione({ user }) {
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
-    if (user?.tipo_account === 'proprieta') {
+    if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') {
       loadData();
     }
   }, [user]);
@@ -39,8 +39,15 @@ export default function Gestione({ user }) {
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
-      
-      setCentri(centriData);
+
+      // Per il direttore, filtra solo i centri assegnati
+      if (user?.tipo_account === 'direttore') {
+        const centriIds = assegnazioniData.filter(a => a.user_email === user.email).map(a => a.centro_id);
+        setCentri(centriData.filter(c => centriIds.includes(c.id)));
+      } else {
+        setCentri(centriData);
+      }
+
       setDirettori(direttoriData);
       setVigilanze(vigilanzeData);
       setAssegnazioni(assegnazioniData);
