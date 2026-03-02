@@ -12,6 +12,8 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
   const [clienti, setClienti] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [loading, setLoading] = useState(true);
+  const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
+  const [soloEventi, setSoloEventi] = useState(false);
   const [centri, setCentri] = useState([]);
   const [centroSelezionato, setCentroSelezionato] = useState(null);
 
