@@ -418,26 +418,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         </div>
       )}
 
-      {/* Second row - Events & Clients */}
+      {/* Second row - Events */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-6">
-          {/* Numero Clienti */}
-          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Clienti
-                </CardTitle>
-                <Users className="w-5 h-5 text-indigo-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-indigo-700">
-                {stats.clientiTotali}
-              </p>
-            </CardContent>
-          </Card>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
           {/* Numero Eventi */}
           <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
