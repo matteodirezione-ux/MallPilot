@@ -498,23 +498,43 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
-        {/* Prossimi Eventi */}
+        {/* Eventi */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
               <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
-                Prossimi Eventi
+                Eventi
               </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
-            {stats.eventStats.prossimiEventi.length === 0 ? (
+            {stats.eventStats.eventiCorrentiList?.length === 0 && stats.eventStats.prossimiEventi.length === 0 ? (
               <p className="text-slate-500 text-center py-4 text-sm">
-                Nessun evento nei prossimi giorni
+                Nessun evento in corso o in programma
               </p>
             ) : (
               <div className="space-y-2">
+                {stats.eventStats.eventiCorrentiList?.map((evento) => (
+                  <div 
+                    key={evento.id}
+                    className="flex items-center justify-between p-3 bg-purple-100 rounded-lg border border-purple-200"
+                  >
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 text-sm truncate">
+                        {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
+                      </p>
+                      <p className="text-xs text-purple-700 font-medium">
+                        ✦ In corso
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-slate-700">
+                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
                 {stats.eventStats.prossimiEventi.map((evento) => (
                   <div 
                     key={evento.id}
@@ -522,18 +542,15 @@ export default function Dashboard({ centroSelezionato }) {
                   >
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 text-sm truncate">
-                        {evento.cliente?.ragione_sociale || 'N.A.'}
+                        {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
-                      <p className="text-xs text-slate-600">
-                        {stats.eventStats.eventiCorrenti > 0 && evento.data_inizio === new Date().toISOString().split('T')[0] ? 'In corso' : 'Prossimo'}
+                      <p className="text-xs text-slate-500">
+                        Prossimo
                       </p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xs font-medium text-slate-700">
                         {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
-                      </p>
-                      <p className="text-sm font-semibold text-purple-600">
-                        {stats.eventStats.giorniEvento} giorni
                       </p>
                     </div>
                   </div>
