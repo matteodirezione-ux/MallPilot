@@ -336,269 +336,265 @@ export default function Dashboard({ centroSelezionato, user }) {
         <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
-      {/* Stats Grid - solo per proprietà e direttore */}
-      {user?.tipo_account !== 'vigilanza' && (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-6">
-            {/* Spazi Occupati */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Spazi affittati
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                    <Building2 className="w-4 h-4 text-blue-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-slate-800 mb-2">
-                  {stats.spaziOccupati} / {stats.spaziTotali}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
-                      style={{ width: `${percentualeOccupazione}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</span>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Stats Grid - 2 cols on mobile, 3 on md, 6 on lg */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-6">
+        {/* Spazi Occupati */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Spazi affittati
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4 text-blue-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800 mb-2">
+              {stats.spaziOccupati} / {stats.spaziTotali}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all"
+                  style={{ width: `${percentualeOccupazione}%` }}
+                ></div>
+              </div>
+              <span className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</span>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Incassi Mese */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Incassi Mese
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-4 h-4 text-green-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800 mb-1">
-                  {formatCurrency(stats.incassiMese)}
-                </div>
-                <p className="text-xs text-slate-500">
-                  {format(new Date(), 'MMM yyyy', { locale: it })}
-                </p>
-              </CardContent>
-            </Card>
+        {/* Incassi Mese */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Incassi Mese
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4 text-green-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
+              {formatCurrency(stats.incassiMese)}
+            </div>
+            <p className="text-xs text-slate-500">
+              {format(new Date(), 'MMM yyyy', { locale: it })}
+            </p>
+          </CardContent>
+        </Card>
 
-            {/* Incassi Anno / Budget */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Incassi Anno
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                    <Target className="w-4 h-4 text-emerald-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800 mb-1">
-                  {formatCurrency(stats.incassiAnno)}
-                </div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all"
-                      style={{ width: `${Math.min(percentualeBudget, 100)}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs font-medium text-emerald-600">{percentualeBudget}%</span>
-                </div>
-                <p className="text-xs text-slate-500 truncate">
-                  Budget: {formatCurrency(stats.budgetAnno)}
-                </p>
-              </CardContent>
-            </Card>
+        {/* Incassi Anno / Budget */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Incassi Anno
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                <Target className="w-4 h-4 text-emerald-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
+              {formatCurrency(stats.incassiAnno)}
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full transition-all"
+                  style={{ width: `${Math.min(percentualeBudget, 100)}%` }}
+                ></div>
+              </div>
+              <span className="text-xs font-medium text-emerald-600">{percentualeBudget}%</span>
+            </div>
+            <p className="text-xs text-slate-500 truncate">
+              Budget: {formatCurrency(stats.budgetAnno)}
+            </p>
+          </CardContent>
+        </Card>
 
-            {/* Affitto Medio Giornaliero */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Affitto Medio / gg
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                    <BarChart2 className="w-4 h-4 text-orange-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800 mb-1">
-                  {formatCurrency(stats.affittoMedioGiornaliero)}
-                </div>
-                <p className="text-xs text-slate-500">Media affitti</p>
-              </CardContent>
-            </Card>
+        {/* Affitto Medio Giornaliero */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Affitto Medio / gg
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                <BarChart2 className="w-4 h-4 text-orange-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-1">
+              {formatCurrency(stats.affittoMedioGiornaliero)}
+            </div>
+            <p className="text-xs text-slate-500">Media affitti</p>
+          </CardContent>
+        </Card>
 
-            {/* Tasso Occupazione Annuale */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Tasso Occupaz.
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                    <Percent className="w-4 h-4 text-teal-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800 mb-2">
-                  {stats.tassoOccupazioneAnnuale.toFixed(1)}%
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all"
-                      style={{ width: `${Math.min(stats.tassoOccupazioneAnnuale, 100)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Tasso Occupazione Annuale */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Tasso Occupaz.
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                <Percent className="w-4 h-4 text-teal-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800 mb-2">
+              {stats.tassoOccupazioneAnnuale.toFixed(1)}%
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-teal-500 to-teal-600 rounded-full transition-all"
+                  style={{ width: `${Math.min(stats.tassoOccupazioneAnnuale, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            {/* Clienti Totali */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Clienti Totali
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-                    <Users className="w-4 h-4 text-violet-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-slate-800">
-                  {stats.clientiTotali}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Clienti registrati</p>
-              </CardContent>
-            </Card>
+        {/* Clienti Totali */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Clienti Totali
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 text-violet-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800">
+              {stats.clientiTotali}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Clienti registrati</p>
+          </CardContent>
+        </Card>
 
-          </div>
+      </div>
 
-          {/* Evento stats row */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-6">
-            {/* Numero Eventi Anno */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    N° Eventi {new Date().getFullYear()}
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4 text-indigo-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-slate-800">
-                  {stats.eventStats.numeroEventiAnno || 0}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Numero eventi anno</p>
-              </CardContent>
-            </Card>
+      {/* Evento stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-6">
+        {/* Numero Eventi Anno */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                N° Eventi {new Date().getFullYear()}
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-indigo-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800">
+              {stats.eventStats.numeroEventiAnno || 0}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Numero eventi anno</p>
+          </CardContent>
+        </Card>
 
-            {/* Giorni Evento Anno */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Giorni Evento
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-2xl font-bold text-slate-800">
-                  {stats.eventStats.giorniEvento}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Anno in corso</p>
-              </CardContent>
-            </Card>
+        {/* Giorni Evento Anno */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Giorni Evento
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold text-slate-800">
+              {stats.eventStats.giorniEvento}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Anno in corso</p>
+          </CardContent>
+        </Card>
 
-            {/* Costo Eventi Anno (inline) */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Costo Eventi {new Date().getFullYear()}
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-50 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4 text-fuchsia-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800">
-                  {formatCurrency(stats.eventStats.costoEventiAnno || 0)}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Totale eventi anno</p>
-              </CardContent>
-            </Card>
+        {/* Costo Eventi Anno (inline) */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Costo Eventi {new Date().getFullYear()}
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-fuchsia-50 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-fuchsia-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800">
+              {formatCurrency(stats.eventStats.costoEventiAnno || 0)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Totale eventi anno</p>
+          </CardContent>
+        </Card>
 
-            {/* Costo Singolo Evento */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Costo Singolo Evento {new Date().getFullYear()}
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-4 h-4 text-orange-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800">
-                  {formatCurrency(stats.eventStats.numeroEventiAnno ? (stats.eventStats.costoEventiAnno || 0) / stats.eventStats.numeroEventiAnno : 0)}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Costo medio per evento</p>
-              </CardContent>
-            </Card>
+        {/* Costo Singolo Evento */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Costo Singolo Evento {new Date().getFullYear()}
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4 text-orange-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800">
+              {formatCurrency(stats.eventStats.numeroEventiAnno ? (stats.eventStats.costoEventiAnno || 0) / stats.eventStats.numeroEventiAnno : 0)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Costo medio per evento</p>
+          </CardContent>
+        </Card>
 
-            {/* Costo Giorno Evento (inline) */}
-            <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-48">
-              <CardHeader className="pb-2 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                    Costo / Giorno Evento
-                  </CardTitle>
-                  <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center shrink-0">
-                    <DollarSign className="w-4 h-4 text-pink-600" />
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className="text-xl font-bold text-slate-800">
-                  {formatCurrency(stats.eventStats.costoMedioGiornoEvento || 0)}
-                </div>
-                <p className="text-xs text-slate-500 mt-2">Media giornaliera</p>
-              </CardContent>
-            </Card>
-          </div>
-        </>
-      )}
+        {/* Costo Giorno Evento (inline) */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Costo / Giorno Evento
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center shrink-0">
+                <DollarSign className="w-4 h-4 text-pink-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800">
+              {formatCurrency(stats.eventStats.costoMedioGiornoEvento || 0)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Media giornaliera</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Bottom cards - 4 columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Task per Giorno */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <ListTodo className="w-5 h-5 text-slate-600" />
@@ -613,7 +609,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Eventi */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
@@ -675,7 +671,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Affitti Correnti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
@@ -708,21 +704,19 @@ export default function Dashboard({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-700">
                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
-                      {user?.tipo_account !== 'vigilanza' && (
-                         <p className="text-sm font-semibold text-green-600">
-                           {formatCurrency(prenotazione.prezzo_totale)}
-                         </p>
-                       )}
-                      </div>
-                      </div>
-                      ))}
-                      </div>
-                      )}
-                      </CardContent>
-                      </Card>
+                      <p className="text-sm font-semibold text-green-600">
+                        {formatCurrency(prenotazione.prezzo_totale)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-                      {/* Prossimi Affitti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
+        {/* Prossimi Affitti */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-blue-600" />
@@ -755,19 +749,17 @@ export default function Dashboard({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-700">
                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
-                      {user?.tipo_account !== 'vigilanza' && (
-                         <p className="text-sm font-semibold text-green-600">
-                           {formatCurrency(prenotazione.prezzo_totale)}
-                         </p>
-                       )}
-                      </div>
-                      </div>
-                      ))}
-                      </div>
-                      )}
-                      </CardContent>
-                      </Card>
-                      </div>
-                      </div>
-                      );
-                      }
+                      <p className="text-sm font-semibold text-green-600">
+                        {formatCurrency(prenotazione.prezzo_totale)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

@@ -157,12 +157,15 @@ export default function Layout({ children, currentPageName }) {
   };
 
   const navigationItems = [
-    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
+    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
+    { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore'] },
+    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
     { name: 'Calendario Manutenzioni', page: 'CalendarioManutenzioni', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['vigilanza'] },
+    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['vigilanza'] },
+    { name: 'Task', page: 'Task', icon: ListTodo, roles: ['vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
-    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
   ];
