@@ -467,6 +467,46 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
+        {/* Costo Eventi Anno */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Costo Eventi
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800">
+              {formatCurrency(stats.eventStats.costoEventi)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Anno in corso</p>
+          </CardContent>
+        </Card>
+
+        {/* Costo Giorno Evento */}
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          <CardHeader className="pb-2 p-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
+                Costo / gg Evento
+              </CardTitle>
+              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-xl font-bold text-slate-800">
+              {formatCurrency(stats.eventStats.costoGiornoEvento)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Totale / giorni evento</p>
+          </CardContent>
+        </Card>
+
         {/* Clienti Totali */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-2 p-4">
