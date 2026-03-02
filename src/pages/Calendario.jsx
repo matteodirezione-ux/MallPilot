@@ -173,11 +173,11 @@ export default function Calendario({ centroSelezionato, user }) {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-         <div>
-           <h1 className="text-3xl font-bold text-slate-800 mb-2">Calendario Expo</h1>
-           <p className="text-slate-600">{centroSelezionato?.nome}</p>
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-4 sm:mb-6 lg:mb-8">
+         <div className="min-w-0">
+           <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-1">Calendario Expo</h1>
+           <p className="text-slate-600 text-sm truncate">{centroSelezionato?.nome}</p>
          </div>
          {!isVigilanza && (
            <Dialog open={dialogOpen} onOpenChange={(open) => {
@@ -185,9 +185,10 @@ export default function Calendario({ centroSelezionato, user }) {
              if (!open) setEditingPrenotazione(null);
            }}>
              <DialogTrigger asChild>
-               <Button className="bg-blue-600 hover:bg-blue-700">
+               <Button className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm sm:text-base">
                  <Plus className="w-4 h-4 mr-2" />
-                 Nuova Prenotazione
+                 <span className="hidden sm:inline">Nuova Prenotazione</span>
+                 <span className="sm:hidden">Nuova</span>
                </Button>
              </DialogTrigger>
              <DialogContent className="max-w-2xl">
@@ -212,49 +213,52 @@ export default function Calendario({ centroSelezionato, user }) {
        </div>
 
       <Tabs defaultValue="mensile" className="w-full">
-         <div className="mb-4 flex flex-col gap-3">
+         <div className="mb-3 sm:mb-4 flex flex-col gap-2 sm:gap-3">
            <div className="relative">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
              <Input
                placeholder="Cerca per cliente, evento o spazio..."
                value={searchText}
                onChange={(e) => setSearchText(e.target.value)}
-               className="pl-9"
+               className="pl-9 text-sm"
              />
            </div>
-           <div className="flex flex-wrap items-center justify-between gap-3">
-           <TabsList>
-             <TabsTrigger value="mensile" className="flex items-center gap-2">
-               <CalendarIcon className="w-4 h-4" />
-               Mensile
+           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+           <TabsList className="grid grid-cols-2 sm:flex gap-1 w-full sm:w-auto">
+             <TabsTrigger value="mensile" className="flex items-center gap-1 text-xs sm:text-sm px-2 sm:px-3">
+               <CalendarIcon className="w-3 sm:w-4 h-3 sm:h-4" />
+               <span className="hidden sm:inline">Mensile</span>
+               <span className="sm:hidden">Mese</span>
              </TabsTrigger>
-             <TabsTrigger value="settimanale" className="flex items-center gap-2">
-               <CalendarDays className="w-4 h-4" />
-               Settimanale
+             <TabsTrigger value="settimanale" className="flex items-center gap-1 text-xs sm:text-sm px-2 sm:px-3">
+               <CalendarDays className="w-3 sm:w-4 h-3 sm:h-4" />
+               <span className="hidden sm:inline">Settimanale</span>
+               <span className="sm:hidden">Sett</span>
              </TabsTrigger>
              {!isVigilanza && (
                <>
-                 <TabsTrigger value="lista" className="flex items-center gap-2">
-                   <List className="w-4 h-4" />
-                   Lista
+                 <TabsTrigger value="lista" className="flex items-center gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                   <List className="w-3 sm:w-4 h-3 sm:h-4" />
+                   <span className="hidden sm:inline">Lista</span>
                  </TabsTrigger>
-                 <TabsTrigger value="disponibilita" className="flex items-center gap-2">
-                   <LayoutGrid className="w-4 h-4" />
-                   Disponibilità
+                 <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs sm:text-sm px-2 sm:px-3">
+                   <LayoutGrid className="w-3 sm:w-4 h-3 sm:h-4" />
+                   <span className="hidden md:inline">Disp</span>
                  </TabsTrigger>
                </>
              )}
            </TabsList>
            {!isVigilanza && (
-             <div className="flex items-center gap-6">
+             <div className="flex flex-col gap-2">
                <div className="flex items-center gap-2">
                  <Checkbox
                    id="nascondi-permanenti"
                    checked={nascondiPermanenti}
                    onCheckedChange={setNascondiPermanenti}
+                   className="w-4 h-4"
                  />
-                 <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
-                   Nascondi prenotazioni permanenti (≥ 300 giorni)
+                 <Label htmlFor="nascondi-permanenti" className="text-xs sm:text-sm text-slate-600 cursor-pointer">
+                   Nascondi permanenti
                  </Label>
                </div>
                <div className="flex items-center gap-2">
@@ -262,9 +266,10 @@ export default function Calendario({ centroSelezionato, user }) {
                    id="solo-eventi"
                    checked={soloEventi}
                    onCheckedChange={setSoloEventi}
+                   className="w-4 h-4"
                  />
-                 <Label htmlFor="solo-eventi" className="text-sm text-slate-600 cursor-pointer">
-                   Mostra solo eventi
+                 <Label htmlFor="solo-eventi" className="text-xs sm:text-sm text-slate-600 cursor-pointer">
+                   Solo eventi
                  </Label>
                </div>
              </div>

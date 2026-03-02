@@ -212,43 +212,48 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   if (!user) return null;
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Wrench className="w-6 h-6 text-blue-600" />
-            Calendario Manutenzioni
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-6 mb-4 sm:mb-6">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <Wrench className="w-5 sm:w-6 h-5 sm:h-6 text-blue-600" />
+            <span className="hidden sm:inline">Calendario Manutenzioni</span>
+            <span className="sm:hidden">Manutenzioni</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5 truncate">
             {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
           </p>
         </div>
-        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700">
+        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm">
           <Plus className="w-4 h-4 mr-2" />
-          Nuova Manutenzione
+          <span className="hidden sm:inline">Nuova Manutenzione</span>
+          <span className="sm:hidden">Nuova</span>
         </Button>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-400">Caricamento...</div>
+        <div className="text-center py-8 sm:py-12 text-slate-400 text-sm">Caricamento...</div>
       ) : (
         <>
-          <div className="relative mb-4">
+          <div className="relative mb-3 sm:mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               placeholder="Cerca per titolo o descrizione..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="pl-9"
+              className="pl-9 text-sm"
             />
           </div>
         <Tabs defaultValue="calendario">
-          <TabsList className="mb-4">
-            <TabsTrigger value="calendario" className="gap-2">
-              <Calendar className="w-4 h-4" /> Calendario
+          <TabsList className="mb-3 sm:mb-4 grid grid-cols-2 sm:flex gap-1 w-full">
+            <TabsTrigger value="calendario" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <Calendar className="w-3 sm:w-4 h-3 sm:h-4" /> 
+              <span className="hidden sm:inline">Calendario</span>
+              <span className="sm:hidden">Cal</span>
             </TabsTrigger>
-            <TabsTrigger value="lista" className="gap-2">
-              <ListTodo className="w-4 h-4" /> Lista
+            <TabsTrigger value="lista" className="gap-1 text-xs sm:text-sm px-2 sm:px-3">
+              <ListTodo className="w-3 sm:w-4 h-3 sm:h-4" /> 
+              <span className="hidden sm:inline">Lista</span>
             </TabsTrigger>
           </TabsList>
 
