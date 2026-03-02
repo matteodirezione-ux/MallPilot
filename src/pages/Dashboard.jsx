@@ -336,9 +336,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
-      {/* Summary Cards - Top row */}
+      {/* Summary Cards - All in one row */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4 mb-6">
           {/* Incassi Mese */}
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
