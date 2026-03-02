@@ -270,21 +270,25 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           </div>
 
           {/* Prezzi */}
-          <div className={rowClass}>
-            <label className={labelClass}>Prezzo *</label>
-            <div className={`${fieldClass} flex gap-2`}>
-              <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Totale (€)" className="h-8 text-sm" />
-              <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="Mensile (€)" className="h-8 text-sm" />
+          {!isVigilanza && (
+            <div className={rowClass}>
+              <label className={labelClass}>Prezzo *</label>
+              <div className={`${fieldClass} flex gap-2`}>
+                <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Totale (€)" className="h-8 text-sm" />
+                <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="Mensile (€)" className="h-8 text-sm" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Materiale */}
-          <div className={rowClass}>
-            <label className={labelClass}>Materiale *</label>
-            <div className={fieldClass}>
-              <Textarea value={formData.materiale_dimostrativo} onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })} placeholder="Materiale dimostrativo/pubblicitario" rows={2} className="text-sm" />
+          {!isVigilanza && (
+            <div className={rowClass}>
+              <label className={labelClass}>Materiale *</label>
+              <div className={fieldClass}>
+                <Textarea value={formData.materiale_dimostrativo} onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })} placeholder="Materiale dimostrativo/pubblicitario" rows={2} className="text-sm" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Elettricità */}
           <div className={rowClass}>
