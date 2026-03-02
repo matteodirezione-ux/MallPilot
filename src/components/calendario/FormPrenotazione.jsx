@@ -15,6 +15,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const [formData, setFormData] = useState({
     spazi_ids: [],
     cliente_id: '',
+    nome_evento: '',
     data_inizio: '',
     data_fine: '',
     prezzo_totale: '',
