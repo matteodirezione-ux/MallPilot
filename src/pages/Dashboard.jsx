@@ -356,7 +356,13 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="bg-blue-100 p-2 rounded-lg"><TrendingUp className="w-4 h-4 text-blue-600" /></div>
             </div>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.incassiAnno)}</p>
-            <p className="text-xs text-slate-500 mt-2">Budget: {formatCurrency(stats.budgetAnno)} ({percentualeBudget}%)</p>
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-slate-600">Budget</p>
+                <p className="text-xs font-medium text-blue-600">{percentualeBudget}%</p>
+              </div>
+              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-2" />
+            </div>
           </div>
 
           {/* Spazi Occupati */}
@@ -366,7 +372,13 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="bg-blue-100 p-2 rounded-lg"><Building2 className="w-4 h-4 text-blue-600" /></div>
             </div>
             <p className="text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
-            <p className="text-xs text-slate-500 mt-2">Occupazione: {percentualeOccupazione}%</p>
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-slate-600">Occupazione</p>
+                <p className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</p>
+              </div>
+              <Progress value={parseInt(percentualeOccupazione)} className="h-2" />
+            </div>
           </div>
 
           {/* Affitto Medio Giornaliero */}
@@ -376,7 +388,13 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="bg-blue-100 p-2 rounded-lg"><BarChart2 className="w-4 h-4 text-blue-600" /></div>
             </div>
             <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
-            <p className="text-xs text-slate-500 mt-2">Occupazione: {stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-xs text-slate-600">Occupazione</p>
+                <p className="text-xs font-medium text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
+              </div>
+              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-2" />
+            </div>
           </div>
 
           {/* Numero Eventi */}
