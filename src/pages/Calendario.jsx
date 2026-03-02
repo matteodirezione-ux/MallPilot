@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -196,7 +195,7 @@ export default function Calendario({ centroSelezionato }) {
       </div>
 
       <Tabs defaultValue="mensile" className="w-full">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <TabsList>
             <TabsTrigger value="mensile" className="flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
