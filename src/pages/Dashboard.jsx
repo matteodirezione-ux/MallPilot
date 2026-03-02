@@ -331,8 +331,8 @@ export default function Dashboard({ centroSelezionato }) {
         <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
-      {/* Stats Grid - 2 cols on mobile, 3 on md, 8 on lg */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-8 gap-3 md:gap-6 mb-6">
+      {/* Stats Grid - 2 cols on mobile, 3 on md, 6 on lg */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-6 mb-6">
         {/* Spazi Occupati */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-2 p-4">
