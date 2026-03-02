@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Pencil, Trash2, Building2, User, Calendar, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Pencil, Trash2, Building2, User, Calendar, ArrowUpDown, ArrowUp, ArrowDown, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 

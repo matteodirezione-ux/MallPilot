@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
+import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
 export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit }) {
