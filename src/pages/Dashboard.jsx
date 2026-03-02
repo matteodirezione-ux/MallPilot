@@ -613,7 +613,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Eventi */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
