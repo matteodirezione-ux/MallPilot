@@ -32,8 +32,8 @@ export default function DisponibilitaSpazi({ prenotazioni, spazi }) {
             const spaziPrenotati = p.spazi_ids?.length ? p.spazi_ids : (p.spazio_id ? [p.spazio_id] : []);
             if (!spaziPrenotati.includes(spazio.id)) return false;
             return isWithinInterval(giorno, {
-              start: new Date(p.data_inizio),
-              end: new Date(p.data_fine)
+              start: parseLocalDate(p.data_inizio),
+              end: parseLocalDate(p.data_fine)
             });
           });
         }).length;
