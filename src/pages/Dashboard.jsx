@@ -181,17 +181,22 @@ export default function Dashboard({ centroSelezionato }) {
       const prossimiEventi = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
       
       let giorniEvento = 0;
+      let costoEventi = 0;
       allPrenotazioni.forEach(p => {
         if (p.is_event && (p.stato === 'confermata' || p.stato === 'in_corso')) {
           const inizio = new Date(p.data_inizio);
           const fine = new Date(p.data_fine);
           const giorni = Math.ceil((fine - inizio) / (1000 * 60 * 60 * 24)) + 1;
           giorniEvento += giorni;
+          costoEventi += (p.prezzo_totale || 0);
         }
       });
+      const costoGiornoEvento = giorniEvento > 0 ? costoEventi / giorniEvento : 0;
 
       const eventStats = {
         giorniEvento,
+        costoEventi,
+        costoGiornoEvento,
         eventiCorrenti: eventiCorrentiList.length,
         eventiCorrentiList,
         prossimiEventi
