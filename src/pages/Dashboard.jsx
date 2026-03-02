@@ -708,18 +708,20 @@ export default function Dashboard({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-700">
                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
-                      <p className="text-sm font-semibold text-green-600">
-                        {formatCurrency(prenotazione.prezzo_totale)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                      {user?.tipo_account !== 'vigilanza' && (
+                         <p className="text-sm font-semibold text-green-600">
+                           {formatCurrency(prenotazione.prezzo_totale)}
+                         </p>
+                       )}
+                      </div>
+                      </div>
+                      ))}
+                      </div>
+                      )}
+                      </CardContent>
+                      </Card>
 
-        {/* Prossimi Affitti */}
+                      {/* Prossimi Affitti */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
