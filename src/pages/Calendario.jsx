@@ -161,39 +161,41 @@ export default function Calendario({ centroSelezionato, user }) {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Calendario Prenotazioni</h1>
-          <p className="text-slate-600">{centroSelezionato?.nome}</p>
-        </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) setEditingPrenotazione(null);
-        }}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 mr-2" />
-              Nuova Prenotazione
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPrenotazione ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
-              </DialogTitle>
-            </DialogHeader>
-            <FormPrenotazione
-              prenotazione={editingPrenotazione}
-              spazi={spazi}
-              clienti={clienti}
-              onSave={handleSavePrenotazione}
-              onCancel={() => {
-                setDialogOpen(false);
-                setEditingPrenotazione(null);
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      </div>
+         <div>
+           <h1 className="text-3xl font-bold text-slate-800 mb-2">Calendario Expo</h1>
+           <p className="text-slate-600">{centroSelezionato?.nome}</p>
+         </div>
+         {!isVigilanza && (
+           <Dialog open={dialogOpen} onOpenChange={(open) => {
+             setDialogOpen(open);
+             if (!open) setEditingPrenotazione(null);
+           }}>
+             <DialogTrigger asChild>
+               <Button className="bg-blue-600 hover:bg-blue-700">
+                 <Plus className="w-4 h-4 mr-2" />
+                 Nuova Prenotazione
+               </Button>
+             </DialogTrigger>
+             <DialogContent className="max-w-2xl">
+               <DialogHeader>
+                 <DialogTitle>
+                   {editingPrenotazione ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
+                 </DialogTitle>
+               </DialogHeader>
+               <FormPrenotazione
+                 prenotazione={editingPrenotazione}
+                 spazi={spazi}
+                 clienti={clienti}
+                 onSave={handleSavePrenotazione}
+                 onCancel={() => {
+                   setDialogOpen(false);
+                   setEditingPrenotazione(null);
+                 }}
+               />
+             </DialogContent>
+           </Dialog>
+         )}
+       </div>
 
       <Tabs defaultValue="mensile" className="w-full">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
