@@ -205,24 +205,38 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </div>
       </div>
 
-      {/* Cliente */}
-      <div className={rowClass}>
-        <label htmlFor="cliente_id" className={labelClass}>Cliente *</label>
-        <div className={fieldClass}>
-          <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
-            <SelectTrigger className="h-8 text-sm">
-              <SelectValue placeholder="Seleziona un cliente" />
-            </SelectTrigger>
-            <SelectContent>
-              {clienti.map((cliente) => (
-                <SelectItem key={cliente.id} value={cliente.id}>
-                  {cliente.ragione_sociale}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      {/* Cliente o Nome Evento */}
+      {formData.is_event ? (
+        <div className={rowClass}>
+          <label className={labelClass}>Nome Evento *</label>
+          <div className={fieldClass}>
+            <Input
+              value={formData.nome_evento}
+              onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
+              placeholder="Nome dell'evento"
+              className="h-8 text-sm"
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className={rowClass}>
+          <label htmlFor="cliente_id" className={labelClass}>Cliente *</label>
+          <div className={fieldClass}>
+            <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder="Seleziona un cliente" />
+              </SelectTrigger>
+              <SelectContent>
+                {clienti.map((cliente) => (
+                  <SelectItem key={cliente.id} value={cliente.id}>
+                    {cliente.ragione_sociale}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
 
       {/* Date */}
       <div className={rowClass}>
