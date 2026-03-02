@@ -124,7 +124,7 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
                     {selectedPrenotazione.spazio?.numero_spazio || '?'}
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800">{selectedPrenotazione.cliente?.ragione_sociale || 'Cliente'}</p>
+                    <p className="font-semibold text-slate-800">{selectedPrenotazione.prenotazione.is_event ? (selectedPrenotazione.prenotazione.nome_evento || 'Evento') : (selectedPrenotazione.cliente?.ragione_sociale || 'Cliente')}</p>
                     <p className="text-sm text-slate-500">{selectedPrenotazione.spazio?.nome || `Spazio ${selectedPrenotazione.spazio?.numero_spazio}`}</p>
                   </div>
                 </div>
