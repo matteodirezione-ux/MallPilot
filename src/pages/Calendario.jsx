@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -194,48 +195,49 @@ export default function Calendario({ centroSelezionato }) {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-6 mb-4">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="nascondi-permanenti"
-            checked={nascondiPermanenti}
-            onCheckedChange={setNascondiPermanenti}
-          />
-          <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
-            Nascondi prenotazioni permanenti (≥ 300 giorni)
-          </Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="solo-eventi"
-            checked={soloEventi}
-            onCheckedChange={setSoloEventi}
-          />
-          <Label htmlFor="solo-eventi" className="text-sm text-slate-600 cursor-pointer">
-            Mostra solo eventi
-          </Label>
-        </div>
-      </div>
-
       <Tabs defaultValue="mensile" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="mensile" className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            Mensile
-          </TabsTrigger>
-          <TabsTrigger value="settimanale" className="flex items-center gap-2">
-            <CalendarDays className="w-4 h-4" />
-            Settimanale
-          </TabsTrigger>
-          <TabsTrigger value="lista" className="flex items-center gap-2">
-            <List className="w-4 h-4" />
-            Lista
-          </TabsTrigger>
-          <TabsTrigger value="disponibilita" className="flex items-center gap-2">
-            <LayoutGrid className="w-4 h-4" />
-            Disponibilità
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <TabsList>
+            <TabsTrigger value="mensile" className="flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4" />
+              Mensile
+            </TabsTrigger>
+            <TabsTrigger value="settimanale" className="flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" />
+              Settimanale
+            </TabsTrigger>
+            <TabsTrigger value="lista" className="flex items-center gap-2">
+              <List className="w-4 h-4" />
+              Lista
+            </TabsTrigger>
+            <TabsTrigger value="disponibilita" className="flex items-center gap-2">
+              <LayoutGrid className="w-4 h-4" />
+              Disponibilità
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="nascondi-permanenti"
+                checked={nascondiPermanenti}
+                onCheckedChange={setNascondiPermanenti}
+              />
+              <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
+                Nascondi prenotazioni permanenti (≥ 300 giorni)
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="solo-eventi"
+                checked={soloEventi}
+                onCheckedChange={setSoloEventi}
+              />
+              <Label htmlFor="solo-eventi" className="text-sm text-slate-600 cursor-pointer">
+                Mostra solo eventi
+              </Label>
+            </div>
+          </div>
+        </div>
 
         <TabsContent value="mensile">
           <CalendarioMensile
