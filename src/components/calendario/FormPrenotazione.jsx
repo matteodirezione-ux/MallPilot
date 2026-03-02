@@ -417,6 +417,72 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           {prenotazione ? 'Aggiorna' : 'Crea'}
         </Button>
       </div>
+
+      {/* Dialog Nuovo Cliente */}
+      <Dialog open={showNewClienteDialog} onOpenChange={setShowNewClienteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Crea Nuovo Cliente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Ragione Sociale *</Label>
+              <Input 
+                value={nuoClienteData.ragione_sociale}
+                onChange={(e) => setNuoClienteData({ ...nuoClienteData, ragione_sociale: e.target.value })}
+                placeholder="Es. ACME S.r.l."
+                className="h-8 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Email *</Label>
+              <Input 
+                type="email"
+                value={nuoClienteData.email}
+                onChange={(e) => setNuoClienteData({ ...nuoClienteData, email: e.target.value })}
+                placeholder="Es. info@acme.com"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Partita IVA</Label>
+              <Input 
+                value={nuoClienteData.partita_iva}
+                onChange={(e) => setNuoClienteData({ ...nuoClienteData, partita_iva: e.target.value })}
+                placeholder="Es. IT12345678901"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-sm font-medium mb-1 block">Telefono</Label>
+              <Input 
+                value={nuoClienteData.telefono}
+                onChange={(e) => setNuoClienteData({ ...nuoClienteData, telefono: e.target.value })}
+                placeholder="Es. +39 06 1234567"
+                className="h-8 text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowNewClienteDialog(false)}
+              >
+                Annulla
+              </Button>
+              <Button 
+                type="button" 
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleCreateNewCliente}
+              >
+                Crea Cliente
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }
