@@ -7,6 +7,9 @@ import CalendarioSettimanale from '../components/calendario/CalendarioSettimanal
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
 import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { differenceInDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import DisponibilitaSpazi from '../components/calendario/DisponibilitaSpazi';
