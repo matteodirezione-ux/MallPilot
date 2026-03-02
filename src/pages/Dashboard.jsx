@@ -331,151 +331,151 @@ export default function Dashboard({ centroSelezionato, user }) {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-1">Dashboard</h1>
-        <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
+    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-0.5">Dashboard</h1>
+        <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
       </div>
 
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Incassi Mese */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Incassi Mese</p>
-              <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-4 h-4 text-blue-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.incassiMese)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiMese)}</p>
           </div>
 
           {/* Incassi Anno */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Incassi Anno</p>
-              <div className="bg-blue-100 p-2 rounded-lg"><TrendingUp className="w-4 h-4 text-blue-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><TrendingUp className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.incassiAnno)}</p>
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1.5">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiAnno)}</p>
+            <div className="mt-2 sm:mt-3">
+              <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-slate-600">Budget</p>
                 <p className="text-xs font-medium text-blue-600">{percentualeBudget}%</p>
               </div>
-              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-2" />
+              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-1.5 sm:h-2" />
             </div>
           </div>
 
           {/* Spazi Occupati */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Spazi Occupati</p>
-              <div className="bg-blue-100 p-2 rounded-lg"><Building2 className="w-4 h-4 text-blue-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1.5">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
+            <div className="mt-2 sm:mt-3">
+              <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-slate-600">Occupazione</p>
                 <p className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</p>
               </div>
-              <Progress value={parseInt(percentualeOccupazione)} className="h-2" />
+              <Progress value={parseInt(percentualeOccupazione)} className="h-1.5 sm:h-2" />
             </div>
           </div>
 
           {/* Affitto Medio Giornaliero */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Affitto Medio/Gg</p>
-              <div className="bg-blue-100 p-2 rounded-lg"><BarChart2 className="w-4 h-4 text-blue-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BarChart2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1.5">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
+            <div className="mt-2 sm:mt-3">
+              <div className="flex items-center justify-between mb-1">
                 <p className="text-xs text-slate-600">Occupazione</p>
                 <p className="text-xs font-medium text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
               </div>
-              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-2" />
+              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
             </div>
           </div>
 
           {/* Numero Eventi */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">N. Eventi</p>
-              <div className="bg-purple-100 p-2 rounded-lg"><Sparkles className="w-4 h-4 text-purple-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">N. Eventi</p>
+              <div className="bg-purple-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-purple-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{stats.eventStats.numeroEventiAnno}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.eventStats.numeroEventiAnno}</p>
           </div>
 
           {/* Giorni Evento */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Giorni Evento</p>
-              <div className="bg-orange-100 p-2 rounded-lg"><Calendar className="w-4 h-4 text-orange-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Giorni Evento</p>
+              <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{stats.eventStats.giorniEvento}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.eventStats.giorniEvento}</p>
           </div>
 
           {/* Costo Eventi */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Costo Eventi</p>
-              <div className="bg-red-100 p-2 rounded-lg"><DollarSign className="w-4 h-4 text-red-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Eventi</p>
+              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.eventStats.costoEventiAnno)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoEventiAnno)}</p>
           </div>
 
           {/* Costo Medio Giorno Evento */}
-          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Costo Medio/Gg Evento</p>
-              <div className="bg-green-100 p-2 rounded-lg"><Target className="w-4 h-4 text-green-600" /></div>
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Med/Gg Ev</p>
+              <div className="bg-green-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Target className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-green-600" /></div>
             </div>
-            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
           </div>
           </div>
           )}
 
           {/* Bottom cards - Responsive Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           {/* Task per Giorno */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
-              <ListTodo className="w-5 h-5 text-slate-600" />
-              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
+              <ListTodo className="w-4 sm:w-5 h-4 sm:h-5 text-slate-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
                 Task
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="max-h-96 overflow-y-auto">
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
             <TasksDashboard tasks={stats.tasksList} />
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Eventi */}
-        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+          {/* Eventi */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+          <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
-              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
+              <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
                 Eventi
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
             {stats.eventStats.eventiCorrentiList?.length === 0 && stats.eventStats.prossimiEventi.length === 0 ? (
-              <p className="text-slate-500 text-center py-4 text-sm">
+              <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                 Nessun evento in corso o in programma
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 {stats.eventStats.eventiCorrentiList?.map((evento) => (
                   <div 
                     key={evento.id}
-                    className="flex items-center justify-between p-3 bg-purple-100 rounded-lg border border-purple-200"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-purple-100 rounded-lg border border-purple-200 text-xs sm:text-sm"
                   >
                     <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 text-sm truncate">
+                      <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
                         {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
                       <p className="text-xs text-purple-700 font-medium">
@@ -483,8 +483,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700">
-                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
+                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}
                       </p>
                     </div>
                   </div>
@@ -492,10 +492,10 @@ export default function Dashboard({ centroSelezionato, user }) {
                 {stats.eventStats.prossimiEventi.map((evento) => (
                   <div 
                     key={evento.id}
-                    className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-100"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm"
                   >
                     <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 text-sm truncate">
+                      <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
                         {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
                       <p className="text-xs text-slate-500">
@@ -503,8 +503,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700">
-                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}
+                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}
                       </p>
                     </div>
                   </div>
@@ -512,32 +512,32 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
 
-        {/* Affitti Correnti */}
-        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
-          <CardHeader className="pb-3">
+          {/* Affitti Correnti */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+          <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
+              <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
                 Affitti Correnti
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
             {stats.affittiCorrenti?.length === 0 ? (
-              <p className="text-slate-500 text-center py-4 text-sm">
+              <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                 Nessun affitto attivo al momento
               </p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                 {stats.affittiCorrenti?.map((prenotazione) => (
                   <div 
                     key={prenotazione.id}
-                    className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm"
                   >
                     <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 text-sm truncate">
+                      <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
                         {prenotazione.cliente?.ragione_sociale}
                       </p>
                       <p className="text-xs text-slate-600">
@@ -545,8 +545,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                       <p className="text-xs font-medium text-slate-700">
-                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
+                       <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })}
                        </p>
                      </div>
                     </div>
@@ -558,28 +558,28 @@ export default function Dashboard({ centroSelezionato, user }) {
 
                     {/* Prossimi Affitti */}
                     <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
-                    <CardHeader className="pb-3">
+                    <CardHeader className="pb-2 sm:pb-3">
                     <div className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                    <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
-                    Prossimi Affitti (1 Mese)
+                    <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
+                    <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
+                    Prossimi Affitti
                     </CardTitle>
                     </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
                     {stats.prossimiAffitti.length === 0 ? (
-                    <p className="text-slate-500 text-center py-4 text-sm">
+                    <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                     Nessun affitto nei prossimi 30 giorni
                     </p>
                     ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5 sm:space-y-2">
                     {stats.prossimiAffitti.map((prenotazione) => (
                     <div 
                      key={prenotazione.id}
-                     className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                     className="flex items-center justify-between p-2 sm:p-3 bg-slate-50 rounded-lg text-xs sm:text-sm"
                     >
                      <div className="flex-1 min-w-0 mr-2">
-                       <p className="font-medium text-slate-800 text-sm truncate">
+                       <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
                          {prenotazione.cliente?.ragione_sociale}
                        </p>
                        <p className="text-xs text-slate-600">
@@ -587,8 +587,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                        </p>
                      </div>
                      <div className="text-right shrink-0">
-                       <p className="text-xs font-medium text-slate-700">
-                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
+                       <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })}
                        </p>
                      </div>
                   </div>
@@ -596,8 +596,8 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
             )}
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+          </div>
     </div>
   );
 }
