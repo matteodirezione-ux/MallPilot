@@ -109,19 +109,28 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                         <div
                           key={p.id}
                           onClick={() => onEdit(p)}
-                          style={{
+                          style={p.is_event ? {} : {
                             backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
                             borderColor: spazioColor,
                           }}
-                          className="text-xs px-2 py-1.5 rounded cursor-pointer border-l-4 hover:opacity-80 transition-opacity"
+                          className={`text-xs px-2 py-1.5 rounded cursor-pointer border-l-4 hover:opacity-80 transition-opacity ${
+                            p.is_event ? 'bg-purple-50 border-purple-400' : ''
+                          }`}
                         >
-                          <div
-                            className="font-bold text-[10px] mb-0.5"
-                            style={{ color: spazioColor }}
-                          >
-                            {spazio?.numero_spazio || '?'} {spazio?.nome ? `· ${spazio.nome}` : ''}
-                          </div>
-                          <div className="text-slate-700 truncate font-medium">
+                          {p.is_event ? (
+                            <div className="flex items-center gap-1 text-purple-600 font-bold text-[10px] mb-0.5">
+                              <Sparkles className="w-3 h-3" />
+                              <span>Evento</span>
+                            </div>
+                          ) : (
+                            <div
+                              className="font-bold text-[10px] mb-0.5"
+                              style={{ color: spazioColor }}
+                            >
+                              {spazio?.numero_spazio || '?'} {spazio?.nome ? `· ${spazio.nome}` : ''}
+                            </div>
+                          )}
+                          <div className={`truncate font-medium ${p.is_event ? 'text-purple-800' : 'text-slate-700'}`}>
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
