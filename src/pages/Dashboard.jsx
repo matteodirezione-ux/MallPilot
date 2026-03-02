@@ -336,160 +336,90 @@ export default function Dashboard({ centroSelezionato, user }) {
         <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
-      {/* Summary Cards - All in one row */}
+      {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {/* Incassi Mese */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Incassi Mese
-                </CardTitle>
-                <DollarSign className="w-5 h-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-blue-700">
-                {formatCurrency(stats.incassiMese)}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Incassi Mese</p>
+              <div className="bg-blue-100 p-2 rounded-lg"><DollarSign className="w-4 h-4 text-blue-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.incassiMese)}</p>
+          </div>
 
           {/* Incassi Anno */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Incassi Anno
-                </CardTitle>
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-blue-700">
-                {formatCurrency(stats.incassiAnno)}
-              </p>
-              <p className="text-xs text-blue-600 mt-2">
-                Budget: {formatCurrency(stats.budgetAnno)} ({percentualeBudget}%)
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Incassi Anno</p>
+              <div className="bg-blue-100 p-2 rounded-lg"><TrendingUp className="w-4 h-4 text-blue-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.incassiAnno)}</p>
+            <p className="text-xs text-slate-500 mt-2">Budget: {formatCurrency(stats.budgetAnno)} ({percentualeBudget}%)</p>
+          </div>
 
           {/* Spazi Occupati */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Spazi Occupati
-                </CardTitle>
-                <Building2 className="w-5 h-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-blue-700">
-                {stats.spaziOccupati}/{stats.spaziTotali}
-              </p>
-              <p className="text-xs text-blue-600 mt-2">
-                Occupazione: {percentualeOccupazione}%
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Spazi Occupati</p>
+              <div className="bg-blue-100 p-2 rounded-lg"><Building2 className="w-4 h-4 text-blue-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
+            <p className="text-xs text-slate-500 mt-2">Occupazione: {percentualeOccupazione}%</p>
+          </div>
 
           {/* Affitto Medio Giornaliero */}
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Affitto Medio/Giorno
-                </CardTitle>
-                <BarChart2 className="w-5 h-5 text-blue-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-blue-700">
-                {formatCurrency(stats.affittoMedioGiornaliero)}
-              </p>
-              <p className="text-xs text-blue-600 mt-2">
-                Tasso occupazione: {stats.tassoOccupazioneAnnuale.toFixed(1)}%
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Affitto Medio/Gg</p>
+              <div className="bg-blue-100 p-2 rounded-lg"><BarChart2 className="w-4 h-4 text-blue-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
+            <p className="text-xs text-slate-500 mt-2">Occupazione: {stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
+          </div>
 
           {/* Numero Eventi */}
-          <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  N. Eventi
-                </CardTitle>
-                <Sparkles className="w-5 h-5 text-pink-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-pink-700">
-                {stats.eventStats.numeroEventiAnno}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">N. Eventi</p>
+              <div className="bg-purple-100 p-2 rounded-lg"><Sparkles className="w-4 h-4 text-purple-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{stats.eventStats.numeroEventiAnno}</p>
+          </div>
 
           {/* Giorni Evento */}
-          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Giorni Evento
-                </CardTitle>
-                <Calendar className="w-5 h-5 text-rose-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-rose-700">
-                {stats.eventStats.giorniEvento}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Giorni Evento</p>
+              <div className="bg-orange-100 p-2 rounded-lg"><Calendar className="w-4 h-4 text-orange-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{stats.eventStats.giorniEvento}</p>
+          </div>
 
           {/* Costo Eventi */}
-          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Costo Eventi
-                </CardTitle>
-                <DollarSign className="w-5 h-5 text-rose-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-rose-700">
-                {formatCurrency(stats.eventStats.costoEventiAnno)}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Costo Eventi</p>
+              <div className="bg-red-100 p-2 rounded-lg"><DollarSign className="w-4 h-4 text-red-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.eventStats.costoEventiAnno)}</p>
+          </div>
 
           {/* Costo Medio Giorno Evento */}
-          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
-                  Costo Medio/Giorno Evento
-                </CardTitle>
-                <Target className="w-5 h-5 text-rose-600" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-rose-700">
-                {formatCurrency(stats.eventStats.costoMedioGiornoEvento)}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-lg border border-slate-200 p-4 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Costo Medio/Gg Evento</p>
+              <div className="bg-green-100 p-2 rounded-lg"><Target className="w-4 h-4 text-green-600" /></div>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
+          </div>
           </div>
           )}
 
-          {/* Bottom cards - 4 columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {/* Task per Giorno */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+          {/* Bottom cards - Responsive Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+          {/* Task per Giorno */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <ListTodo className="w-5 h-5 text-slate-600" />
@@ -504,7 +434,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Eventi */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
@@ -566,7 +496,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Affitti Correnti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
@@ -608,7 +538,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                     </Card>
 
                     {/* Prossimi Affitti */}
-                    <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+                    <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
                     <CardHeader className="pb-3">
                     <div className="flex items-center gap-2">
                     <Calendar className="w-5 h-5 text-blue-600" />
