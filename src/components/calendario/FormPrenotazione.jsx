@@ -124,7 +124,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Inserisci le date di inizio e fine');
       return;
     }
-    if (!formData.prezzo_totale || parseFloat(formData.prezzo_totale) <= 0) {
+    if (formData.prezzo_totale === '' || formData.prezzo_totale === null || formData.prezzo_totale === undefined || isNaN(parseFloat(formData.prezzo_totale))) {
       toast.error('Inserisci un prezzo totale valido');
       return;
     }
