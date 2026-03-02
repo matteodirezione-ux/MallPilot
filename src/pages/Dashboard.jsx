@@ -448,58 +448,52 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700">
-                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
-                      </p>
-                      <p className="text-sm font-semibold text-green-600">
-                        {formatCurrency(prenotazione.prezzo_totale)}
-                      </p>
+                       <p className="text-xs font-medium text-slate-700">
+                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
+                       </p>
+                     </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    ))}
+                    </div>
+                    )}
+                    </CardContent>
+                    </Card>
 
-        {/* Prossimi Affitti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-blue-600" />
-              <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
-                Prossimi Affitti (1 Mese)
-              </CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {stats.prossimiAffitti.length === 0 ? (
-              <p className="text-slate-500 text-center py-4 text-sm">
-                Nessun affitto nei prossimi 30 giorni
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {stats.prossimiAffitti.map((prenotazione) => (
-                  <div 
-                    key={prenotazione.id}
-                    className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-                  >
-                    <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 text-sm truncate">
-                        {prenotazione.cliente?.ragione_sociale}
-                      </p>
-                      <p className="text-xs text-slate-600">
-                        Spazio {prenotazione.spazio?.numero_spazio}
-                      </p>
+                    {/* Prossimi Affitti */}
+                    <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+                    <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-blue-600" />
+                    <CardTitle className="text-base md:text-lg font-semibold text-slate-800">
+                    Prossimi Affitti (1 Mese)
+                    </CardTitle>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700">
-                        {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
-                      </p>
-                      <p className="text-sm font-semibold text-green-600">
-                        {formatCurrency(prenotazione.prezzo_totale)}
-                      </p>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                    {stats.prossimiAffitti.length === 0 ? (
+                    <p className="text-slate-500 text-center py-4 text-sm">
+                    Nessun affitto nei prossimi 30 giorni
+                    </p>
+                    ) : (
+                    <div className="space-y-2">
+                    {stats.prossimiAffitti.map((prenotazione) => (
+                    <div 
+                     key={prenotazione.id}
+                     className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
+                    >
+                     <div className="flex-1 min-w-0 mr-2">
+                       <p className="font-medium text-slate-800 text-sm truncate">
+                         {prenotazione.cliente?.ragione_sociale}
+                       </p>
+                       <p className="text-xs text-slate-600">
+                         Spazio {prenotazione.spazio?.numero_spazio}
+                       </p>
+                     </div>
+                     <div className="text-right shrink-0">
+                       <p className="text-xs font-medium text-slate-700">
+                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
+                       </p>
+                     </div>
                   </div>
                 ))}
               </div>
