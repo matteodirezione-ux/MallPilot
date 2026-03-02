@@ -128,8 +128,38 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
           )}
         </div>
 
+        <div className="flex flex-wrap gap-6 mb-4">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="nascondi-permanenti"
+              checked={nascondiPermanenti}
+              onCheckedChange={setNascondiPermanenti}
+            />
+            <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
+              Nascondi prenotazioni permanenti (≥ 300 giorni)
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="solo-eventi"
+              checked={soloEventi}
+              onCheckedChange={setSoloEventi}
+            />
+            <Label htmlFor="solo-eventi" className="text-sm text-slate-600 cursor-pointer">
+              Mostra solo eventi
+            </Label>
+          </div>
+        </div>
+
         <CalendarioVigilanzaMensile
-          prenotazioni={prenotazioni}
+          prenotazioni={prenotazioni.filter(p => {
+            if (nascondiPermanenti) {
+              const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio));
+              if (giorni >= 300) return false;
+            }
+            if (soloEventi && !p.is_event) return false;
+            return true;
+          })}
           spazi={spazi}
           clienti={clienti}
           currentMonth={currentMonth}
