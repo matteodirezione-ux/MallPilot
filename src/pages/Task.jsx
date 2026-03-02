@@ -32,6 +32,8 @@ export default function TaskPage({ centroSelezionato, user }) {
       if (user?.tipo_account === 'vigilanza') {
         const assegnati = await base44.entities.Task.filter({ assegnato_a_email: user.email });
         setTasks(assegnati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+        setLoading(false);
+        return;
 
       } else if (user?.tipo_account === 'direttore') {
         const [assegnati, creati] = await Promise.all([
