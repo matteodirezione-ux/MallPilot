@@ -175,7 +175,7 @@ export default function Dashboard({ centroSelezionato }) {
       const hoje = new Date();
       hoje.setHours(0, 0, 0, 0);
       
-      const eventiCorrenti = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
+      const eventiCorrentiList = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
       const prossimiEventi = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
       
       let giorniEvento = 0;
