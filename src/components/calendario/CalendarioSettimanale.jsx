@@ -6,7 +6,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, ad
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
-export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit }) {
+export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, isVigilanza }) {
   const giorni = useMemo(() => {
     const inizio = startOfWeek(currentWeek, { weekStartsOn: 1 });
     const fine = endOfWeek(currentWeek, { weekStartsOn: 1 });
