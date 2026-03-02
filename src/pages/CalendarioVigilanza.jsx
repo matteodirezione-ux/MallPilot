@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import CalendarioVigilanzaMensile from '@/components/calendario/CalendarioVigilanzaMensile';
-import { Building2, ChevronDown } from 'lucide-react';
+import CalendarioVigilanzaSettimanale from '@/components/calendario/CalendarioVigilanzaSettimanale';
+import { Building2, ChevronDown, CalendarDays, Calendar } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { differenceInDays } from 'date-fns';
@@ -11,6 +12,8 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
   const [spazi, setSpazi] = useState([]);
   const [clienti, setClienti] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [vista, setVista] = useState('settimanale');
   const [loading, setLoading] = useState(true);
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const [soloEventi, setSoloEventi] = useState(false);
