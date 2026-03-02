@@ -40,6 +40,8 @@ export default function Dashboard({ centroSelezionato }) {
     },
     eventStats: {
       giorniEvento: 0,
+      costoEventi: 0,
+      costoPorGiornoEvento: 0,
       eventiCorrenti: 0,
       prossimiEventi: []
     },
