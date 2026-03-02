@@ -224,7 +224,7 @@ export default function Calendario({ centroSelezionato }) {
 
         <TabsContent value="mensile">
           <CalendarioMensile
-            prenotazioni={prenotazioni}
+            prenotazioni={prenotazioniFiltrate}
             spazi={spazi}
             clienti={clienti}
             currentMonth={currentMonth}
