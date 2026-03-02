@@ -96,26 +96,24 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                       <div
                         key={p.id}
                         onClick={() => onEdit(p)}
-                        style={p.is_event ? {} : {
+                        style={p.is_event ? {
+                          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`,
+                          borderColor: spazioColor,
+                        } : {
                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
                           borderColor: spazioColor,
                           color: spazioColor
                         }}
-                        className={`text-xs px-2 py-1 rounded cursor-pointer border-2 hover:opacity-80 transition-opacity ${
-                          p.is_event ? 'bg-purple-100 border-purple-400' : ''
-                        }`}
+                        className="text-xs px-2 py-1 rounded cursor-pointer border-2 hover:opacity-80 transition-opacity"
                       >
                         <div className="flex items-center gap-1.5">
-                          {p.is_event ? (
-                            <Sparkles className="flex-shrink-0 w-3.5 h-3.5 text-purple-500" />
-                          ) : (
-                            <div
-                              className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
-                              style={{ borderColor: spazioColor, color: spazioColor }}
-                            >
-                              {spazio?.numero_spazio || '?'}
-                            </div>
-                          )}
+                          <div
+                            className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
+                            style={{ borderColor: spazioColor, color: spazioColor }}
+                          >
+                            {spazio?.numero_spazio || '?'}
+                          </div>
+                          {p.is_event && <Sparkles className="flex-shrink-0 w-3 h-3 text-purple-500" />}
                           <div className={`font-medium truncate flex-1 ${p.is_event ? 'text-purple-800' : ''}`} style={p.is_event ? {} : { color: '#1e293b' }}>
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
