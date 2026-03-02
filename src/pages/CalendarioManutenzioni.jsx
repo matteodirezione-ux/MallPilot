@@ -191,6 +191,16 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
   const handleDelete = async () => {
     if (window.confirm('Eliminare questa manutenzione?')) {
+      // Se è una manutenzione padre ricorrente, elimina anche tutte le figlie
+      if (manutenzioneSelezionata.ricorrente) {
+        const allManutenzioni = await base44.entities.Manutenzione.list();
+        const manutenzioniCollegate = allManutenzioni.filter(m => m.manutenzione_padre_id === manutenzioneSelezionata.id);
+
+        for (const m of manutenzioniCollegate) {
+          await base44.entities.Manutenzione.delete(m.id);
+        }
+      }
+
       await base44.entities.Manutenzione.delete(manutenzioneSelezionata.id);
       setDialogOpen(false);
       setManutenzioneSelezionata(null);
