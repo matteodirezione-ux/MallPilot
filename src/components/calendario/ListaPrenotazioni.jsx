@@ -140,6 +140,11 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
+                      {prenotazione.is_event && (
+                        <span className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                          <Sparkles className="w-3 h-3" /> Evento
+                        </span>
+                      )}
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatoColor(prenotazione.stato)}`}>
                         {prenotazione.stato.charAt(0).toUpperCase() + prenotazione.stato.slice(1).replace('_', ' ')}
                       </span>
