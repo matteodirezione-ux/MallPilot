@@ -675,7 +675,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         </Card>
 
         {/* Affitti Correnti */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
+        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1 min-h-96">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
