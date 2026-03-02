@@ -468,17 +468,17 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Costo Medio Giorno Evento */}
-          <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200 hover:shadow-lg transition-shadow">
+          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
                   Costo Medio/Giorno Evento
                 </CardTitle>
-                <Target className="w-5 h-5 text-teal-600" />
+                <Target className="w-5 h-5 text-rose-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-teal-700">
+              <p className="text-2xl md:text-3xl font-bold text-rose-700">
                 {formatCurrency(stats.eventStats.costoMedioGiornoEvento)}
               </p>
             </CardContent>
