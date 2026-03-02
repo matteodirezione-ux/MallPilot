@@ -257,7 +257,7 @@ export default function Calendario({ centroSelezionato }) {
 
         <TabsContent value="disponibilita">
           <DisponibilitaSpazi
-            prenotazioni={prenotazioni}
+            prenotazioni={prenotazioniFiltrate}
             spazi={spazi}
           />
         </TabsContent>
