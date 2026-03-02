@@ -51,7 +51,7 @@ export default function Dashboard({ centroSelezionato, user }) {
     if (centroSelezionato && centroSelezionato.id) {
       loadStats();
     }
-  }, [centroSelezionato]);
+  }, [centroSelezionato, user]);
 
   const loadStats = async () => {
     try {
