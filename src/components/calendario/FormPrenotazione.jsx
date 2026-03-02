@@ -335,12 +335,14 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           </div>
 
           {/* Costo Evento */}
-          <div className={rowClass}>
-            <label className={labelClass}>Costo Evento</label>
-            <div className={fieldClass}>
-              <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Costo (€)" className="h-8 text-sm" />
+          {!isVigilanza && (
+            <div className={rowClass}>
+              <label className={labelClass}>Costo Evento</label>
+              <div className={fieldClass}>
+                <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Costo (€)" className="h-8 text-sm" />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Elettricità */}
           <div className={rowClass}>
