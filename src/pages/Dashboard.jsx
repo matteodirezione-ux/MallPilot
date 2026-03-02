@@ -20,7 +20,7 @@ import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfY
 import { it } from 'date-fns/locale';
 import TasksDashboard from '@/components/dashboard/TasksDashboard';
 
-export default function Dashboard({ centroSelezionato }) {
+export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
     prossimiAffitti: [],
     affittiCorrenti: [],
