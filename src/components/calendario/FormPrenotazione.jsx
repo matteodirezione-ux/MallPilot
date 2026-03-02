@@ -12,9 +12,16 @@ import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval } from 'date-fns';
 
-export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza }) {
+export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
   const [activeTab, setActiveTab] = useState(prenotazione?.is_event ? 'evento' : 'affitto');
+  const [showNewClienteDialog, setShowNewClienteDialog] = useState(false);
+  const [nuoClienteData, setNuoClienteData] = useState({
+    ragione_sociale: '',
+    email: '',
+    partita_iva: '',
+    telefono: ''
+  });
 
   const [formData, setFormData] = useState({
     spazi_ids: [],
