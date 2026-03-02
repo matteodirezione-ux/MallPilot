@@ -367,7 +367,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-green-700">
+              <p className="text-2xl md:text-3xl font-bold text-blue-700">
                 {formatCurrency(stats.incassiAnno)}
               </p>
               <p className="text-xs text-blue-600 mt-2">
