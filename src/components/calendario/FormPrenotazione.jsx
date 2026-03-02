@@ -275,9 +275,9 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           {/* Cliente */}
           <div className={rowClass}>
             <label className={labelClass}>Cliente *</label>
-            <div className={fieldClass}>
+            <div className={`${fieldClass} flex gap-2`}>
               <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
-                <SelectTrigger className="h-8 text-sm">
+                <SelectTrigger className="h-8 text-sm flex-1">
                   <SelectValue placeholder="Seleziona un cliente" />
                 </SelectTrigger>
                 <SelectContent>
@@ -288,6 +288,17 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
                   ))}
                 </SelectContent>
               </Select>
+              <Button 
+                type="button" 
+                size="sm" 
+                variant="outline"
+                className="h-8 px-2 flex items-center gap-1"
+                onClick={() => setShowNewClienteDialog(true)}
+                title="Crea nuovo cliente"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline text-xs">Nuovo</span>
+              </Button>
             </div>
           </div>
 
