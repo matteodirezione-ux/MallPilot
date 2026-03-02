@@ -456,69 +456,135 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </Button>
       </div>
 
-      {/* Dialog Nuovo Cliente */}
-      <Dialog open={showNewClienteDialog} onOpenChange={setShowNewClienteDialog}>
-        <DialogContent>
+      {/* Dialog Nuovo Cliente - Same as Clienti page */}
+      <Dialog open={showNewClienteDialog} onOpenChange={(open) => {
+        setShowNewClienteDialog(open);
+        if (!open) resetNewClienteForm();
+      }}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Crea Nuovo Cliente</DialogTitle>
+            <DialogTitle>Nuovo Cliente</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div>
-              <Label className="text-sm font-medium mb-1 block">Ragione Sociale *</Label>
-              <Input 
-                value={nuoClienteData.ragione_sociale}
-                onChange={(e) => setNuoClienteData({ ...nuoClienteData, ragione_sociale: e.target.value })}
-                placeholder="Es. ACME S.r.l."
-                className="h-8 text-sm"
-              />
+          <form onSubmit={(e) => { 
+            e.preventDefault(); 
+            if (wizardStep === 2) {
+              handleCreateNewCliente();
+            } else {
+              setWizardStep(wizardStep + 1);
+            }
+          }}>
+            {/* Progress Indicator */}
+            <div className="mb-6 flex gap-2">
+              {['Dati Azienda', 'Indirizzo', 'Referente'].map((label, idx) => (
+                <div key={idx} className="flex-1">
+                  <div className={`h-1 rounded-full transition-colors ${idx <= wizardStep ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
+                  <p className={`text-xs mt-1 font-medium ${idx <= wizardStep ? 'text-blue-600' : 'text-slate-500'}`}>{label}</p>
+                </div>
+              ))}
             </div>
-            <div>
-              <Label className="text-sm font-medium mb-1 block">Email *</Label>
-              <Input 
-                type="email"
-                value={nuoClienteData.email}
-                onChange={(e) => setNuoClienteData({ ...nuoClienteData, email: e.target.value })}
-                placeholder="Es. info@acme.com"
-                className="h-8 text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1 block">Partita IVA</Label>
-              <Input 
-                value={nuoClienteData.partita_iva}
-                onChange={(e) => setNuoClienteData({ ...nuoClienteData, partita_iva: e.target.value })}
-                placeholder="Es. IT12345678901"
-                className="h-8 text-sm"
-              />
-            </div>
-            <div>
-              <Label className="text-sm font-medium mb-1 block">Telefono</Label>
-              <Input 
-                value={nuoClienteData.telefono}
-                onChange={(e) => setNuoClienteData({ ...nuoClienteData, telefono: e.target.value })}
-                placeholder="Es. +39 06 1234567"
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowNewClienteDialog(false)}
-              >
-                Annulla
+
+            {/* Step 0: Dati Azienda */}
+            {wizardStep === 0 && (
+              <div className="space-y-3">
+                {[
+                  { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
+                  { label: 'Partita IVA *', key: 'partita_iva', required: true },
+                  { label: 'Codice Fiscale', key: 'codice_fiscale' },
+                  { label: 'Email *', key: 'email', type: 'email', required: true },
+                  { label: 'PEC', key: 'pec' },
+                  { label: 'Telefono', key: 'telefono' },
+                ].map(({ label, key, type = 'text', required }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        type={type}
+                        value={nuoClienteData[key] || ''}
+                        onChange={(e) => setNuoClienteData({ ...nuoClienteData, [key]: e.target.value })}
+                        required={required}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Step 1: Indirizzo */}
+            {wizardStep === 1 && (
+              <div className="space-y-3">
+                {[
+                  { label: 'Indirizzo *', key: 'indirizzo', required: true },
+                  { label: 'Città *', key: 'citta', required: true },
+                  { label: 'Provincia *', key: 'provincia', required: true },
+                  { label: 'CAP *', key: 'cap', required: true },
+                ].map(({ label, key, required }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={nuoClienteData[key] || ''}
+                        onChange={(e) => setNuoClienteData({ ...nuoClienteData, [key]: e.target.value })}
+                        required={required}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Step 2: Referente */}
+            {wizardStep === 2 && (
+              <div className="space-y-3">
+                {[
+                  { label: 'Nome Referente *', key: 'referente_nome', required: true },
+                  { label: 'Telefono', key: 'referente_telefono' },
+                  { label: 'Email Referente *', key: 'referente_email', type: 'email', required: true },
+                ].map(({ label, key, type = 'text', required }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        type={type}
+                        value={nuoClienteData[key] || ''}
+                        onChange={(e) => setNuoClienteData({ ...nuoClienteData, [key]: e.target.value })}
+                        required={required}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div className="flex items-start gap-3 pt-1">
+                  <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Note</label>
+                  <div className="flex-1 min-w-0">
+                    <Textarea
+                      value={nuoClienteData.note || ''}
+                      onChange={(e) => setNuoClienteData({ ...nuoClienteData, note: e.target.value })}
+                      rows={2}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-between gap-3 pt-4 mt-4 border-t">
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => { setShowNewClienteDialog(false); resetNewClienteForm(); }}>
+                  Annulla
+                </Button>
+                {wizardStep > 0 && (
+                  <Button type="button" variant="outline" size="sm" onClick={() => setWizardStep(wizardStep - 1)}>
+                    Indietro
+                  </Button>
+                )}
+              </div>
+              <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
+                {wizardStep === 2 ? 'Crea' : 'Avanti'}
               </Button>
-              <Button 
-                type="button" 
-                size="sm"
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={handleCreateNewCliente}
-              >
-                Crea Cliente
-              </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </form>
