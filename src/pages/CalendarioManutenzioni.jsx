@@ -95,9 +95,44 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     loadData();
   };
 
+  const generateRecurrence = (startDate, config) => {
+    const dates = [];
+    let currentDate = new Date(startDate);
+    const endDate = config.ricorrenza_fine ? new Date(config.ricorrenza_fine) : new Date(startDate.getFullYear() + 5, startDate.getMonth(), startDate.getDate());
+
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+
+      if (config.ricorrenza_tipo === 'giornaliero') {
+        currentDate = addDays(currentDate, config.ricorrenza_ogni || 1);
+      } else if (config.ricorrenza_tipo === 'settimanale') {
+        currentDate = addWeeks(currentDate, config.ricorrenza_ogni || 1);
+      } else if (config.ricorrenza_tipo === 'mensile') {
+        currentDate = addMonths(currentDate, config.ricorrenza_ogni || 1);
+      } else if (config.ricorrenza_tipo === 'annuale') {
+        currentDate = addMonths(currentDate, 12 * (config.ricorrenza_ogni || 1));
+      } else if (config.ricorrenza_tipo === 'personalizzato') {
+        if (config.ricorrenza_unita === 'giorni') {
+          currentDate = addDays(currentDate, config.ricorrenza_ogni || 1);
+        } else if (config.ricorrenza_unita === 'settimane') {
+          currentDate = addWeeks(currentDate, config.ricorrenza_ogni || 1);
+        } else if (config.ricorrenza_unita === 'mesi') {
+          currentDate = addMonths(currentDate, config.ricorrenza_ogni || 1);
+        }
+      }
+    }
+
+    return dates;
+  };
+
   const handleSave = async () => {
     if (!formData.titolo.trim()) {
       alert('Titolo obbligatorio');
+      return;
+    }
+
+    if (formData.ricorrente && !formData.ricorrenza_fine) {
+      alert('Specificare una data di fine per la ricorrenza');
       return;
     }
 
@@ -105,11 +140,29 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       if (manutenzioneSelezionata?.id) {
         await base44.entities.Manutenzione.update(manutenzioneSelezionata.id, formData);
       } else {
-        await base44.entities.Manutenzione.create({
+        const manutenzioneData = {
           ...formData,
           assegnato_da_email: user.email,
           assegnato_da_nome: user.full_name
-        });
+        };
+
+        if (formData.ricorrente) {
+          const dates = generateRecurrence(new Date(formData.data_scadenza), formData);
+          const mainManutenzione = await base44.entities.Manutenzione.create(manutenzioneData);
+
+          const otherDates = dates.slice(1);
+          if (otherDates.length > 0) {
+            const manutenzioniRicorrenti = otherDates.map(date => ({
+              ...manutenzioneData,
+              data_scadenza: format(date, 'yyyy-MM-dd'),
+              manutenzione_padre_id: mainManutenzione.id,
+              ricorrente: false
+            }));
+            await base44.entities.Manutenzione.bulkCreate(manutenzioniRicorrenti);
+          }
+        } else {
+          await base44.entities.Manutenzione.create(manutenzioneData);
+        }
       }
       setDialogOpen(false);
       setManutenzioneSelezionata(null);
