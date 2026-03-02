@@ -200,7 +200,7 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
           </h2>
           <div className="space-y-2">
             {completati.map(t => (
-              <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+              <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} canDelete={canDelete(t)} />
             ))}
           </div>
         </div>
