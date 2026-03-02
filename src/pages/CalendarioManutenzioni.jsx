@@ -118,31 +118,59 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <Wrench className="w-6 h-6 text-blue-600" />
-          Calendario Manutenzioni
-        </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <Wrench className="w-6 h-6 text-blue-600" />
+            Calendario Manutenzioni
+          </h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
+          </p>
+        </div>
+        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700">
+          <Plus className="w-4 h-4 mr-2" />
+          Nuova Manutenzione
+        </Button>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-slate-400">Caricamento...</div>
       ) : (
-        <CalendarioManutenzioniMensile
-          tasks={tasks}
-          onTaskClick={handleTaskClick}
-          onToggleStatus={handleToggleStatus}
-          onNewTask={handleNewTask}
-        />
+        <Tabs defaultValue="calendario">
+          <TabsList className="mb-4">
+            <TabsTrigger value="calendario" className="gap-2">
+              <Calendar className="w-4 h-4" /> Calendario
+            </TabsTrigger>
+            <TabsTrigger value="lista" className="gap-2">
+              <ListTodo className="w-4 h-4" /> Lista
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calendario">
+            <CalendarioManutenzioniMensile
+              tasks={manutenzioni}
+              onTaskClick={handleManutenzioneClick}
+              onToggleStatus={handleToggleStatus}
+              onNewTask={handleNewManutenzione}
+            />
+          </TabsContent>
+
+          <TabsContent value="lista">
+            <ListaManutenzioni
+              manutenzioni={manutenzioni}
+              onEdit={handleManutenzioneClick}
+              onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
+            />
+          </TabsContent>
+        </Tabs>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{taskSelezionato?.id ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle>
+            <DialogTitle>{manutenzioneSelezionata?.id ? 'Modifica Manutenzione' : 'Nuova Manutenzione'}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
@@ -193,7 +221,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">
-              {taskSelezionato?.id && (
+              {manutenzioneSelezionata?.id && (
                 <Button variant="destructive" onClick={handleDelete}>
                   Elimina
                 </Button>
