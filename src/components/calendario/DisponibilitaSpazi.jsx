@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { eachMonthOfInterval, startOfYear, endOfYear, eachDayOfInterval, startOfMonth, endOfMonth, isWithinInterval, format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
+// Parsa date YYYY-MM-DD come date locali (evita shift UTC)
+const parseLocalDate = (dateStr) => {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export default function DisponibilitaSpazi({ prenotazioni, spazi }) {
   const anno = new Date().getFullYear();
 
