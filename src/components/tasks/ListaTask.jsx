@@ -109,7 +109,7 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
   );
 }
 
-export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canEdit }) {
+export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canEdit, canDelete }) {
   // Separa da fare e completati
   const daFare = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
   const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
