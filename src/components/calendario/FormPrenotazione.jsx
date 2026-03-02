@@ -6,12 +6,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { X, Plus, AlertTriangle, Zap, Sparkles } from 'lucide-react';
+import { X, AlertTriangle, Zap, Sparkles, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval } from 'date-fns';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel }) {
+  // Determina la tab iniziale in base alla prenotazione in modifica
+  const [activeTab, setActiveTab] = useState(prenotazione?.is_event ? 'evento' : 'affitto');
+
   const [formData, setFormData] = useState({
     spazi_ids: [],
     cliente_id: '',
@@ -32,7 +35,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   useEffect(() => {
     loadPrenotazioni();
     if (prenotazione) {
-      // Supporta sia il vecchio campo spazio_id che il nuovo spazi_ids
       let spaziIds = prenotazione.spazi_ids || [];
       if (spaziIds.length === 0 && prenotazione.spazio_id) {
         spaziIds = [prenotazione.spazio_id];
@@ -51,6 +53,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         stato: prenotazione.stato,
         note: prenotazione.note || ''
       });
+      setActiveTab(prenotazione.is_event ? 'evento' : 'affitto');
     }
   }, [prenotazione]);
 
@@ -72,20 +75,16 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
     formData.spazi_ids.forEach(spazioId => {
       const conflittiSpazio = allPrenotazioni.filter(p => {
-        if (prenotazione && p.id === prenotazione.id) return false; // escludi prenotazione in modifica
+        if (prenotazione && p.id === prenotazione.id) return false;
         if (p.stato === 'cancellata') return false;
-        
         const pInizio = new Date(p.data_inizio);
         const pFine = new Date(p.data_fine);
-        
         const spazioConflitto = p.spazi_ids?.includes(spazioId) || p.spazio_id === spazioId;
         const dateConflitto = isWithinInterval(dataInizio, { start: pInizio, end: pFine }) ||
                              isWithinInterval(dataFine, { start: pInizio, end: pFine }) ||
                              isWithinInterval(pInizio, { start: dataInizio, end: dataFine });
-        
         return spazioConflitto && dateConflitto;
       });
-
       if (conflittiSpazio.length > 0) {
         nuoviConflitti[spazioId] = conflittiSpazio;
       }
@@ -107,16 +106,17 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const isEvent = activeTab === 'evento';
 
     if (formData.spazi_ids.length === 0) {
       toast.error('Seleziona almeno uno spazio');
       return;
     }
-    if (!formData.is_event && !formData.cliente_id) {
+    if (!isEvent && !formData.cliente_id) {
       toast.error('Seleziona un cliente');
       return;
     }
-    if (formData.is_event && !formData.nome_evento) {
+    if (isEvent && !formData.nome_evento) {
       toast.error('Inserisci il nome dell\'evento');
       return;
     }
@@ -124,19 +124,20 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Inserisci le date di inizio e fine');
       return;
     }
-    if (formData.prezzo_totale === '' || formData.prezzo_totale === null || formData.prezzo_totale === undefined || isNaN(parseFloat(formData.prezzo_totale))) {
+    if (!isEvent && (formData.prezzo_totale === '' || isNaN(parseFloat(formData.prezzo_totale)))) {
       toast.error('Inserisci un prezzo totale valido');
       return;
     }
-    if (!formData.materiale_dimostrativo) {
+    if (!isEvent && !formData.materiale_dimostrativo) {
       toast.error('Inserisci il materiale dimostrativo');
       return;
     }
 
     const dataToSave = {
       ...formData,
-      spazio_id: formData.spazi_ids[0], // manteniamo compatibilità col campo principale
-      prezzo_totale: parseFloat(formData.prezzo_totale),
+      is_event: isEvent,
+      spazio_id: formData.spazi_ids[0],
+      prezzo_totale: formData.prezzo_totale ? parseFloat(formData.prezzo_totale) : 0,
       prezzo_mensile: formData.prezzo_mensile ? parseFloat(formData.prezzo_mensile) : null
     };
 
@@ -147,8 +148,74 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const labelClass = "w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
   const fieldClass = "flex-1 min-w-0";
 
+  // Spazio selector condiviso
+  const SpazioSelector = () => (
+    <div className={rowClass}>
+      <span className={labelClass}>Spazi *<span className="block text-xs text-slate-400 font-normal">(più spazi)</span></span>
+      <div className={fieldClass}>
+        {formData.spazi_ids.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-1">
+            {formData.spazi_ids.map(id => {
+              const spazio = spazi.find(s => s.id === id);
+              return spazio ? (
+                <Badge key={id} variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-xs">
+                  <span>N.{spazio.numero_spazio}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}</span>
+                  <button type="button" onClick={() => handleRemoveSpazio(id)} className="ml-1 hover:text-red-500">
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              ) : null;
+            })}
+          </div>
+        )}
+        {spaziDisponibili.length > 0 && (
+          <Select onValueChange={handleAddSpazio} value="">
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona spazio" : "Aggiungi spazio..."} />
+            </SelectTrigger>
+            <SelectContent>
+              {spaziDisponibili.map((spazio) => (
+                <SelectItem key={spazio.id} value={spazio.id}>
+                  Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Tab switcher */}
+      <div className="flex rounded-lg overflow-hidden border border-slate-200 mb-4">
+        <button
+          type="button"
+          onClick={() => setActiveTab('affitto')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'affitto'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          Affitto
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('evento')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'evento'
+              ? 'bg-purple-600 text-white'
+              : 'bg-white text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <Sparkles className="w-4 h-4" />
+          Evento
+        </button>
+      </div>
+
       {Object.keys(conflittiDisponibilita).length > 0 && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
@@ -156,7 +223,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             <div className="font-medium mb-1">Postazioni non disponibili:</div>
             {Object.entries(conflittiDisponibilita).map(([spazioId, conflitti]) => {
               const spazio = spazi.find(s => s.id === spazioId);
-              const dateRange = conflitti[0] 
+              const dateRange = conflitti[0]
                 ? `${new Date(conflitti[0].data_inizio).toLocaleDateString('it-IT')} - ${new Date(conflitti[0].data_fine).toLocaleDateString('it-IT')}`
                 : '';
               return (
@@ -169,190 +236,135 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </Alert>
       )}
 
-      {/* Spazi */}
-      <div className={rowClass}>
-        <span className={labelClass}>Spazi *<span className="block text-xs text-slate-400 font-normal">(più spazi)</span></span>
-        <div className={fieldClass}>
-          {formData.spazi_ids.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-1">
-              {formData.spazi_ids.map(id => {
-                const spazio = spazi.find(s => s.id === id);
-                return spazio ? (
-                  <Badge key={id} variant="secondary" className="flex items-center gap-1 px-2 py-0.5 text-xs">
-                    <span>N.{spazio.numero_spazio}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}</span>
-                    <button type="button" onClick={() => handleRemoveSpazio(id)} className="ml-1 hover:text-red-500">
-                      <X className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ) : null;
-              })}
-            </div>
-          )}
-          {spaziDisponibili.length > 0 && (
-            <Select onValueChange={handleAddSpazio} value="">
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona spazio" : "Aggiungi spazio..."} />
-              </SelectTrigger>
-              <SelectContent>
-                {spaziDisponibili.map((spazio) => (
-                  <SelectItem key={spazio.id} value={spazio.id}>
-                    Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-      </div>
+      {activeTab === 'affitto' && (
+        <>
+          <SpazioSelector />
 
-      {/* Cliente o Nome Evento */}
-      {formData.is_event ? (
-        <div className={rowClass}>
-          <label className={labelClass}>Nome Evento *</label>
-          <div className={fieldClass}>
-            <Input
-              value={formData.nome_evento}
-              onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })}
-              placeholder="Nome dell'evento"
-              className="h-8 text-sm"
-            />
+          {/* Cliente */}
+          <div className={rowClass}>
+            <label className={labelClass}>Cliente *</label>
+            <div className={fieldClass}>
+              <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue placeholder="Seleziona un cliente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {clienti.map((cliente) => (
+                    <SelectItem key={cliente.id} value={cliente.id}>
+                      {cliente.ragione_sociale}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className={rowClass}>
-          <label htmlFor="cliente_id" className={labelClass}>Cliente *</label>
-          <div className={fieldClass}>
-            <Select value={formData.cliente_id} onValueChange={(value) => setFormData({ ...formData, cliente_id: value })}>
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue placeholder="Seleziona un cliente" />
-              </SelectTrigger>
-              <SelectContent>
-                {clienti.map((cliente) => (
-                  <SelectItem key={cliente.id} value={cliente.id}>
-                    {cliente.ragione_sociale}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+
+          {/* Periodo */}
+          <div className={rowClass}>
+            <label className={labelClass}>Periodo *</label>
+            <div className={`${fieldClass} flex gap-2`}>
+              <Input type="date" value={formData.data_inizio} onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })} className="h-8 text-sm flex-1" />
+              <span className="pt-1.5 text-slate-400 text-sm">→</span>
+              <Input type="date" value={formData.data_fine} onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })} className="h-8 text-sm flex-1" />
+            </div>
           </div>
-        </div>
+
+          {/* Prezzi */}
+          <div className={rowClass}>
+            <label className={labelClass}>Prezzo *</label>
+            <div className={`${fieldClass} flex gap-2`}>
+              <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Totale (€)" className="h-8 text-sm" />
+              <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="Mensile (€)" className="h-8 text-sm" />
+            </div>
+          </div>
+
+          {/* Materiale */}
+          <div className={rowClass}>
+            <label className={labelClass}>Materiale *</label>
+            <div className={fieldClass}>
+              <Textarea value={formData.materiale_dimostrativo} onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })} placeholder="Materiale dimostrativo/pubblicitario" rows={2} className="text-sm" />
+            </div>
+          </div>
+
+          {/* Elettricità */}
+          <div className={rowClass}>
+            <span className={labelClass}>Elettricità</span>
+            <div className={`${fieldClass} flex items-center pt-1.5`}>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={formData.necessita_elettricita} onChange={(e) => setFormData({ ...formData, necessita_elettricita: e.target.checked })} className="w-4 h-4 accent-yellow-500" />
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm text-slate-700">Necessita di elettricità</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Note */}
+          <div className={rowClass}>
+            <label className={labelClass}>Note</label>
+            <div className={fieldClass}>
+              <Textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="text-sm" />
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Date */}
-      <div className={rowClass}>
-        <label className={labelClass}>Periodo *</label>
-        <div className={`${fieldClass} flex gap-2`}>
-          <Input
-            type="date"
-            value={formData.data_inizio}
-            onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })}
-            className="h-8 text-sm flex-1"
-          />
-          <span className="pt-1.5 text-slate-400 text-sm">→</span>
-          <Input
-            type="date"
-            value={formData.data_fine}
-            onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })}
-            className="h-8 text-sm flex-1"
-          />
-        </div>
-      </div>
+      {activeTab === 'evento' && (
+        <>
+          <SpazioSelector />
 
-      {/* Prezzi */}
-      <div className={rowClass}>
-        <label className={labelClass}>Prezzo *</label>
-        <div className={`${fieldClass} flex gap-2`}>
-          <div className="flex-1">
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.prezzo_totale}
-              onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })}
-              placeholder="Totale (€)"
-              className="h-8 text-sm"
-            />
+          {/* Nome Evento */}
+          <div className={rowClass}>
+            <label className={labelClass}>Nome Evento *</label>
+            <div className={fieldClass}>
+              <Input value={formData.nome_evento} onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })} placeholder="Nome dell'evento" className="h-8 text-sm" />
+            </div>
           </div>
-          <div className="flex-1">
-            <Input
-              type="number"
-              step="0.01"
-              value={formData.prezzo_mensile}
-              onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })}
-              placeholder="Mensile (€)"
-              className="h-8 text-sm"
-            />
+
+          {/* Periodo */}
+          <div className={rowClass}>
+            <label className={labelClass}>Periodo *</label>
+            <div className={`${fieldClass} flex gap-2`}>
+              <Input type="date" value={formData.data_inizio} onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })} className="h-8 text-sm flex-1" />
+              <span className="pt-1.5 text-slate-400 text-sm">→</span>
+              <Input type="date" value={formData.data_fine} onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })} className="h-8 text-sm flex-1" />
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Materiale dimostrativo */}
-      <div className={rowClass}>
-        <label htmlFor="materiale_dimostrativo" className={labelClass}>Materiale *</label>
-        <div className={fieldClass}>
-          <Textarea
-            id="materiale_dimostrativo"
-            value={formData.materiale_dimostrativo}
-            onChange={(e) => setFormData({ ...formData, materiale_dimostrativo: e.target.value })}
-            placeholder="Materiale dimostrativo/pubblicitario"
-            rows={2}
-            className="text-sm"
-          />
-        </div>
-      </div>
+          {/* Costo Evento */}
+          <div className={rowClass}>
+            <label className={labelClass}>Costo Evento</label>
+            <div className={fieldClass}>
+              <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Costo (€)" className="h-8 text-sm" />
+            </div>
+          </div>
 
-      {/* Elettricità */}
-      <div className={rowClass}>
-        <span className={labelClass}>Elettricità</span>
-        <div className={`${fieldClass} flex items-center pt-1.5`}>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.necessita_elettricita}
-              onChange={(e) => setFormData({ ...formData, necessita_elettricita: e.target.checked })}
-              className="w-4 h-4 accent-yellow-500"
-            />
-            <Zap className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm text-slate-700">Necessita di elettricità</span>
-          </label>
-        </div>
-      </div>
+          {/* Elettricità */}
+          <div className={rowClass}>
+            <span className={labelClass}>Elettricità</span>
+            <div className={`${fieldClass} flex items-center pt-1.5`}>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={formData.necessita_elettricita} onChange={(e) => setFormData({ ...formData, necessita_elettricita: e.target.checked })} className="w-4 h-4 accent-yellow-500" />
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm text-slate-700">Necessita di elettricità</span>
+              </label>
+            </div>
+          </div>
 
-      {/* Evento */}
-      <div className={rowClass}>
-        <span className={labelClass}>Evento</span>
-        <div className={`${fieldClass} flex items-center pt-1.5`}>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.is_event}
-              onChange={(e) => setFormData({ ...formData, is_event: e.target.checked })}
-              className="w-4 h-4 accent-purple-500"
-            />
-            <Sparkles className="w-4 h-4 text-purple-500" />
-            <span className="text-sm text-slate-700">Questa è una prenotazione per un evento</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Note */}
-      <div className={rowClass}>
-        <label htmlFor="note" className={labelClass}>Note</label>
-        <div className={fieldClass}>
-          <Textarea
-            id="note"
-            value={formData.note}
-            onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-            rows={2}
-            className="text-sm"
-          />
-        </div>
-      </div>
+          {/* Note */}
+          <div className={rowClass}>
+            <label className={labelClass}>Note</label>
+            <div className={fieldClass}>
+              <Textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="text-sm" />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           Annulla
         </Button>
-        <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">
+        <Button type="submit" size="sm" className={activeTab === 'evento' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-blue-600 hover:bg-blue-700'}>
           {prenotazione ? 'Aggiorna' : 'Crea'}
         </Button>
       </div>
