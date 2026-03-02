@@ -190,7 +190,8 @@ export default function Dashboard({ centroSelezionato }) {
 
       const eventStats = {
         giorniEvento,
-        eventiCorrenti: eventiCorrenti.length,
+        eventiCorrenti: eventiCorrentiList.length,
+        eventiCorrentiList,
         prossimiEventi
       };
 
