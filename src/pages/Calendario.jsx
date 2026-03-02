@@ -26,14 +26,17 @@ export default function Calendario({ centroSelezionato }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
+  const [soloEventi, setSoloEventi] = useState(false);
 
   // Considera "permanente" una prenotazione con durata >= 300 giorni
-  const prenotazioniFiltrate = nascondiPermanenti
-    ? prenotazioni.filter(p => {
-        const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio));
-        return giorni < 300;
-      })
-    : prenotazioni;
+  const prenotazioniFiltrate = prenotazioni.filter(p => {
+    if (nascondiPermanenti) {
+      const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio));
+      if (giorni >= 300) return false;
+    }
+    if (soloEventi && !p.is_event) return false;
+    return true;
+  });
 
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
