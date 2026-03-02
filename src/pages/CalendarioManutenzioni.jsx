@@ -37,14 +37,13 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       const allCentri = await base44.entities.CentroCommerciale.list();
       setCentri(allCentri);
 
-      let allTasks = await base44.entities.Task.list();
-      let filtrati = allTasks.filter(t => t.ricorrente === false || !t.ricorrente);
+      let allManutenzioni = await base44.entities.Manutenzione.list();
 
       if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') {
-        filtrati = filtrati.filter(t => t.centro_id === centroSelezionato.id || !t.centro_id);
+        allManutenzioni = allManutenzioni.filter(m => m.centro_id === centroSelezionato.id || !m.centro_id);
       }
 
-      setTasks(filtrati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+      setManutenzioni(allManutenzioni.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
     } catch (err) {
       console.error(err);
     }
