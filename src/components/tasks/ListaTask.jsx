@@ -148,44 +148,54 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
 
   return (
     <div>
-      {dateOrdinate.map(dateStr => {
-        const { label, color } = getLabelData(dateStr);
-        const list = gruppi[dateStr];
-        return (
-          <div key={dateStr} className="mb-5">
-            <h3 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${color}`}>
-              <span>{label}</span>
-              <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{list.length}</span>
-            </h3>
-            <div className="space-y-2">
-              {list.map(t => (
-                <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
-              ))}
-            </div>
-          </div>
-        );
-      })}
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          📋 Da Fare
+        </h2>
+        {daFare.length === 0 ? (
+          <div className="text-center py-8 text-slate-400">Nessun task da fare</div>
+        ) : (
+          <div>
+            {dateOrdinate.map(dateStr => {
+              const { label, color } = getLabelData(dateStr);
+              const list = gruppi[dateStr];
+              return (
+                <div key={dateStr} className="mb-5">
+                  <h3 className={`text-sm font-semibold mb-2 flex items-center gap-2 ${color}`}>
+                    <span>{label}</span>
+                    <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{list.length}</span>
+                  </h3>
+                  <div className="space-y-2">
+                    {list.map(t => (
+                      <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
 
-      {senzaData.length > 0 && (
-        <div className="mb-5">
-          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-500">
-            <span>📋 Senza scadenza</span>
-            <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{senzaData.length}</span>
-          </h3>
-          <div className="space-y-2">
-            {senzaData.map(t => (
-              <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
-            ))}
+            {senzaData.length > 0 && (
+              <div className="mb-5">
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-500">
+                  <span>📋 Senza scadenza</span>
+                  <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{senzaData.length}</span>
+                </h3>
+                <div className="space-y-2">
+                  {senzaData.map(t => (
+                    <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {completati.length > 0 && (
         <div className="mb-5">
-          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2 text-slate-400">
-            <span>✓ Completati / Annullati</span>
-            <span className="text-xs font-normal bg-white border rounded-full px-2 py-0.5">{completati.length}</span>
-          </h3>
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            ✓ Completati / Annullati
+          </h2>
           <div className="space-y-2">
             {completati.map(t => (
               <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
