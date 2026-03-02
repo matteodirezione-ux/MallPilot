@@ -121,7 +121,7 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                             {spazio?.numero_spazio || '?'} {spazio?.nome ? `· ${spazio.nome}` : ''}
                           </div>
                           <div className="text-slate-700 truncate font-medium">
-                            {cliente?.ragione_sociale || 'Cliente'}
+                            {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
                       );
