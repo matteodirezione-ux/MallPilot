@@ -110,7 +110,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                             {spazio?.numero_spazio || '?'}
                           </div>
                           <div className="font-medium truncate flex-1" style={{ color: '#1e293b' }}>
-                            {cliente?.ragione_sociale || 'Cliente'}
+                            {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
                       </div>
