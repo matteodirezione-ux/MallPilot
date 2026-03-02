@@ -755,17 +755,19 @@ export default function Dashboard({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-700">
                         {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}
                       </p>
-                      <p className="text-sm font-semibold text-green-600">
-                        {formatCurrency(prenotazione.prezzo_totale)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
+                      {user?.tipo_account !== 'vigilanza' && (
+                         <p className="text-sm font-semibold text-green-600">
+                           {formatCurrency(prenotazione.prezzo_totale)}
+                         </p>
+                       )}
+                      </div>
+                      </div>
+                      ))}
+                      </div>
+                      )}
+                      </CardContent>
+                      </Card>
+                      </div>
+                      </div>
+                      );
+                      }
