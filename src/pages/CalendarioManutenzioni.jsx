@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Wrench, Calendar, ListTodo } from 'lucide-react';
+import { Plus, Wrench, Calendar, ListTodo, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
 import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
@@ -15,6 +16,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [manutenzioni, setManutenzioni] = useState([]);
   const [centri, setCentri] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchText, setSearchText] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
   const [formData, setFormData] = useState({
@@ -231,6 +233,16 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       {loading ? (
         <div className="text-center py-12 text-slate-400">Caricamento...</div>
       ) : (
+        <>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Cerca per titolo o descrizione..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-9"
+            />
+          </div>
         <Tabs defaultValue="calendario">
           <TabsList className="mb-4">
             <TabsTrigger value="calendario" className="gap-2">
@@ -243,7 +255,11 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
           <TabsContent value="calendario">
             <CalendarioManutenzioniMensile
-              tasks={manutenzioni}
+              tasks={manutenzioni.filter(m => {
+                if (!searchText.trim()) return true;
+                const search = searchText.toLowerCase();
+                return m.titolo?.toLowerCase().includes(search) || m.descrizione?.toLowerCase().includes(search);
+              })}
               onTaskClick={handleManutenzioneClick}
               onToggleStatus={handleToggleStatus}
               onNewTask={handleNewManutenzione}
@@ -252,13 +268,18 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
           <TabsContent value="lista">
             <ListaManutenzioni
-              manutenzioni={manutenzioni}
+              manutenzioni={manutenzioni.filter(m => {
+                if (!searchText.trim()) return true;
+                const search = searchText.toLowerCase();
+                return m.titolo?.toLowerCase().includes(search) || m.descrizione?.toLowerCase().includes(search);
+              })}
               onEdit={handleManutenzioneClick}
               onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
             />
           </TabsContent>
         </Tabs>
+        </>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
