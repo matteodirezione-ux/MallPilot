@@ -132,31 +132,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
           })}
         </div>
 
-        {/* Legenda Spazi */}
-        {spazi.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-slate-200">
-            <p className="text-sm font-medium text-slate-700 mb-3">Spazi:</p>
-            <div className="flex flex-wrap gap-3">
-              {spazi.map(spazio => {
-                const rgb = hexToRgb(spazio.colore || '#3b82f6');
-                return (
-                  <div key={spazio.id} className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded border-2"
-                      style={{
-                        backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
-                        borderColor: spazio.colore || '#3b82f6'
-                      }}
-                    />
-                    <span className="text-sm text-slate-600">
-                      {spazio.numero_spazio} - {spazio.nome || 'Spazio'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
       </CardContent>
     </Card>
   );
