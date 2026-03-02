@@ -103,7 +103,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                     return (
                       <div
                          key={p.id}
-                         onClick={() => onEdit && onEdit(p)}
+                         onClick={() => isVigilanza ? setSelectedPrenotazione({ prenotazione: p, spazio, cliente }) : (onEdit && onEdit(p))}
                          style={p.is_event ? {
                            backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`,
                            borderColor: spazioColor,
@@ -112,7 +112,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                            borderColor: spazioColor,
                            color: spazioColor
                          }}
-                         className={`text-xs px-2 py-1 rounded border-2 hover:opacity-80 transition-opacity ${onEdit ? 'cursor-pointer' : ''}`}
+                         className={`text-xs px-2 py-1 rounded border-2 hover:opacity-80 transition-opacity cursor-pointer`}
                        >
                         <div className="flex items-center gap-1.5">
                           <div
