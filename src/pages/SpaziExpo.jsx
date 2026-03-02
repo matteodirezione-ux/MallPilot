@@ -539,6 +539,12 @@ function SpazioCard({ spazio, onEdit, onDelete }) {
           >
             {spazio.numero_spazio}
           </div>
+          {spazio.solo_eventi && (
+            <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full bg-purple-600 text-white text-xs font-medium">
+              <Sparkles className="w-3 h-3" />
+              Solo eventi
+            </div>
+          )}
         </div>
       )}
       
