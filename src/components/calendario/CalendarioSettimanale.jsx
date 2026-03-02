@@ -112,14 +112,14 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                       const rgb = hexToRgb(spazioColor);
                       return (
                         <div
-                          key={p.id}
-                          onClick={() => onEdit(p)}
-                          style={{
-                            backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
-                            borderColor: spazioColor,
-                          }}
-                          className="text-xs px-2 py-1.5 rounded cursor-pointer border-l-4 hover:opacity-80 transition-opacity"
-                        >
+                           key={p.id}
+                           onClick={() => onEdit && onEdit(p)}
+                           style={{
+                             backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
+                             borderColor: spazioColor,
+                           }}
+                           className={`text-xs px-2 py-1.5 rounded border-l-4 hover:opacity-80 transition-opacity ${onEdit ? 'cursor-pointer' : ''}`}
+                         >
                           <div className="flex items-center gap-1 mb-0.5">
                             <span
                               className="font-bold text-[10px]"
