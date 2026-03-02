@@ -50,8 +50,8 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     setLoading(false);
   };
 
-  const handleNewTask = (giorno) => {
-    setTaskSelezionato(null);
+  const handleNewManutenzione = (giorno) => {
+    setManutenzioneSelezionata(null);
     setFormData({
       titolo: '',
       descrizione: '',
@@ -62,21 +62,21 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     setDialogOpen(true);
   };
 
-  const handleTaskClick = (task) => {
-    setTaskSelezionato(task);
+  const handleManutenzioneClick = (manutenzione) => {
+    setManutenzioneSelezionata(manutenzione);
     setFormData({
-      titolo: task.titolo,
-      descrizione: task.descrizione,
-      data_scadenza: task.data_scadenza,
-      centro_id: task.centro_id,
-      stato: task.stato
+      titolo: manutenzione.titolo,
+      descrizione: manutenzione.descrizione,
+      data_scadenza: manutenzione.data_scadenza,
+      centro_id: manutenzione.centro_id,
+      stato: manutenzione.stato
     });
     setDialogOpen(true);
   };
 
-  const handleToggleStatus = async (task) => {
-    const nuovoStato = task.stato === 'completato' ? 'da_fare' : 'completato';
-    await base44.entities.Task.update(task.id, { stato: nuovoStato });
+  const handleToggleStatus = async (manutenzione) => {
+    const nuovoStato = manutenzione.stato === 'completato' ? 'da_fare' : 'completato';
+    await base44.entities.Manutenzione.update(manutenzione.id, { stato: nuovoStato });
     loadData();
   };
 
@@ -87,17 +87,17 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     }
 
     try {
-      if (taskSelezionato?.id) {
-        await base44.entities.Task.update(taskSelezionato.id, formData);
+      if (manutenzioneSelezionata?.id) {
+        await base44.entities.Manutenzione.update(manutenzioneSelezionata.id, formData);
       } else {
-        await base44.entities.Task.create({
+        await base44.entities.Manutenzione.create({
           ...formData,
           assegnato_da_email: user.email,
           assegnato_da_nome: user.full_name
         });
       }
       setDialogOpen(false);
-      setTaskSelezionato(null);
+      setManutenzioneSelezionata(null);
       loadData();
     } catch (err) {
       console.error(err);
@@ -106,10 +106,10 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Eliminare questo task?')) {
-      await base44.entities.Task.delete(taskSelezionato.id);
+    if (window.confirm('Eliminare questa manutenzione?')) {
+      await base44.entities.Manutenzione.delete(manutenzioneSelezionata.id);
       setDialogOpen(false);
-      setTaskSelezionato(null);
+      setManutenzioneSelezionata(null);
       loadData();
     }
   };
