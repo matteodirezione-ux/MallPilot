@@ -1,0 +1,212 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertCircle, Wrench } from 'lucide-react';
+import { format } from 'date-fns';
+import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
+
+export default function CalendarioManutenzioni({ centroSelezionato, user }) {
+  const [tasks, setTasks] = useState([]);
+  const [centri, setCentri] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [taskSelezionato, setTaskSelezionato] = useState(null);
+  const [formData, setFormData] = useState({
+    titolo: '',
+    descrizione: '',
+    data_scadenza: format(new Date(), 'yyyy-MM-dd'),
+    centro_id: '',
+    stato: 'da_fare'
+  });
+
+  useEffect(() => {
+    if (user?.tipo_account && user?.email && centroSelezionato?.id) {
+      loadData();
+    }
+  }, [user?.tipo_account, user?.email, centroSelezionato?.id]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const allCentri = await base44.entities.CentroCommerciale.list();
+      setCentri(allCentri);
+
+      let allTasks = await base44.entities.Task.list();
+      let filtrati = allTasks.filter(t => t.ricorrente === false || !t.ricorrente);
+
+      if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') {
+        filtrati = filtrati.filter(t => t.centro_id === centroSelezionato.id || !t.centro_id);
+      }
+
+      setTasks(filtrati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
+  const handleNewTask = (giorno) => {
+    setTaskSelezionato(null);
+    setFormData({
+      titolo: '',
+      descrizione: '',
+      data_scadenza: format(giorno, 'yyyy-MM-dd'),
+      centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '',
+      stato: 'da_fare'
+    });
+    setDialogOpen(true);
+  };
+
+  const handleTaskClick = (task) => {
+    setTaskSelezionato(task);
+    setFormData({
+      titolo: task.titolo,
+      descrizione: task.descrizione,
+      data_scadenza: task.data_scadenza,
+      centro_id: task.centro_id,
+      stato: task.stato
+    });
+    setDialogOpen(true);
+  };
+
+  const handleToggleStatus = async (task) => {
+    const nuovoStato = task.stato === 'completato' ? 'da_fare' : 'completato';
+    await base44.entities.Task.update(task.id, { stato: nuovoStato });
+    loadData();
+  };
+
+  const handleSave = async () => {
+    if (!formData.titolo.trim()) {
+      alert('Titolo obbligatorio');
+      return;
+    }
+
+    try {
+      if (taskSelezionato?.id) {
+        await base44.entities.Task.update(taskSelezionato.id, formData);
+      } else {
+        await base44.entities.Task.create({
+          ...formData,
+          assegnato_da_email: user.email,
+          assegnato_da_nome: user.full_name
+        });
+      }
+      setDialogOpen(false);
+      setTaskSelezionato(null);
+      loadData();
+    } catch (err) {
+      console.error(err);
+      alert('Errore nel salvataggio');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Eliminare questo task?')) {
+      await base44.entities.Task.delete(taskSelezionato.id);
+      setDialogOpen(false);
+      setTaskSelezionato(null);
+      loadData();
+    }
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <Wrench className="w-6 h-6 text-blue-600" />
+          Calendario Manutenzioni
+        </h1>
+        <p className="text-sm text-slate-500 mt-0.5">
+          {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-slate-400">Caricamento...</div>
+      ) : (
+        <CalendarioManutenzioniMensile
+          tasks={tasks}
+          onTaskClick={handleTaskClick}
+          onToggleStatus={handleToggleStatus}
+          onNewTask={handleNewTask}
+        />
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{taskSelezionato?.id ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700">Titolo *</label>
+              <Input
+                value={formData.titolo}
+                onChange={(e) => setFormData({ ...formData, titolo: e.target.value })}
+                placeholder="Titolo manutenzione"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-slate-700">Descrizione</label>
+              <Textarea
+                value={formData.descrizione}
+                onChange={(e) => setFormData({ ...formData, descrizione: e.target.value })}
+                placeholder="Descrizione dettagliata"
+                className="mt-1"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-slate-700">Data</label>
+                <Input
+                  type="date"
+                  value={formData.data_scadenza}
+                  onChange={(e) => setFormData({ ...formData, data_scadenza: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-slate-700">Centro</label>
+                <Select value={formData.centro_id} onValueChange={(value) => setFormData({ ...formData, centro_id: value })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Seleziona centro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {centri.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-4 border-t">
+              {taskSelezionato?.id && (
+                <Button variant="destructive" onClick={handleDelete}>
+                  Elimina
+                </Button>
+              )}
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Annulla
+              </Button>
+              <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+                Salva
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
