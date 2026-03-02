@@ -484,7 +484,7 @@ export default function Dashboard({ centroSelezionato }) {
       </div>
 
       {/* Evento stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-6 mb-6">
         {/* Numero Eventi Anno */}
         <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
           <CardHeader className="pb-2 p-4">
