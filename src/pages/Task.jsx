@@ -273,6 +273,7 @@ export default function TaskPage({ centroSelezionato, user }) {
               onDelete={handleDelete}
               onToggleStato={handleToggleStato}
               canEdit={(task) => canEdit(task)}
+              canDelete={(task) => canDelete(task)}
             />
           )}
         </TabsContent>
