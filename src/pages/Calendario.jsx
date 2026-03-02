@@ -6,9 +6,10 @@ import CalendarioMensile from '../components/calendario/CalendarioMensile';
 import CalendarioSettimanale from '../components/calendario/CalendarioSettimanale';
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
-import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink, Search } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { differenceInDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -27,6 +28,7 @@ export default function Calendario({ centroSelezionato, user }) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const [soloEventi, setSoloEventi] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const isVigilanza = user?.tipo_account === 'vigilanza';
 
   // Considera "permanente" una prenotazione con durata >= 300 giorni
@@ -36,6 +38,18 @@ export default function Calendario({ centroSelezionato, user }) {
       if (giorni >= 300) return false;
     }
     if (soloEventi && !p.is_event) return false;
+    
+    // Filtro ricerca
+    if (searchText.trim()) {
+      const search = searchText.toLowerCase();
+      const cliente = clienti.find(c => c.id === p.cliente_id);
+      const spazio = spazi.find(s => s.id === p.spazio_id);
+      const matchCliente = cliente?.ragione_sociale?.toLowerCase().includes(search);
+      const matchEvento = p.nome_evento?.toLowerCase().includes(search);
+      const matchSpazio = spazio?.numero_spazio?.toLowerCase().includes(search);
+      if (!matchCliente && !matchEvento && !matchSpazio) return false;
+    }
+    
     return true;
   });
 
