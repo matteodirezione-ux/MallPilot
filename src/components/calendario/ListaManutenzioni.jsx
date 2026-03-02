@@ -27,7 +27,7 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
         />
 
         <div className="flex-1 min-w-0">
-          <p className={`font-medium ${manutenzione.stato === 'completato' ? 'line-through text-slate-500' : sConf.color}`}>
+          <p className={`font-medium ${sConf.color}`}>
             {manutenzione.titolo}
           </p>
 
