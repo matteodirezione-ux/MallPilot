@@ -128,6 +128,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       colore: spazio.colore || '#3b82f6',
       foto_urls: spazio.foto_urls || [],
       piantina_url: spazio.piantina_url || '',
+      solo_eventi: spazio.solo_eventi || false,
       attivo: spazio.attivo
     });
     setDialogOpen(true);
