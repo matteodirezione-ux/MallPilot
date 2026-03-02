@@ -151,9 +151,13 @@ export default function TaskPage({ centroSelezionato, user }) {
   };
 
   const canEdit = (task) => {
-    if (user?.tipo_account === 'vigilanza') return false;
-    if (user?.tipo_account === 'proprieta') return true;
-    return task.assegnato_da_email === user?.email;
+   if (user?.tipo_account === 'vigilanza') return false;
+   if (user?.tipo_account === 'proprieta') return true;
+   return task.assegnato_da_email === user?.email;
+  };
+
+  const canDelete = (task) => {
+   return user?.tipo_account !== 'vigilanza';
   };
 
   // Per la proprietà: accorpa i task con stesso gruppo_id in un unico task virtuale
