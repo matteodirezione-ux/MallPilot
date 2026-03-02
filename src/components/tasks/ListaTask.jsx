@@ -184,7 +184,7 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
                 </h3>
                 <div className="space-y-2">
                   {senzaData.map(t => (
-                    <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} />
+                    <TaskRow key={t.id} task={t} onEdit={onEdit} onDelete={onDelete} onToggleStato={onToggleStato} canEdit={canEdit} canDelete={canDelete(t)} />
                   ))}
                 </div>
               </div>
