@@ -161,6 +161,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
     { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
     { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore'] },
+    { name: 'Calendario Manutenzioni', page: 'CalendarioManutenzioni', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Calendario Vigilanza', page: 'CalendarioVigilanza', icon: Calendar, roles: ['vigilanza'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['vigilanza'] },
     { name: 'Task', page: 'Task', icon: ListTodo, roles: ['vigilanza'] },
