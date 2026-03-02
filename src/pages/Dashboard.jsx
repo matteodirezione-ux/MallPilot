@@ -370,7 +370,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <p className="text-2xl md:text-3xl font-bold text-green-700">
                 {formatCurrency(stats.incassiAnno)}
               </p>
-              <p className="text-xs text-green-600 mt-2">
+              <p className="text-xs text-blue-600 mt-2">
                 Budget: {formatCurrency(stats.budgetAnno)} ({percentualeBudget}%)
               </p>
             </CardContent>
