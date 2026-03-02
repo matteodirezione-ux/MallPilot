@@ -88,7 +88,7 @@ export default function CalendarioManutenzioniMensile({ tasks, onTaskClick, onTo
                       onClick={() => onTaskClick(t)}
                       className={`flex-1 truncate cursor-pointer font-medium ${
                         t.stato === 'completato'
-                          ? 'text-green-700 line-through'
+                          ? 'text-green-700'
                           : 'text-red-700'
                       }`}
                       title={t.titolo}
