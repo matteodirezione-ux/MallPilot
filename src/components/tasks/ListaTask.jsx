@@ -113,11 +113,11 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
   const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
     .sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
 
-  // Raggruppa attivi per data
+  // Raggruppa da fare per data
   const gruppi = {};
   const senzaData = [];
 
-  attivi.forEach(t => {
+  daFare.forEach(t => {
     if (!t.data_scadenza) {
       senzaData.push(t);
     } else {
