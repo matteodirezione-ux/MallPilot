@@ -99,18 +99,18 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                     const rgb = hexToRgb(spazioColor);
                     return (
                       <div
-                        key={p.id}
-                        onClick={() => onEdit(p)}
-                        style={p.is_event ? {
-                          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`,
-                          borderColor: spazioColor,
-                        } : {
-                          backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
-                          borderColor: spazioColor,
-                          color: spazioColor
-                        }}
-                        className="text-xs px-2 py-1 rounded cursor-pointer border-2 hover:opacity-80 transition-opacity"
-                      >
+                         key={p.id}
+                         onClick={() => onEdit && onEdit(p)}
+                         style={p.is_event ? {
+                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`,
+                           borderColor: spazioColor,
+                         } : {
+                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
+                           borderColor: spazioColor,
+                           color: spazioColor
+                         }}
+                         className={`text-xs px-2 py-1 rounded border-2 hover:opacity-80 transition-opacity ${onEdit ? 'cursor-pointer' : ''}`}
+                       >
                         <div className="flex items-center gap-1.5">
                           <div
                             className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
