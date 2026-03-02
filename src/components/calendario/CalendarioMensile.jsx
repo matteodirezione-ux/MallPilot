@@ -6,7 +6,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, 
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
-export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete }) {
+export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete, isVigilanza }) {
   const giorni = useMemo(() => {
     const inizio = startOfMonth(currentMonth);
     const fine = endOfMonth(currentMonth);
