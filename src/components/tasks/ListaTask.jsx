@@ -98,9 +98,11 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
           <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(task)}>
             <Pencil className="w-3.5 h-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(task.id)}>
-            <Trash2 className="w-3.5 h-3.5" />
-          </Button>
+          {canDelete && (
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(task.id)}>
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       )}
     </div>
