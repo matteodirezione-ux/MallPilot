@@ -112,6 +112,30 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
   const spaziDisponibili = spazi.filter(s => !formData.spazi_ids.includes(s.id));
 
+  const handleCreateNewCliente = async () => {
+    if (!nuoClienteData.ragione_sociale || !nuoClienteData.email) {
+      toast.error('Inserisci ragione sociale e email');
+      return;
+    }
+    try {
+      const newCliente = await base44.entities.Cliente.create({
+        centro_id: centroSelezionato?.id || '',
+        ...nuoClienteData
+      });
+      setFormData({ ...formData, cliente_id: newCliente.id });
+      setShowNewClienteDialog(false);
+      setNuoClienteData({
+        ragione_sociale: '',
+        email: '',
+        partita_iva: '',
+        telefono: ''
+      });
+      toast.success('Cliente creato con successo');
+    } catch (error) {
+      toast.error('Errore nella creazione del cliente');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const isEvent = activeTab === 'evento';
