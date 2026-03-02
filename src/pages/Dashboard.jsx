@@ -397,20 +397,20 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Affitto Medio Giornaliero */}
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
                   Affitto Medio/Giorno
                 </CardTitle>
-                <BarChart2 className="w-5 h-5 text-orange-600" />
+                <BarChart2 className="w-5 h-5 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-orange-700">
+              <p className="text-2xl md:text-3xl font-bold text-blue-700">
                 {formatCurrency(stats.affittoMedioGiornaliero)}
               </p>
-              <p className="text-xs text-orange-600 mt-2">
+              <p className="text-xs text-blue-600 mt-2">
                 Tasso occupazione: {stats.tassoOccupazioneAnnuale.toFixed(1)}%
               </p>
             </CardContent>
