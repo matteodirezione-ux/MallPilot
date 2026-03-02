@@ -48,7 +48,7 @@ export default function Dashboard({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (centroSelezionato && centroSelezionato.id) {
+    if (centroSelezionato && centroSelezionato.id && user) {
       loadStats();
     }
   }, [centroSelezionato, user]);
