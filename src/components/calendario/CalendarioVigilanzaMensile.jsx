@@ -96,7 +96,7 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
                             {spazio?.numero_spazio || '?'}
                           </div>
                           <div className="font-medium truncate flex-1 text-slate-800 text-[10px] sm:text-xs">
-                            {cliente?.ragione_sociale || 'Cliente'}
+                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
                       </div>
