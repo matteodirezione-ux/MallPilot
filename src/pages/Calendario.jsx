@@ -191,6 +191,17 @@ export default function Calendario({ centroSelezionato }) {
         </Dialog>
       </div>
 
+      <div className="flex items-center gap-2 mb-4">
+        <Checkbox
+          id="nascondi-permanenti"
+          checked={nascondiPermanenti}
+          onCheckedChange={setNascondiPermanenti}
+        />
+        <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
+          Nascondi prenotazioni permanenti (≥ 300 giorni)
+        </Label>
+      </div>
+
       <Tabs defaultValue="mensile" className="w-full">
         <TabsList className="mb-6">
           <TabsTrigger value="mensile" className="flex items-center gap-2">
