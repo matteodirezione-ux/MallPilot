@@ -377,20 +377,20 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Spazi Occupati */}
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
                   Spazi Occupati
                 </CardTitle>
-                <Building2 className="w-5 h-5 text-purple-600" />
+                <Building2 className="w-5 h-5 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl md:text-3xl font-bold text-purple-700">
+              <p className="text-2xl md:text-3xl font-bold text-blue-700">
                 {stats.spaziOccupati}/{stats.spaziTotali}
               </p>
-              <p className="text-xs text-purple-600 mt-2">
+              <p className="text-xs text-blue-600 mt-2">
                 Occupazione: {percentualeOccupazione}%
               </p>
             </CardContent>
