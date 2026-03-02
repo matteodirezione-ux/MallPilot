@@ -163,8 +163,10 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
                       <div className="flex items-center gap-2 text-slate-600">
                         <User className="w-4 h-4 shrink-0" />
                         <div>
-                          <p className="text-sm font-medium">{cliente?.ragione_sociale || '—'}</p>
-                          {cliente?.email && <p className="text-xs text-slate-500">{cliente.email}</p>}
+                          <p className="text-sm font-medium">
+                            {prenotazione.is_event ? (prenotazione.nome_evento || 'Evento') : (cliente?.ragione_sociale || '—')}
+                          </p>
+                          {!prenotazione.is_event && cliente?.email && <p className="text-xs text-slate-500">{cliente.email}</p>}
                         </div>
                       </div>
 
