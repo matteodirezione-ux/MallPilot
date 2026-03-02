@@ -418,6 +418,96 @@ export default function Dashboard({ centroSelezionato, user }) {
         </div>
       )}
 
+      {/* Second row - Events & Clients */}
+      {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 mb-6">
+          {/* Numero Clienti */}
+          <Card className="bg-gradient-to-br from-indigo-50 to-indigo-100 border-indigo-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Clienti
+                </CardTitle>
+                <Users className="w-5 h-5 text-indigo-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-indigo-700">
+                {stats.clientiTotali}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Numero Eventi */}
+          <Card className="bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  N. Eventi
+                </CardTitle>
+                <Sparkles className="w-5 h-5 text-pink-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-pink-700">
+                {stats.eventStats.numeroEventiAnno}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Giorni Evento */}
+          <Card className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-cyan-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Giorni Evento
+                </CardTitle>
+                <Calendar className="w-5 h-5 text-cyan-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-cyan-700">
+                {stats.eventStats.giorniEvento}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Costo Eventi */}
+          <Card className="bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Costo Eventi
+                </CardTitle>
+                <DollarSign className="w-5 h-5 text-rose-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-rose-700">
+                {formatCurrency(stats.eventStats.costoEventiAnno)}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Costo Medio Giorno Evento */}
+          <Card className="bg-gradient-to-br from-teal-50 to-teal-100 border-teal-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Costo Medio/Giorno Evento
+                </CardTitle>
+                <Target className="w-5 h-5 text-teal-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-teal-700">
+                {formatCurrency(stats.eventStats.costoMedioGiornoEvento)}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Bottom cards - 4 columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {/* Task per Giorno */}
