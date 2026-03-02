@@ -115,20 +115,44 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
             </div>
           </div>
 
-          {centri.length > 1 && (
-            <div className="relative">
-              <select
-                value={centroSelezionato?.id || ''}
-                onChange={(e) => handleCentroChange(e.target.value)}
-                className="appearance-none px-4 py-2 pr-10 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer hover:bg-slate-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div className="flex items-center gap-3">
+            {/* Toggle vista */}
+            <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+              <button
+                onClick={() => setVista('settimanale')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors ${
+                  vista === 'settimanale' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                }`}
               >
-                {centri.map(c => (
-                  <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <CalendarDays className="w-4 h-4" />
+                Settimana
+              </button>
+              <button
+                onClick={() => setVista('mensile')}
+                className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-colors ${
+                  vista === 'mensile' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                Mese
+              </button>
             </div>
-          )}
+
+            {centri.length > 1 && (
+              <div className="relative">
+                <select
+                  value={centroSelezionato?.id || ''}
+                  onChange={(e) => handleCentroChange(e.target.value)}
+                  className="appearance-none px-4 py-2 pr-10 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 cursor-pointer hover:bg-slate-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {centri.map(c => (
+                    <option key={c.id} value={c.id}>{c.nome}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-6 mb-4">
