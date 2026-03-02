@@ -264,7 +264,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-slate-700">Data</label>
+                <label className="text-sm font-medium text-slate-700">Data *</label>
                 <Input
                   type="date"
                   value={formData.data_scadenza}
@@ -286,6 +286,80 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="checkbox"
+                  checked={formData.ricorrente}
+                  onChange={(e) => setFormData({ ...formData, ricorrente: e.target.checked })}
+                  className="rounded"
+                  id="ricorrente"
+                />
+                <label htmlFor="ricorrente" className="text-sm font-medium text-slate-700 cursor-pointer">
+                  Manutenzione ricorrente
+                </label>
+              </div>
+
+              {formData.ricorrente && (
+                <div className="space-y-3 bg-slate-50 p-3 rounded-lg">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Ogni</label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={formData.ricorrenza_ogni}
+                        onChange={(e) => setFormData({ ...formData, ricorrenza_ogni: parseInt(e.target.value) || 1 })}
+                        className="mt-1 h-8"
+                      />
+                    </div>
+
+                    {formData.ricorrenza_tipo === 'personalizzato' ? (
+                      <div>
+                        <label className="text-xs font-medium text-slate-700">Unità</label>
+                        <Select value={formData.ricorrenza_unita} onValueChange={(value) => setFormData({ ...formData, ricorrenza_unita: value })}>
+                          <SelectTrigger className="mt-1 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="giorni">Giorni</SelectItem>
+                            <SelectItem value="settimane">Settimane</SelectItem>
+                            <SelectItem value="mesi">Mesi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="text-xs font-medium text-slate-700">Tipo</label>
+                        <Select value={formData.ricorrenza_tipo} onValueChange={(value) => setFormData({ ...formData, ricorrenza_tipo: value })}>
+                          <SelectTrigger className="mt-1 h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="giornaliero">Giornaliero</SelectItem>
+                            <SelectItem value="settimanale">Settimanale</SelectItem>
+                            <SelectItem value="mensile">Mensile</SelectItem>
+                            <SelectItem value="annuale">Annuale</SelectItem>
+                            <SelectItem value="personalizzato">Personalizzato</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-xs font-medium text-slate-700">Fino al</label>
+                      <Input
+                        type="date"
+                        value={formData.ricorrenza_fine}
+                        onChange={(e) => setFormData({ ...formData, ricorrenza_fine: e.target.value })}
+                        className="mt-1 h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">
