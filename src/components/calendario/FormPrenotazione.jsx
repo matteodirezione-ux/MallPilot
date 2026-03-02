@@ -16,11 +16,22 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   // Determina la tab iniziale in base alla prenotazione in modifica
   const [activeTab, setActiveTab] = useState(prenotazione?.is_event ? 'evento' : 'affitto');
   const [showNewClienteDialog, setShowNewClienteDialog] = useState(false);
+  const [wizardStep, setWizardStep] = useState(0);
   const [nuoClienteData, setNuoClienteData] = useState({
     ragione_sociale: '',
-    email: '',
     partita_iva: '',
-    telefono: ''
+    codice_fiscale: '',
+    email: '',
+    pec: '',
+    telefono: '',
+    indirizzo: '',
+    citta: '',
+    provincia: '',
+    cap: '',
+    referente_nome: '',
+    referente_telefono: '',
+    referente_email: '',
+    note: ''
   });
 
   const [formData, setFormData] = useState({
