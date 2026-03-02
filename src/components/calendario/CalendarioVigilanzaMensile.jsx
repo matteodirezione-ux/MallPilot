@@ -12,12 +12,17 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
     return eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
   }, [currentMonth]);
 
+  const parseLocalDate = (dateStr) => {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  };
+
   const prenotazioniPerGiorno = useMemo(() => {
     const map = {};
     giorni.forEach(giorno => {
       map[format(giorno, 'yyyy-MM-dd')] = prenotazioni.filter(p => {
-        const dataInizio = new Date(p.data_inizio);
-        const dataFine = new Date(p.data_fine);
+        const dataInizio = parseLocalDate(p.data_inizio);
+        const dataFine = parseLocalDate(p.data_fine);
         return isWithinInterval(giorno, { start: dataInizio, end: dataFine }) && p.stato !== 'cancellata';
       });
     });
