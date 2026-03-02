@@ -16,7 +16,7 @@ import DisponibilitaSpazi from '../components/calendario/DisponibilitaSpazi';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
-export default function Calendario({ centroSelezionato }) {
+export default function Calendario({ centroSelezionato, user }) {
   const [prenotazioni, setPrenotazioni] = useState([]);
   const [spazi, setSpazi] = useState([]);
   const [clienti, setClienti] = useState([]);
@@ -27,6 +27,7 @@ export default function Calendario({ centroSelezionato }) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const [soloEventi, setSoloEventi] = useState(false);
+  const isVigilanza = user?.tipo_account === 'vigilanza';
 
   // Considera "permanente" una prenotazione con durata >= 300 giorni
   const prenotazioniFiltrate = prenotazioni.filter(p => {
