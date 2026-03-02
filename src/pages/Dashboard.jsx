@@ -357,13 +357,13 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Incassi Anno */}
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
                   Incassi Anno
                 </CardTitle>
-                <TrendingUp className="w-5 h-5 text-green-600" />
+                <TrendingUp className="w-5 h-5 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
