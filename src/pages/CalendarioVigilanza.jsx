@@ -188,18 +188,15 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
             return true;
           });
 
-          if (vista === 'mensile') {
-            return (
-              <CalendarioVigilanzaMensile
-                prenotazioni={filteredPrenotazioni}
-                spazi={spazi}
-                clienti={clienti}
-                currentMonth={currentMonth}
-                setCurrentMonth={setCurrentMonth}
-              />
-            );
-          }
-          return (
+          return vista === 'mensile' ? (
+            <CalendarioVigilanzaMensile
+              prenotazioni={filteredPrenotazioni}
+              spazi={spazi}
+              clienti={clienti}
+              currentMonth={currentMonth}
+              setCurrentMonth={setCurrentMonth}
+            />
+          ) : (
             <CalendarioVigilanzaSettimanale
               prenotazioni={filteredPrenotazioni}
               spazi={spazi}
