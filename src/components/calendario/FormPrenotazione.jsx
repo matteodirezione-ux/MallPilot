@@ -39,7 +39,8 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       }
       setFormData({
         spazi_ids: spaziIds,
-        cliente_id: prenotazione.cliente_id,
+        cliente_id: prenotazione.cliente_id || '',
+        nome_evento: prenotazione.nome_evento || '',
         data_inizio: prenotazione.data_inizio,
         data_fine: prenotazione.data_fine,
         prezzo_totale: prenotazione.prezzo_totale,
