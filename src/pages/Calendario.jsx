@@ -212,7 +212,17 @@ export default function Calendario({ centroSelezionato, user }) {
        </div>
 
       <Tabs defaultValue="mensile" className="w-full">
-         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+         <div className="mb-4 flex flex-col gap-3">
+           <div className="relative">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+             <Input
+               placeholder="Cerca per cliente, evento o spazio..."
+               value={searchText}
+               onChange={(e) => setSearchText(e.target.value)}
+               className="pl-9"
+             />
+           </div>
+           <div className="flex flex-wrap items-center justify-between gap-3">
            <TabsList>
              <TabsTrigger value="mensile" className="flex items-center gap-2">
                <CalendarIcon className="w-4 h-4" />
@@ -258,10 +268,11 @@ export default function Calendario({ centroSelezionato, user }) {
                  </Label>
                </div>
              </div>
-           )}
-         </div>
+             )}
+             </div>
+             </div>
 
-        <TabsContent value="mensile">
+             <TabsContent value="mensile">
            <CalendarioMensile
              prenotazioni={prenotazioniFiltrate}
              spazi={spazi}
