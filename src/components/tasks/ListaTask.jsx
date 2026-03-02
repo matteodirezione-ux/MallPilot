@@ -36,7 +36,7 @@ function getScadenzaColor(data, stato) {
   return 'text-slate-600';
 }
 
-function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit }) {
+function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) {
   const pConf = prioritaConfig[task.priorita] || prioritaConfig.media;
   const sConf = statoConfig[task.stato] || statoConfig.da_fare;
   const StatoIcon = sConf.icon;
