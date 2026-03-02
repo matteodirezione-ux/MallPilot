@@ -389,12 +389,25 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     </div>
 
                     <div className={row}>
-                      <span className={lbl}>Stato</span>
-                      <div className={`${fld} flex items-center pt-1.5`}>
+                      <span className={lbl}>Opzioni</span>
+                      <div className={`${fld} flex flex-col gap-2 pt-1.5`}>
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            id="attivo"
+                            checked={formData.solo_eventi}
+                            onChange={(e) => setFormData({ ...formData, solo_eventi: e.target.checked })}
+                            className="rounded"
+                          />
+                          <span className="text-sm text-slate-700">Spazio dedicato solo agli eventi</span>
+                        </label>
+                        {formData.solo_eventi && (
+                          <p className="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded">
+                            Questo spazio non verrà conteggiato nelle statistiche di affitto
+                          </p>
+                        )}
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
                             checked={formData.attivo}
                             onChange={(e) => setFormData({ ...formData, attivo: e.target.checked })}
                             className="rounded"
