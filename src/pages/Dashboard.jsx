@@ -481,45 +481,6 @@ export default function Dashboard({ centroSelezionato }) {
           </CardContent>
         </Card>
 
-        {/* Costo Eventi Anno */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
-          <CardHeader className="pb-2 p-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                Costo Eventi {new Date().getFullYear()}
-              </CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-fuchsia-50 flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-fuchsia-600" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl font-bold text-slate-800">
-              {formatCurrency(stats.eventStats.costoEventiAnno || 0)}
-            </div>
-            <p className="text-xs text-slate-500 mt-2">Totale eventi anno</p>
-          </CardContent>
-        </Card>
-
-        {/* Costo Giorno Evento */}
-        <Card className="bg-white border-slate-200 hover:shadow-lg transition-shadow col-span-1">
-          <CardHeader className="pb-2 p-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xs font-medium text-slate-600 leading-tight">
-                Costo / Giorno Evento
-              </CardTitle>
-              <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center shrink-0">
-                <DollarSign className="w-4 h-4 text-pink-600" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-xl font-bold text-slate-800">
-              {formatCurrency(stats.eventStats.costoMedioGiornoEvento || 0)}
-            </div>
-            <p className="text-xs text-slate-500 mt-2">Media giornaliera</p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Evento stats row */}
