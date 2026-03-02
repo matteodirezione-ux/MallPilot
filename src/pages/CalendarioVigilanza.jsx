@@ -178,20 +178,37 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
           </div>
         </div>
 
-        <CalendarioVigilanzaMensile
-          prenotazioni={prenotazioni.filter(p => {
+        {(() => {
+          const filteredPrenotazioni = prenotazioni.filter(p => {
             if (nascondiPermanenti) {
               const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio));
               if (giorni >= 300) return false;
             }
             if (soloEventi && !p.is_event) return false;
             return true;
-          })}
-          spazi={spazi}
-          clienti={clienti}
-          currentMonth={currentMonth}
-          setCurrentMonth={setCurrentMonth}
-        />
+          });
+
+          if (vista === 'mensile') {
+            return (
+              <CalendarioVigilanzaMensile
+                prenotazioni={filteredPrenotazioni}
+                spazi={spazi}
+                clienti={clienti}
+                currentMonth={currentMonth}
+                setCurrentMonth={setCurrentMonth}
+              />
+            );
+          }
+          return (
+            <CalendarioVigilanzaSettimanale
+              prenotazioni={filteredPrenotazioni}
+              spazi={spazi}
+              clienti={clienti}
+              currentWeek={currentWeek}
+              setCurrentWeek={setCurrentWeek}
+            />
+          );
+        })()}
       </div>
     </div>
   );
