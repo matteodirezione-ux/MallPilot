@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import CalendarioVigilanzaMensile from '@/components/calendario/CalendarioVigilanzaMensile';
 import { Building2, ChevronDown } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { differenceInDays } from 'date-fns';
 
 export default function CalendarioVigilanza({ centroSelezionato: centroFromLayout, user }) {
   const [prenotazioni, setPrenotazioni] = useState([]);
