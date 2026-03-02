@@ -12,11 +12,11 @@ import CalendarioManutenzioniMensile from '../components/calendario/CalendarioMa
 import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
 
 export default function CalendarioManutenzioni({ centroSelezionato, user }) {
-  const [tasks, setTasks] = useState([]);
+  const [manutenzioni, setManutenzioni] = useState([]);
   const [centri, setCentri] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [taskSelezionato, setTaskSelezionato] = useState(null);
+  const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
   const [formData, setFormData] = useState({
     titolo: '',
     descrizione: '',
