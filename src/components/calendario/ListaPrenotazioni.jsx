@@ -135,7 +135,7 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
           const cliente = getClienteById(prenotazione.cliente_id);
 
           return (
-            <Card key={prenotazione.id} className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+            <Card key={prenotazione.id} className={`hover:shadow-md transition-shadow ${prenotazione.is_event ? 'bg-purple-50 border-purple-200' : 'bg-white border-slate-200'}`}>
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-2">
