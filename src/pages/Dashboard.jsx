@@ -204,13 +204,16 @@ export default function Dashboard({ centroSelezionato }) {
         costoMedioGiornoEvento = costoEventiAnno / giorniEvento;
       }
 
+      const numeroEventiAnno = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio).getFullYear() === annoCorrente).length;
+
       const eventStats = {
         giorniEvento,
         eventiCorrenti: eventiCorrentiList.length,
         eventiCorrentiList,
         prossimiEventi,
         costoEventiAnno,
-        costoMedioGiornoEvento
+        costoMedioGiornoEvento,
+        numeroEventiAnno
       };
 
       // Affitto medio giornaliero (solo prenotazioni non cancellate con durata > 0)
