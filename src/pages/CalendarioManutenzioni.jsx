@@ -62,7 +62,12 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       descrizione: '',
       data_scadenza: format(giorno, 'yyyy-MM-dd'),
       centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '',
-      stato: 'da_fare'
+      stato: 'da_fare',
+      ricorrente: false,
+      ricorrenza_tipo: 'settimanale',
+      ricorrenza_ogni: 1,
+      ricorrenza_unita: 'settimane',
+      ricorrenza_fine: ''
     });
     setDialogOpen(true);
   };
