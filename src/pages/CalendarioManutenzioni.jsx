@@ -79,7 +79,12 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       descrizione: manutenzione.descrizione,
       data_scadenza: manutenzione.data_scadenza,
       centro_id: manutenzione.centro_id,
-      stato: manutenzione.stato
+      stato: manutenzione.stato,
+      ricorrente: manutenzione.ricorrente || false,
+      ricorrenza_tipo: manutenzione.ricorrenza_tipo || 'settimanale',
+      ricorrenza_ogni: manutenzione.ricorrenza_ogni || 1,
+      ricorrenza_unita: manutenzione.ricorrenza_unita || 'settimane',
+      ricorrenza_fine: manutenzione.ricorrenza_fine || ''
     });
     setDialogOpen(true);
   };
