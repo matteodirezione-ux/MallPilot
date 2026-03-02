@@ -138,7 +138,23 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
     try {
       if (manutenzioneSelezionata?.id) {
-        await base44.entities.Manutenzione.update(manutenzioneSelezionata.id, formData);
+        // Se è una manutenzione padre, aggiorna anche tutte le figlie
+        if (manutenzioneSelezionata.ricorrente) {
+          await base44.entities.Manutenzione.update(manutenzioneSelezionata.id, formData);
+          const allManutenzioni = await base44.entities.Manutenzione.list();
+          const manutenzioniCollegate = allManutenzioni.filter(m => m.manutenzione_padre_id === manutenzioneSelezionata.id);
+
+          // Aggiorna le manutenzioni collegate con i nuovi dati (escludendo campi specifici)
+          for (const m of manutenzioniCollegate) {
+            await base44.entities.Manutenzione.update(m.id, {
+              titolo: formData.titolo,
+              descrizione: formData.descrizione,
+              stato: formData.stato
+            });
+          }
+        } else {
+          await base44.entities.Manutenzione.update(manutenzioneSelezionata.id, formData);
+        }
       } else {
         const manutenzioneData = {
           ...formData,
