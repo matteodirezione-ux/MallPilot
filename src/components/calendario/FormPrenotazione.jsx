@@ -112,8 +112,12 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Seleziona almeno uno spazio');
       return;
     }
-    if (!formData.cliente_id) {
+    if (!formData.is_event && !formData.cliente_id) {
       toast.error('Seleziona un cliente');
+      return;
+    }
+    if (formData.is_event && !formData.nome_evento) {
+      toast.error('Inserisci il nome dell\'evento');
       return;
     }
     if (!formData.data_inizio || !formData.data_fine) {
