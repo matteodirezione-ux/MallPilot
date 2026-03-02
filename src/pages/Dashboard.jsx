@@ -336,7 +336,87 @@ export default function Dashboard({ centroSelezionato, user }) {
         <p className="text-slate-600 text-sm">{centroSelezionato?.nome}</p>
       </div>
 
+      {/* Summary Cards - Top row */}
+      {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+          {/* Incassi Mese */}
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Incassi Mese
+                </CardTitle>
+                <DollarSign className="w-5 h-5 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-blue-700">
+                {formatCurrency(stats.incassiMese)}
+              </p>
+            </CardContent>
+          </Card>
 
+          {/* Incassi Anno */}
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Incassi Anno
+                </CardTitle>
+                <TrendingUp className="w-5 h-5 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-green-700">
+                {formatCurrency(stats.incassiAnno)}
+              </p>
+              <p className="text-xs text-green-600 mt-2">
+                Budget: {formatCurrency(stats.budgetAnno)} ({percentualeBudget}%)
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Spazi Occupati */}
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Spazi Occupati
+                </CardTitle>
+                <Building2 className="w-5 h-5 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-purple-700">
+                {stats.spaziOccupati}/{stats.spaziTotali}
+              </p>
+              <p className="text-xs text-purple-600 mt-2">
+                Occupazione: {percentualeOccupazione}%
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Affitto Medio Giornaliero */}
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-shadow">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm md:text-base font-semibold text-slate-800">
+                  Affitto Medio/Giorno
+                </CardTitle>
+                <BarChart2 className="w-5 h-5 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl md:text-3xl font-bold text-orange-700">
+                {formatCurrency(stats.affittoMedioGiornaliero)}
+              </p>
+              <p className="text-xs text-orange-600 mt-2">
+                Tasso occupazione: {stats.tassoOccupazioneAnnuale.toFixed(1)}%
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Bottom cards - 4 columns */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
