@@ -5,9 +5,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertCircle, Wrench } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Plus, Wrench, Calendar, ListTodo } from 'lucide-react';
 import { format } from 'date-fns';
 import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
+import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
 
 export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [tasks, setTasks] = useState([]);

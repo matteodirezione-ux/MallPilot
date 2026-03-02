@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import Calendario from './pages/Calendario';
+import CalendarioManutenzioni from './pages/CalendarioManutenzioni';
 import CalendarioVigilanza from './pages/CalendarioVigilanza';
 import Clienti from './pages/Clienti';
 import Dashboard from './pages/Dashboard';
@@ -55,12 +56,12 @@ import Documenti from './pages/Documenti';
 import Gestione from './pages/Gestione';
 import SpaziExpo from './pages/SpaziExpo';
 import Task from './pages/Task';
-import CalendarioManutenzioni from './pages/CalendarioManutenzioni';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Calendario": Calendario,
+    "CalendarioManutenzioni": CalendarioManutenzioni,
     "CalendarioVigilanza": CalendarioVigilanza,
     "Clienti": Clienti,
     "Dashboard": Dashboard,
@@ -68,7 +69,6 @@ export const PAGES = {
     "Gestione": Gestione,
     "SpaziExpo": SpaziExpo,
     "Task": Task,
-    "CalendarioManutenzioni": CalendarioManutenzioni,
 }
 
 export const pagesConfig = {
