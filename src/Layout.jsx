@@ -82,11 +82,6 @@ export default function Layout({ children, currentPageName }) {
       
       setUser(userData);
 
-      // Redirect vigilanza al calendario vigilanza se è sulla dashboard
-      if (userData.tipo_account === 'vigilanza' && (currentPageName === 'Dashboard' || currentPageName === '')) {
-        navigate(createPageUrl('CalendarioVigilanza'));
-      }
-
       if (userData.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri);
