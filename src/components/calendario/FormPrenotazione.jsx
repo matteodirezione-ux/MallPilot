@@ -124,10 +124,6 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const spaziDisponibili = spazi.filter(s => !formData.spazi_ids.includes(s.id));
 
   const handleCreateNewCliente = async () => {
-    if (!nuoClienteData.ragione_sociale || !nuoClienteData.email) {
-      toast.error('Inserisci ragione sociale e email');
-      return;
-    }
     try {
       const newCliente = await base44.entities.Cliente.create({
         centro_id: centroSelezionato?.id || '',
@@ -135,16 +131,47 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       });
       setFormData({ ...formData, cliente_id: newCliente.id });
       setShowNewClienteDialog(false);
+      setWizardStep(0);
       setNuoClienteData({
         ragione_sociale: '',
-        email: '',
         partita_iva: '',
-        telefono: ''
+        codice_fiscale: '',
+        email: '',
+        pec: '',
+        telefono: '',
+        indirizzo: '',
+        citta: '',
+        provincia: '',
+        cap: '',
+        referente_nome: '',
+        referente_telefono: '',
+        referente_email: '',
+        note: ''
       });
       toast.success('Cliente creato con successo');
     } catch (error) {
       toast.error('Errore nella creazione del cliente');
     }
+  };
+
+  const resetNewClienteForm = () => {
+    setNuoClienteData({
+      ragione_sociale: '',
+      partita_iva: '',
+      codice_fiscale: '',
+      email: '',
+      pec: '',
+      telefono: '',
+      indirizzo: '',
+      citta: '',
+      provincia: '',
+      cap: '',
+      referente_nome: '',
+      referente_telefono: '',
+      referente_email: '',
+      note: ''
+    });
+    setWizardStep(0);
   };
 
   const handleSubmit = (e) => {
