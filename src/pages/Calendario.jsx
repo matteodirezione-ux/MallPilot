@@ -248,27 +248,29 @@ export default function Calendario({ centroSelezionato, user }) {
          </div>
 
         <TabsContent value="mensile">
-          <CalendarioMensile
-            prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
-            clienti={clienti}
-            currentMonth={currentMonth}
-            setCurrentMonth={setCurrentMonth}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </TabsContent>
+           <CalendarioMensile
+             prenotazioni={prenotazioniFiltrate}
+             spazi={spazi}
+             clienti={clienti}
+             currentMonth={currentMonth}
+             setCurrentMonth={setCurrentMonth}
+             onEdit={isVigilanza ? null : handleEdit}
+             onDelete={isVigilanza ? null : handleDelete}
+             isVigilanza={isVigilanza}
+           />
+         </TabsContent>
 
-        <TabsContent value="settimanale">
-          <CalendarioSettimanale
-            prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
-            clienti={clienti}
-            currentWeek={currentWeek}
-            setCurrentWeek={setCurrentWeek}
-            onEdit={handleEdit}
-          />
-        </TabsContent>
+         <TabsContent value="settimanale">
+           <CalendarioSettimanale
+             prenotazioni={prenotazioniFiltrate}
+             spazi={spazi}
+             clienti={clienti}
+             currentWeek={currentWeek}
+             setCurrentWeek={setCurrentWeek}
+             onEdit={isVigilanza ? null : handleEdit}
+             isVigilanza={isVigilanza}
+           />
+         </TabsContent>
 
         <TabsContent value="lista">
           <ListaPrenotazioni
