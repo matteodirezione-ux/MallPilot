@@ -26,6 +26,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
     colore: '#3b82f6',
     foto_urls: [],
     piantina_url: '',
+    solo_eventi: false,
     attivo: true
   });
 
