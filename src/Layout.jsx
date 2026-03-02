@@ -159,8 +159,8 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore'] },
-    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
     { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore'] },
+    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore'] },
     { name: 'Calendario Manutenzioni', page: 'CalendarioManutenzioni', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Calendario Vigilanza', page: 'CalendarioVigilanza', icon: Calendar, roles: ['vigilanza'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['vigilanza'] },
