@@ -272,22 +272,26 @@ export default function Calendario({ centroSelezionato, user }) {
            />
          </TabsContent>
 
-        <TabsContent value="lista">
-          <ListaPrenotazioni
-            prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
-            clienti={clienti}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </TabsContent>
+        {!isVigilanza && (
+           <>
+             <TabsContent value="lista">
+               <ListaPrenotazioni
+                 prenotazioni={prenotazioniFiltrate}
+                 spazi={spazi}
+                 clienti={clienti}
+                 onEdit={handleEdit}
+                 onDelete={handleDelete}
+               />
+             </TabsContent>
 
-        <TabsContent value="disponibilita">
-          <DisponibilitaSpazi
-            prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
-          />
-        </TabsContent>
+             <TabsContent value="disponibilita">
+               <DisponibilitaSpazi
+                 prenotazioni={prenotazioniFiltrate}
+                 spazi={spazi}
+               />
+             </TabsContent>
+           </>
+         )}
       </Tabs>
     </div>
   );
