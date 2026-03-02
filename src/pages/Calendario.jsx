@@ -236,7 +236,7 @@ export default function Calendario({ centroSelezionato }) {
 
         <TabsContent value="settimanale">
           <CalendarioSettimanale
-            prenotazioni={prenotazioni}
+            prenotazioni={prenotazioniFiltrate}
             spazi={spazi}
             clienti={clienti}
             currentWeek={currentWeek}
