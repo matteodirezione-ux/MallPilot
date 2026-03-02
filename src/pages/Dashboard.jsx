@@ -156,9 +156,14 @@ export default function Dashboard({ centroSelezionato }) {
       const clienti = await base44.entities.Cliente.list();
 
       // Task statistics
-      const tasksList = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Task.list()
-        : await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+      let tasksList;
+      if (user?.tipo_account === 'vigilanza') {
+        tasksList = await base44.entities.Task.filter({ assegnato_a_email: user.email });
+      } else if (centroSelezionato?.id === 'tutti') {
+        tasksList = await base44.entities.Task.list();
+      } else {
+        tasksList = await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+      }
       
       const taskStats = {
         urgenti: tasksList.filter(t => t.priorita === 'urgente' && t.stato !== 'completato' && t.stato !== 'annullato').length,
