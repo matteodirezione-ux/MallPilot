@@ -23,8 +23,8 @@ export default function TaskPage({ centroSelezionato, user }) {
   const [cerca, setCerca] = useState('');
 
   useEffect(() => {
-    if (user) loadData();
-  }, [user, centroSelezionato]);
+    if (user?.tipo_account) loadData();
+  }, [user?.tipo_account, user?.email, centroSelezionato]);
 
   const loadData = async () => {
     setLoading(true);
