@@ -52,7 +52,7 @@ export default function TaskPage({ centroSelezionato, user }) {
         const nomeDirettore = direttoreRecord.length > 0 ? direttoreRecord[0].full_name : user.full_name;
         setDirettori([{ email: user.email, full_name: nomeDirettore }]);
 
-        // Carica tutti i task dei centri assegnati (non solo quelli assegnati al direttore)
+        // Carica tutti i task dei centri assegnati + quelli assegnati/creati dal direttore
         const [assegnati, creati] = await Promise.all([
           base44.entities.Task.filter({ assegnato_a_email: user.email }),
           base44.entities.Task.filter({ assegnato_da_email: user.email }),
@@ -62,8 +62,13 @@ export default function TaskPage({ centroSelezionato, user }) {
           const taskPerCentro = await Promise.all(centriIds.map(id => base44.entities.Task.filter({ centro_id: id })));
           taskCentri = taskPerCentro.flat();
         }
+        // Includi tutti senza filtrare per stato
         const unici = Array.from(new Map([...assegnati, ...creati, ...taskCentri].map(t => [t.id, t])).values());
-        setTasks(unici.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+        setTasks(unici.sort((a, b) => {
+          if (!a.data_scadenza) return 1;
+          if (!b.data_scadenza) return -1;
+          return new Date(a.data_scadenza) - new Date(b.data_scadenza);
+        }));
 
         setLoading(false);
         return;
