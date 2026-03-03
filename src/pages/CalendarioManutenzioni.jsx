@@ -37,6 +37,24 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     }
   }, [user?.tipo_account, user?.email, centroSelezionato?.id]);
 
+  // Sottoscrizione real-time
+  useEffect(() => {
+    if (!user?.tipo_account) return;
+    const unsubscribe = base44.entities.Manutenzione.subscribe((event) => {
+      if (event.type === 'create') {
+        setManutenzioni(prev => {
+          if (prev.find(m => m.id === event.id)) return prev;
+          return [...prev, event.data].sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
+        });
+      } else if (event.type === 'update') {
+        setManutenzioni(prev => prev.map(m => m.id === event.id ? { ...m, ...event.data } : m));
+      } else if (event.type === 'delete') {
+        setManutenzioni(prev => prev.filter(m => m.id !== event.id));
+      }
+    });
+    return () => unsubscribe();
+  }, [user?.tipo_account]);
+
   const loadData = async () => {
     setLoading(true);
     try {
