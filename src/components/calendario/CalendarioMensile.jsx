@@ -46,36 +46,36 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
   };
 
   return (
-    <Card className="bg-white border-slate-200 overflow-hidden">
-      <CardHeader className="p-3 sm:p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-          <CardTitle className="text-lg sm:text-xl font-semibold text-slate-800">
-            {format(currentMonth, 'MMM yyyy', { locale: it })}
+    <Card className="bg-white border-slate-200">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold text-slate-800">
+            {format(currentMonth, 'MMMM yyyy', { locale: it })}
           </CardTitle>
-          <div className="flex gap-1 sm:gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" className="text-xs h-8 sm:h-9" onClick={() => setCurrentMonth(new Date())}>
+            <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date())}>
               Oggi
             </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+            <Button variant="outline" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-3 sm:p-4 md:p-6 overflow-x-auto">
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 min-w-min">
+      <CardContent>
+        <div className="grid grid-cols-7 gap-2">
           {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map(giorno => (
-            <div key={giorno} className="text-center text-xs sm:text-sm font-semibold text-slate-600 py-1 sm:py-2 w-12 sm:w-16 md:w-20">
+            <div key={giorno} className="text-center text-sm font-semibold text-slate-600 py-2">
               {giorno}
             </div>
           ))}
 
           {/* Padding iniziale */}
           {Array.from({ length: (giorni[0]?.getDay() + 6) % 7 }).map((_, i) => (
-            <div key={`pad-${i}`} className="min-h-16 sm:min-h-20 md:min-h-24 bg-slate-50 rounded-lg w-12 sm:w-16 md:w-20"></div>
+            <div key={`pad-${i}`} className="min-h-24 bg-slate-50 rounded-lg"></div>
           ))}
 
           {/* Giorni del mese */}
@@ -87,14 +87,14 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             return (
               <div
                 key={dataKey}
-                className={`min-h-16 sm:min-h-20 md:min-h-24 p-1 sm:p-2 border rounded-lg transition-shadow w-12 sm:w-16 md:w-20 ${
+                className={`min-h-24 p-2 border rounded-lg ${
                   isToday ? 'bg-blue-50 border-blue-300' : 'bg-white border-slate-200'
-                } hover:shadow-md`}
+                } hover:shadow-md transition-shadow`}
               >
-                <div className={`text-xs sm:text-sm font-medium mb-0.5 sm:mb-1 ${isToday ? 'text-blue-700' : 'text-slate-700'}`}>
+                <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-700' : 'text-slate-700'}`}>
                   {format(giorno, 'd')}
                 </div>
-                <div className="space-y-0.5 sm:space-y-1">
+                <div className="space-y-1">
                   {prenotazioniGiorno.map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);
@@ -112,17 +112,17 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                            borderColor: spazioColor,
                            color: spazioColor
                          }}
-                         className={`text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 sm:py-1 rounded border-2 hover:opacity-80 transition-opacity cursor-pointer`}
+                         className={`text-xs px-2 py-1 rounded border-2 hover:opacity-80 transition-opacity cursor-pointer`}
                        >
-                        <div className="flex items-center gap-0.5 sm:gap-1.5 min-w-0">
+                        <div className="flex items-center gap-1.5">
                           <div
-                            className="flex-shrink-0 w-4 sm:w-5 h-4 sm:h-5 rounded-full border-2 flex items-center justify-center font-bold text-[8px] sm:text-[10px] bg-white"
+                            className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
                             style={{ borderColor: spazioColor, color: spazioColor }}
                           >
                             {spazio?.numero_spazio || '?'}
                           </div>
-                          {p.is_event && <Sparkles className="flex-shrink-0 w-2.5 sm:w-3 h-2.5 sm:h-3 text-purple-500" />}
-                          <div className={`font-medium truncate flex-1 hidden sm:block text-[10px] ${p.is_event ? 'text-purple-800' : ''}`} style={p.is_event ? {} : { color: '#1e293b' }}>
+                          {p.is_event && <Sparkles className="flex-shrink-0 w-3 h-3 text-purple-500" />}
+                          <div className={`font-medium truncate flex-1 ${p.is_event ? 'text-purple-800' : ''}`} style={p.is_event ? {} : { color: '#1e293b' }}>
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
