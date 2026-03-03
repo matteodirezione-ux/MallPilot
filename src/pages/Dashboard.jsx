@@ -483,29 +483,31 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
-                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {stats.eventStats.prossimiEventi.map((evento) => (
-                  <div 
-                    key={evento.id}
-                    className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm"
-                  >
-                    <div className="flex-1 min-w-0 mr-2">
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-slate-700">{format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}</p>
+                        <p className="text-xs text-slate-500">{format(new Date(evento.data_fine), 'dd MMM', { locale: it })}</p>
+                      </div>
+                      </div>
+                      </div>
+                      ))}
+                      {stats.eventStats.prossimiEventi.map((evento) => (
+                      <div 
+                      key={evento.id}
+                      className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm"
+                      >
+                      <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
                         {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
                       <p className="text-xs text-slate-500">
                         Prossimo
                       </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">
-                        {format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}
-                      </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                      <div className="text-right">
+                        <p className="text-xs font-medium text-slate-700">{format(new Date(evento.data_inizio), 'dd MMM', { locale: it })}</p>
+                        <p className="text-xs text-slate-500">{format(new Date(evento.data_fine), 'dd MMM', { locale: it })}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
