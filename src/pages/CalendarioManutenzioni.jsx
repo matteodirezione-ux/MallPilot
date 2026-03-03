@@ -201,7 +201,6 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       }
       setDialogOpen(false);
       setManutenzioneSelezionata(null);
-      loadData();
     } catch (err) {
       console.error(err);
       alert('Errore nel salvataggio');
