@@ -110,8 +110,8 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
   const handleToggleStatus = async (manutenzione) => {
     const nuovoStato = manutenzione.stato === 'completato' ? 'da_fare' : 'completato';
+    setManutenzioni(prev => prev.map(m => m.id === manutenzione.id ? { ...m, stato: nuovoStato } : m));
     await base44.entities.Manutenzione.update(manutenzione.id, { stato: nuovoStato });
-    loadData();
   };
 
   const generateRecurrence = (startDate, config) => {
