@@ -245,8 +245,7 @@ export default function Calendario({ centroSelezionato, user }) {
                </>
              )}
            </TabsList>
-           {!isVigilanza && (
-             <div className="flex items-center gap-6">
+           <div className="flex items-center gap-6">
                <div className="flex items-center gap-2">
                  <Checkbox
                    id="nascondi-permanenti"
@@ -268,7 +267,6 @@ export default function Calendario({ centroSelezionato, user }) {
                  </Label>
                </div>
              </div>
-             )}
              </div>
              </div>
 
