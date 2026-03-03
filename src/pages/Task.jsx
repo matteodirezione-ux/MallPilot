@@ -128,38 +128,57 @@ export default function TaskPage({ centroSelezionato, user }) {
     if (occorrenze.length > 0) await base44.entities.Task.bulkCreate(occorrenze);
   };
 
+  // Sottoscrizione real-time
+  useEffect(() => {
+    if (!user?.tipo_account) return;
+    const unsubscribe = base44.entities.Task.subscribe((event) => {
+      if (event.type === 'create') {
+        setTasks(prev => {
+          if (prev.find(t => t.id === event.id)) return prev;
+          return [...prev, event.data].sort((a, b) => {
+            if (!a.data_scadenza) return 1;
+            if (!b.data_scadenza) return -1;
+            return new Date(a.data_scadenza) - new Date(b.data_scadenza);
+          });
+        });
+      } else if (event.type === 'update') {
+        setTasks(prev => prev.map(t => t.id === event.id ? { ...t, ...event.data } : t));
+      } else if (event.type === 'delete') {
+        setTasks(prev => prev.filter(t => t.id !== event.id));
+      }
+    });
+    return () => unsubscribe();
+  }, [user?.tipo_account]);
+
   const handleSave = async (data) => {
     if (taskSelezionato?.id) {
-      // Modifica task esistente
-      await base44.entities.Task.update(taskSelezionato.id, data);
+      const updated = await base44.entities.Task.update(taskSelezionato.id, data);
+      setTasks(prev => prev.map(t => t.id === taskSelezionato.id ? { ...t, ...data } : t));
     } else if (Array.isArray(data)) {
-      // Task multipli: crea con stesso gruppo_id
       const gruppoId = `gruppo_${Date.now()}`;
       const taskConGruppo = data.map(t => ({ ...t, gruppo_id: gruppoId }));
       const saved = await Promise.all(taskConGruppo.map(t => base44.entities.Task.create(t)));
-      // Gestisci ricorrenza per ognuno
       await Promise.all(saved.map((s, i) => data[i].ricorrente ? generaTaskRicorrenti(data[i], s.id) : Promise.resolve()));
+      // I task ricorrenti figli verranno aggiunti via subscribe
     } else {
-      // Task singolo
       const saved = await base44.entities.Task.create(data);
       if (data.ricorrente) await generaTaskRicorrenti(data, saved.id);
     }
     setDialogOpen(false);
     setTaskSelezionato(null);
-    loadData();
   };
 
   const handleEdit = (task) => { setTaskSelezionato(task); setDialogOpen(true); };
   const handleDelete = async (id) => {
     if (window.confirm('Eliminare questo task?')) {
       await base44.entities.Task.delete(id);
-      loadData();
+      setTasks(prev => prev.filter(t => t.id !== id));
     }
   };
   const handleToggleStato = async (task) => {
     const nuovoStato = task.stato === 'completato' ? 'da_fare' : 'completato';
+    setTasks(prev => prev.map(t => t.id === task.id ? { ...t, stato: nuovoStato } : t));
     await base44.entities.Task.update(task.id, { stato: nuovoStato });
-    loadData();
   };
 
   const canEdit = (task) => {
