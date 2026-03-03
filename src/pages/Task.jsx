@@ -64,6 +64,7 @@ export default function TaskPage({ centroSelezionato, user }) {
         }
         // Includi tutti senza filtrare per stato
         const unici = Array.from(new Map([...assegnati, ...creati, ...taskCentri].map(t => [t.id, t])).values());
+        console.log('Task totali direttore:', unici.length, 'di cui completati:', unici.filter(t => t.stato === 'completato').length);
         setTasks(unici.sort((a, b) => {
           if (!a.data_scadenza) return 1;
           if (!b.data_scadenza) return -1;
