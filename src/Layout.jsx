@@ -83,6 +83,11 @@ export default function Layout({ children, currentPageName }) {
       
       setUser(userData);
 
+      // Redirect direttore e vigilanza alla dashboard se aprono la root
+      if ((userData.tipo_account === 'direttore' || userData.tipo_account === 'vigilanza') && location.pathname === '/') {
+        navigate(createPageUrl('Dashboard'));
+      }
+
       if (userData.tipo_account === 'proprieta') {
         const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri);
