@@ -36,6 +36,7 @@ export default function TaskPage({ centroSelezionato, user }) {
         return;
 
       } else if (user?.tipo_account === 'direttore') {
+        const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
         const allCentri = await base44.entities.CentroCommerciale.list();
         setCentri(allCentri.filter(c => centriIds.includes(c.id)));
