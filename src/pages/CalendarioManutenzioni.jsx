@@ -220,9 +220,9 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       }
 
       await base44.entities.Manutenzione.delete(manutenzioneSelezionata.id);
+      setManutenzioni(prev => prev.filter(m => m.id !== manutenzioneSelezionata.id && m.manutenzione_padre_id !== manutenzioneSelezionata.id));
       setDialogOpen(false);
       setManutenzioneSelezionata(null);
-      loadData();
     }
   };
 
