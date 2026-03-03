@@ -36,13 +36,6 @@ export default function TaskPage({ centroSelezionato, user }) {
         return;
 
       } else if (user?.tipo_account === 'direttore') {
-        const [assegnati, creati] = await Promise.all([
-          base44.entities.Task.filter({ assegnato_a_email: user.email }),
-          base44.entities.Task.filter({ assegnato_da_email: user.email }),
-        ]);
-        const unici = Array.from(new Map([...assegnati, ...creati].map(t => [t.id, t])).values());
-        setTasks(unici.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
-
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
         const allCentri = await base44.entities.CentroCommerciale.list();
