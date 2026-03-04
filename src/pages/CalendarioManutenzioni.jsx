@@ -264,7 +264,6 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             />
           </div>
         <Tabs defaultValue="calendario">
-          {({ value: tabValue } = {}) => null}
           <TabsList className="mb-4">
             <TabsTrigger value="calendario" className="gap-2">
               <Calendar className="w-4 h-4" /> Calendario
