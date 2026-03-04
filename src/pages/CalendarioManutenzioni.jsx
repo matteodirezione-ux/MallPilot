@@ -187,14 +187,13 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
         };
 
         if (formData.ricorrente) {
-          const dates = generateRecurrence(new Date(formData.data_scadenza), formData);
           const mainManutenzione = await base44.entities.Manutenzione.create(manutenzioneData);
 
-          const otherDates = dates.slice(1);
-          if (otherDates.length > 0) {
-            const manutenzioniRicorrenti = otherDates.map(date => ({
+          const futureDates = generateRecurrence(formData.data_scadenza, formData);
+          if (futureDates.length > 0) {
+            const manutenzioniRicorrenti = futureDates.map(dateStr => ({
               ...manutenzioneData,
-              data_scadenza: format(date, 'yyyy-MM-dd'),
+              data_scadenza: dateStr,
               manutenzione_padre_id: mainManutenzione.id,
               ricorrente: false
             }));
