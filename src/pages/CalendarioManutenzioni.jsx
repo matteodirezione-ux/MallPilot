@@ -270,14 +270,27 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             />
           </div>
         <Tabs defaultValue="calendario">
-          <TabsList className="mb-4">
-            <TabsTrigger value="calendario" className="gap-2">
-              <Calendar className="w-4 h-4" /> Calendario
-            </TabsTrigger>
-            <TabsTrigger value="lista" className="gap-2">
-              <ListTodo className="w-4 h-4" /> Lista
-            </TabsTrigger>
-          </TabsList>
+          {(tabCtx) => (
+            <>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="calendario" className="gap-2">
+                <Calendar className="w-4 h-4" /> Calendario
+              </TabsTrigger>
+              <TabsTrigger value="lista" className="gap-2">
+                <ListTodo className="w-4 h-4" /> Lista
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-sm font-bold text-slate-800 min-w-[48px] text-center">{annoSelezionato}</span>
+              <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={idx >= anniDisponibili.length - 1}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
 
           <TabsContent value="calendario">
             <CalendarioManutenzioniMensile
