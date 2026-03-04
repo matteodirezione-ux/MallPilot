@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Wrench, Calendar, ListTodo, Search } from 'lucide-react';
+import { Plus, Wrench, Calendar, ListTodo, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
 import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
