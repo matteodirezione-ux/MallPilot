@@ -270,8 +270,6 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             />
           </div>
         <Tabs defaultValue="calendario">
-          {(tabCtx) => (
-            <>
           <div className="flex items-center justify-between mb-4">
             <TabsList>
               <TabsTrigger value="calendario" className="gap-2">
@@ -315,11 +313,10 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
               onEdit={handleManutenzioneClick}
               onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
+              annoSelezionato={annoSelezionato}
             />
           </TabsContent>
         </Tabs>
-        </>
-      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
