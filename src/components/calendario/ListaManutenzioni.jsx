@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { format, parseISO, isPast, isToday } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const statoConfig = {
   da_fare: { label: 'Da Fare', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
