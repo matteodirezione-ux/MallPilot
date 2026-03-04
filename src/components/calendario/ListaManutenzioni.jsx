@@ -25,9 +25,12 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
           onCheckedChange={() => onToggleStatus(manutenzione)}
         />
 
-        <p className={`font-medium flex-1 min-w-0 truncate ${sConf.color}`}>
-          {manutenzione.titolo}
-        </p>
+        <div className="flex-1 min-w-0">
+          <p className={`font-medium truncate ${sConf.color}`}>{manutenzione.titolo}</p>
+          {manutenzione.descrizione && (
+            <p className="text-xs text-slate-500 truncate">{manutenzione.descrizione}</p>
+          )}
+        </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className={`text-xs px-2 py-0.5 rounded border font-medium ${sConf.bg} ${sConf.border} ${sConf.color}`}>
