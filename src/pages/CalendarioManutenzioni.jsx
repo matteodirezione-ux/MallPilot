@@ -230,6 +230,12 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     }
   };
 
+  const annoCorrente = new Date().getFullYear();
+  const [annoSelezionato, setAnnoSelezionato] = useState(annoCorrente);
+
+  const anniDisponibili = [...new Set(manutenzioni.map(m => m.data_scadenza ? parseInt(m.data_scadenza.substring(0, 4)) : null).filter(Boolean))].sort();
+  const idx = anniDisponibili.indexOf(annoSelezionato);
+
   if (!user) return null;
 
   return (
