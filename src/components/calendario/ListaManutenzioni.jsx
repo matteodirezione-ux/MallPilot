@@ -80,43 +80,53 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
     );
   }
 
-  const groupedByStatus = {
-    da_fare: [],
-    in_corso: [],
-    completato: [],
-    annullato: []
-  };
-
+  // Raggruppa per anno
+  const perAnno = {};
   manutenzioni.forEach(m => {
-    if (groupedByStatus[m.stato]) {
-      groupedByStatus[m.stato].push(m);
-    }
+    const anno = m.data_scadenza ? m.data_scadenza.substring(0, 4) : 'N/A';
+    if (!perAnno[anno]) perAnno[anno] = [];
+    perAnno[anno].push(m);
   });
 
-  return (
-    <div className="space-y-6">
-      {['da_fare', 'in_corso', 'completato'].map(status => {
-        const list = groupedByStatus[status];
-        if (list.length === 0) return null;
+  const anniOrdinati = Object.keys(perAnno).sort();
+  const labels = { da_fare: '🔴 Da Fare', in_corso: '🔵 In Corso', completato: '✅ Completato', annullato: '⚫ Annullato' };
 
-        const sConf = statoConfig[status];
-        const labels = { da_fare: '🔴 Da Fare', in_corso: '🔵 In Corso', completato: '✅ Completato' };
+  return (
+    <div className="space-y-8">
+      {anniOrdinati.map(anno => {
+        const lista = perAnno[anno];
+
+        // Per ogni anno, raggruppa per stato
+        const perStato = { da_fare: [], in_corso: [], completato: [], annullato: [] };
+        lista.forEach(m => { if (perStato[m.stato]) perStato[m.stato].push(m); });
 
         return (
-          <div key={status}>
-            <h3 className={`text-sm font-semibold ${sConf.color} mb-3 uppercase`}>
-              {labels[status]} ({list.length})
-            </h3>
-            <div className="space-y-2">
-              {list.map(m => (
-                <ManutenzioneRow
-                  key={m.id}
-                  manutenzione={m}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleStatus={onToggleStatus}
-                />
-              ))}
+          <div key={anno}>
+            <h2 className="text-base font-bold text-slate-700 mb-4 border-b pb-2">📅 {anno} ({lista.length})</h2>
+            <div className="space-y-4">
+              {['da_fare', 'in_corso', 'completato', 'annullato'].map(status => {
+                const list = perStato[status];
+                if (list.length === 0) return null;
+                const sConf = statoConfig[status];
+                return (
+                  <div key={status}>
+                    <h3 className={`text-xs font-semibold ${sConf.color} mb-2 uppercase`}>
+                      {labels[status]} ({list.length})
+                    </h3>
+                    <div className="space-y-2">
+                      {list.map(m => (
+                        <ManutenzioneRow
+                          key={m.id}
+                          manutenzione={m}
+                          onEdit={onEdit}
+                          onDelete={onDelete}
+                          onToggleStatus={onToggleStatus}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
