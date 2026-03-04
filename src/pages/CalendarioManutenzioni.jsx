@@ -114,31 +114,36 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     await base44.entities.Manutenzione.update(manutenzione.id, { stato: nuovoStato });
   };
 
-  const generateRecurrence = (startDate, config) => {
+  const generateRecurrence = (startDateStr, config) => {
+    // Parse date string as local date to avoid timezone issues
+    const [y, m, d] = startDateStr.split('-').map(Number);
+    let currentDate = new Date(y, m - 1, d);
+    
+    const endDateStr = config.ricorrenza_fine;
+    const [ey, em, ed] = endDateStr.split('-').map(Number);
+    const endDate = new Date(ey, em - 1, ed);
+
     const dates = [];
-    let currentDate = new Date(startDate);
-    const endDate = config.ricorrenza_fine ? new Date(config.ricorrenza_fine) : new Date(startDate.getFullYear() + 5, startDate.getMonth(), startDate.getDate());
+    const n = config.ricorrenza_ogni || 1;
 
-    while (currentDate <= endDate) {
-      dates.push(new Date(currentDate));
-
-      if (config.ricorrenza_tipo === 'giornaliero') {
-        currentDate = addDays(currentDate, config.ricorrenza_ogni || 1);
-      } else if (config.ricorrenza_tipo === 'settimanale') {
-        currentDate = addWeeks(currentDate, config.ricorrenza_ogni || 1);
-      } else if (config.ricorrenza_tipo === 'mensile') {
-        currentDate = addMonths(currentDate, config.ricorrenza_ogni || 1);
-      } else if (config.ricorrenza_tipo === 'annuale') {
-        currentDate = addMonths(currentDate, 12 * (config.ricorrenza_ogni || 1));
-      } else if (config.ricorrenza_tipo === 'personalizzato') {
-        if (config.ricorrenza_unita === 'giorni') {
-          currentDate = addDays(currentDate, config.ricorrenza_ogni || 1);
-        } else if (config.ricorrenza_unita === 'settimane') {
-          currentDate = addWeeks(currentDate, config.ricorrenza_ogni || 1);
-        } else if (config.ricorrenza_unita === 'mesi') {
-          currentDate = addMonths(currentDate, config.ricorrenza_ogni || 1);
-        }
+    // Avanza alla prima occorrenza successiva alla data iniziale
+    const advance = (date) => {
+      if (config.ricorrenza_tipo === 'giornaliero') return addDays(date, n);
+      if (config.ricorrenza_tipo === 'settimanale') return addWeeks(date, n);
+      if (config.ricorrenza_tipo === 'mensile') return addMonths(date, n);
+      if (config.ricorrenza_tipo === 'annuale') return addMonths(date, 12 * n);
+      if (config.ricorrenza_tipo === 'personalizzato') {
+        if (config.ricorrenza_unita === 'giorni') return addDays(date, n);
+        if (config.ricorrenza_unita === 'settimane') return addWeeks(date, n);
+        if (config.ricorrenza_unita === 'mesi') return addMonths(date, n);
       }
+      return addWeeks(date, n);
+    };
+
+    currentDate = advance(currentDate);
+    while (currentDate <= endDate) {
+      dates.push(format(currentDate, 'yyyy-MM-dd'));
+      currentDate = advance(currentDate);
     }
 
     return dates;
