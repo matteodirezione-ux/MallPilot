@@ -300,6 +300,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
               onTaskClick={handleManutenzioneClick}
               onToggleStatus={handleToggleStatus}
               onNewTask={handleNewManutenzione}
+              annoSelezionato={annoSelezionato}
             />
           </TabsContent>
 
