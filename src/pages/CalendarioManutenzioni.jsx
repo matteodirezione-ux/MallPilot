@@ -317,6 +317,8 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             />
           </TabsContent>
         </Tabs>
+        </>
+      )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
