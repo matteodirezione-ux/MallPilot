@@ -5,8 +5,14 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 
-export default function CalendarioManutenzioniMensile({ tasks, onTaskClick, onToggleStatus, onNewTask, onMonthChange }) {
+export default function CalendarioManutenzioniMensile({ tasks, onTaskClick, onToggleStatus, onNewTask, onMonthChange, annoSelezionato }) {
   const [mese, setMese] = React.useState(new Date());
+
+  React.useEffect(() => {
+    if (annoSelezionato) {
+      setMese(prev => new Date(annoSelezionato, prev.getMonth(), 1));
+    }
+  }, [annoSelezionato]);
 
   const inizioMese = startOfMonth(mese);
   const fineMese = endOfMonth(mese);
