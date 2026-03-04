@@ -71,13 +71,7 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   );
 }
 
-export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus }) {
-  const annoCorrente = new Date().getFullYear();
-  const [annoSelezionato, setAnnoSelezionato] = useState(annoCorrente);
-
-  // Anni disponibili
-  const anniDisponibili = [...new Set(manutenzioni.map(m => m.data_scadenza ? parseInt(m.data_scadenza.substring(0, 4)) : null).filter(Boolean))].sort();
-
+export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato }) {
   const lista = manutenzioni.filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)));
 
   const perStato = { da_fare: [], in_corso: [], completato: [], annullato: [] };
@@ -85,23 +79,8 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
 
   const labels = { da_fare: '🔴 Da Fare', in_corso: '🔵 In Corso', completato: '✅ Completato', annullato: '⚫ Annullato' };
 
-  const idx = anniDisponibili.indexOf(annoSelezionato);
-  const hasPrev = idx > 0;
-  const hasNext = idx < anniDisponibili.length - 1;
-
   return (
     <div>
-      {/* Selettore anno */}
-      <div className="flex items-center justify-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={!hasPrev}>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <span className="text-lg font-bold text-slate-800 min-w-[80px] text-center">{annoSelezionato}</span>
-        <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={!hasNext}>
-          <ChevronRight className="w-5 h-5" />
-        </Button>
-      </div>
-
       {lista.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
           <p>Nessuna manutenzione per il {annoSelezionato}</p>
