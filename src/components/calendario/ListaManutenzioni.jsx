@@ -72,65 +72,67 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
 }
 
 export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus }) {
-  if (manutenzioni.length === 0) {
-    return (
-      <div className="text-center py-12 text-slate-400">
-        <p>Nessuna manutenzione da visualizzare</p>
-      </div>
-    );
-  }
+  const annoCorrente = new Date().getFullYear();
+  const [annoSelezionato, setAnnoSelezionato] = useState(annoCorrente);
 
-  // Raggruppa per anno
-  const perAnno = {};
-  manutenzioni.forEach(m => {
-    const anno = m.data_scadenza ? m.data_scadenza.substring(0, 4) : 'N/A';
-    if (!perAnno[anno]) perAnno[anno] = [];
-    perAnno[anno].push(m);
-  });
+  // Anni disponibili
+  const anniDisponibili = [...new Set(manutenzioni.map(m => m.data_scadenza ? parseInt(m.data_scadenza.substring(0, 4)) : null).filter(Boolean))].sort();
 
-  const anniOrdinati = Object.keys(perAnno).sort();
+  const lista = manutenzioni.filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)));
+
+  const perStato = { da_fare: [], in_corso: [], completato: [], annullato: [] };
+  lista.forEach(m => { if (perStato[m.stato]) perStato[m.stato].push(m); });
+
   const labels = { da_fare: '🔴 Da Fare', in_corso: '🔵 In Corso', completato: '✅ Completato', annullato: '⚫ Annullato' };
 
+  const idx = anniDisponibili.indexOf(annoSelezionato);
+  const hasPrev = idx > 0;
+  const hasNext = idx < anniDisponibili.length - 1;
+
   return (
-    <div className="space-y-8">
-      {anniOrdinati.map(anno => {
-        const lista = perAnno[anno];
+    <div>
+      {/* Selettore anno */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={!hasPrev}>
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+        <span className="text-lg font-bold text-slate-800 min-w-[80px] text-center">{annoSelezionato}</span>
+        <Button variant="ghost" size="icon" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={!hasNext}>
+          <ChevronRight className="w-5 h-5" />
+        </Button>
+      </div>
 
-        // Per ogni anno, raggruppa per stato
-        const perStato = { da_fare: [], in_corso: [], completato: [], annullato: [] };
-        lista.forEach(m => { if (perStato[m.stato]) perStato[m.stato].push(m); });
-
-        return (
-          <div key={anno}>
-            <h2 className="text-base font-bold text-slate-700 mb-4 border-b pb-2">📅 {anno} ({lista.length})</h2>
-            <div className="space-y-4">
-              {['da_fare', 'in_corso', 'completato', 'annullato'].map(status => {
-                const list = perStato[status];
-                if (list.length === 0) return null;
-                const sConf = statoConfig[status];
-                return (
-                  <div key={status}>
-                    <h3 className={`text-xs font-semibold ${sConf.color} mb-2 uppercase`}>
-                      {labels[status]} ({list.length})
-                    </h3>
-                    <div className="space-y-2">
-                      {list.map(m => (
-                        <ManutenzioneRow
-                          key={m.id}
-                          manutenzione={m}
-                          onEdit={onEdit}
-                          onDelete={onDelete}
-                          onToggleStatus={onToggleStatus}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })}
+      {lista.length === 0 ? (
+        <div className="text-center py-12 text-slate-400">
+          <p>Nessuna manutenzione per il {annoSelezionato}</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {['da_fare', 'in_corso', 'completato', 'annullato'].map(status => {
+            const list = perStato[status];
+            if (list.length === 0) return null;
+            const sConf = statoConfig[status];
+            return (
+              <div key={status}>
+                <h3 className={`text-xs font-semibold ${sConf.color} mb-2 uppercase`}>
+                  {labels[status]} ({list.length})
+                </h3>
+                <div className="space-y-2">
+                  {list.map(m => (
+                    <ManutenzioneRow
+                      key={m.id}
+                      manutenzione={m}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      onToggleStatus={onToggleStatus}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
