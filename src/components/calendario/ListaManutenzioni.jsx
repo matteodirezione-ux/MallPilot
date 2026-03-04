@@ -18,52 +18,35 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   const isScaduto = isPast(dataScad) && !isToday(dataScad) && manutenzione.stato !== 'completato' && manutenzione.stato !== 'annullato';
 
   return (
-    <div className={`border rounded-lg p-3 ${sConf.bg} ${sConf.border} transition-colors`}>
-      <div className="flex items-start gap-3">
+    <div className={`border rounded-lg px-3 py-2 ${sConf.bg} ${sConf.border} transition-colors`}>
+      <div className="flex items-center gap-3">
         <Checkbox
           checked={manutenzione.stato === 'completato'}
           onCheckedChange={() => onToggleStatus(manutenzione)}
-          className="mt-1"
         />
 
-        <div className="flex-1 min-w-0">
-          <p className={`font-medium ${sConf.color}`}>
-            {manutenzione.titolo}
-          </p>
+        <p className={`font-medium flex-1 min-w-0 truncate ${sConf.color}`}>
+          {manutenzione.titolo}
+        </p>
 
-          {manutenzione.descrizione && (
-            <p className="text-sm text-slate-600 mt-1">{manutenzione.descrizione}</p>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className={`text-xs px-2 py-0.5 rounded border font-medium ${sConf.bg} ${sConf.border} ${sConf.color}`}>
+            {sConf.label}
+          </span>
+          <span className={`text-xs font-medium ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
+            {format(dataScad, 'd MMM yyyy', { locale: it })}
+          </span>
+          {manutenzione.assegnato_a_nome && (
+            <span className="text-xs text-slate-500 hidden sm:inline">→ {manutenzione.assegnato_a_nome}</span>
           )}
-
-          <div className="flex items-center gap-2 mt-2 flex-wrap">
-            <span className={`text-xs px-2 py-1 rounded ${sConf.bg} ${sConf.border} border font-medium ${sConf.color}`}>
-              {sConf.label}
-            </span>
-            <span className={`text-xs font-medium ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
-              {format(dataScad, 'd MMM yyyy', { locale: it })}
-            </span>
-            {manutenzione.assegnato_a_nome && (
-              <span className="text-xs text-slate-500">→ {manutenzione.assegnato_a_nome}</span>
-            )}
-          </div>
         </div>
 
         <div className="flex gap-1 flex-shrink-0">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-slate-400 hover:text-blue-600"
-            onClick={() => onEdit(manutenzione)}
-          >
-            <Pencil className="w-4 h-4" />
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(manutenzione)}>
+            <Pencil className="w-3.5 h-3.5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-slate-400 hover:text-red-600"
-            onClick={() => onDelete(manutenzione.id)}
-          >
-            <Trash2 className="w-4 h-4" />
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(manutenzione.id)}>
+            <Trash2 className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
