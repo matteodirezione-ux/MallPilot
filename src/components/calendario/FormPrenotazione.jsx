@@ -217,8 +217,8 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     onSave(dataToSave);
   };
 
-  const rowClass = "flex items-start gap-2";
-  const labelClass = "w-28 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
+  const rowClass = "flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2";
+  const labelClass = "sm:w-28 sm:flex-shrink-0 text-sm font-medium text-slate-700 sm:pt-2";
   const fieldClass = "flex-1 min-w-0";
 
   const DatePicker = ({ value, onChange, placeholder }) => {
