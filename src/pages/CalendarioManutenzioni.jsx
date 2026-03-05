@@ -239,20 +239,21 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   if (!user) return null;
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-3 md:p-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Wrench className="w-6 h-6 text-blue-600" />
-            Calendario Manutenzioni
+          <h1 className="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <Wrench className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
+            <span className="hidden sm:inline">Calendario Manutenzioni</span>
+            <span className="sm:hidden">Manutenzioni</span>
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-xs md:text-sm text-slate-500 mt-0.5">
             {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
           </p>
         </div>
-        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" />
-          Nuova Manutenzione
+        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700" size="sm">
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline ml-1">Nuova Manutenzione</span>
         </Button>
       </div>
 
