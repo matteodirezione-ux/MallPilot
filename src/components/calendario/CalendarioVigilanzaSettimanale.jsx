@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
