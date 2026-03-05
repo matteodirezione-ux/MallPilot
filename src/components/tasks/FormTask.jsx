@@ -40,6 +40,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
   const [centriSelezionati, setCentriSelezionati] = useState([]);
   const [assegnatiSelezionati, setAssegnatiSelezionati] = useState([]);
   const [modalitaAssegnazione, setModalitaAssegnazione] = useState('singola');
+  const [uploadingFoto, setUploadingFoto] = useState(false);
 
   const isProprieta = user?.tipo_account === 'proprieta';
 
