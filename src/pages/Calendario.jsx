@@ -212,48 +212,48 @@ export default function Calendario({ centroSelezionato, user }) {
        </div>
 
       <Tabs defaultValue="mensile" className="w-full">
-         <div className="mb-4 flex flex-col gap-3">
+         <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
            <div className="relative">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
              <Input
-               placeholder="Cerca per cliente, evento o spazio..."
+               placeholder="Cerca..."
                value={searchText}
                onChange={(e) => setSearchText(e.target.value)}
                className="pl-9"
              />
            </div>
-           <div className="flex flex-wrap items-center justify-between gap-3">
-           <TabsList>
-             <TabsTrigger value="mensile" className="flex items-center gap-2">
-               <CalendarIcon className="w-4 h-4" />
-               Mensile
+           <div className="flex flex-wrap items-center justify-between gap-2">
+           <TabsList className="h-8">
+             <TabsTrigger value="mensile" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+               <CalendarIcon className="w-3.5 h-3.5" />
+               <span className="hidden sm:inline">Mensile</span>
              </TabsTrigger>
-             <TabsTrigger value="settimanale" className="flex items-center gap-2">
-               <CalendarDays className="w-4 h-4" />
-               Settimanale
+             <TabsTrigger value="settimanale" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+               <CalendarDays className="w-3.5 h-3.5" />
+               <span className="hidden sm:inline">Settimanale</span>
              </TabsTrigger>
              {!isVigilanza && (
                <>
-                 <TabsTrigger value="lista" className="flex items-center gap-2">
-                   <List className="w-4 h-4" />
+                 <TabsTrigger value="lista" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                   <List className="w-3.5 h-3.5" />
                    Lista
                  </TabsTrigger>
-                 <TabsTrigger value="disponibilita" className="flex items-center gap-2">
-                   <LayoutGrid className="w-4 h-4" />
-                   Disponibilità
+                 <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                   <LayoutGrid className="w-3.5 h-3.5" />
+                   <span className="hidden sm:inline">Disponibilità</span>
                  </TabsTrigger>
                </>
              )}
            </TabsList>
-           <div className="flex items-center gap-6">
+           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                <div className="flex items-center gap-2">
                  <Checkbox
                    id="nascondi-permanenti"
                    checked={nascondiPermanenti}
                    onCheckedChange={setNascondiPermanenti}
                  />
-                 <Label htmlFor="nascondi-permanenti" className="text-sm text-slate-600 cursor-pointer">
-                   Nascondi prenotazioni permanenti (≥ 300 giorni)
+                 <Label htmlFor="nascondi-permanenti" className="text-xs text-slate-600 cursor-pointer">
+                   Nascondi permanenti
                  </Label>
                </div>
                <div className="flex items-center gap-2">
@@ -262,8 +262,8 @@ export default function Calendario({ centroSelezionato, user }) {
                    checked={soloEventi}
                    onCheckedChange={setSoloEventi}
                  />
-                 <Label htmlFor="solo-eventi" className="text-sm text-slate-600 cursor-pointer">
-                   Mostra solo eventi
+                 <Label htmlFor="solo-eventi" className="text-xs text-slate-600 cursor-pointer">
+                   Solo eventi
                  </Label>
                </div>
              </div>
