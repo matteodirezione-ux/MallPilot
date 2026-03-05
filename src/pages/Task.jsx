@@ -52,10 +52,12 @@ export default function TaskPage({ centroSelezionato, user }) {
         const nomeDirettore = direttoreRecord.length > 0 ? direttoreRecord[0].full_name : user.full_name;
         setDirettori([{ email: user.email, full_name: nomeDirettore }]);
 
-        // Carica tutti i task dei centri assegnati + quelli assegnati/creati dal direttore
-        const [assegnati, creati] = await Promise.all([
+        // Carica tutti i task dei centri assegnati + quelli assegnati/creati dal direttore + quelli delle vigilanze
+        const emailsVigilanzaList = allVigilanze.filter(v => emailsVigilanza.includes(v.email)).map(v => v.email);
+        const [assegnati, creati, ...taskVigilanze] = await Promise.all([
           base44.entities.Task.filter({ assegnato_a_email: user.email }),
           base44.entities.Task.filter({ assegnato_da_email: user.email }),
+          ...emailsVigilanzaList.map(email => base44.entities.Task.filter({ assegnato_a_email: email })),
         ]);
         let taskCentri = [];
         if (centriIds.length > 0) {
@@ -63,7 +65,7 @@ export default function TaskPage({ centroSelezionato, user }) {
           taskCentri = taskPerCentro.flat();
         }
         // Includi tutti senza filtrare per stato
-        const unici = Array.from(new Map([...assegnati, ...creati, ...taskCentri].map(t => [t.id, t])).values());
+        const unici = Array.from(new Map([...assegnati, ...creati, ...taskCentri, ...taskVigilanze.flat()].map(t => [t.id, t])).values());
         console.log('Task totali direttore:', unici.length, 'di cui completati:', unici.filter(t => t.stato === 'completato').length);
         setTasks(unici.sort((a, b) => {
           if (!a.data_scadenza) return 1;
