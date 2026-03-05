@@ -356,13 +356,20 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
 
           {/* Prezzi */}
           {!isVigilanza && (
-            <div className={rowClass}>
-              <label className={labelClass}>Prezzo *</label>
-              <div className={`${fieldClass} flex gap-2`}>
-                <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="Totale (€)" className="h-8 text-sm" />
-                <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="Mensile (€)" className="h-8 text-sm" />
+            <>
+              <div className={rowClass}>
+                <label className={labelClass}>Prezzo totale *</label>
+                <div className={fieldClass}>
+                  <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="€" className="h-8 text-sm" />
+                </div>
               </div>
-            </div>
+              <div className={rowClass}>
+                <label className={labelClass}>Prezzo mensile</label>
+                <div className={fieldClass}>
+                  <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="€" className="h-8 text-sm" />
+                </div>
+              </div>
+            </>
           )}
 
           {/* Materiale */}
