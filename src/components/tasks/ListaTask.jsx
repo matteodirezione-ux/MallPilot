@@ -37,7 +37,100 @@ function getScadenzaColor(data, stato) {
   return 'text-slate-600';
 }
 
+function DettaglioTask({ task, open, onClose }) {
+  const pConf = prioritaConfig[task.priorita] || prioritaConfig.media;
+  const sConf = statoConfig[task.stato] || statoConfig.da_fare;
+  const [fotoIngrandita, setFotoIngrandita] = useState(null);
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="pr-6">{task.titolo}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Badge className={pConf.class}>{pConf.label}</Badge>
+            <Badge className={sConf.class}>{sConf.label}</Badge>
+            {task.ricorrente && <Badge className="bg-purple-100 text-purple-700">Ricorrente</Badge>}
+          </div>
+
+          {task.descrizione && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Descrizione</p>
+              <p className="text-sm text-slate-700">{task.descrizione}</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            {task.data_scadenza && (
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-0.5">Scadenza</p>
+                <p className="text-slate-700">{format(parseISO(task.data_scadenza), 'd MMM yyyy', { locale: it })}</p>
+              </div>
+            )}
+            {task.assegnato_a_nome && (
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-0.5">Assegnato a</p>
+                <p className="text-slate-700">{task.assegnato_a_nome}</p>
+              </div>
+            )}
+            {task.assegnato_da_nome && (
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-0.5">Assegnato da</p>
+                <p className="text-slate-700">{task.assegnato_da_nome}</p>
+              </div>
+            )}
+          </div>
+
+          {task.note && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase mb-1">Note</p>
+              <p className="text-sm text-slate-700">{task.note}</p>
+            </div>
+          )}
+
+          {task.foto_urls?.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase mb-2">Foto ({task.foto_urls.length})</p>
+              <div className="grid grid-cols-3 gap-2">
+                {task.foto_urls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt={`Foto ${i + 1}`}
+                    className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity border"
+                    onClick={() => setFotoIngrandita(url)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(!task.foto_urls || task.foto_urls.length === 0) && (
+            <div className="flex items-center gap-2 text-slate-400 text-sm">
+              <ImageOff className="w-4 h-4" />
+              Nessuna foto allegata
+            </div>
+          )}
+        </div>
+      </DialogContent>
+
+      {/* Foto ingrandita */}
+      {fotoIngrandita && (
+        <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onClick={() => setFotoIngrandita(null)}>
+          <button className="absolute top-4 right-4 text-white" onClick={() => setFotoIngrandita(null)}>
+            <X className="w-8 h-8" />
+          </button>
+          <img src={fotoIngrandita} alt="Foto ingrandita" className="max-w-full max-h-full rounded-lg object-contain" />
+        </div>
+      )}
+    </Dialog>
+  );
+}
+
 function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) {
+  const [showDettaglio, setShowDettaglio] = useState(false);
   const pConf = prioritaConfig[task.priorita] || prioritaConfig.media;
   const sConf = statoConfig[task.stato] || statoConfig.da_fare;
   const StatoIcon = sConf.icon;
