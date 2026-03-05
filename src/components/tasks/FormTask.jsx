@@ -108,10 +108,11 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Se stiamo modificando un task esistente, non sovrascrivere chi l'ha assegnato
     const base = {
       ...form,
-      assegnato_da_email: user?.email,
-      assegnato_da_nome: user?.full_name,
+      assegnato_da_email: task?.assegnato_da_email || user?.email,
+      assegnato_da_nome: task?.assegnato_da_nome || user?.full_name,
     };
     if (!base.ricorrente) {
       delete base.ricorrenza_tipo;
