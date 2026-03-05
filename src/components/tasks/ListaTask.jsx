@@ -187,18 +187,25 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
         </div>
       </div>
 
-      {canEdit && (
-        <div className="flex gap-1 flex-shrink-0">
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(task)}>
-            <Pencil className="w-3.5 h-3.5" />
-          </Button>
-          {canDelete && (
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(task.id)}>
-              <Trash2 className="w-3.5 h-3.5" />
+      <div className="flex gap-1 flex-shrink-0">
+        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-700" onClick={() => setShowDettaglio(true)} title="Dettagli">
+          <Eye className="w-3.5 h-3.5" />
+        </Button>
+        {canEdit && (
+          <>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(task)}>
+              <Pencil className="w-3.5 h-3.5" />
             </Button>
-          )}
-        </div>
-      )}
+            {canDelete && (
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(task.id)}>
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            )}
+          </>
+        )}
+      </div>
+
+      <DettaglioTask task={task} open={showDettaglio} onClose={() => setShowDettaglio(false)} />
     </div>
   );
 }
