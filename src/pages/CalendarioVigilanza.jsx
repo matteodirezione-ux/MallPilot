@@ -25,7 +25,7 @@ export default function CalendarioVigilanza({ centroSelezionato: centroFromLayou
     const [prenotaz, spaziData, clientiData] = await Promise.all([
       base44.entities.Prenotazione.filter({ centro_id: centro.id }),
       base44.entities.SpazioExpo.filter({ centro_id: centro.id }),
-      base44.entities.Cliente.filter({ centro_id: centro.id }),
+      base44.entities.Cliente.list(),
     ]);
     setPrenotazioni(prenotaz);
     setSpazi(spaziData);
