@@ -138,9 +138,9 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
   const isScaduto = task.data_scadenza && isPast(parseISO(task.data_scadenza)) && !isToday(parseISO(task.data_scadenza)) && task.stato !== 'completato' && task.stato !== 'annullato';
 
   return (
-    <div className={`flex items-start gap-3 p-3 rounded-lg border ${isScaduto ? 'bg-red-50 border-red-300' : 'bg-white'} hover:shadow-sm transition-shadow ${task.stato === 'completato' ? 'opacity-60' : ''}`}>
+    <div className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${isScaduto ? 'bg-red-50 border-red-300' : 'bg-white'} hover:shadow-sm transition-shadow ${task.stato === 'completato' ? 'opacity-60' : ''}`} onClick={() => setShowDettaglio(true)}>
       <button
-        onClick={() => onToggleStato(task)}
+        onClick={(e) => { e.stopPropagation(); onToggleStato(task); }}
         className="mt-0.5 flex-shrink-0"
         title="Cambia stato"
       >
