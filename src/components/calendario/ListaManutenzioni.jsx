@@ -59,7 +59,7 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
           onCheckedChange={() => onToggleStatus(manutenzione)}
           className="flex-shrink-0"
         />
-        <span className={`font-medium text-sm flex-shrink-0 w-48 truncate ${sConf.color}`}>{manutenzione.titolo}</span>
+        <span className={`font-medium text-sm flex-shrink-0 w-96 truncate ${sConf.color}`}>{manutenzione.titolo}</span>
         {manutenzione.descrizione && (
           <span className="text-xs text-slate-500 flex-1 truncate">{manutenzione.descrizione}</span>
         )}
