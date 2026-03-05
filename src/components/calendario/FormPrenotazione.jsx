@@ -221,6 +221,40 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const labelClass = "w-28 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
   const fieldClass = "flex-1 min-w-0";
 
+  const DatePicker = ({ value, onChange, placeholder }) => {
+    const [open, setOpen] = useState(false);
+    const selected = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
+    return (
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="h-8 w-full flex items-center gap-2 px-3 rounded-md border border-input bg-background text-sm hover:bg-accent transition-colors"
+          >
+            <CalendarIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <span className={value ? 'text-slate-800' : 'text-slate-400'}>
+              {value ? format(selected, 'dd/MM/yyyy') : (placeholder || 'Seleziona data')}
+            </span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={selected}
+            onSelect={(date) => {
+              if (date) {
+                onChange(format(date, 'yyyy-MM-dd'));
+                setOpen(false);
+              }
+            }}
+            locale={it}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   // Spazio selector condiviso
   const SpazioSelector = () => (
     <div className={rowClass}>
