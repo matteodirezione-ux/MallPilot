@@ -19,16 +19,14 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
 
   return (
     <div className={`border rounded-lg px-3 py-2.5 ${sConf.bg} ${sConf.border} transition-colors`}>
-      {/* Layout mobile: due righe */}
-      <div className="flex items-start gap-2.5">
+      {/* Mobile */}
+      <div className="flex items-start gap-2.5 md:hidden">
         <Checkbox
           checked={manutenzione.stato === 'completato'}
           onCheckedChange={() => onToggleStatus(manutenzione)}
           className="mt-0.5 flex-shrink-0"
         />
-
         <div className="flex-1 min-w-0">
-          {/* Riga 1: titolo + bottoni */}
           <div className="flex items-start justify-between gap-2">
             <p className={`font-medium text-sm leading-snug ${sConf.color}`}>{manutenzione.titolo}</p>
             <div className="flex gap-0.5 flex-shrink-0 -mt-0.5">
@@ -40,13 +38,9 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
               </Button>
             </div>
           </div>
-
-          {/* Riga 2: descrizione */}
           {manutenzione.descrizione && (
             <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{manutenzione.descrizione}</p>
           )}
-
-          {/* Riga 3: data + assegnato */}
           <div className="flex flex-wrap items-center gap-2 mt-1.5">
             <span className={`text-xs font-semibold ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
               📅 {format(dataScad, 'd MMM yyyy', { locale: it })}
@@ -55,6 +49,34 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
               <span className="text-xs text-slate-500">→ {manutenzione.assegnato_a_nome}</span>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Desktop: tutto in riga */}
+      <div className="hidden md:flex items-center gap-3">
+        <Checkbox
+          checked={manutenzione.stato === 'completato'}
+          onCheckedChange={() => onToggleStatus(manutenzione)}
+          className="flex-shrink-0"
+        />
+        <span className={`font-medium text-sm flex-shrink-0 w-48 truncate ${sConf.color}`}>{manutenzione.titolo}</span>
+        {manutenzione.descrizione && (
+          <span className="text-xs text-slate-500 flex-1 truncate">{manutenzione.descrizione}</span>
+        )}
+        {!manutenzione.descrizione && <span className="flex-1" />}
+        <span className={`text-xs font-semibold flex-shrink-0 ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
+          📅 {format(dataScad, 'd MMM yyyy', { locale: it })}
+        </span>
+        {manutenzione.assegnato_a_nome && (
+          <span className="text-xs text-slate-500 flex-shrink-0 w-32 truncate">→ {manutenzione.assegnato_a_nome}</span>
+        )}
+        <div className="flex gap-0.5 flex-shrink-0">
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(manutenzione)}>
+            <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(manutenzione)}>
+            <Trash2 className="w-3.5 h-3.5" />
+          </Button>
         </div>
       </div>
     </div>
