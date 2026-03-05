@@ -187,10 +187,7 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
         </div>
       </div>
 
-      <div className="flex gap-1 flex-shrink-0">
-        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-700" onClick={() => setShowDettaglio(true)} title="Dettagli">
-          <Eye className="w-3.5 h-3.5" />
-        </Button>
+      <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
         {canEdit && (
           <>
             <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(task)}>
