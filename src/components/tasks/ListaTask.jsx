@@ -202,7 +202,9 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
         )}
       </div>
 
-      <DettaglioTask task={task} open={showDettaglio} onClose={() => setShowDettaglio(false)} />
+      <div onClick={e => e.stopPropagation()}>
+        <DettaglioTask task={task} open={showDettaglio} onClose={() => setShowDettaglio(false)} />
+      </div>
     </div>
   );
 }
