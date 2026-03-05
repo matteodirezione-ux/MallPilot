@@ -7,10 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, AlertTriangle, Zap, Sparkles, Building2, Plus } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { X, AlertTriangle, Zap, Sparkles, Building2, Plus, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
-import { isWithinInterval } from 'date-fns';
+import { isWithinInterval, format, parse } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
