@@ -31,6 +31,7 @@ const defaultForm = {
   ricorrenza_ogni: 1,
   ricorrenza_unita: 'settimane',
   ricorrenza_fine: '',
+  foto_urls: [],
   note: '',
 };
 
