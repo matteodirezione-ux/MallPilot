@@ -173,11 +173,11 @@ export default function Calendario({ centroSelezionato, user }) {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-3 md:p-8">
+      <div className="flex items-center justify-between mb-4 md:mb-8">
          <div>
-           <h1 className="text-3xl font-bold text-slate-800 mb-2">Calendario Expo</h1>
-           <p className="text-slate-600">{centroSelezionato?.nome}</p>
+           <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2">Calendario Expo</h1>
+           <p className="text-xs md:text-base text-slate-600">{centroSelezionato?.nome}</p>
          </div>
          {!isVigilanza && (
            <Dialog open={dialogOpen} onOpenChange={(open) => {
@@ -185,9 +185,9 @@ export default function Calendario({ centroSelezionato, user }) {
              if (!open) setEditingPrenotazione(null);
            }}>
              <DialogTrigger asChild>
-               <Button className="bg-blue-600 hover:bg-blue-700">
-                 <Plus className="w-4 h-4 mr-2" />
-                 Nuova Prenotazione
+               <Button className="bg-blue-600 hover:bg-blue-700" size="sm">
+                 <Plus className="w-4 h-4" />
+                 <span className="hidden sm:inline ml-1">Nuova Prenotazione</span>
                </Button>
              </DialogTrigger>
              <DialogContent className="max-w-2xl">
