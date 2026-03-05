@@ -211,20 +211,31 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (manutenzioneArg) => {
+    const target = manutenzioneArg || manutenzioneSelezionata;
+    if (!target) return;
     if (window.confirm('Eliminare questa manutenzione?')) {
-      // Se è una manutenzione padre ricorrente, elimina anche tutte le figlie
-      if (manutenzioneSelezionata.ricorrente) {
+      // Elimina tutte le occorrenze ricorrenti figlie (se è il padre)
+      if (target.ricorrente) {
         const allManutenzioni = await base44.entities.Manutenzione.list();
-        const manutenzioniCollegate = allManutenzioni.filter(m => m.manutenzione_padre_id === manutenzioneSelezionata.id);
-
-        for (const m of manutenzioniCollegate) {
+        const figlie = allManutenzioni.filter(m => m.manutenzione_padre_id === target.id);
+        for (const m of figlie) {
           await base44.entities.Manutenzione.delete(m.id);
         }
       }
-
-      await base44.entities.Manutenzione.delete(manutenzioneSelezionata.id);
-      setManutenzioni(prev => prev.filter(m => m.id !== manutenzioneSelezionata.id && m.manutenzione_padre_id !== manutenzioneSelezionata.id));
+      // Se è una figlia, elimina anche il padre e tutte le altre figlie
+      if (target.manutenzione_padre_id) {
+        const allManutenzioni = await base44.entities.Manutenzione.list();
+        const sorelle = allManutenzioni.filter(m => m.manutenzione_padre_id === target.manutenzione_padre_id && m.id !== target.id);
+        for (const m of sorelle) {
+          await base44.entities.Manutenzione.delete(m.id);
+        }
+        await base44.entities.Manutenzione.delete(target.manutenzione_padre_id);
+        setManutenzioni(prev => prev.filter(m => m.id !== target.id && m.id !== target.manutenzione_padre_id && m.manutenzione_padre_id !== target.manutenzione_padre_id));
+      } else {
+        setManutenzioni(prev => prev.filter(m => m.id !== target.id && m.manutenzione_padre_id !== target.id));
+      }
+      await base44.entities.Manutenzione.delete(target.id);
       setDialogOpen(false);
       setManutenzioneSelezionata(null);
     }
