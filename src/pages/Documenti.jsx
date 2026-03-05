@@ -235,7 +235,7 @@ export default function Documenti({ centroSelezionato }) {
   };
 
   const prenotazioniSenzaContratto = prenotazioni.filter(p => 
-    !p.contratto_generato && p.stato !== 'cancellata'
+    !p.contratto_generato && p.stato !== 'cancellata' && !p.is_event
   );
 
   const getTipoIcon = (tipo) => {
