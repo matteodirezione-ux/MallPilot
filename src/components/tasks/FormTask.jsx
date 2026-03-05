@@ -60,6 +60,24 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }));
 
+  const handleFotoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingFoto(true);
+    const nuoveUrls = [];
+    for (const file of files) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      nuoveUrls.push(file_url);
+    }
+    set('foto_urls', [...(form.foto_urls || []), ...nuoveUrls]);
+    setUploadingFoto(false);
+    e.target.value = '';
+  };
+
+  const handleRemoveFoto = (url) => {
+    set('foto_urls', (form.foto_urls || []).filter(u => u !== url));
+  };
+
   const assegnatari = React.useMemo(() => {
     const list = [];
     if (isProprieta) {
