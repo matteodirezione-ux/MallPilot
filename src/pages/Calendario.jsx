@@ -190,7 +190,7 @@ export default function Calendario({ centroSelezionato, user }) {
                  <span className="hidden sm:inline ml-1">Nuova Prenotazione</span>
                </Button>
              </DialogTrigger>
-             <DialogContent className="max-w-2xl">
+             <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                <DialogHeader>
                  <DialogTitle>
                    {editingPrenotazione ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
