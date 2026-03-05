@@ -1,12 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
 export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, isVigilanza }) {
+  const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+
   const giorni = useMemo(() => {
     const inizio = startOfWeek(currentWeek, { weekStartsOn: 1 });
     const fine = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -113,12 +116,12 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                       return (
                         <div
                            key={p.id}
-                           onClick={() => onEdit && onEdit(p)}
+                           onClick={() => isVigilanza ? setSelectedPrenotazione({ prenotazione: p, spazio, cliente }) : (onEdit && onEdit(p))}
                            style={{
                              backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
                              borderColor: spazioColor,
                            }}
-                           className={`text-xs px-2 py-1.5 rounded border-l-4 hover:opacity-80 transition-opacity ${onEdit ? 'cursor-pointer' : ''}`}
+                           className={`text-xs px-2 py-1.5 rounded border-l-4 hover:opacity-80 transition-opacity cursor-pointer`}
                          >
                           <div className="flex items-center gap-1 mb-0.5">
                             <span
@@ -141,9 +144,103 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
             );
           })}
         </div>
-
-
       </CardContent>
+
+      {selectedPrenotazione && (
+        <Dialog open={!!selectedPrenotazione} onOpenChange={() => setSelectedPrenotazione(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Dettaglio Prenotazione</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div className="flex items-start gap-3">
+                <div
+                  className="w-10 h-10 rounded-full border-2 flex items-center justify-center font-bold text-sm flex-shrink-0 bg-white"
+                  style={{ borderColor: selectedPrenotazione.spazio?.colore || '#3b82f6', color: selectedPrenotazione.spazio?.colore || '#3b82f6' }}
+                >
+                  {selectedPrenotazione.spazio?.numero_spazio || '?'}
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800">
+                    {selectedPrenotazione.prenotazione.is_event ? (selectedPrenotazione.prenotazione.nome_evento || 'Evento') : (selectedPrenotazione.cliente?.ragione_sociale || 'Cliente')}
+                  </p>
+                  <p className="text-sm text-slate-500">{selectedPrenotazione.spazio?.nome || `Spazio ${selectedPrenotazione.spazio?.numero_spazio}`}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                <CalendarDays className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">Periodo</p>
+                  <p className="text-sm font-semibold text-slate-800">
+                    {format(new Date(selectedPrenotazione.prenotazione.data_inizio), 'd MMMM yyyy', { locale: it })}
+                    {' → '}
+                    {format(new Date(selectedPrenotazione.prenotazione.data_fine), 'd MMMM yyyy', { locale: it })}
+                  </p>
+                </div>
+              </div>
+
+              {!selectedPrenotazione.prenotazione.is_event && selectedPrenotazione.cliente && (
+                selectedPrenotazione.cliente.referente_nome || selectedPrenotazione.cliente.referente_telefono || selectedPrenotazione.cliente.referente_email
+              ) && (
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <User className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-xs text-slate-500 font-medium">Referente</p>
+                    {selectedPrenotazione.cliente.referente_nome && <p className="text-sm font-semibold text-slate-800">{selectedPrenotazione.cliente.referente_nome}</p>}
+                    {selectedPrenotazione.cliente.referente_telefono && (
+                      <a href={`tel:${selectedPrenotazione.cliente.referente_telefono}`} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                        <Phone className="w-3.5 h-3.5" />{selectedPrenotazione.cliente.referente_telefono}
+                      </a>
+                    )}
+                    {selectedPrenotazione.cliente.referente_email && (
+                      <a href={`mailto:${selectedPrenotazione.cliente.referente_email}`} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                        <Mail className="w-3.5 h-3.5" />{selectedPrenotazione.cliente.referente_email}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {selectedPrenotazione.spazio?.piantina_url && (
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium mb-1">Posizione</p>
+                    <img src={selectedPrenotazione.spazio.piantina_url} alt="Piantina" className="max-h-48 rounded-lg object-contain" />
+                  </div>
+                </div>
+              )}
+              {!selectedPrenotazione.spazio?.piantina_url && selectedPrenotazione.spazio?.descrizione && (
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">Posizione</p>
+                    <p className="text-sm text-slate-700">{selectedPrenotazione.spazio.descrizione}</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedPrenotazione.prenotazione.necessita_elettricita && (
+                <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <Zap className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                  <p className="text-sm font-semibold text-yellow-800">Necessita di elettricità</p>
+                </div>
+              )}
+
+              {selectedPrenotazione.prenotazione.note && (
+                <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <FileText className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium">Note</p>
+                    <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }
