@@ -146,6 +146,28 @@ export default function CalendarioVigilanzaMensile({ prenotazioni, spazi, client
                   </div>
                 </div>
 
+                {!selectedPrenotazione.prenotazione.is_event && selectedPrenotazione.cliente && (
+                  selectedPrenotazione.cliente.referente_nome || selectedPrenotazione.cliente.referente_telefono || selectedPrenotazione.cliente.referente_email
+                ) && (
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <User className="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-xs text-slate-500 font-medium">Referente</p>
+                      {selectedPrenotazione.cliente.referente_nome && <p className="text-sm font-semibold text-slate-800">{selectedPrenotazione.cliente.referente_nome}</p>}
+                      {selectedPrenotazione.cliente.referente_telefono && (
+                        <a href={`tel:${selectedPrenotazione.cliente.referente_telefono}`} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                          <Phone className="w-3.5 h-3.5" />{selectedPrenotazione.cliente.referente_telefono}
+                        </a>
+                      )}
+                      {selectedPrenotazione.cliente.referente_email && (
+                        <a href={`mailto:${selectedPrenotazione.cliente.referente_email}`} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                          <Mail className="w-3.5 h-3.5" />{selectedPrenotazione.cliente.referente_email}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {selectedPrenotazione.spazio?.piantina_url && (
                   <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
                     <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
