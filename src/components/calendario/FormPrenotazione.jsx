@@ -344,13 +344,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           <div className={rowClass}>
             <label className={labelClass}>Inizio *</label>
             <div className={fieldClass}>
-              <Input type="date" value={formData.data_inizio} onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })} className="h-8 text-sm" />
+              <Input type="date" value={formData.data_inizio} onChange={(e) => { const v = e.target.value; if (v && v.length === 10) setFormData(prev => ({ ...prev, data_inizio: v, data_fine: prev.data_fine || v })); }} className="h-8 text-sm" />
             </div>
           </div>
           <div className={rowClass}>
             <label className={labelClass}>Fine *</label>
             <div className={fieldClass}>
-              <Input type="date" value={formData.data_fine} onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })} className="h-8 text-sm" />
+              <Input type="date" value={formData.data_fine} onChange={(e) => { const v = e.target.value; if (v && v.length === 10) setFormData(prev => ({ ...prev, data_fine: v })); }} className="h-8 text-sm" />
             </div>
           </div>
 
