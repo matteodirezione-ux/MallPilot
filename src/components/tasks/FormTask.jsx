@@ -356,6 +356,38 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             </div>
           )}
 
+          {/* Foto */}
+          <div className={rowClass}>
+            <label className={labelClass}>Foto</label>
+            <div className={fieldClass}>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {(form.foto_urls || []).map((url, i) => (
+                  <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-slate-200 group">
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveFoto(url)}
+                      className="absolute top-0.5 right-0.5 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <XIcon className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+                <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer hover:border-blue-400 transition-colors">
+                  {uploadingFoto ? (
+                    <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                  ) : (
+                    <>
+                      <ImagePlus className="w-5 h-5 text-slate-400" />
+                      <span className="text-xs text-slate-400 mt-0.5">Aggiungi</span>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} disabled={uploadingFoto} />
+                </label>
+              </div>
+            </div>
+          </div>
+
           <div className={rowClass}>
             <label className={labelClass}>Note</label>
             <div className={fieldClass}>
