@@ -344,7 +344,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           <div className={rowClass}>
             <label className={labelClass}>Periodo *</label>
             <div className={`${fieldClass} flex gap-2`}>
-              <Input type="date" value={formData.data_inizio} onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value })} className="h-8 text-sm flex-1" />
+              <Input type="date" value={formData.data_inizio} onChange={(e) => setFormData({ ...formData, data_inizio: e.target.value, data_fine: formData.data_fine || e.target.value })} className="h-8 text-sm flex-1" />
               <span className="pt-1.5 text-slate-400 text-sm">→</span>
               <Input type="date" value={formData.data_fine} onChange={(e) => setFormData({ ...formData, data_fine: e.target.value })} className="h-8 text-sm flex-1" />
             </div>
