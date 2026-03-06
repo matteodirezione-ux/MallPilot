@@ -160,7 +160,7 @@ export default function Layout({ children, currentPageName }) {
   const navigationItems = [
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Calendario Manutenzioni', page: 'CalendarioManutenzioni', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Controlli & Attività', page: 'CalendarioManutenzioni', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
