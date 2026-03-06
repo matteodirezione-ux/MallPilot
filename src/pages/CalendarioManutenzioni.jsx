@@ -255,7 +255,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
         <div>
           <h1 className="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
             <Wrench className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
-            <span className="hidden sm:inline">Calendario Manutenzioni</span>
+            <span className="hidden sm:inline">Controlli & Attività</span>
             <span className="sm:hidden">Manutenzioni</span>
           </h1>
           <p className="text-xs md:text-sm text-slate-500 mt-0.5">
