@@ -37,6 +37,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
       loadSpazi();
+      setMappaUrl(centroSelezionato?.piantina_url || null);
     }
   }, [centroSelezionato]);
 
