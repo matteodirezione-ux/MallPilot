@@ -176,8 +176,6 @@ export default function Calendario({ centroSelezionato, user }) {
     );
   }
 
-  const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
-
   return (
     <div className="p-3 md:p-8">
       {/* Header */}
