@@ -240,10 +240,17 @@ export default function SpaziExpo({ centroSelezionato, user }) {
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Spazi Expo</h1>
           <p className="text-slate-600">{centroSelezionato?.nome}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
-        }}>
+        <div className="flex items-center gap-2">
+          {/* Pulsante Mappa */}
+          <Button onClick={() => setMappaOpen(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Map className="w-4 h-4 mr-2" />
+            Mappa
+          </Button>
+
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) resetForm();
+          }}>
           {user?.tipo_account !== 'vigilanza' && (
           <DialogTrigger asChild>
             <Button className="bg-blue-600 hover:bg-blue-700">
