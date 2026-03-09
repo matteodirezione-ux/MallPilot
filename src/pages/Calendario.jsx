@@ -24,6 +24,9 @@ export default function Calendario({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrenotazione, setEditingPrenotazione] = useState(null);
+  const [mappaOpen, setMappaOpen] = useState(false);
+  const [uploadingMappa, setUploadingMappa] = useState(false);
+  const isDirettore = user?.tipo_account === 'direttore';
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
