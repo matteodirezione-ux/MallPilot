@@ -61,20 +61,44 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   );
 }
 
-export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato }) {
-  const lista = manutenzioni
-    .filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)))
-    .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
-
-  // Raggruppa per giorno
+function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus }) {
   const perGiorno = {};
   lista.forEach(m => {
     const giorno = m.data_scadenza.slice(0, 10);
     if (!perGiorno[giorno]) perGiorno[giorno] = [];
     perGiorno[giorno].push(m);
   });
-
   const giorni = Object.keys(perGiorno).sort();
+
+  return (
+    <div className="space-y-4">
+      {giorni.map(giorno => {
+        const data = parseISO(giorno);
+        const oggi = isToday(data);
+        return (
+          <div key={giorno}>
+            <h4 className={`text-xs font-bold mb-2 uppercase tracking-wide ${oggi ? 'text-blue-600' : 'text-slate-500'}`}>
+              {oggi ? '📌 Oggi — ' : ''}{format(data, 'EEEE d MMMM yyyy', { locale: it })}
+            </h4>
+            <div className="space-y-2">
+              {perGiorno[giorno].map(m => (
+                <ManutenzioneRow key={m.id} manutenzione={m} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato }) {
+  const lista = manutenzioni
+    .filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)))
+    .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
+
+  const attivi = lista.filter(m => m.stato !== 'completato' && m.stato !== 'annullato');
+  const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato');
 
   return (
     <div>
@@ -83,29 +107,23 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
           <p>Nessuna attività per il {annoSelezionato}</p>
         </div>
       ) : (
-        <div className="space-y-5">
-          {giorni.map(giorno => {
-            const data = parseISO(giorno);
-            const oggi = isToday(data);
-            return (
-              <div key={giorno}>
-                <h3 className={`text-xs font-bold mb-2 uppercase tracking-wide ${oggi ? 'text-blue-600' : 'text-slate-500'}`}>
-                  {oggi ? '📌 Oggi — ' : ''}{format(data, 'EEEE d MMMM yyyy', { locale: it })}
-                </h3>
-                <div className="space-y-2">
-                  {perGiorno[giorno].map(m => (
-                    <ManutenzioneRow
-                      key={m.id}
-                      manutenzione={m}
-                      onEdit={onEdit}
-                      onDelete={onDelete}
-                      onToggleStatus={onToggleStatus}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+        <div className="space-y-8">
+          {attivi.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                🔴 Da fare / In corso <span className="text-xs font-normal text-slate-400">({attivi.length})</span>
+              </h3>
+              <GruppoPerGiorno lista={attivi} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+            </div>
+          )}
+          {completati.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-slate-500 mb-3 flex items-center gap-2">
+                ✅ Completati / Annullati <span className="text-xs font-normal text-slate-400">({completati.length})</span>
+              </h3>
+              <GruppoPerGiorno lista={completati} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+            </div>
+          )}
         </div>
       )}
     </div>
