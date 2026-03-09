@@ -182,7 +182,64 @@ export default function Calendario({ centroSelezionato, user }) {
            <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2">Calendario Expo</h1>
            <p className="text-xs md:text-base text-slate-600">{centroSelezionato?.nome}</p>
          </div>
-         {!isVigilanza && (
+         <div className="flex items-center gap-2">
+           {/* Pulsante Mappa */}
+           <Button
+             onClick={() => setMappaOpen(true)}
+             className="bg-orange-500 hover:bg-orange-600 text-white"
+             size="sm"
+           >
+             <Map className="w-4 h-4" />
+             <span className="hidden sm:inline ml-1">Mappa</span>
+           </Button>
+
+           {/* Dialog Mappa */}
+           <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
+             <DialogContent className="max-w-3xl w-full">
+               <DialogHeader>
+                 <DialogTitle>Mappa del Centro — {centroSelezionato?.nome}</DialogTitle>
+               </DialogHeader>
+               <div className="space-y-4">
+                 {centroSelezionato?.piantina_url ? (
+                   <img
+                     src={centroSelezionato.piantina_url}
+                     alt="Mappa del centro"
+                     className="w-full rounded-lg border border-slate-200 object-contain max-h-[60vh]"
+                   />
+                 ) : (
+                   <div className="flex items-center justify-center h-48 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-400">
+                     Nessuna mappa caricata
+                   </div>
+                 )}
+                 {isDirettore && (
+                   <div>
+                     <label className="block text-sm font-medium text-slate-700 mb-1">
+                       {centroSelezionato?.piantina_url ? 'Sostituisci mappa' : 'Carica mappa'}
+                     </label>
+                     <input
+                       type="file"
+                       accept="image/*"
+                       disabled={uploadingMappa}
+                       onChange={async (e) => {
+                         const file = e.target.files[0];
+                         if (!file) return;
+                         setUploadingMappa(true);
+                         const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                         await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+                         centroSelezionato.piantina_url = file_url;
+                         setUploadingMappa(false);
+                         toast.success('Mappa caricata');
+                       }}
+                       className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                     />
+                     {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
+                   </div>
+                 )}
+               </div>
+             </DialogContent>
+           </Dialog>
+
+           {!isVigilanza && (
            <Dialog open={dialogOpen} onOpenChange={(open) => {
              setDialogOpen(open);
              if (!open) setEditingPrenotazione(null);
