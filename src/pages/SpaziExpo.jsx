@@ -443,7 +443,49 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+        </div>
+
+      {/* Dialog Mappa Centro */}
+      <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
+        <DialogContent className="max-w-3xl md:max-w-5xl w-full">
+          <DialogHeader>
+            <DialogTitle>Mappa del Centro - {centroSelezionato?.nome}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {mappaUrl ? (
+              <img src={mappaUrl} alt="Mappa del centro" className="w-full rounded-lg border border-slate-200 object-contain max-h-[60vh]" />
+            ) : (
+              <div className="flex items-center justify-center h-48 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-400">
+                Nessuna mappa caricata
+              </div>
+            )}
+            {isDirettore && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {mappaUrl ? 'Sostituisci mappa' : 'Carica mappa'}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingMappa}
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setUploadingMappa(true);
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+                    setMappaUrl(file_url);
+                    setUploadingMappa(false);
+                    toast.success('Mappa caricata');
+                  }}
+                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                />
+                {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {spazi.length === 0 ? (
         <Card className="bg-white border-slate-200">
