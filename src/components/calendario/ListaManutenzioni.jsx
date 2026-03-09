@@ -62,32 +62,38 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
 }
 
 export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato }) {
-  const lista = manutenzioni.filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)));
+  const lista = manutenzioni
+    .filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)))
+    .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
 
-  const perStato = { da_fare: [], in_corso: [], completato: [], annullato: [] };
-  lista.forEach(m => { if (perStato[m.stato]) perStato[m.stato].push(m); });
+  // Raggruppa per giorno
+  const perGiorno = {};
+  lista.forEach(m => {
+    const giorno = m.data_scadenza.slice(0, 10);
+    if (!perGiorno[giorno]) perGiorno[giorno] = [];
+    perGiorno[giorno].push(m);
+  });
 
-  const labels = { da_fare: '🔴 Da Fare', in_corso: '🔵 In Corso', completato: '✅ Completato', annullato: '⚫ Annullato' };
+  const giorni = Object.keys(perGiorno).sort();
 
   return (
     <div>
       {lista.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
-          <p>Nessuna manutenzione per il {annoSelezionato}</p>
+          <p>Nessuna attività per il {annoSelezionato}</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          {['da_fare', 'in_corso', 'completato', 'annullato'].map(status => {
-            const list = perStato[status];
-            if (list.length === 0) return null;
-            const sConf = statoConfig[status];
+        <div className="space-y-5">
+          {giorni.map(giorno => {
+            const data = parseISO(giorno);
+            const oggi = isToday(data);
             return (
-              <div key={status}>
-                <h3 className={`text-xs font-semibold ${sConf.color} mb-2 uppercase`}>
-                  {labels[status]} ({list.length})
+              <div key={giorno}>
+                <h3 className={`text-xs font-bold mb-2 uppercase tracking-wide ${oggi ? 'text-blue-600' : 'text-slate-500'}`}>
+                  {oggi ? '📌 Oggi — ' : ''}{format(data, 'EEEE d MMMM yyyy', { locale: it })}
                 </h3>
                 <div className="space-y-2">
-                  {list.map(m => (
+                  {perGiorno[giorno].map(m => (
                     <ManutenzioneRow
                       key={m.id}
                       manutenzione={m}
