@@ -6,7 +6,7 @@ import CalendarioMensile from '../components/calendario/CalendarioMensile';
 import CalendarioSettimanale from '../components/calendario/CalendarioSettimanale';
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
-import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink, Search } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink, Search, Map, Upload, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
