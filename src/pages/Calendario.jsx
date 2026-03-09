@@ -60,6 +60,7 @@ export default function Calendario({ centroSelezionato, user }) {
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
       loadData();
+      setMappaUrl(centroSelezionato?.piantina_url || null);
     }
   }, [centroSelezionato]);
 
