@@ -268,8 +268,9 @@ export default function Calendario({ centroSelezionato, user }) {
                />
              </DialogContent>
            </Dialog>
-         )}
-       </div>
+           )}
+           </div>
+           </div>
 
       <Tabs defaultValue="mensile" className="w-full">
          <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
