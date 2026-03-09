@@ -444,6 +444,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
           </DialogContent>
         </Dialog>
         </div>
+      </div>
 
       {/* Dialog Mappa Centro */}
       <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
