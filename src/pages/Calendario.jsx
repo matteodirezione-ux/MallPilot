@@ -232,7 +232,7 @@ export default function Calendario({ centroSelezionato, user }) {
 
       {/* Dialog Mappa */}
       <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
-        <DialogContent className="max-w-3xl w-full">
+        <DialogContent className="max-w-3xl md:max-w-5xl w-full">
           <DialogHeader>
             <DialogTitle>Mappa del Centro - {centroSelezionato?.nome}</DialogTitle>
           </DialogHeader>
