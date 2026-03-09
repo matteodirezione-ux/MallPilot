@@ -175,207 +175,211 @@ export default function Calendario({ centroSelezionato, user }) {
     );
   }
 
+  const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
+
   return (
     <div className="p-3 md:p-8">
+      {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-8">
-         <div>
-           <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2">Calendario Expo</h1>
-           <p className="text-xs md:text-base text-slate-600">{centroSelezionato?.nome}</p>
-         </div>
-         <div className="flex items-center gap-2">
-           {/* Pulsante Mappa */}
-           <Button
-             onClick={() => setMappaOpen(true)}
-             className="bg-orange-500 hover:bg-orange-600 text-white"
-             size="sm"
-           >
-             <Map className="w-4 h-4" />
-             <span className="hidden sm:inline ml-1">Mappa</span>
-           </Button>
+        <div>
+          <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2">Calendario Expo</h1>
+          <p className="text-xs md:text-base text-slate-600">{centroSelezionato?.nome}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Pulsante Mappa */}
+          <Button
+            onClick={() => setMappaOpen(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+            size="sm"
+          >
+            <Map className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">Mappa</span>
+          </Button>
 
-           {/* Dialog Mappa */}
-           <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
-             <DialogContent className="max-w-3xl w-full">
-               <DialogHeader>
-                 <DialogTitle>Mappa del Centro — {centroSelezionato?.nome}</DialogTitle>
-               </DialogHeader>
-               <div className="space-y-4">
-                 {centroSelezionato?.piantina_url ? (
-                   <img
-                     src={centroSelezionato.piantina_url}
-                     alt="Mappa del centro"
-                     className="w-full rounded-lg border border-slate-200 object-contain max-h-[60vh]"
-                   />
-                 ) : (
-                   <div className="flex items-center justify-center h-48 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-400">
-                     Nessuna mappa caricata
-                   </div>
-                 )}
-                 {isDirettore && (
-                   <div>
-                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                       {centroSelezionato?.piantina_url ? 'Sostituisci mappa' : 'Carica mappa'}
-                     </label>
-                     <input
-                       type="file"
-                       accept="image/*"
-                       disabled={uploadingMappa}
-                       onChange={async (e) => {
-                         const file = e.target.files[0];
-                         if (!file) return;
-                         setUploadingMappa(true);
-                         const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                         await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
-                         centroSelezionato.piantina_url = file_url;
-                         setUploadingMappa(false);
-                         toast.success('Mappa caricata');
-                       }}
-                       className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
-                     />
-                     {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
-                   </div>
-                 )}
-               </div>
-             </DialogContent>
-           </Dialog>
+          {/* Pulsante Nuova Prenotazione */}
+          {!isVigilanza && (
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) setEditingPrenotazione(null);
+            }}>
+              <DialogTrigger asChild>
+                <Button className="bg-blue-600 hover:bg-blue-700" size="sm">
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline ml-1">Nuova Prenotazione</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingPrenotazione ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
+                  </DialogTitle>
+                </DialogHeader>
+                <FormPrenotazione
+                  prenotazione={editingPrenotazione}
+                  spazi={spazi}
+                  clienti={clienti}
+                  onSave={handleSavePrenotazione}
+                  onCancel={() => {
+                    setDialogOpen(false);
+                    setEditingPrenotazione(null);
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+      </div>
 
-           {!isVigilanza && (
-           <Dialog open={dialogOpen} onOpenChange={(open) => {
-             setDialogOpen(open);
-             if (!open) setEditingPrenotazione(null);
-           }}>
-             <DialogTrigger asChild>
-               <Button className="bg-blue-600 hover:bg-blue-700" size="sm">
-                 <Plus className="w-4 h-4" />
-                 <span className="hidden sm:inline ml-1">Nuova Prenotazione</span>
-               </Button>
-             </DialogTrigger>
-             <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-               <DialogHeader>
-                 <DialogTitle>
-                   {editingPrenotazione ? 'Modifica Prenotazione' : 'Nuova Prenotazione'}
-                 </DialogTitle>
-               </DialogHeader>
-               <FormPrenotazione
-                 prenotazione={editingPrenotazione}
-                 spazi={spazi}
-                 clienti={clienti}
-                 onSave={handleSavePrenotazione}
-                 onCancel={() => {
-                   setDialogOpen(false);
-                   setEditingPrenotazione(null);
-                 }}
-               />
-             </DialogContent>
-           </Dialog>
-           )}
-           </div>
-           </div>
+      {/* Dialog Mappa */}
+      <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
+        <DialogContent className="max-w-3xl w-full">
+          <DialogHeader>
+            <DialogTitle>Mappa del Centro - {centroSelezionato?.nome}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {mappaUrl ? (
+              <img
+                src={mappaUrl}
+                alt="Mappa del centro"
+                className="w-full rounded-lg border border-slate-200 object-contain max-h-[60vh]"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-48 bg-slate-50 rounded-lg border border-dashed border-slate-300 text-slate-400">
+                Nessuna mappa caricata
+              </div>
+            )}
+            {isDirettore && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {mappaUrl ? 'Sostituisci mappa' : 'Carica mappa'}
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingMappa}
+                  onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    setUploadingMappa(true);
+                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                    await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+                    setMappaUrl(file_url);
+                    setUploadingMappa(false);
+                    toast.success('Mappa caricata');
+                  }}
+                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
+                />
+                {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
+      {/* Tabs */}
       <Tabs defaultValue="mensile" className="w-full">
-         <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
-           <div className="relative">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-             <Input
-               placeholder="Cerca..."
-               value={searchText}
-               onChange={(e) => setSearchText(e.target.value)}
-               className="pl-9"
-             />
-           </div>
-           <div className="flex flex-wrap items-center justify-between gap-2">
-           <TabsList className="h-8">
-             <TabsTrigger value="mensile" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
-               <CalendarIcon className="w-3.5 h-3.5" />
-               <span className="hidden sm:inline">Mensile</span>
-             </TabsTrigger>
-             <TabsTrigger value="settimanale" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
-               <CalendarDays className="w-3.5 h-3.5" />
-               <span className="hidden sm:inline">Settimanale</span>
-             </TabsTrigger>
-             {!isVigilanza && (
-               <>
-                 <TabsTrigger value="lista" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
-                   <List className="w-3.5 h-3.5" />
-                   Lista
-                 </TabsTrigger>
-                 <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
-                   <LayoutGrid className="w-3.5 h-3.5" />
-                   <span className="hidden sm:inline">Disponibilità</span>
-                 </TabsTrigger>
-               </>
-             )}
-           </TabsList>
-           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-               <div className="flex items-center gap-2">
-                 <Checkbox
-                   id="nascondi-permanenti"
-                   checked={nascondiPermanenti}
-                   onCheckedChange={setNascondiPermanenti}
-                 />
-                 <Label htmlFor="nascondi-permanenti" className="text-xs text-slate-600 cursor-pointer">
-                   Nascondi permanenti
-                 </Label>
-               </div>
-               <div className="flex items-center gap-2">
-                 <Checkbox
-                   id="solo-eventi"
-                   checked={soloEventi}
-                   onCheckedChange={setSoloEventi}
-                 />
-                 <Label htmlFor="solo-eventi" className="text-xs text-slate-600 cursor-pointer">
-                   Solo eventi
-                 </Label>
-               </div>
-             </div>
-             </div>
-             </div>
+        <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Cerca..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <TabsList className="h-8">
+              <TabsTrigger value="mensile" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                <CalendarIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Mensile</span>
+              </TabsTrigger>
+              <TabsTrigger value="settimanale" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                <CalendarDays className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Settimanale</span>
+              </TabsTrigger>
+              {!isVigilanza && (
+                <>
+                  <TabsTrigger value="lista" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                    <List className="w-3.5 h-3.5" />
+                    Lista
+                  </TabsTrigger>
+                  <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Disponibilita</span>
+                  </TabsTrigger>
+                </>
+              )}
+            </TabsList>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="nascondi-permanenti"
+                  checked={nascondiPermanenti}
+                  onCheckedChange={setNascondiPermanenti}
+                />
+                <Label htmlFor="nascondi-permanenti" className="text-xs text-slate-600 cursor-pointer">
+                  Nascondi permanenti
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="solo-eventi"
+                  checked={soloEventi}
+                  onCheckedChange={setSoloEventi}
+                />
+                <Label htmlFor="solo-eventi" className="text-xs text-slate-600 cursor-pointer">
+                  Solo eventi
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
 
-             <TabsContent value="mensile">
-           <CalendarioMensile
-             prenotazioni={prenotazioniFiltrate}
-             spazi={spazi}
-             clienti={clienti}
-             currentMonth={currentMonth}
-             setCurrentMonth={setCurrentMonth}
-             onEdit={isVigilanza ? null : handleEdit}
-             onDelete={isVigilanza ? null : handleDelete}
-             isVigilanza={isVigilanza}
-           />
-         </TabsContent>
+        <TabsContent value="mensile">
+          <CalendarioMensile
+            prenotazioni={prenotazioniFiltrate}
+            spazi={spazi}
+            clienti={clienti}
+            currentMonth={currentMonth}
+            setCurrentMonth={setCurrentMonth}
+            onEdit={isVigilanza ? null : handleEdit}
+            onDelete={isVigilanza ? null : handleDelete}
+            isVigilanza={isVigilanza}
+          />
+        </TabsContent>
 
-         <TabsContent value="settimanale">
-           <CalendarioSettimanale
-             prenotazioni={prenotazioniFiltrate}
-             spazi={spazi}
-             clienti={clienti}
-             currentWeek={currentWeek}
-             setCurrentWeek={setCurrentWeek}
-             onEdit={isVigilanza ? null : handleEdit}
-             isVigilanza={isVigilanza}
-           />
-         </TabsContent>
+        <TabsContent value="settimanale">
+          <CalendarioSettimanale
+            prenotazioni={prenotazioniFiltrate}
+            spazi={spazi}
+            clienti={clienti}
+            currentWeek={currentWeek}
+            setCurrentWeek={setCurrentWeek}
+            onEdit={isVigilanza ? null : handleEdit}
+            isVigilanza={isVigilanza}
+          />
+        </TabsContent>
 
         {!isVigilanza && (
-           <>
-             <TabsContent value="lista">
-               <ListaPrenotazioni
-                 prenotazioni={prenotazioniFiltrate}
-                 spazi={spazi}
-                 clienti={clienti}
-                 onEdit={handleEdit}
-                 onDelete={handleDelete}
-               />
-             </TabsContent>
-
-             <TabsContent value="disponibilita">
-               <DisponibilitaSpazi
-                 prenotazioni={prenotazioniFiltrate}
-                 spazi={spazi}
-               />
-             </TabsContent>
-           </>
-         )}
+          <>
+            <TabsContent value="lista">
+              <ListaPrenotazioni
+                prenotazioni={prenotazioniFiltrate}
+                spazi={spazi}
+                clienti={clienti}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </TabsContent>
+            <TabsContent value="disponibilita">
+              <DisponibilitaSpazi
+                prenotazioni={prenotazioniFiltrate}
+                spazi={spazi}
+              />
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </div>
   );
