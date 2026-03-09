@@ -26,6 +26,7 @@ export default function Calendario({ centroSelezionato, user }) {
   const [editingPrenotazione, setEditingPrenotazione] = useState(null);
   const [mappaOpen, setMappaOpen] = useState(false);
   const [uploadingMappa, setUploadingMappa] = useState(false);
+  const [mappaUrl, setMappaUrl] = useState(null);
   const isDirettore = user?.tipo_account === 'direttore';
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
