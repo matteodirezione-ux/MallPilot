@@ -258,7 +258,7 @@ export default function TaskPage({ centroSelezionato, user }) {
     return true;
   });
 
-  const canCreate = user?.tipo_account !== 'vigilanza';
+  const canCreate = true;
   if (!user) return null;
 
   return (
