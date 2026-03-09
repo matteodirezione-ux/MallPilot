@@ -16,6 +16,10 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingSpazio, setEditingSpazio] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [mappaOpen, setMappaOpen] = useState(false);
+  const [uploadingMappa, setUploadingMappa] = useState(false);
+  const [mappaUrl, setMappaUrl] = useState(null);
+  const isDirettore = user?.tipo_account === 'direttore';
 
   const [formData, setFormData] = useState({
     centro_id: '',
