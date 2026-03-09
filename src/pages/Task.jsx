@@ -30,8 +30,29 @@ export default function TaskPage({ centroSelezionato, user }) {
     setLoading(true);
     try {
       if (user?.tipo_account === 'vigilanza') {
-        const assegnati = await base44.entities.Task.filter({ assegnato_a_email: user.email });
-        setTasks(assegnati.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
+        const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
+        const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
+        const allCentri = await base44.entities.CentroCommerciale.list();
+        setCentri(allCentri.filter(c => centriIds.includes(c.id)));
+
+        // Carica direttori e vigilanze degli stessi centri per poter assegnare task
+        if (centriIds.length > 0) {
+          const assegnazioniCentri = await Promise.all(centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id })));
+          const emails = [...new Set(assegnazioniCentri.flat().map(a => a.user_email))];
+          const [allDirettori, allVigilanze] = await Promise.all([
+            base44.entities.Direttore.list(),
+            base44.entities.Vigilanza.list(),
+          ]);
+          setDirettori(allDirettori.filter(d => emails.includes(d.email)));
+          setVigilanze(allVigilanze.filter(v => emails.includes(v.email)));
+        }
+
+        const [assegnati, creati] = await Promise.all([
+          base44.entities.Task.filter({ assegnato_a_email: user.email }),
+          base44.entities.Task.filter({ assegnato_da_email: user.email }),
+        ]);
+        const unici = Array.from(new Map([...assegnati, ...creati].map(t => [t.id, t])).values());
+        setTasks(unici.sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza)));
         setLoading(false);
         return;
 
