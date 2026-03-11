@@ -195,8 +195,13 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 bg-black/40 z-40" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden">
+      <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-slate-200">
