@@ -211,9 +211,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="flex items-center justify-between">
               {sidebarOpen && (
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
-                    <Building2 className="w-5 h-5 text-white" />
-                  </div>
+                  <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
                   <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
                   {user?.tipo_account === 'vigilanza' && (
                     <NotificaBell user={user} />
