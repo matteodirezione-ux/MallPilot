@@ -209,7 +209,7 @@ export default function Layout({ children, currentPageName }) {
           </div>
 
           {/* Centro Selector */}
-          {centroSelezionato && sidebarOpen && centri.length > 0 && (
+          {centroSelezionato && centri.length > 0 && (
             <div className="p-4 border-b border-slate-200">
               <div className="relative">
                 <select
