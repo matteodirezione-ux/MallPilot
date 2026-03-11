@@ -22,10 +22,10 @@ export default function Layout({ children, currentPageName }) {
   const [user, setUser] = useState(null);
   const [displayName, setDisplayName] = useState(null);
   const sidebarOpen = true;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [centri, setCentri] = useState([]);
   const [centroSelezionato, setCentroSelezionato] = useState(null);
   const [loading, setLoading] = useState(true);
-  // sidebar always open
 
   useEffect(() => {
     loadUserAndCentri();
