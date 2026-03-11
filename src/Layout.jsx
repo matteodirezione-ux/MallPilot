@@ -214,7 +214,7 @@ export default function Layout({ children, currentPageName }) {
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
-                  <span className="font-bold text-lg text-slate-800">MallSpace</span>
+                  <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
                   {user?.tipo_account === 'vigilanza' && (
                     <NotificaBell user={user} />
                   )}
@@ -340,7 +340,7 @@ export default function Layout({ children, currentPageName }) {
             {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </Button>
           <div className="ml-3">
-            <h1 className="font-bold text-slate-800">MallSpace</h1>
+            <h1 className="font-bold text-slate-800">Mall Pilot</h1>
           </div>
         </div>
         <div className="min-h-screen pt-16 md:pt-0">
