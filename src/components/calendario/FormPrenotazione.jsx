@@ -124,7 +124,9 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     setFormData({ ...formData, spazi_ids: formData.spazi_ids.filter(id => id !== spazioId) });
   };
 
-  const spaziDisponibili = spazi.filter(s => !formData.spazi_ids.includes(s.id));
+  const spaziDisponibili = spazi
+    .filter(s => !formData.spazi_ids.includes(s.id))
+    .sort((a, b) => (a.numero_spazio || '').localeCompare(b.numero_spazio || '', 'it', { numeric: true }));
 
   const handleCreateNewCliente = async () => {
     try {
