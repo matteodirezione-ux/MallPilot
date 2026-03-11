@@ -11,9 +11,7 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ListTodo,
-  Menu,
-  X
+  ListTodo
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
@@ -201,7 +199,7 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden transition-transform duration-200 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-slate-200">
