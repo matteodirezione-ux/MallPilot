@@ -21,7 +21,7 @@ export default function Layout({ children, currentPageName }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
   const [displayName, setDisplayName] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const sidebarOpen = true;
   const [centri, setCentri] = useState([]);
   const [centroSelezionato, setCentroSelezionato] = useState(null);
   const [loading, setLoading] = useState(true);
