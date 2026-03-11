@@ -312,6 +312,9 @@ export default function Layout({ children, currentPageName }) {
       <main className="md:ml-64 ml-0">
         {/* Mobile Header */}
         <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-slate-200 z-30 h-16 flex items-center px-4">
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg hover:bg-slate-100">
+            <Menu className="w-5 h-5 text-slate-600" />
+          </button>
           <div className="ml-3">
             <h1 className="font-bold text-slate-800">Mall Pilot</h1>
           </div>
