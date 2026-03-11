@@ -180,6 +180,21 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                     {selectedPrenotazione.prenotazione.is_event ? (selectedPrenotazione.prenotazione.nome_evento || 'Evento') : (selectedPrenotazione.cliente?.ragione_sociale || 'Cliente')}
                   </p>
                   <p className="text-sm text-slate-500">{selectedPrenotazione.spazio?.nome || `Spazio ${selectedPrenotazione.spazio?.numero_spazio}`}</p>
+                  {selectedPrenotazione.prenotazione.spazi_ids && selectedPrenotazione.prenotazione.spazi_ids.filter(id => id !== selectedPrenotazione.prenotazione.spazio_id).length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <span className="text-xs text-slate-400">Spazi aggiuntivi:</span>
+                      {selectedPrenotazione.prenotazione.spazi_ids.filter(id => id !== selectedPrenotazione.prenotazione.spazio_id).map(id => {
+                        const s = getSpazioById(id);
+                        if (!s) return null;
+                        const sc = s.colore || '#3b82f6';
+                        return (
+                          <span key={id} className="text-xs px-1.5 py-0.5 rounded border font-medium" style={{ borderColor: sc, color: sc, backgroundColor: `${sc}15` }}>
+                            {s.numero_spazio}{s.nome ? ` · ${s.nome}` : ''}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
 
