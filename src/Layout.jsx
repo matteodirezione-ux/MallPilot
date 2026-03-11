@@ -260,7 +260,7 @@ export default function Layout({ children, currentPageName }) {
                     }`}
                   >
                     <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                    {sidebarOpen && <span>{item.name}</span>}
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}
