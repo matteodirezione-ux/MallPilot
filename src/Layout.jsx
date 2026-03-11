@@ -9,8 +9,6 @@ import {
   Users, 
   FileText, 
   Settings,
-  Menu,
-  X,
   LogOut,
   ChevronDown,
   ListTodo
