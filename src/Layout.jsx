@@ -11,7 +11,9 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  ListTodo
+  ListTodo,
+  Menu,
+  X
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
