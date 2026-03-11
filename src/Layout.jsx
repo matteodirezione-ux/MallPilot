@@ -192,38 +192,19 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/30 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 transition-all duration-300 z-50 
-        ${sidebarOpen ? 'w-64' : 'w-0 md:w-20'} overflow-hidden`}>
+      <aside className="fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
-              {sidebarOpen && (
-                <div className="flex items-center gap-2">
-                  <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
-                  <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
-                  {user?.tipo_account === 'vigilanza' && (
-                    <NotificaBell user={user} />
-                  )}
-                </div>
+              <div className="flex items-center gap-2">
+                <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
+                <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
+              </div>
+              {user?.tipo_account === 'vigilanza' && (
+                <NotificaBell user={user} />
               )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="text-slate-600"
-              >
-                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </Button>
             </div>
           </div>
 
