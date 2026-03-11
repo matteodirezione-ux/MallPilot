@@ -135,6 +135,21 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                           <div className={`truncate font-medium ${p.is_event ? 'text-purple-800' : 'text-slate-700'}`}>
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
+                          {/* Spazi aggiuntivi */}
+                          {p.spazi_ids && p.spazi_ids.filter(id => id !== p.spazio_id).length > 0 && (
+                            <div className="flex flex-wrap gap-0.5 mt-1">
+                              {p.spazi_ids.filter(id => id !== p.spazio_id).map(id => {
+                                const s = getSpazioById(id);
+                                if (!s) return null;
+                                const sc = s.colore || '#3b82f6';
+                                return (
+                                  <span key={id} className="text-[9px] px-1 py-0.5 rounded bg-white border font-medium" style={{ borderColor: sc, color: sc }}>
+                                    +{s.numero_spazio}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
