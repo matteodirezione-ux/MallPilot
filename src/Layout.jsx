@@ -215,6 +215,9 @@ export default function Layout({ children, currentPageName }) {
                     <Building2 className="w-5 h-5 text-white" />
                   </div>
                   <span className="font-bold text-lg text-slate-800">MallSpace</span>
+                  {user?.tipo_account === 'vigilanza' && (
+                    <NotificaBell user={user} />
+                  )}
                 </div>
               )}
               <Button
