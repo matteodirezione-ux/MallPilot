@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ListTodo
 } from 'lucide-react';
+import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
 
 export default function Layout({ children, currentPageName }) {
