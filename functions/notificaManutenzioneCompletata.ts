@@ -28,13 +28,13 @@ Deno.serve(async (req) => {
             return Response.json({ message: 'No directors assigned to this centro' });
         }
 
-        const direttoriEmails = [...new Set(assegnazioni.map(a => a.user_email))];
+        const tutteLeEmail = [...new Set(assegnazioni.map(a => a.user_email))];
 
-        // Recupera i direttori per verificare il tipo account
-        const direttori = await base44.asServiceRole.entities.Direttore.list();
-        const emailsDirettori = direttori.map(d => d.email);
+        // Escludi le vigilanze, tieni solo i direttori
+        const vigilanze = await base44.asServiceRole.entities.Vigilanza.list();
+        const emailsVigilanza = vigilanze.map(v => v.email);
 
-        const destinatari = direttoriEmails.filter(email => emailsDirettori.includes(email));
+        const destinatari = tutteLeEmail.filter(email => !emailsVigilanza.includes(email));
 
         if (!destinatari.length) {
             return Response.json({ message: 'No direttori found for this centro' });
