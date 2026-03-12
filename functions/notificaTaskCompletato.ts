@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
             destinatario_email: email,
             tipo: 'task',
             titolo: `Task completato: ${task.titolo}`,
-            messaggio: `Il task "${task.titolo}" è stato completato da ${completatoDA}${task.data_scadenza ? ` (scadenza: ${task.data_scadenza})` : ''}.`,
+            messaggio: `Il task "${task.titolo}" è stato completato da ${completatoDA}${task.data_scadenza ? ` (scadenza: ${formatData(task.data_scadenza)})` : ''}.`,
             centro_id: centroId,
             entity_id: task.id,
             letta: false
