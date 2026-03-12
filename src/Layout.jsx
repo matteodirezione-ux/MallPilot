@@ -210,7 +210,7 @@ export default function Layout({ children, currentPageName }) {
                 <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
                 <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
               </div>
-              {user?.tipo_account === 'vigilanza' && (
+              {(user?.tipo_account === 'vigilanza' || user?.tipo_account === 'direttore') && (
                 <NotificaBell user={user} />
               )}
             </div>
