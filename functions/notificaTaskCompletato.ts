@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
         }
 
         const completatoDA = task.assegnato_a_nome || task.assegnato_a_email || 'Utente';
+        const formatData = (d) => d ? d.split('-').reverse().join('/') : null;
 
         const notifiche = destinatari.map(email => ({
             destinatario_email: email,
