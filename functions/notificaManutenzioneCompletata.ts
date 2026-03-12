@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
         }
 
         const completatoDa = manutenzione.assegnato_a_nome || manutenzione.assegnato_a_email || 'Utente';
+        const formatData = (d) => d ? d.split('-').reverse().join('/') : null;
 
         const notifiche = destinatari.map(email => ({
             destinatario_email: email,
