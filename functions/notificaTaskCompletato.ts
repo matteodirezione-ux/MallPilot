@@ -18,26 +18,26 @@ Deno.serve(async (req) => {
         const task = data;
         const centroId = task.centro_id;
 
-        if (!centroId) {
-            return Response.json({ message: 'No centro_id on task' });
-        }
+        let destinatari = [];
 
-        // Trova i direttori assegnati a questo centro
-        const assegnazioni = await base44.asServiceRole.entities.Assegnazione.filter({ centro_id: centroId });
-        if (!assegnazioni.length) {
-            return Response.json({ message: 'No directors assigned to this centro' });
-        }
-
-        const tutteLeEmail = [...new Set(assegnazioni.map(a => a.user_email))];
-
-        // Escludi le vigilanze, tieni solo i direttori
         const vigilanze = await base44.asServiceRole.entities.Vigilanza.list();
-        const emailsVigilanza = vigilanze.map(v => v.email);
+        const emailsVigilanza = new Set(vigilanze.map(v => v.email));
 
-        const destinatari = tutteLeEmail.filter(email => !emailsVigilanza.includes(email));
+        if (centroId) {
+            // Trova i direttori assegnati a questo centro
+            const assegnazioni = await base44.asServiceRole.entities.Assegnazione.filter({ centro_id: centroId });
+            const tutteLeEmail = [...new Set(assegnazioni.map(a => a.user_email))];
+            destinatari = tutteLeEmail.filter(email => !emailsVigilanza.has(email));
+        }
+
+        // Se non ci sono destinatari dal centro (o non c'è centro_id),
+        // notifica chi ha assegnato il task (se non è vigilanza)
+        if (!destinatari.length && task.assegnato_da_email && !emailsVigilanza.has(task.assegnato_da_email)) {
+            destinatari = [task.assegnato_da_email];
+        }
 
         if (!destinatari.length) {
-            return Response.json({ message: 'No direttori found for this centro' });
+            return Response.json({ message: 'No recipients found for notification' });
         }
 
         const completatoDA = task.assegnato_a_nome || task.assegnato_a_email || 'Utente';
