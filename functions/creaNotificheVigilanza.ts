@@ -28,9 +28,17 @@ Deno.serve(async (req) => {
     const vigilanze = await base44.asServiceRole.entities.Vigilanza.list();
     const vigilanzaEmails = new Set(vigilanze.map(v => v.email));
 
-    const destinatari = assegnazioni
+    const destinatariDaAssegnazione = assegnazioni
       .map(a => a.user_email)
       .filter(email => vigilanzaEmails.has(email));
+
+    // Includi anche il destinatario diretto se è una vigilanza
+    const destinatariSet = new Set(destinatariDaAssegnazione);
+    if (entityData.assegnato_a_email && vigilanzaEmails.has(entityData.assegnato_a_email)) {
+      destinatariSet.add(entityData.assegnato_a_email);
+    }
+
+    const destinatari = [...destinatariSet];
 
     if (!destinatari.length) {
       return Response.json({ ok: true, message: 'No vigilanza destinatari' });
