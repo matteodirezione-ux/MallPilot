@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
             destinatario_email: email,
             tipo: 'manutenzione',
             titolo: `Attività completata: ${manutenzione.titolo}`,
-            messaggio: `L'attività "${manutenzione.titolo}" è stata completata da ${completatoDa}.`,
+            messaggio: `L'attività "${manutenzione.titolo}" è stata completata da ${completatoDa}${manutenzione.data_scadenza ? ` (scadenza: ${formatData(manutenzione.data_scadenza)})` : ''}.`,
             centro_id: centroId,
             entity_id: manutenzione.id,
             letta: false
