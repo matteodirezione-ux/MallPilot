@@ -124,7 +124,7 @@ function DettaglioTask({ task, open, onClose }) {
           <button className="absolute top-4 right-4 text-white" onClick={() => setFotoIngrandita(null)}>
             <X className="w-8 h-8" />
           </button>
-          <img src={fotoIngrandita} alt="Foto ingrandita" className="max-w-full max-h-full rounded-lg object-contain" />
+          <img src={fotoIngrandita} alt="Foto ingrandita" className="max-w-full max-h-full rounded-lg object-contain" loading="eager" onError={(e) => { e.target.src = fotoIngrandita + '?t=' + Date.now(); e.target.onerror = null; }} />
         </div>
       )}
     </Dialog>
