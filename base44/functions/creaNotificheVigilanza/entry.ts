@@ -18,22 +18,19 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, message: 'No centro_id' });
     }
 
-    // Trova assegnazioni per questo centro
-    const assegnazioni = await base44.asServiceRole.entities.Assegnazione.filter({ centro_id });
-    if (!assegnazioni.length) {
-      return Response.json({ ok: true, message: 'No assegnazioni' });
-    }
+    // Trova vigilanze registrate e assegnazioni in parallelo
+    const [assegnazioni, vigilanze] = await Promise.all([
+      base44.asServiceRole.entities.Assegnazione.filter({ centro_id }),
+      base44.asServiceRole.entities.Vigilanza.list(),
+    ]);
 
-    // Trova vigilanze registrate
-    const vigilanze = await base44.asServiceRole.entities.Vigilanza.list();
     const vigilanzaEmails = new Set(vigilanze.map(v => v.email));
 
-    const destinatariDaAssegnazione = assegnazioni
-      .map(a => a.user_email)
-      .filter(email => vigilanzaEmails.has(email));
+    const destinatariSet = new Set(
+      assegnazioni.map(a => a.user_email).filter(email => vigilanzaEmails.has(email))
+    );
 
-    // Includi anche il destinatario diretto se è una vigilanza
-    const destinatariSet = new Set(destinatariDaAssegnazione);
+    // Includi sempre il destinatario diretto se è una vigilanza
     if (entityData.assegnato_a_email && vigilanzaEmails.has(entityData.assegnato_a_email)) {
       destinatariSet.add(entityData.assegnato_a_email);
     }
