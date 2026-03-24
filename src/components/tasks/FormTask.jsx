@@ -374,17 +374,24 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                     </button>
                   </div>
                 ))}
-                <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer hover:border-blue-400 transition-colors">
-                  {uploadingFoto ? (
+                {uploadingFoto ? (
+                  <div className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-slate-300 rounded-md">
                     <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
-                  ) : (
-                    <>
+                  </div>
+                ) : (
+                  <>
+                    <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer hover:border-blue-400 transition-colors" title="Scegli dalla galleria">
                       <ImagePlus className="w-5 h-5 text-slate-400" />
-                      <span className="text-xs text-slate-400 mt-0.5">Aggiungi</span>
-                    </>
-                  )}
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} disabled={uploadingFoto} />
-                </label>
+                      <span className="text-xs text-slate-400 mt-0.5">Galleria</span>
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} />
+                    </label>
+                    <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-green-300 rounded-md cursor-pointer hover:border-green-500 transition-colors" title="Scatta una foto">
+                      <Camera className="w-5 h-5 text-green-400" />
+                      <span className="text-xs text-green-400 mt-0.5">Fotocamera</span>
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFotoUpload} />
+                    </label>
+                  </>
+                )}
               </div>
             </div>
           </div>
