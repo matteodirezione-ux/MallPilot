@@ -383,7 +383,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                       <span className="text-xs text-slate-400 mt-0.5">Aggiungi</span>
                     </>
                   )}
-                  <input type="file" accept="image/*" multiple capture="environment" className="hidden" onChange={handleFotoUpload} disabled={uploadingFoto} />
+                  <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} disabled={uploadingFoto} />
                 </label>
               </div>
             </div>
