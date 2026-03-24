@@ -101,6 +101,8 @@ function DettaglioTask({ task, open, onClose }) {
                     alt={`Foto ${i + 1}`}
                     className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity border"
                     onClick={() => setFotoIngrandita(url)}
+                    loading="lazy"
+                    onError={(e) => { e.target.src = url + '?t=' + Date.now(); e.target.onerror = null; }}
                   />
                 ))}
               </div>
