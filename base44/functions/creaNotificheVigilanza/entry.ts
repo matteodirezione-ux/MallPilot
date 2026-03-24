@@ -14,14 +14,11 @@ Deno.serve(async (req) => {
     }
 
     const centro_id = entityData.centro_id;
-    if (!centro_id) {
-      return Response.json({ ok: true, message: 'No centro_id' });
-    }
 
-    // Trova vigilanze registrate e assegnazioni in parallelo
-    const [assegnazioni, vigilanze] = await Promise.all([
-      base44.asServiceRole.entities.Assegnazione.filter({ centro_id }),
+    // Trova vigilanze registrate (sempre) e assegnazioni solo se c'è centro_id
+    const [vigilanze, assegnazioni] = await Promise.all([
       base44.asServiceRole.entities.Vigilanza.list(),
+      centro_id ? base44.asServiceRole.entities.Assegnazione.filter({ centro_id }) : Promise.resolve([]),
     ]);
 
     const vigilanzaEmails = new Set(vigilanze.map(v => v.email));
