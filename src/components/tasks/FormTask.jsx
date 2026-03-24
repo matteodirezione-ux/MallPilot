@@ -216,7 +216,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             </div>
           )}
 
-          {isProprieta && centri?.length > 0 && (
+          {(isProprieta || user?.tipo_account === 'direttore') && centri?.length > 0 && (
             <div className={rowClass}>
               <label className={labelClass}>{isMultipla ? 'Centri' : 'Centro'}</label>
               <div className={fieldClass}>
