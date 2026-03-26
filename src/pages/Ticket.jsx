@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, Clock, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 import FormTicket from '@/components/tickets/FormTicket';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 const statoConfig = {
   aperto: { label: 'Aperto', color: 'bg-blue-100 text-blue-700' },
-  in_corso: { label: 'In corso', color: 'bg-yellow-100 text-yellow-700' },
   chiuso: { label: 'Chiuso', color: 'bg-green-100 text-green-700' },
 };
 
@@ -94,7 +93,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
   const counts = {
     aperto: tickets.filter(t => t.stato === 'aperto').length,
-    in_corso: tickets.filter(t => t.stato === 'in_corso').length,
+    sollecitati: tickets.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
     chiuso: tickets.filter(t => t.stato === 'chiuso').length,
   };
 
@@ -123,12 +122,12 @@ export default function Ticket({ centroSelezionato, user }) {
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-yellow-600" />
+          <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-orange-600" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-slate-800">{counts.in_corso}</p>
-            <p className="text-xs text-slate-500">In corso</p>
+            <p className="text-2xl font-bold text-slate-800">{counts.sollecitati}</p>
+            <p className="text-xs text-slate-500">Sollecitati</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
@@ -149,7 +148,7 @@ export default function Ticket({ centroSelezionato, user }) {
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
         </div>
         <div className="flex gap-1">
-          {['tutti', 'aperto', 'in_corso', 'chiuso'].map(s => (
+          {['tutti', 'aperto', 'chiuso'].map(s => (
             <button
               key={s}
               onClick={() => setFiltroStato(s)}
@@ -189,7 +188,6 @@ export default function Ticket({ centroSelezionato, user }) {
                        </SelectTrigger>
                        <SelectContent>
                          <SelectItem value="aperto">Aperto</SelectItem>
-                         <SelectItem value="in_corso">In corso</SelectItem>
                          <SelectItem value="chiuso">Chiuso</SelectItem>
                        </SelectContent>
                      </Select>
