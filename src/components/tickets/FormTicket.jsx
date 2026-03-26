@@ -164,7 +164,6 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
                 <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="aperto">Aperto</SelectItem>
-                  <SelectItem value="in_corso">In corso</SelectItem>
                   <SelectItem value="chiuso">Chiuso</SelectItem>
                 </SelectContent>
               </Select>
