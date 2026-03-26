@@ -30,7 +30,7 @@ export default function Ticket({ centroSelezionato, user }) {
   const [formOpen, setFormOpen] = useState(false);
   const [ticketSelezionato, setTicketSelezionato] = useState(null);
   const [search, setSearch] = useState('');
-  const [filtroStato, setFiltroStato] = useState('tutti');
+  const [filtroStato, setFiltroStato] = useState('aperto');
 
   useEffect(() => {
     if (centroSelezionato) loadTickets();
