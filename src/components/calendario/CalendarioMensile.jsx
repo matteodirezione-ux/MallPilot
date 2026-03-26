@@ -92,7 +92,7 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             const spaziOccupatiIds = new Set(
               prenotazioniGiorno.flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean))
             );
-            const spaziLiberi = mostraDisponibili ? spazi.filter(s => !spaziOccupatiIds.has(s.id)) : [];
+            const spaziLiberi = mostraDisponibili ? spazi.filter(s => !spaziOccupatiIds.has(s.id)).sort((a, b) => a.numero_spazio?.localeCompare(b.numero_spazio, undefined, { numeric: true })) : [];
 
             return (
               <div
