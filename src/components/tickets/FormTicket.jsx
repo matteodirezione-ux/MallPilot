@@ -31,6 +31,7 @@ const defaultForm = {
   descrizione: '',
   scadenza: defaultScadenza('ordinario'),
   stato: 'aperto',
+  numero_sollecito: 0,
   foto_urls: [],
 };
 
@@ -136,6 +137,23 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
             <label className={labelClass}>Descrizione</label>
             <div className={fieldClass}>
               <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={3} className="text-sm" placeholder="Descrivi il problema..." />
+            </div>
+          </div>
+
+          <div className={rowClass}>
+            <label className={labelClass}>N° Sollecito</label>
+            <div className={fieldClass}>
+              <Select value={String(form.numero_sollecito ?? 0)} onValueChange={v => set('numero_sollecito', Number(v))}>
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Nessun sollecito</SelectItem>
+                  <SelectItem value="1">Sollecito 1</SelectItem>
+                  <SelectItem value="2">Sollecito 2</SelectItem>
+                  <SelectItem value="3">Sollecito 3</SelectItem>
+                  <SelectItem value="4">Sollecito 4</SelectItem>
+                  <SelectItem value="5">Sollecito 5</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

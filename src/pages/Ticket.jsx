@@ -173,6 +173,7 @@ export default function Ticket({ centroSelezionato, user }) {
                     <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
                     <Badge className={tipologiaConfig[ticket.tipologia]?.color}>{tipologiaConfig[ticket.tipologia]?.label}</Badge>
                     <Badge className={statoConfig[ticket.stato]?.color}>{statoConfig[ticket.stato]?.label}</Badge>
+                    {ticket.numero_sollecito > 0 && <Badge className="bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</Badge>}
                     {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
                   </div>
                   {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
