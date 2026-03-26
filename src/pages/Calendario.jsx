@@ -33,7 +33,6 @@ export default function Calendario({ centroSelezionato, user }) {
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const [soloEventi, setSoloEventi] = useState(false);
   const [mostraDisponibili, setMostraDisponibili] = useState(false);
-  const [activeTab, setActiveTab] = useState('mensile');
   const [searchText, setSearchText] = useState('');
   const isVigilanza = user?.tipo_account === 'vigilanza';
 
@@ -289,7 +288,7 @@ export default function Calendario({ centroSelezionato, user }) {
       </Dialog>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="mensile" className="w-full">
         <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -328,10 +327,7 @@ export default function Calendario({ centroSelezionato, user }) {
                 <Checkbox
                   id="mostra-disponibili"
                   checked={mostraDisponibili}
-                  onCheckedChange={(val) => {
-                    setMostraDisponibili(val);
-                    if (val) setActiveTab('disponibilita');
-                  }}
+                  onCheckedChange={setMostraDisponibili}
                 />
                 <Label htmlFor="mostra-disponibili" className="text-xs text-slate-600 cursor-pointer">
                   Mostra disponibili
@@ -401,7 +397,7 @@ export default function Calendario({ centroSelezionato, user }) {
             <TabsContent value="disponibilita">
               <DisponibilitaSpazi
                 prenotazioni={prenotazioniFiltrate}
-                spazi={mostraDisponibili ? spaziFiltrati : spazi}
+                spazi={spazi}
               />
             </TabsContent>
           </>
