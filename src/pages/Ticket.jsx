@@ -193,7 +193,7 @@ export default function Ticket({ centroSelezionato, user }) {
                         <SelectItem value="chiuso">Chiuso</SelectItem>
                       </SelectContent>
                     </Select>
-                    {ticket.numero_sollecito > 0 && <Badge className="bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</Badge>}
+
                     {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
                   </div>
                   {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
@@ -209,17 +209,28 @@ export default function Ticket({ centroSelezionato, user }) {
                         className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
                       />
                     </span>
-                    <span className="flex items-center gap-1">
-                      Sollecito:
-                      <select
-                        value={ticket.numero_sollecito ?? 0}
-                        onChange={e => handleFieldChange(ticket, 'numero_sollecito', Number(e.target.value))}
-                        className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value={0}>Nessuno</option>
-                        {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-                      </select>
-                    </span>
+                    {(ticket.numero_sollecito > 0) && (
+                      <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
+                        <SelectTrigger className="h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 bg-orange-100 text-orange-700">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Nessun sollecito</SelectItem>
+                          {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {(!ticket.numero_sollecito || ticket.numero_sollecito === 0) && (
+                      <Select value="0" onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
+                        <SelectTrigger className="h-6 text-xs px-2 py-0 border border-slate-200 rounded-full w-auto gap-1 text-slate-400 bg-white">
+                          <SelectValue placeholder="+ Sollecito" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">Nessun sollecito</SelectItem>
+                          {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                   {/* Foto preview */}
                   {ticket.foto_urls?.length > 0 && (
