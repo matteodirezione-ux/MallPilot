@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ImagePlus, X as XIcon, Loader2, Camera } from 'lucide-react';
+import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import {
   Select,
@@ -361,38 +361,43 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
           <div className={rowClass}>
             <label className={labelClass}>Foto</label>
             <div className={fieldClass}>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {(form.foto_urls || []).map((url, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden border border-slate-200 group">
-                    <img src={url} alt="" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFoto(url)}
-                      className="absolute top-0.5 right-0.5 bg-black/60 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <XIcon className="w-3 h-3 text-white" />
-                    </button>
-                  </div>
-                ))}
+              <div className="flex gap-2 flex-wrap mb-2">
                 {uploadingFoto ? (
-                  <div className="w-16 h-16 flex items-center justify-center border-2 border-dashed border-slate-300 rounded-md">
-                    <Loader2 className="w-5 h-5 text-slate-400 animate-spin" />
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Caricamento...
                   </div>
                 ) : (
                   <>
-                    <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-md cursor-pointer hover:border-blue-400 transition-colors" title="Scegli dalla galleria">
-                      <ImagePlus className="w-5 h-5 text-slate-400" />
-                      <span className="text-xs text-slate-400 mt-0.5">Galleria</span>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <ImageIcon className="w-4 h-4" />
+                      Galleria
                       <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} />
                     </label>
-                    <label className="w-16 h-16 flex flex-col items-center justify-center border-2 border-dashed border-green-300 rounded-md cursor-pointer hover:border-green-500 transition-colors" title="Scatta una foto">
-                      <Camera className="w-5 h-5 text-green-400" />
-                      <span className="text-xs text-green-400 mt-0.5">Fotocamera</span>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <Camera className="w-4 h-4" />
+                      Fotocamera
                       <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFotoUpload} />
                     </label>
                   </>
                 )}
               </div>
+              {(form.foto_urls || []).length > 0 && (
+                <div className="grid grid-cols-4 gap-1">
+                  {(form.foto_urls || []).map((url, i) => (
+                    <div key={i} className="relative group">
+                      <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFoto(url)}
+                        className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
