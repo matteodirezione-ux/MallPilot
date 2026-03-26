@@ -7,7 +7,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, 
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
-export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete, isVigilanza }) {
+export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete, isVigilanza, mostraDisponibili }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
 
   const giorni = useMemo(() => {
@@ -87,6 +87,11 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             const dataKey = format(giorno, 'yyyy-MM-dd');
             const prenotazioniGiorno = prenotazioniPerGiorno[dataKey] || [];
             const isToday = isSameDay(giorno, new Date());
+            // Spazi liberi oggi (solo se mostraDisponibili e oggi)
+            const spaziOccupatiIds = new Set(
+              prenotazioniGiorno.flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean))
+            );
+            const spaziLiberi = (mostraDisponibili && isToday) ? spazi.filter(s => !spaziOccupatiIds.has(s.id)) : [];
 
             return (
               <div
@@ -99,6 +104,21 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                   {format(giorno, 'd')}
                 </div>
                 <div className="space-y-1">
+                  {/* Badge spazi liberi oggi */}
+                  {spaziLiberi.map(s => (
+                    <div
+                      key={`libero-${s.id}`}
+                      className="text-xs px-2 py-1 rounded border-2 border-dashed border-green-400 bg-green-50 text-green-700 flex items-center gap-1.5"
+                    >
+                      <div
+                        className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
+                        style={{ borderColor: s.colore || '#22c55e', color: s.colore || '#22c55e' }}
+                      >
+                        {s.numero_spazio || '?'}
+                      </div>
+                      <span className="font-medium truncate">Libero</span>
+                    </div>
+                  ))}
                   {prenotazioniGiorno.map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);

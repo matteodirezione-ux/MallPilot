@@ -360,13 +360,14 @@ export default function Calendario({ centroSelezionato, user }) {
         <TabsContent value="mensile">
           <CalendarioMensile
             prenotazioni={prenotazioniFiltrate}
-            spazi={spaziFiltrati}
+            spazi={spazi}
             clienti={clienti}
             currentMonth={currentMonth}
             setCurrentMonth={setCurrentMonth}
             onEdit={isVigilanza ? null : handleEdit}
             onDelete={isVigilanza ? null : handleDelete}
             isVigilanza={isVigilanza}
+            mostraDisponibili={mostraDisponibili}
           />
         </TabsContent>
 
