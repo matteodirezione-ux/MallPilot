@@ -32,8 +32,19 @@ export default function Calendario({ centroSelezionato, user }) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const [soloEventi, setSoloEventi] = useState(false);
+  const [mostraDisponibili, setMostraDisponibili] = useState(false);
   const [searchText, setSearchText] = useState('');
   const isVigilanza = user?.tipo_account === 'vigilanza';
+
+  // Spazi occupati oggi (per il filtro disponibilità)
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+  const spaziOccupatiOggi = new Set(
+    prenotazioni
+      .filter(p => p.stato !== 'cancellata' && new Date(p.data_inizio) <= oggi && new Date(p.data_fine) >= oggi)
+      .flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean))
+  );
+  const spaziFiltrati = mostraDisponibili ? spazi.filter(s => !spaziOccupatiOggi.has(s.id)) : spazi;
 
   // Considera "permanente" una prenotazione con durata >= 300 giorni
   const prenotazioniFiltrate = prenotazioni.filter(p => {
@@ -314,6 +325,16 @@ export default function Calendario({ centroSelezionato, user }) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
+                  id="mostra-disponibili"
+                  checked={mostraDisponibili}
+                  onCheckedChange={setMostraDisponibili}
+                />
+                <Label htmlFor="mostra-disponibili" className="text-xs text-slate-600 cursor-pointer">
+                  Mostra disponibili
+                </Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
                   id="nascondi-permanenti"
                   checked={nascondiPermanenti}
                   onCheckedChange={setNascondiPermanenti}
@@ -339,7 +360,7 @@ export default function Calendario({ centroSelezionato, user }) {
         <TabsContent value="mensile">
           <CalendarioMensile
             prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
+            spazi={spaziFiltrati}
             clienti={clienti}
             currentMonth={currentMonth}
             setCurrentMonth={setCurrentMonth}
@@ -352,7 +373,7 @@ export default function Calendario({ centroSelezionato, user }) {
         <TabsContent value="settimanale">
           <CalendarioSettimanale
             prenotazioni={prenotazioniFiltrate}
-            spazi={spazi}
+            spazi={spaziFiltrati}
             clienti={clienti}
             currentWeek={currentWeek}
             setCurrentWeek={setCurrentWeek}
