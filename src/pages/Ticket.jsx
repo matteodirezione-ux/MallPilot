@@ -76,6 +76,11 @@ export default function Ticket({ centroSelezionato, user }) {
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, stato: nuovoStato } : t));
   };
 
+  const handleFieldChange = async (ticket, field, value) => {
+    await base44.entities.Ticket.update(ticket.id, { [field]: value });
+    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, [field]: value } : t));
+  };
+
   const handleNuovo = () => {
     setTicketSelezionato(null);
     setFormOpen(true);
@@ -192,10 +197,29 @@ export default function Ticket({ centroSelezionato, user }) {
                     {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
                   </div>
                   {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-slate-500">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 items-center">
                     <span>Operatore: <strong className="text-slate-700">{ticket.operatore}</strong></span>
                     <span>Apertura: <strong className="text-slate-700">{formatData(ticket.data_apertura)}</strong></span>
-                    {ticket.scadenza && <span className={isScaduto ? 'text-red-600 font-medium' : ''}>Scadenza: <strong>{formatData(ticket.scadenza)}</strong></span>}
+                    <span className={`flex items-center gap-1 ${isScaduto ? 'text-red-600 font-medium' : ''}`}>
+                      Scadenza:
+                      <input
+                        type="date"
+                        value={ticket.scadenza || ''}
+                        onChange={e => handleFieldChange(ticket, 'scadenza', e.target.value)}
+                        className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
+                      />
+                    </span>
+                    <span className="flex items-center gap-1">
+                      Sollecito:
+                      <select
+                        value={ticket.numero_sollecito ?? 0}
+                        onChange={e => handleFieldChange(ticket, 'numero_sollecito', Number(e.target.value))}
+                        className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
+                      >
+                        <option value={0}>Nessuno</option>
+                        {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </span>
                   </div>
                   {/* Foto preview */}
                   {ticket.foto_urls?.length > 0 && (
