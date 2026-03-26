@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Ticket as TicketIcon, AlertCircle, Clock, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 import FormTicket from '@/components/tickets/FormTicket';
 import { format } from 'date-fns';
@@ -68,6 +69,11 @@ export default function Ticket({ centroSelezionato, user }) {
     if (!confirm('Eliminare questo ticket?')) return;
     await base44.entities.Ticket.delete(ticket.id);
     loadTickets();
+  };
+
+  const handleStatoChange = async (ticket, nuovoStato) => {
+    await base44.entities.Ticket.update(ticket.id, { stato: nuovoStato });
+    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, stato: nuovoStato } : t));
   };
 
   const handleNuovo = () => {
@@ -172,7 +178,16 @@ export default function Ticket({ centroSelezionato, user }) {
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
                     <Badge className={tipologiaConfig[ticket.tipologia]?.color}>{tipologiaConfig[ticket.tipologia]?.label}</Badge>
-                    <Badge className={statoConfig[ticket.stato]?.color}>{statoConfig[ticket.stato]?.label}</Badge>
+                    <Select value={ticket.stato} onValueChange={v => handleStatoChange(ticket, v)}>
+                      <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 ${statoConfig[ticket.stato]?.color}`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="aperto">Aperto</SelectItem>
+                        <SelectItem value="in_corso">In corso</SelectItem>
+                        <SelectItem value="chiuso">Chiuso</SelectItem>
+                      </SelectContent>
+                    </Select>
                     {ticket.numero_sollecito > 0 && <Badge className="bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</Badge>}
                     {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
                   </div>
