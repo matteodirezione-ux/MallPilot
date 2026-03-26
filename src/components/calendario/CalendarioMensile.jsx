@@ -87,11 +87,12 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             const dataKey = format(giorno, 'yyyy-MM-dd');
             const prenotazioniGiorno = prenotazioniPerGiorno[dataKey] || [];
             const isToday = isSameDay(giorno, new Date());
-            // Spazi liberi oggi (solo se mostraDisponibili e oggi)
+
+            // Calcolo spazi liberi per questo giorno
             const spaziOccupatiIds = new Set(
               prenotazioniGiorno.flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean))
             );
-            const spaziLiberi = (mostraDisponibili && isToday) ? spazi.filter(s => !spaziOccupatiIds.has(s.id)) : [];
+            const spaziLiberi = mostraDisponibili ? spazi.filter(s => !spaziOccupatiIds.has(s.id)) : [];
 
             return (
               <div
@@ -104,22 +105,28 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                   {format(giorno, 'd')}
                 </div>
                 <div className="space-y-1">
-                  {/* Badge spazi liberi oggi */}
-                  {spaziLiberi.map(s => (
-                    <div
-                      key={`libero-${s.id}`}
-                      className="text-xs px-2 py-1 rounded border-2 border-dashed border-green-400 bg-green-50 text-green-700 flex items-center gap-1.5"
-                    >
-                      <div
-                        className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
-                        style={{ borderColor: s.colore || '#22c55e', color: s.colore || '#22c55e' }}
-                      >
-                        {s.numero_spazio || '?'}
-                      </div>
-                      <span className="font-medium truncate">Libero</span>
-                    </div>
-                  ))}
-                  {prenotazioniGiorno.map(p => {
+                  {/* Modalità "Mostra disponibili": mostra solo spazi liberi, nascondi prenotazioni */}
+                  {mostraDisponibili ? (
+                    spaziLiberi.length === 0 ? (
+                      <div className="text-[10px] text-slate-400 italic">Tutto occupato</div>
+                    ) : (
+                      spaziLiberi.map(s => (
+                        <div
+                          key={`libero-${s.id}`}
+                          className="text-xs px-2 py-1 rounded border-2 border-dashed border-green-400 bg-green-50 text-green-700 flex items-center gap-1.5"
+                        >
+                          <div
+                            className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
+                            style={{ borderColor: s.colore || '#22c55e', color: s.colore || '#22c55e' }}
+                          >
+                            {s.numero_spazio || '?'}
+                          </div>
+                          <span className="font-medium truncate">{s.nome || `Spazio ${s.numero_spazio}`}</span>
+                        </div>
+                      ))
+                    )
+                  ) : null}
+                  {!mostraDisponibili && prenotazioniGiorno.map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);
                     const spazioColor = spazio?.colore || '#3b82f6';
@@ -150,7 +157,6 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
-                        {/* Spazi aggiuntivi */}
                         {p.spazi_ids && p.spazi_ids.filter(id => id !== p.spazio_id).length > 0 && (
                           <div className="flex flex-wrap gap-0.5 mt-0.5">
                             {p.spazi_ids.filter(id => id !== p.spazio_id).map(id => {
