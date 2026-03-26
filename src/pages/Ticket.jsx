@@ -184,13 +184,23 @@ export default function Ticket({ centroSelezionato, user }) {
                     <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
                     <Badge className={tipologiaConfig[ticket.tipologia]?.color}>{tipologiaConfig[ticket.tipologia]?.label}</Badge>
                     <Select value={ticket.stato} onValueChange={v => handleStatoChange(ticket, v)}>
-                      <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 ${statoConfig[ticket.stato]?.color}`}>
-                        <SelectValue />
+                       <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 ${statoConfig[ticket.stato]?.color}`}>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="aperto">Aperto</SelectItem>
+                         <SelectItem value="in_corso">In corso</SelectItem>
+                         <SelectItem value="chiuso">Chiuso</SelectItem>
+                       </SelectContent>
+                     </Select>
+
+                    <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
+                      <SelectTrigger className={`h-6 text-xs px-2 py-0 rounded-full font-medium w-auto gap-1 ${(ticket.numero_sollecito > 0) ? 'border-0 bg-orange-100 text-orange-700' : 'border border-slate-200 text-slate-400 bg-white'}`}>
+                        <SelectValue>{ticket.numero_sollecito > 0 ? `Sollecito ${ticket.numero_sollecito}` : '+ Sollecito'}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="aperto">Aperto</SelectItem>
-                        <SelectItem value="in_corso">In corso</SelectItem>
-                        <SelectItem value="chiuso">Chiuso</SelectItem>
+                        <SelectItem value="0">Nessun sollecito</SelectItem>
+                        {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
                       </SelectContent>
                     </Select>
 
@@ -209,28 +219,7 @@ export default function Ticket({ centroSelezionato, user }) {
                         className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
                       />
                     </span>
-                    {(ticket.numero_sollecito > 0) && (
-                      <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
-                        <SelectTrigger className="h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 bg-orange-100 text-orange-700">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">Nessun sollecito</SelectItem>
-                          {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
-                    {(!ticket.numero_sollecito || ticket.numero_sollecito === 0) && (
-                      <Select value="0" onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
-                        <SelectTrigger className="h-6 text-xs px-2 py-0 border border-slate-200 rounded-full w-auto gap-1 text-slate-400 bg-white">
-                          <SelectValue placeholder="+ Sollecito" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">Nessun sollecito</SelectItem>
-                          {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    )}
+
                   </div>
                   {/* Foto preview */}
                   {ticket.foto_urls?.length > 0 && (
