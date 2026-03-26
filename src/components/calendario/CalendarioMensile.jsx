@@ -28,6 +28,10 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
         const dataInizio = parseLocalDate(p.data_inizio);
         const dataFine = parseLocalDate(p.data_fine);
         return isWithinInterval(giorno, { start: dataInizio, end: dataFine }) && p.stato !== 'cancellata';
+      }).sort((a, b) => {
+        const nA = spazi.find(s => s.id === a.spazio_id)?.numero_spazio || '';
+        const nB = spazi.find(s => s.id === b.spazio_id)?.numero_spazio || '';
+        return nA.localeCompare(nB, undefined, { numeric: true });
       });
     });
     return map;
