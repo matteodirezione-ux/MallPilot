@@ -43,7 +43,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
     if (ticket) {
       setForm({ ...defaultForm, ...ticket });
     } else {
-      setForm({ ...defaultForm, data_apertura: today(), scadenza: defaultScadenza('ordinario'), operatore: user?.full_name || '' });
+      setForm({ ...defaultForm, data_apertura: today(), scadenza: defaultScadenza('ordinario'), operatore: '' });
     }
   }, [ticket, open, user]);
 
@@ -109,7 +109,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
           <div className={rowClass}>
             <label className={labelClass}>Operatore *</label>
             <div className={fieldClass}>
-              <Input value={form.operatore} onChange={e => set('operatore', e.target.value)} required className="h-8 text-sm" placeholder="Nome operatore" />
+              <Input value={form.operatore} onChange={e => set('operatore', e.target.value)} required className="h-8 text-sm" placeholder="es. Rossi" />
             </div>
           </div>
 
