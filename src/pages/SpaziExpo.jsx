@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Building2, MapPin, Pencil, Trash2, Image as ImageIcon, Sparkles, Map } from 'lucide-react';
+import { Plus, Building2, MapPin, Pencil, Trash2, Image as ImageIcon, Sparkles, Map, Camera, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SpaziExpo({ centroSelezionato, user }) {
@@ -152,22 +152,21 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   };
 
   const handleFileUpload = async (e, type) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    // Reset input so same file can be re-selected
+    e.target.value = '';
 
     try {
       setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      
-      if (type === 'foto') {
-        setFormData(prev => ({
-          ...prev,
-          foto_urls: [...prev.foto_urls, file_url]
-        }));
-      } else if (type === 'piantina') {
-        setFormData(prev => ({ ...prev, piantina_url: file_url }));
+      for (const file of files) {
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        if (type === 'foto') {
+          setFormData(prev => ({ ...prev, foto_urls: [...prev.foto_urls, file_url] }));
+        } else if (type === 'piantina') {
+          setFormData(prev => ({ ...prev, piantina_url: file_url }));
+        }
       }
-      
       toast.success('File caricato con successo');
     } catch (error) {
       console.error('Errore upload file:', error);
@@ -355,20 +354,34 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     <div className={row}>
                       <label className={lbl}>Foto</label>
                       <div className={fld}>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'foto')}
-                          disabled={uploading}
-                          className="h-8 text-sm"
-                        />
+                        <div className="flex gap-2 flex-wrap">
+                          {uploading ? (
+                            <div className="flex items-center gap-2 text-sm text-slate-500">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Caricamento...
+                            </div>
+                          ) : (
+                            <>
+                              <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-lg cursor-pointer transition-colors">
+                                <ImageIcon className="w-4 h-4" />
+                                Galleria
+                                <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFileUpload(e, 'foto')} />
+                              </label>
+                              <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
+                                <Camera className="w-4 h-4" />
+                                Fotocamera
+                                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFileUpload(e, 'foto')} />
+                              </label>
+                            </>
+                          )}
+                        </div>
                         {formData.foto_urls.length > 0 && (
-                          <div className="grid grid-cols-4 gap-1 mt-1">
+                          <div className="grid grid-cols-4 gap-1 mt-2">
                             {formData.foto_urls.map((url, index) => (
                               <div key={index} className="relative group">
-                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-16 object-cover rounded" />
+                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-16 object-cover rounded" loading="lazy" crossOrigin="anonymous" />
                                 <button type="button" onClick={() => removeFoto(index)}
-                                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 md:opacity-0 opacity-100 transition-opacity">
                                   <Trash2 className="w-2.5 h-2.5" />
                                 </button>
                               </div>
@@ -381,13 +394,18 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                     <div className={row}>
                       <label className={lbl}>Piantina</label>
                       <div className={fld}>
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'piantina')}
-                          disabled={uploading}
-                          className="h-8 text-sm"
-                        />
+                        <div className="flex gap-2 flex-wrap">
+                          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-lg cursor-pointer transition-colors">
+                            <ImageIcon className="w-4 h-4" />
+                            Galleria
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'piantina')} disabled={uploading} />
+                          </label>
+                          <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
+                            <Camera className="w-4 h-4" />
+                            Fotocamera
+                            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => handleFileUpload(e, 'piantina')} disabled={uploading} />
+                          </label>
+                        </div>
                         {formData.piantina_url && (
                           <div className="relative mt-1">
                             <img src={formData.piantina_url} alt="Piantina" className="w-full h-24 object-cover rounded" />
@@ -462,26 +480,48 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             )}
             {isDirettore && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <p className="text-sm font-medium text-slate-700 mb-2">
                   {mappaUrl ? 'Sostituisci mappa' : 'Carica mappa'}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploadingMappa}
-                  onChange={async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    setUploadingMappa(true);
-                    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-                    await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
-                    setMappaUrl(file_url);
-                    setUploadingMappa(false);
-                    toast.success('Mappa caricata');
-                  }}
-                  className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer"
-                />
-                {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
+                </p>
+                {uploadingMappa ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Caricamento in corso...
+                  </div>
+                ) : (
+                  <div className="flex gap-2 flex-wrap">
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <ImageIcon className="w-4 h-4" />
+                      Galleria
+                      <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        e.target.value = '';
+                        setUploadingMappa(true);
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+                        setMappaUrl(file_url);
+                        setUploadingMappa(false);
+                        toast.success('Mappa caricata');
+                      }} />
+                    </label>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <Camera className="w-4 h-4" />
+                      Fotocamera
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        e.target.value = '';
+                        setUploadingMappa(true);
+                        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+                        await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+                        setMappaUrl(file_url);
+                        setUploadingMappa(false);
+                        toast.success('Mappa caricata');
+                      }} />
+                    </label>
+                  </div>
+                )}
               </div>
             )}
           </div>
