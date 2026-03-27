@@ -15,7 +15,7 @@ import { base44 } from '@/api/base44Client';
 import { isWithinInterval, format, parse } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato }) {
+export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato, onClienteCreated }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
   const [activeTab, setActiveTab] = useState(prenotazione?.is_event ? 'evento' : 'affitto');
   const [showNewClienteDialog, setShowNewClienteDialog] = useState(false);
@@ -154,6 +154,9 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         note: ''
       });
       toast.success('Cliente creato con successo');
+      if (onClienteCreated) {
+        onClienteCreated(newCliente);
+      }
     } catch (error) {
       toast.error('Errore nella creazione del cliente');
     }

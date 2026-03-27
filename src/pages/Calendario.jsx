@@ -230,15 +230,20 @@ export default function Calendario({ centroSelezionato, user }) {
                   </DialogTitle>
                 </DialogHeader>
                 <FormPrenotazione
-                  prenotazione={editingPrenotazione}
-                  spazi={spazi}
-                  clienti={clienti}
-                  onSave={handleSavePrenotazione}
-                  onCancel={() => {
-                    setDialogOpen(false);
-                    setEditingPrenotazione(null);
-                  }}
-                />
+                   prenotazione={editingPrenotazione}
+                   spazi={spazi}
+                   clienti={clienti}
+                   onSave={handleSavePrenotazione}
+                   onCancel={() => {
+                     setDialogOpen(false);
+                     setEditingPrenotazione(null);
+                   }}
+                   isVigilanza={isVigilanza}
+                   centroSelezionato={centroSelezionato}
+                   onClienteCreated={(nuovoCliente) => {
+                     setClienti([...clienti, nuovoCliente]);
+                   }}
+                 />
               </DialogContent>
             </Dialog>
           )}
