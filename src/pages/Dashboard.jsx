@@ -544,33 +544,43 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
-            {stats.ticketsList.length === 0 ? (
-              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket</p>
-            ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {stats.ticketsList
-                  .filter(t => t.stato !== 'chiuso')
-                  .sort((a, b) => {
-                    const order = { urgente: 0, ordinario: 1 };
-                    return (order[a.tipologia] ?? 1) - (order[b.tipologia] ?? 1);
-                  })
-                  .slice(0, 10)
-                  .map(t => (
-                    <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
-                      <div className="flex-1 min-w-0 mr-2">
-                        <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · Solleciti: {t.numero_sollecito || 0}</p>
-                        <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
-                      </div>
-                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${t.tipologia === 'urgente' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {t.tipologia}
-                      </span>
+            {(() => {
+              const oggi = new Date(); oggi.setHours(0,0,0,0);
+              const aperti = stats.ticketsList.filter(t => t.stato !== 'chiuso');
+              if (aperti.length === 0) return <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket aperto</p>;
+
+              const scaduti = aperti.filter(t => t.scadenza && new Date(t.scadenza) < oggi);
+              const inCorso = aperti.filter(t => !t.scadenza || new Date(t.scadenza) >= oggi);
+
+              const TicketCard = ({ t }) => (
+                <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
+                  <div className="flex-1 min-w-0 mr-2">
+                    <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · Solleciti: {t.numero_sollecito || 0}</p>
+                    <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
+                  </div>
+                  <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${t.tipologia === 'urgente' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                    {t.tipologia}
+                  </span>
+                </div>
+              );
+
+              return (
+                <div className="space-y-4">
+                  {scaduti.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-700 mb-2">⚠️ Scaduti</h4>
+                      <div className="space-y-1.5 sm:space-y-2">{scaduti.map(t => <TicketCard key={t.id} t={t} />)}</div>
                     </div>
-                  ))}
-                {stats.ticketsList.filter(t => t.stato !== 'chiuso').length === 0 && (
-                  <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket aperto</p>
-                )}
-              </div>
-            )}
+                  )}
+                  {inCorso.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-slate-700 mb-2">🔧 In corso</h4>
+                      <div className="space-y-1.5 sm:space-y-2">{inCorso.map(t => <TicketCard key={t.id} t={t} />)}</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </CardContent>
           </Card>
 
