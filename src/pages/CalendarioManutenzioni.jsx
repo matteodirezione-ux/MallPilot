@@ -399,7 +399,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                   id="ricorrente"
                 />
                 <label htmlFor="ricorrente" className="text-sm font-medium text-slate-700 cursor-pointer">
-                  Manutenzione ricorrente
+                  Controllo ricorrente
                 </label>
               </div>
 
