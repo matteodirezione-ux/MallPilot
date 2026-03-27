@@ -552,8 +552,8 @@ export default function Dashboard({ centroSelezionato, user }) {
               const scaduti = aperti.filter(t => t.scadenza && new Date(t.scadenza) < oggi);
               const inCorso = aperti.filter(t => !t.scadenza || new Date(t.scadenza) >= oggi);
 
-              const TicketCard = ({ t }) => (
-                <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
+              const TicketCard = ({ t, isScaduto }) => (
+                <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${isScaduto ? 'bg-red-50 border-red-200' : t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
                   <div className="flex-1 min-w-0 mr-2">
                     <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · Solleciti: {t.numero_sollecito || 0}</p>
                     <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
@@ -569,7 +569,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                   {scaduti.length > 0 && (
                     <div>
                       <h4 className="text-sm font-semibold text-slate-700 mb-2">⚠️ Scaduti</h4>
-                      <div className="space-y-1.5 sm:space-y-2">{scaduti.map(t => <TicketCard key={t.id} t={t} />)}</div>
+                      <div className="space-y-1.5 sm:space-y-2">{scaduti.map(t => <TicketCard key={t.id} t={t} isScaduto={true} />)}</div>
                     </div>
                   )}
                   {inCorso.length > 0 && (
