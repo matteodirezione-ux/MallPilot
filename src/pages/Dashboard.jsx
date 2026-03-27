@@ -638,11 +638,11 @@ export default function Dashboard({ centroSelezionato, user }) {
                         {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
                       <p className="text-xs text-slate-500">
-                        Prossimo · {giorniMancanti(evento.data_inizio)}
+                        Prossimo
                       </p>
                       </div>
                       <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">{format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}</p>
+                        <p className="text-xs whitespace-nowrap"><span className="font-bold text-red-600">{giorniMancanti(evento.data_inizio)}</span> · <span className="font-medium text-slate-700">{format(new Date(evento.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(evento.data_fine), 'dd MMM', { locale: it })}</span></p>
                     </div>
                   </div>
                 ))}
@@ -718,11 +718,11 @@ export default function Dashboard({ centroSelezionato, user }) {
                          {prenotazione.cliente?.ragione_sociale}
                        </p>
                        <p className="text-xs text-slate-600">
-                         Spazio {prenotazione.spazio?.numero_spazio} · {giorniMancanti(prenotazione.data_inizio)}
+                         Spazio {prenotazione.spazio?.numero_spazio}
                        </p>
                        </div>
                        <div className="text-right shrink-0">
-                       <p className="text-xs font-medium text-slate-700 whitespace-nowrap">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}</p>
+                       <p className="text-xs whitespace-nowrap"><span className="font-bold text-red-600">{giorniMancanti(prenotazione.data_inizio)}</span> · <span className="font-medium text-slate-700">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}</span></p>
                        </div>
                        </div>
                        ))}
