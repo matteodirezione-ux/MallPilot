@@ -270,7 +270,7 @@ export default function TaskPage({ centroSelezionato, user }) {
             Task
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
+            Tutte le attività da fare attivamente programmate
           </p>
         </div>
         {canCreate && (
