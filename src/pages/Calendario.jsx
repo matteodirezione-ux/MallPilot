@@ -34,7 +34,7 @@ export default function Calendario({ centroSelezionato, user }) {
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const [tabDefault] = useState(isMobile ? 'giornaliero' : 'mensile');
+  const [tabDefault] = useState(isMobile ? 'giornaliero' : 'settimanale');
   const [soloEventi, setSoloEventi] = useState(false);
   const [mostraDisponibili, setMostraDisponibili] = useState(false);
   const [searchText, setSearchText] = useState('');
