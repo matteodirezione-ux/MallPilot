@@ -103,7 +103,7 @@ export default function Ticket({ centroSelezionato, user }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Ticket</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{centroSelezionato?.nome || 'Tutti i centri'}</p>
+          <p className="text-sm text-slate-500 mt-0.5">Gestione ticket manutenzione</p>
         </div>
         <Button onClick={handleNuovo} className="bg-blue-600 hover:bg-blue-700 gap-2">
           <Plus className="w-4 h-4" /> Nuovo Ticket
