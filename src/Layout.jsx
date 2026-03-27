@@ -14,6 +14,7 @@ import {
   ListTodo,
   ClipboardList,
   Ticket,
+  BookOpen,
   Menu,
   X
 } from 'lucide-react';
@@ -172,7 +173,8 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
+    { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
+  { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
   ];
 

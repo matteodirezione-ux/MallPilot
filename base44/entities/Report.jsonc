@@ -1,0 +1,39 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data del report"
+    },
+    "operatore": {
+      "type": "string",
+      "description": "Cognome dell'operatore (es. Rossi)"
+    },
+    "contenuto": {
+      "type": "string",
+      "description": "Contenuto del report"
+    },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto allegate al report"
+    },
+    "creato_da_email": {
+      "type": "string",
+      "description": "Email di chi ha creato il report"
+    }
+  },
+  "required": [
+    "centro_id",
+    "data",
+    "operatore"
+  ]
+}
