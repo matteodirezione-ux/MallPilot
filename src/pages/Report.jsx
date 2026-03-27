@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -104,9 +105,8 @@ export default function Report({ centroSelezionato, user }) {
   };
 
   // Raggruppa per data e filtra per mese
-  const { startOfMonth: getStartOfMonth, endOfMonth: getEndOfMonth } = require('date-fns');
-  const inizio = getStartOfMonth(meseFiltrato);
-  const fine = getEndOfMonth(meseFiltrato);
+  const inizio = startOfMonth(meseFiltrato);
+  const fine = endOfMonth(meseFiltrato);
   
   const reportsDelMese = reports.filter(r => {
     const d = new Date(r.data + 'T00:00:00');
