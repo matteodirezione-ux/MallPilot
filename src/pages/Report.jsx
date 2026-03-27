@@ -144,9 +144,6 @@ export default function Report({ centroSelezionato, user }) {
         <div className="space-y-4">
           {dateOrdinate.map(data => (
             <div key={data}>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-1">
-                {format(new Date(data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
-              </h3>
               <div className="space-y-2">
                 {grouped[data].map(r => {
                   const espanso = espansi[r.id];
