@@ -187,10 +187,13 @@ export default function Dashboard({ centroSelezionato, user }) {
             return false;
           });
         }
-      } else if (centroSelezionato?.id === 'tutti') {
-        tasksList = await base44.entities.Task.list();
       } else {
-        tasksList = await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+        // proprietà
+        if (centroSelezionato?.id === 'tutti') {
+          tasksList = await base44.entities.Task.list();
+        } else {
+          tasksList = await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+        }
       }
       
       const taskStats = {
