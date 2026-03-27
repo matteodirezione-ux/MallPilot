@@ -558,7 +558,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                   .map(t => (
                     <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
                       <div className="flex-1 min-w-0 mr-2">
-                        <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · {t.operatore}</p>
+                        <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · Solleciti: {t.numero_sollecito || 0}</p>
                         <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
                       </div>
                       <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${t.tipologia === 'urgente' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
