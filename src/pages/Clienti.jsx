@@ -187,6 +187,8 @@ export default function Clienti({ centroSelezionato }) {
       const statsB = clientiStats[b.id] || {};
       
       switch (sortBy) {
+        case 'alfabetico':
+          return (a.ragione_sociale || '').localeCompare(b.ragione_sociale || '', 'it');
         case 'incassoAnno':
           return (statsB.incassoAnno || 0) - (statsA.incassoAnno || 0);
         case 'numeroAffitti':
@@ -369,6 +371,7 @@ export default function Clienti({ centroSelezionato }) {
             onChange={(e) => setSortBy(e.target.value)}
             className="px-3 py-2 border border-slate-200 rounded-md text-sm text-slate-700 bg-white hover:bg-slate-50 transition-colors"
           >
+            <option value="alfabetico">Alfabetico</option>
             <option value="incassoAnno">Incasso Anno</option>
             <option value="numeroAffitti">Numero Affitti</option>
             <option value="ultimoAffitto">Ultimo Affitto</option>
