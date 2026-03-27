@@ -176,7 +176,7 @@ export default function Ticket({ centroSelezionato, user }) {
             const isUrgente = ticket.tipologia === 'urgente';
             const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < new Date() && ticket.stato !== 'chiuso';
             return (
-              <div key={ticket.id} className={`bg-white rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm ${isUrgente ? 'border-red-200' : 'border-slate-200'}`}>
+              <div key={ticket.id} className={`rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
                 {/* Left */}
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
