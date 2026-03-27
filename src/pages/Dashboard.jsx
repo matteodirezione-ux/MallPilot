@@ -479,22 +479,48 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
-            {stats.controlliList.length === 0 ? (
-              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo</p>
-            ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {stats.controlliList
-                  .filter(c => c.stato !== 'completato' && c.stato !== 'annullato')
-                  .sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza))
-                  .slice(0, 10)
-                  .map(c => {
-                    const scaduto = new Date(c.data_scadenza) < new Date();
+            {(() => {
+              const oggi = new Date(); oggi.setHours(0,0,0,0);
+              const domani = new Date(oggi); domani.setDate(oggi.getDate() + 1);
+              const dopodomani = new Date(oggi); dopodomani.setDate(oggi.getDate() + 2);
+
+              const getDataScadenza = (c) => { const d = new Date(c.data_scadenza); d.setHours(0,0,0,0); return d; };
+
+              const filtrati = stats.controlliList
+                .filter(c => {
+                  if (c.stato === 'completato' || c.stato === 'annullato') return false;
+                  const ds = getDataScadenza(c);
+                  return ds < dopodomani; // scaduti, oggi o domani
+                })
+                .sort((a, b) => {
+                  const da = getDataScadenza(a);
+                  const db = getDataScadenza(b);
+                  const aScaduto = da < oggi;
+                  const bScaduto = db < oggi;
+                  const aOggi = da.getTime() === oggi.getTime();
+                  const bOggi = db.getTime() === oggi.getTime();
+                  // 1. scaduti, 2. oggi, 3. domani
+                  const priority = (d) => d < oggi ? 0 : d.getTime() === oggi.getTime() ? 1 : 2;
+                  const diff = priority(da) - priority(db);
+                  if (diff !== 0) return diff;
+                  return da - db;
+                });
+
+              if (filtrati.length === 0) return <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo in scadenza</p>;
+
+              return (
+                <div className="space-y-1.5 sm:space-y-2">
+                  {filtrati.map(c => {
+                    const ds = getDataScadenza(c);
+                    const scaduto = ds < oggi;
+                    const isOggi = ds.getTime() === oggi.getTime();
                     return (
-                      <div key={c.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${scaduto ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-100'}`}>
+                      <div key={c.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${scaduto ? 'bg-red-50 border-red-200' : isOggi ? 'bg-yellow-50 border-yellow-200' : 'bg-indigo-50 border-indigo-100'}`}>
                         <div className="flex-1 min-w-0 mr-2">
                           <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
-                          <p className={`text-xs ${scaduto ? 'text-red-600' : 'text-slate-500'}`}>
-                            {scaduto ? '⚠ ' : ''}{format(new Date(c.data_scadenza), 'dd MMM yyyy', { locale: it })}
+                          <p className={`text-xs ${scaduto ? 'text-red-600 font-medium' : isOggi ? 'text-yellow-700 font-medium' : 'text-slate-500'}`}>
+                            {scaduto ? '⚠ Scaduto · ' : isOggi ? '⏰ Oggi · ' : 'Domani · '}
+                            {format(new Date(c.data_scadenza), 'dd MMM yyyy', { locale: it })}
                           </p>
                         </div>
                         <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${c.stato === 'in_corso' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'}`}>
@@ -503,11 +529,9 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </div>
                     );
                   })}
-                {stats.controlliList.filter(c => c.stato !== 'completato' && c.stato !== 'annullato').length === 0 && (
-                  <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo pendente</p>
-                )}
-              </div>
-            )}
+                </div>
+              );
+            })()}
           </CardContent>
           </Card>
 
