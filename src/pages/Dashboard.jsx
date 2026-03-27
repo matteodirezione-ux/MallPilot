@@ -165,16 +165,28 @@ export default function Dashboard({ centroSelezionato, user }) {
       if (user?.tipo_account === 'vigilanza') {
         tasksList = await base44.entities.Task.filter({ assegnato_a_email: user.email });
       } else if (user?.tipo_account === 'direttore') {
-        // Il direttore vede i task del centro + quelli assegnati a lui direttamente
-        const [tasksCentro, tasksAssegnati] = await Promise.all([
-          centroSelezionato?.id === 'tutti'
-            ? base44.entities.Task.list()
-            : base44.entities.Task.filter({ centro_id: centroSelezionato.id }),
-          base44.entities.Task.filter({ assegnato_a_email: user.email })
-        ]);
-        // Unisci senza duplicati
-        const allIds = new Set(tasksCentro.map(t => t.id));
-        tasksList = [...tasksCentro, ...tasksAssegnati.filter(t => !allIds.has(t.id))];
+        // Il direttore vede tutti i task degli utenti assegnati al suo centro
+        if (centroSelezionato?.id === 'tutti') {
+          tasksList = await base44.entities.Task.list();
+        } else {
+          // Trova le email di tutti gli utenti assegnati al centro
+          const assegnazioniCentro = await base44.entities.Assegnazione.filter({ centro_id: centroSelezionato.id });
+          const emailsAssegnati = assegnazioniCentro.map(a => a.user_email);
+          
+          // Carica task per centro_id + task assegnati a qualsiasi utente del centro (anche senza centro_id)
+          const allTasks = await base44.entities.Task.list();
+          const allIds = new Set();
+          tasksList = allTasks.filter(t => {
+            if (allIds.has(t.id)) return false;
+            // Includi se ha il centro_id corretto
+            if (t.centro_id === centroSelezionato.id) { allIds.add(t.id); return true; }
+            // Includi se assegnato_a_email è uno degli utenti del centro
+            if (t.assegnato_a_email && emailsAssegnati.includes(t.assegnato_a_email)) { allIds.add(t.id); return true; }
+            // Includi se assegnato_da_email è uno degli utenti del centro
+            if (t.assegnato_da_email && emailsAssegnati.includes(t.assegnato_da_email)) { allIds.add(t.id); return true; }
+            return false;
+          });
+        }
       } else if (centroSelezionato?.id === 'tutti') {
         tasksList = await base44.entities.Task.list();
       } else {
