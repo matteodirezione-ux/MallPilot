@@ -281,7 +281,7 @@ export default function Documenti({ centroSelezionato }) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Documenti</h1>
-          <p className="text-slate-600">{centroSelezionato?.nome}</p>
+          <p className="text-slate-600">Contratti di affitto spazi</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
           setDialogOpen(open);
