@@ -264,7 +264,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
         </div>
         <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700" size="sm">
           <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline ml-1">Nuova Attività</span>
+          <span className="hidden sm:inline ml-1">Nuovo Controllo</span>
         </Button>
       </div>
 
@@ -339,7 +339,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{manutenzioneSelezionata?.id ? 'Modifica Manutenzione' : 'Nuova Attività'}</DialogTitle>
+            <DialogTitle>{manutenzioneSelezionata?.id ? 'Modifica Manutenzione' : 'Nuovo Controllo'}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4">
