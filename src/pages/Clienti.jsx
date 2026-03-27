@@ -19,7 +19,7 @@ export default function Clienti({ centroSelezionato }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('incassoAnno');
+  const [sortBy, setSortBy] = useState('alfabetico');
 
   const [formData, setFormData] = useState({
     ragione_sociale: '',
