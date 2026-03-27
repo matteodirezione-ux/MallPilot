@@ -504,7 +504,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Controlli */}
-          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow flex flex-col">
           <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" />
@@ -513,7 +513,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+          <CardContent className="flex-1 overflow-y-auto">
             {(() => {
               const oggi = new Date(); oggi.setHours(0,0,0,0);
               const domani = new Date(oggi); domani.setDate(oggi.getDate() + 1);
