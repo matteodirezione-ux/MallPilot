@@ -15,6 +15,7 @@ import { differenceInDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import DisponibilitaSpazi from '../components/calendario/DisponibilitaSpazi';
+import OccupazioneSpazi from '../components/calendario/OccupazioneSpazi';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
@@ -320,11 +321,11 @@ export default function Calendario({ centroSelezionato, user }) {
                 <>
                   <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
                     <LayoutGrid className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Disponibilita</span>
+                    <span className="hidden sm:inline">Disponibilità</span>
                   </TabsTrigger>
-                  <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                  <TabsTrigger value="occupazione" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
                     <LayoutGrid className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Disponibilita</span>
+                    <span className="hidden sm:inline">Occupazione</span>
                   </TabsTrigger>
                 </>
               )}
@@ -406,6 +407,13 @@ export default function Calendario({ centroSelezionato, user }) {
               <DisponibilitaSpazi
                 prenotazioni={prenotazioniFiltrate}
                 spazi={spazi}
+              />
+            </TabsContent>
+            <TabsContent value="occupazione">
+              <OccupazioneSpazi
+                prenotazioni={prenotazioniFiltrate}
+                spazi={spazi}
+                clienti={clienti}
               />
             </TabsContent>
           </>
