@@ -198,8 +198,7 @@ export default function Report({ centroSelezionato, user }) {
           <div className="space-y-4 mt-2">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Data</label>
-              <Input type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} />
-            </div>
+              <Input type="date" value={form.data} onChange={e => setForm(p => ({ ...p, data: e.target.value }))} className="w-fit" /></div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Operatore (es. Rossi)</label>
               <Input placeholder="Cognome operatore" value={form.operatore} onChange={e => setForm(p => ({ ...p, operatore: e.target.value }))} />
