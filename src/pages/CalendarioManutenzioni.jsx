@@ -250,7 +250,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   if (!user) return null;
 
   return (
-    <div className="p-3 md:p-6 max-w-6xl mx-auto">
+    <div className="p-3 md:p-6">
       <div className="flex items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
