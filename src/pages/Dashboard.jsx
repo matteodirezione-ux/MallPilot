@@ -15,7 +15,9 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  ClipboardList,
+  Ticket
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -44,7 +46,9 @@ export default function Dashboard({ centroSelezionato, user }) {
       eventiCorrenti: 0,
       prossimiEventi: []
     },
-    tasksList: []
+    tasksList: [],
+    controlliList: [],
+    ticketsList: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -252,6 +256,16 @@ export default function Dashboard({ centroSelezionato, user }) {
         tassoOccupazioneAnnuale = (giorniOccupati / totaleGiorniDisponibili) * 100;
       }
 
+      // Controlli (Manutenzioni)
+      const controlliList = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Manutenzione.list()
+        : await base44.entities.Manutenzione.filter({ centro_id: centroSelezionato.id });
+
+      // Ticket
+      const ticketsList = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Ticket.list()
+        : await base44.entities.Ticket.filter({ centro_id: centroSelezionato.id });
+
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
         tasksList.map(async (t) => {
@@ -278,7 +292,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         tassoOccupazioneAnnuale,
         taskStats,
         eventStats,
-        tasksList: tasksConDettagli
+        tasksList: tasksConDettagli,
+        controlliList: controlliList || [],
+        ticketsList: ticketsList || []
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
@@ -436,9 +452,9 @@ export default function Dashboard({ centroSelezionato, user }) {
           )}
 
           {/* Bottom cards - Responsive Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          {/* Task per Giorno */}
-          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+          {/* Task */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
               <ListTodo className="w-4 sm:w-5 h-4 sm:h-5 text-slate-600" />
@@ -452,8 +468,92 @@ export default function Dashboard({ centroSelezionato, user }) {
           </CardContent>
           </Card>
 
+          {/* Controlli */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
+                Controlli
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+            {stats.controlliList.length === 0 ? (
+              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo</p>
+            ) : (
+              <div className="space-y-1.5 sm:space-y-2">
+                {stats.controlliList
+                  .filter(c => c.stato !== 'completato' && c.stato !== 'annullato')
+                  .sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza))
+                  .slice(0, 10)
+                  .map(c => {
+                    const scaduto = new Date(c.data_scadenza) < new Date();
+                    return (
+                      <div key={c.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${scaduto ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-100'}`}>
+                        <div className="flex-1 min-w-0 mr-2">
+                          <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                          <p className={`text-xs ${scaduto ? 'text-red-600' : 'text-slate-500'}`}>
+                            {scaduto ? '⚠ ' : ''}{format(new Date(c.data_scadenza), 'dd MMM yyyy', { locale: it })}
+                          </p>
+                        </div>
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${c.stato === 'in_corso' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'}`}>
+                          {c.stato === 'da_fare' ? 'Da fare' : 'In corso'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                {stats.controlliList.filter(c => c.stato !== 'completato' && c.stato !== 'annullato').length === 0 && (
+                  <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo pendente</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+          </Card>
+
+          {/* Ticket */}
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3">
+            <div className="flex items-center gap-2">
+              <Ticket className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
+                Ticket
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+            {stats.ticketsList.length === 0 ? (
+              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket</p>
+            ) : (
+              <div className="space-y-1.5 sm:space-y-2">
+                {stats.ticketsList
+                  .filter(t => t.stato !== 'chiuso')
+                  .sort((a, b) => {
+                    const order = { urgente: 0, ordinario: 1 };
+                    return (order[a.tipologia] ?? 1) - (order[b.tipologia] ?? 1);
+                  })
+                  .slice(0, 10)
+                  .map(t => (
+                    <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · {t.operatore}</p>
+                        <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
+                      </div>
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${t.tipologia === 'urgente' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {t.tipologia}
+                      </span>
+                    </div>
+                  ))}
+                {stats.ticketsList.filter(t => t.stato !== 'chiuso').length === 0 && (
+                  <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket aperto</p>
+                )}
+              </div>
+            )}
+          </CardContent>
+          </Card>
+
           {/* Eventi */}
-          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
@@ -511,7 +611,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Affitti Correnti */}
-          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+          <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader className="pb-2 sm:pb-3">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
@@ -551,7 +651,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                     </Card>
 
                     {/* Prossimi Affitti */}
-                    <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow lg:col-span-1">
+                    <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
                     <CardHeader className="pb-2 sm:pb-3">
                     <div className="flex items-center gap-2">
                     <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
