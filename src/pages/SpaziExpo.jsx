@@ -237,7 +237,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Spazi Expo</h1>
-          <p className="text-slate-600">{centroSelezionato?.nome}</p>
+          <p className="text-slate-600">Spazi disponibili in galleria - {centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Pulsante Mappa */}
