@@ -91,7 +91,7 @@ export default function TasksDashboard({ tasks = [] }) {
             {groupedTasks[groupKey].map(task => (
               <div 
                 key={task.id}
-                className="p-2 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+                className={`p-2 rounded-lg border transition-colors ${groupKey === 'scaduti' ? 'bg-red-50 border-red-200 hover:border-red-300' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}
               >
                 <div className="flex items-start gap-2">
                   {/* Priority indicator */}
