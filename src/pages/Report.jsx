@@ -158,10 +158,12 @@ export default function Report({ centroSelezionato, user }) {
                         onClick={() => toggleEspanso(r.id)}
                       >
                         <div className="flex flex-col">
-                          <p className={`text-xs uppercase tracking-wide mb-0.5 ${nonLetto ? 'text-blue-500 font-semibold' : 'text-slate-400'}`}>
-                            {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
-                          </p>
-                          <p className={`text-sm ${nonLetto ? 'font-bold text-blue-700' : 'font-semibold text-slate-800'}`}>{r.operatore}</p>
+                          <div className="flex items-center gap-2">
+                            <p className={`text-xs uppercase tracking-wide ${nonLetto ? 'text-blue-500 font-semibold' : 'text-slate-400'}`}>
+                              {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
+                            </p>
+                            <span className={`text-sm font-semibold ${nonLetto ? 'font-bold text-blue-700' : 'text-slate-800'}`}>· {r.operatore}</span>
+                          </div>
                           {!espanso && r.contenuto && (
                             <p className={`text-xs line-clamp-1 max-w-xs ${nonLetto ? 'text-blue-500 font-medium' : 'text-slate-400'}`}>{r.contenuto}</p>
                           )}
