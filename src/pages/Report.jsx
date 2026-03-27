@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,7 +16,6 @@ export default function Report({ centroSelezionato, user }) {
   const [formOpen, setFormOpen] = useState(false);
   const [reportSelezionato, setReportSelezionato] = useState(null);
   const [espansi, setEspansi] = useState({});
-  const [meseFiltrato, setMeseFiltrato] = useState(new Date());
 
   const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', foto_urls: [] });
   const [uploading, setUploading] = useState(false);
@@ -104,16 +102,8 @@ export default function Report({ centroSelezionato, user }) {
     }
   };
 
-  // Raggruppa per data e filtra per mese
-  const inizio = startOfMonth(meseFiltrato);
-  const fine = endOfMonth(meseFiltrato);
-  
-  const reportsDelMese = reports.filter(r => {
-    const d = new Date(r.data + 'T00:00:00');
-    return d >= inizio && d <= fine;
-  });
-
-  const grouped = reportsDelMese.reduce((acc, r) => {
+  // Raggruppa per data
+  const grouped = reports.reduce((acc, r) => {
     const key = r.data;
     if (!acc[key]) acc[key] = [];
     acc[key].push(r);
@@ -136,22 +126,9 @@ export default function Report({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Report</h1>
           <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
-            <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-              <ChevronLeft className="w-4 h-4 text-slate-600" />
-            </button>
-            <span className="text-sm font-medium text-slate-700 min-w-max">
-              {format(meseFiltrato, 'MMMM yyyy', { locale: it })}
-            </span>
-            <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() + 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-          </div>
-          <Button onClick={openNuovo} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Report
-          </Button>
-        </div>
+        <Button onClick={openNuovo} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" /> Nuovo Report
+        </Button>
       </div>
 
       {loading ? (
