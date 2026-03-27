@@ -164,6 +164,17 @@ export default function Dashboard({ centroSelezionato, user }) {
       let tasksList;
       if (user?.tipo_account === 'vigilanza') {
         tasksList = await base44.entities.Task.filter({ assegnato_a_email: user.email });
+      } else if (user?.tipo_account === 'direttore') {
+        // Il direttore vede i task del centro + quelli assegnati a lui direttamente
+        const [tasksCentro, tasksAssegnati] = await Promise.all([
+          centroSelezionato?.id === 'tutti'
+            ? base44.entities.Task.list()
+            : base44.entities.Task.filter({ centro_id: centroSelezionato.id }),
+          base44.entities.Task.filter({ assegnato_a_email: user.email })
+        ]);
+        // Unisci senza duplicati
+        const allIds = new Set(tasksCentro.map(t => t.id));
+        tasksList = [...tasksCentro, ...tasksAssegnati.filter(t => !allIds.has(t.id))];
       } else if (centroSelezionato?.id === 'tutti') {
         tasksList = await base44.entities.Task.list();
       } else {

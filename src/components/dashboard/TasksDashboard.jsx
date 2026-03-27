@@ -35,7 +35,9 @@ export default function TasksDashboard({ tasks = [] }) {
 
   const activeTasks = tasks.filter(t => {
     if (t.stato === 'completato' || t.stato === 'annullato') return false;
-    return true;
+    if (!t.data_scadenza) return false;
+    const d = new Date(t.data_scadenza); d.setHours(0,0,0,0);
+    return d <= domani; // solo scaduti, oggi e domani
   });
 
   activeTasks.forEach(task => {
