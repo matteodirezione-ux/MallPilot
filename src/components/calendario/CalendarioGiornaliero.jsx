@@ -121,10 +121,6 @@ export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, on
                           })}
                         </div>
                       )}
-
-                      {p.materiale_dimostrativo && (
-                        <p className="text-xs text-slate-500 mt-2 italic">📦 {p.materiale_dimostrativo}</p>
-                      )}
                     </div>
                   </div>
                 </div>
