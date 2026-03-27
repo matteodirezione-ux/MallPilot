@@ -259,7 +259,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             <span className="sm:hidden">Manutenzioni</span>
           </h1>
           <p className="text-xs md:text-sm text-slate-500 mt-0.5">
-            {centroSelezionato?.nome && centroSelezionato.id !== 'tutti' ? centroSelezionato.nome : 'Tutti i centri'}
+            Controlli da effettuare
           </p>
         </div>
         <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700" size="sm">
