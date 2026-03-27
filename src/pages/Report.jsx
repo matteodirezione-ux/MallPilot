@@ -81,7 +81,26 @@ export default function Report({ centroSelezionato, user }) {
     loadReports();
   };
 
-  const toggleEspanso = (id) => setEspansi(prev => ({ ...prev, [id]: !prev[id] }));
+  const isDirettore = user?.tipo_account === 'direttore';
+
+  const isLetto = (r) => {
+    if (!isDirettore) return true;
+    return (r.letto_da || []).includes(user.email);
+  };
+
+  const toggleEspanso = async (id) => {
+    const isOpen = !espansi[id];
+    setEspansi(prev => ({ ...prev, [id]: isOpen }));
+    // Se il direttore apre il report per la prima volta, segnalo come letto
+    if (isDirettore && isOpen) {
+      const r = reports.find(rep => rep.id === id);
+      if (r && !isLetto(r)) {
+        const nuoviLetti = [...(r.letto_da || []), user.email];
+        await base44.entities.Report.update(id, { letto_da: nuoviLetti });
+        setReports(prev => prev.map(rep => rep.id === id ? { ...rep, letto_da: nuoviLetti } : rep));
+      }
+    }
+  };
 
   // Raggruppa per data
   const grouped = reports.reduce((acc, r) => {
@@ -131,24 +150,28 @@ export default function Report({ centroSelezionato, user }) {
               <div className="space-y-2">
                 {grouped[data].map(r => {
                   const espanso = espansi[r.id];
-                  return (
-                    <div key={r.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                  const nonLetto = !isLetto(r);
+                   return (
+                    <div key={r.id} className={`bg-white rounded-xl border overflow-hidden ${nonLetto ? 'border-blue-400' : 'border-slate-200'}`}>
                       <div
-                        className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition-colors"
+                        className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         onClick={() => toggleEspanso(r.id)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${nonLetto ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}>
                             {r.operatore?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-800 text-sm">{r.operatore}</p>
+                            <p className={`text-sm ${nonLetto ? 'font-bold text-blue-700' : 'font-semibold text-slate-800'}`}>{r.operatore}</p>
                             {!espanso && r.contenuto && (
-                              <p className="text-xs text-slate-400 line-clamp-1 max-w-xs">{r.contenuto}</p>
+                              <p className={`text-xs line-clamp-1 max-w-xs ${nonLetto ? 'text-blue-500 font-medium' : 'text-slate-400'}`}>{r.contenuto}</p>
                             )}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          {nonLetto && (
+                            <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
+                          )}
                           {r.foto_urls?.length > 0 && (
                             <span className="text-xs text-slate-400 flex items-center gap-1">
                               <Camera className="w-3 h-3" />{r.foto_urls.length}

@@ -29,6 +29,13 @@
     "creato_da_email": {
       "type": "string",
       "description": "Email di chi ha creato il report"
+    },
+    "letto_da": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista delle email dei direttori che hanno letto il report"
     }
   },
   "required": [
