@@ -157,16 +157,11 @@ export default function Report({ centroSelezionato, user }) {
                         className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         onClick={() => toggleEspanso(r.id)}
                       >
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-xs uppercase tracking-wide ${nonLetto ? 'text-blue-500 font-semibold' : 'text-slate-400'}`}>
-                              {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
-                            </p>
-                            <span className={`text-sm font-semibold ${nonLetto ? 'font-bold text-blue-700' : 'text-slate-800'}`}>· {r.operatore}</span>
-                          </div>
-                          {!espanso && r.contenuto && (
-                            <p className={`text-xs line-clamp-1 max-w-xs ${nonLetto ? 'text-blue-500 font-medium' : 'text-slate-400'}`}>{r.contenuto}</p>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-bold ${nonLetto ? 'text-blue-700' : 'text-slate-800'}`}>
+                            {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
+                          </p>
+                          <span className={`text-sm ${nonLetto ? 'text-blue-500' : 'text-slate-500'}`}>· {r.operatore}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           {nonLetto && (
