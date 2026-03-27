@@ -26,12 +26,14 @@ export default function TasksDashboard({ tasks = [] }) {
     return format(taskDate, 'EEEE d MMMM', { locale: it });
   };
 
-  // Organizza i task per data di scadenza
+  // Organizza i task per data di scadenza (solo attivi)
   const groupedTasks = {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  tasks.forEach(task => {
+  const activeTasks = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
+
+  activeTasks.forEach(task => {
     const dueDate = task.data_scadenza ? new Date(task.data_scadenza) : null;
     let groupKey = 'senza_data';
 
@@ -47,9 +49,9 @@ export default function TasksDashboard({ tasks = [] }) {
     groupedTasks[groupKey].push(task);
   });
 
-  // Ordina i gruppi
+  // Ordina i gruppi: scaduti prima, poi oggi, poi domani, poi futuri
   const sortedGroups = Object.keys(groupedTasks).sort((a, b) => {
-    const order = ['oggi', 'domani', 'scaduti'];
+    const order = ['scaduti', 'oggi', 'domani'];
     const aIndex = order.indexOf(a);
     const bIndex = order.indexOf(b);
 
@@ -59,7 +61,7 @@ export default function TasksDashboard({ tasks = [] }) {
     return a.localeCompare(b);
   });
 
-  if (tasks.length === 0) {
+  if (activeTasks.length === 0) {
     return (
       <div className="text-center py-8 text-slate-500">
         <p className="text-sm">Nessun task da visualizzare</p>
