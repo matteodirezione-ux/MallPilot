@@ -551,9 +551,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                             <div className="flex-1 min-w-0 mr-2">
                               <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
                             </div>
-                            <span className={`text-xs px-1.5 py-0.5 rounded font-medium shrink-0 ${c.stato === 'in_corso' ? 'bg-yellow-100 text-yellow-700' : 'bg-slate-100 text-slate-600'}`}>
-                              {c.stato === 'da_fare' ? 'Da fare' : 'In corso'}
-                            </span>
+
                           </div>
                         ))}
                       </div>
