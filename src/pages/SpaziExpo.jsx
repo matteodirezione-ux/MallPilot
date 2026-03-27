@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Building2, MapPin, Pencil, Trash2, Image as ImageIcon, Sparkles, Map, Camera, Loader2 } from 'lucide-react';
+import { Plus, Building2, MapPin, Pencil, Trash2, Image as ImageIcon, Sparkles, Map, Camera, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function SpaziExpo({ centroSelezionato, user }) {
@@ -21,6 +21,8 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   const [mappaUrl, setMappaUrl] = useState(null);
   const isDirettore = user?.tipo_account === 'direttore';
 
+  const [prenotazioni, setPrenotazioni] = useState([]);
+  
   const [formData, setFormData] = useState({
     centro_id: '',
     numero_spazio: '',
@@ -37,6 +39,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
       loadSpazi();
+      loadPrenotazioni();
       setMappaUrl(centroSelezionato?.piantina_url || null);
     }
   }, [centroSelezionato]);
@@ -94,6 +97,20 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       toast.error('Errore nel caricamento degli spazi');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPrenotazioni = async () => {
+    try {
+      if (!centroSelezionato || !centroSelezionato.id) return;
+      
+      const data = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Prenotazione.list()
+        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
+      
+      setPrenotazioni(data || []);
+    } catch (error) {
+      console.error('Errore caricamento prenotazioni:', error);
     }
   };
 
@@ -216,6 +233,20 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       </div>
     );
   }
+
+  // Calcola spazi disponibili oggi
+  const spaziDisponibili = useMemo(() => {
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+    
+    const spaziOccupati = new Set(
+      prenotazioni
+        .filter(p => p.stato !== 'cancellata' && new Date(p.data_inizio) <= oggi && new Date(p.data_fine) >= oggi)
+        .flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean))
+    );
+    
+    return spazi.filter(s => !spaziOccupati.has(s.id) && s.attivo);
+  }, [spazi, prenotazioni]);
 
   if (loading) {
     return (
@@ -528,6 +559,36 @@ export default function SpaziExpo({ centroSelezionato, user }) {
         </DialogContent>
       </Dialog>
 
+      {/* Sezione Spazi Disponibili */}
+      {spaziDisponibili.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+            <h2 className="text-2xl font-bold text-slate-800">Spazi Disponibili in Galleria</h2>
+            <span className="ml-auto bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">{spaziDisponibili.length}</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {spaziDisponibili.map((spazio) => (
+              <SpazioCard
+                key={spazio.id}
+                spazio={spazio}
+                onEdit={user?.tipo_account !== 'vigilanza' ? handleEdit : null}
+                onDelete={user?.tipo_account !== 'vigilanza' ? handleDelete : null}
+                isDisponibile={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sezione Tutti gli Spazi */}
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <Building2 className="w-6 h-6" />
+          Tutti gli Spazi
+        </h2>
+      </div>
+
       {spazi.length === 0 ? (
         <Card className="bg-white border-slate-200">
           <CardContent className="flex flex-col items-center justify-center py-12">
@@ -593,10 +654,10 @@ export default function SpaziExpo({ centroSelezionato, user }) {
 }
 
 // Componente separato per la card dello spazio
-function SpazioCard({ spazio, onEdit, onDelete }) {
+function SpazioCard({ spazio, onEdit, onDelete, isDisponibile }) {
   return (
     <Card
-      className="bg-white border-slate-200 hover:shadow-lg transition-shadow overflow-hidden"
+      className={`bg-white hover:shadow-lg transition-shadow overflow-hidden ${isDisponibile ? 'border-green-200 border-2' : 'border-slate-200'}`}
       style={{ borderTopWidth: '4px', borderTopColor: spazio.colore || '#3b82f6' }}
     >
       {spazio.foto_urls && spazio.foto_urls.length > 0 ? (
@@ -699,6 +760,13 @@ function SpazioCard({ spazio, onEdit, onDelete }) {
             </div>
           )}
         </div>
+
+        {isDisponibile && (
+          <div className="mt-3 px-2 py-1 bg-green-50 text-green-700 text-xs rounded-lg text-center font-medium flex items-center justify-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Disponibile oggi
+          </div>
+        )}
 
         {!spazio.attivo && (
           <div className="mt-3 px-2 py-1 bg-red-50 text-red-700 text-xs rounded-lg text-center">
