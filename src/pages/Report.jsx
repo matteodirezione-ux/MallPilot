@@ -124,7 +124,7 @@ export default function Report({ centroSelezionato, user }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Report</h1>
-          <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
+          <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
         <Button onClick={openNuovo} className="flex items-center gap-2">
           <Plus className="w-4 h-4" /> Nuovo Report
