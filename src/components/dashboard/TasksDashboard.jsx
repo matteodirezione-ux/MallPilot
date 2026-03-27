@@ -103,6 +103,9 @@ export default function TasksDashboard({ tasks = [] }) {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-800 truncate">{task.titolo}</p>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-xs px-2 py-0.5 bg-white rounded border border-slate-200 text-slate-600">
+                        {priorityConfig[task.priorita]?.label}
+                      </span>
                       {task.assegnato_a_nome && (
                         <span className="text-xs text-slate-500">→ {task.assegnato_a_nome}</span>
                       )}
