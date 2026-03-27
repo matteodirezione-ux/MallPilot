@@ -37,10 +37,11 @@ export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, on
       const dataFine = endOfDay(new Date(p.data_fine));
       return giorno >= dataInizio && giorno <= dataFine && p.stato !== 'cancellata';
     }).sort((a, b) => {
-      if (a.is_event !== b.is_event) return a.is_event ? 1 : -1;
-      return (getClienteById(a.cliente_id)?.ragione_sociale || a.nome_evento || '').localeCompare(
-        (getClienteById(b.cliente_id)?.ragione_sociale || b.nome_evento || '')
-      );
+      const spazioA = getSpazioById(a.spazio_id);
+      const spazioB = getSpazioById(b.spazio_id);
+      const numA = parseInt(spazioA?.numero_spazio || '0') || 0;
+      const numB = parseInt(spazioB?.numero_spazio || '0') || 0;
+      return numA - numB;
     });
   }, [currentDate, prenotazioni, clienti, spazi]);
 
