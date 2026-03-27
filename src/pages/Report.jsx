@@ -157,16 +157,14 @@ export default function Report({ centroSelezionato, user }) {
                         className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         onClick={() => toggleEspanso(r.id)}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 ${nonLetto ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'}`}>
-                            {r.operatore?.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className={`text-sm ${nonLetto ? 'font-bold text-blue-700' : 'font-semibold text-slate-800'}`}>{r.operatore}</p>
-                            {!espanso && r.contenuto && (
-                              <p className={`text-xs line-clamp-1 max-w-xs ${nonLetto ? 'text-blue-500 font-medium' : 'text-slate-400'}`}>{r.contenuto}</p>
-                            )}
-                          </div>
+                        <div className="flex flex-col">
+                          <p className={`text-xs uppercase tracking-wide mb-0.5 ${nonLetto ? 'text-blue-500 font-semibold' : 'text-slate-400'}`}>
+                            {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
+                          </p>
+                          <p className={`text-sm ${nonLetto ? 'font-bold text-blue-700' : 'font-semibold text-slate-800'}`}>{r.operatore}</p>
+                          {!espanso && r.contenuto && (
+                            <p className={`text-xs line-clamp-1 max-w-xs ${nonLetto ? 'text-blue-500 font-medium' : 'text-slate-400'}`}>{r.contenuto}</p>
+                          )}
                         </div>
                         <div className="flex items-center gap-2">
                           {nonLetto && (
