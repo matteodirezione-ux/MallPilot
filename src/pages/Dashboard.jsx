@@ -303,6 +303,15 @@ export default function Dashboard({ centroSelezionato, user }) {
     }
   };
 
+  const giorniMancanti = (dataStr) => {
+    const oggi = new Date(); oggi.setHours(0,0,0,0);
+    const data = new Date(dataStr); data.setHours(0,0,0,0);
+    const diff = Math.round((data - oggi) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return 'oggi';
+    if (diff === 1) return 'domani';
+    return `tra ${diff}gg`;
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('it-IT', { 
       style: 'currency', 
@@ -629,7 +638,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                         {evento.nome_evento || evento.cliente?.ragione_sociale || 'N.A.'}
                       </p>
                       <p className="text-xs text-slate-500">
-                        Prossimo
+                        Prossimo · {giorniMancanti(evento.data_inizio)}
                       </p>
                       </div>
                       <div className="text-right shrink-0">
@@ -709,19 +718,19 @@ export default function Dashboard({ centroSelezionato, user }) {
                          {prenotazione.cliente?.ragione_sociale}
                        </p>
                        <p className="text-xs text-slate-600">
-                         Spazio {prenotazione.spazio?.numero_spazio}
+                         Spazio {prenotazione.spazio?.numero_spazio} · {giorniMancanti(prenotazione.data_inizio)}
                        </p>
-                     </div>
-                     <div className="text-right shrink-0">
+                       </div>
+                       <div className="text-right shrink-0">
                        <p className="text-xs font-medium text-slate-700 whitespace-nowrap">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}</p>
-                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-          </Card>
-          </div>
+                       </div>
+                       </div>
+                       ))}
+                       </div>
+                       )}
+                       </CardContent>
+                       </Card>
+                       </div>
     </div>
   );
 }
