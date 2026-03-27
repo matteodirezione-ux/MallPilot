@@ -31,16 +31,23 @@ export default function TasksDashboard({ tasks = [] }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const activeTasks = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
+  const domani = new Date(today); domani.setDate(today.getDate() + 1);
+
+  const activeTasks = tasks.filter(t => {
+    if (t.stato === 'completato' || t.stato === 'annullato') return false;
+    if (!t.data_scadenza) return false;
+    const d = new Date(t.data_scadenza); d.setHours(0,0,0,0);
+    return d <= domani; // solo scaduti, oggi e domani
+  });
 
   activeTasks.forEach(task => {
-    const dueDate = task.data_scadenza ? new Date(task.data_scadenza) : null;
+    const dueDate = new Date(task.data_scadenza);
     let groupKey = 'senza_data';
 
     if (dueDate) {
       dueDate.setHours(0, 0, 0, 0);
       if (dueDate.getTime() === today.getTime()) groupKey = 'oggi';
-      else if (dueDate.getTime() === today.getTime() + 86400000) groupKey = 'domani';
+      else if (dueDate.getTime() === domani.getTime()) groupKey = 'domani';
       else if (dueDate < today) groupKey = 'scaduti';
       else groupKey = format(dueDate, 'yyyy-MM-dd');
     }
