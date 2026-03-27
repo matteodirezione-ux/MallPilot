@@ -217,7 +217,7 @@ export default function Report({ centroSelezionato, user }) {
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Operatore (es. Rossi)</label>
-              <Input placeholder="Cognome operatore" value={form.operatore} onChange={e => setForm(p => ({ ...p, operatore: e.target.value }))} />
+              <Input placeholder="Es. Mario Rossi" value={form.operatore} onChange={e => setForm(p => ({ ...p, operatore: e.target.value }))} />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Contenuto del report</label>
