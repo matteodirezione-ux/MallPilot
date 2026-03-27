@@ -45,6 +45,13 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
     } : { r: 59, g: 130, b: 246 };
   };
 
+  const getPrenotazioneColor = (p) => {
+    if (p.is_event) return '#9333ea'; // viola
+    const giorni = Math.abs((new Date(p.data_fine) - new Date(p.data_inizio)) / (1000 * 60 * 60 * 24));
+    if (giorni >= 300) return '#3b82f6'; // blu = permanente
+    return '#22c55e'; // verde = non permanente
+  };
+
   const inizioSettimana = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const fineSettimana = endOfWeek(currentWeek, { weekStartsOn: 1 });
 
@@ -111,39 +118,37 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                     {prenotazioniGiorno.map(p => {
                       const spazio = getSpazioById(p.spazio_id);
                       const cliente = getClienteById(p.cliente_id);
-                      const spazioColor = spazio?.colore || '#3b82f6';
-                      const rgb = hexToRgb(spazioColor);
+                      const color = getPrenotazioneColor(p);
+                      const rgb = hexToRgb(color);
                       return (
                         <div
                            key={p.id}
                            onClick={() => isVigilanza ? setSelectedPrenotazione({ prenotazione: p, spazio, cliente }) : (onEdit && onEdit(p))}
                            style={{
                              backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
-                             borderColor: spazioColor,
+                             borderColor: color,
                            }}
                            className={`text-xs px-2 py-1.5 rounded border-l-4 hover:opacity-80 transition-opacity cursor-pointer`}
                          >
                           <div className="flex items-center gap-1 mb-0.5">
                             <span
                               className="font-bold text-[10px]"
-                              style={{ color: spazioColor }}
+                              style={{ color: color }}
                             >
                               {spazio?.numero_spazio || '?'} {spazio?.nome ? `· ${spazio.nome}` : ''}
                             </span>
                             {p.is_event && <Sparkles className="w-3 h-3 text-purple-500 flex-shrink-0" />}
                           </div>
-                          <div className={`truncate font-medium ${p.is_event ? 'text-purple-800' : 'text-slate-700'}`}>
+                          <div className="truncate font-medium text-slate-700">
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
-                          {/* Spazi aggiuntivi */}
                           {p.spazi_ids && p.spazi_ids.filter(id => id !== p.spazio_id).length > 0 && (
                             <div className="flex flex-wrap gap-0.5 mt-1">
                               {p.spazi_ids.filter(id => id !== p.spazio_id).map(id => {
                                 const s = getSpazioById(id);
                                 if (!s) return null;
-                                const sc = s.colore || '#3b82f6';
                                 return (
-                                  <span key={id} className="text-[9px] px-1 py-0.5 rounded bg-white border font-medium" style={{ borderColor: sc, color: sc }}>
+                                  <span key={id} className="text-[9px] px-1 py-0.5 rounded bg-white border font-medium" style={{ borderColor: color, color: color }}>
                                     +{s.numero_spazio}
                                   </span>
                                 );

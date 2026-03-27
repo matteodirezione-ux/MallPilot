@@ -49,6 +49,13 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
     } : { r: 59, g: 130, b: 246 };
   };
 
+  const getPrenotazioneColor = (p) => {
+    if (p.is_event) return '#9333ea'; // viola
+    const giorni = Math.abs((new Date(p.data_fine) - new Date(p.data_inizio)) / (1000 * 60 * 60 * 24));
+    if (giorni >= 300) return '#3b82f6'; // blu = permanente
+    return '#22c55e'; // verde = non permanente
+  };
+
   return (
     <Card className="bg-white border-slate-200">
       <CardHeader>
@@ -129,31 +136,27 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                   {!mostraDisponibili && prenotazioniGiorno.map(p => {
                     const spazio = getSpazioById(p.spazio_id);
                     const cliente = getClienteById(p.cliente_id);
-                    const spazioColor = spazio?.colore || '#3b82f6';
-                    const rgb = hexToRgb(spazioColor);
+                    const color = getPrenotazioneColor(p);
+                    const rgb = hexToRgb(color);
                     return (
                       <div
                          key={p.id}
                          onClick={() => isVigilanza ? setSelectedPrenotazione({ prenotazione: p, spazio, cliente }) : (onEdit && onEdit(p))}
-                         style={p.is_event ? {
-                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.08)`,
-                           borderColor: spazioColor,
-                         } : {
-                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.15)`,
-                           borderColor: spazioColor,
-                           color: spazioColor
+                         style={{
+                           backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
+                           borderColor: color,
                          }}
                          className={`text-xs px-2 py-1 rounded border-2 hover:opacity-80 transition-opacity cursor-pointer`}
                        >
                         <div className="flex items-center gap-1.5">
                           <div
                             className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white"
-                            style={{ borderColor: spazioColor, color: spazioColor }}
+                            style={{ borderColor: color, color: color }}
                           >
                             {spazio?.numero_spazio || '?'}
                           </div>
                           {p.is_event && <Sparkles className="flex-shrink-0 w-3 h-3 text-purple-500" />}
-                          <div className={`font-medium truncate flex-1 ${p.is_event ? 'text-purple-800' : ''}`} style={p.is_event ? {} : { color: '#1e293b' }}>
+                          <div className="font-medium truncate flex-1" style={{ color: '#1e293b' }}>
                             {p.is_event ? (p.nome_evento || 'Evento') : (cliente?.ragione_sociale || 'Cliente')}
                           </div>
                         </div>
@@ -162,9 +165,8 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                             {p.spazi_ids.filter(id => id !== p.spazio_id).map(id => {
                               const s = getSpazioById(id);
                               if (!s) return null;
-                              const sc = s.colore || '#3b82f6';
                               return (
-                                <span key={id} className="text-[9px] px-1 py-0.5 rounded bg-white border font-medium" style={{ borderColor: sc, color: sc }}>
+                                <span key={id} className="text-[9px] px-1 py-0.5 rounded bg-white border font-medium" style={{ borderColor: color, color: color }}>
                                   +{s.numero_spazio}
                                 </span>
                               );
