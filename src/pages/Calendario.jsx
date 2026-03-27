@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CalendarioMensile from '../components/calendario/CalendarioMensile';
 import CalendarioSettimanale from '../components/calendario/CalendarioSettimanale';
+import CalendarioGiornaliero from '../components/calendario/CalendarioGiornaliero';
 import ListaPrenotazioni from '../components/calendario/ListaPrenotazioni';
 import FormPrenotazione from '../components/calendario/FormPrenotazione';
 import { Plus, Calendar as CalendarIcon, CalendarDays, List, LayoutGrid, ExternalLink, Search, Map, Upload, X } from 'lucide-react';
@@ -31,6 +32,8 @@ export default function Calendario({ centroSelezionato, user }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [nascondiPermanenti, setNascondiPermanenti] = useState(false);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [tabDefault] = useState(isMobile ? 'giornaliero' : 'mensile');
   const [soloEventi, setSoloEventi] = useState(false);
   const [mostraDisponibili, setMostraDisponibili] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -288,7 +291,7 @@ export default function Calendario({ centroSelezionato, user }) {
       </Dialog>
 
       {/* Tabs */}
-      <Tabs defaultValue="mensile" className="w-full">
+      <Tabs defaultValue={tabDefault} className="w-full">
         <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -309,11 +312,15 @@ export default function Calendario({ centroSelezionato, user }) {
                 <CalendarDays className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Settimanale</span>
               </TabsTrigger>
+              <TabsTrigger value="giornaliero" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                <CalendarIcon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Giornaliero</span>
+              </TabsTrigger>
               {!isVigilanza && (
                 <>
-                  <TabsTrigger value="lista" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
-                    <List className="w-3.5 h-3.5" />
-                    Lista
+                  <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Disponibilita</span>
                   </TabsTrigger>
                   <TabsTrigger value="disponibilita" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
                     <LayoutGrid className="w-3.5 h-3.5" />
@@ -383,17 +390,18 @@ export default function Calendario({ centroSelezionato, user }) {
           />
         </TabsContent>
 
+        <TabsContent value="giornaliero">
+          <CalendarioGiornaliero
+            prenotazioni={prenotazioniFiltrate}
+            spazi={spazi}
+            clienti={clienti}
+            onEdit={isVigilanza ? null : handleEdit}
+            isVigilanza={isVigilanza}
+          />
+        </TabsContent>
+
         {!isVigilanza && (
           <>
-            <TabsContent value="lista">
-              <ListaPrenotazioni
-                prenotazioni={prenotazioniFiltrate}
-                spazi={spazi}
-                clienti={clienti}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            </TabsContent>
             <TabsContent value="disponibilita">
               <DisponibilitaSpazi
                 prenotazioni={prenotazioniFiltrate}
