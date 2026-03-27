@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
 import FormTicket from '@/components/tickets/FormTicket';
-import { format } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 const statoConfig = {
@@ -31,6 +31,7 @@ export default function Ticket({ centroSelezionato, user }) {
   const [ticketSelezionato, setTicketSelezionato] = useState(null);
   const [search, setSearch] = useState('');
   const [filtroStato, setFiltroStato] = useState('aperto');
+  const [meseFiltrato, setMeseFiltrato] = useState(new Date());
 
   useEffect(() => {
     if (centroSelezionato) loadTickets();
@@ -88,7 +89,11 @@ export default function Ticket({ centroSelezionato, user }) {
   const filtered = tickets.filter(t => {
     const matchSearch = !search || t.numero_ticket?.toLowerCase().includes(search.toLowerCase()) || t.operatore?.toLowerCase().includes(search.toLowerCase()) || t.descrizione?.toLowerCase().includes(search.toLowerCase());
     const matchStato = filtroStato === 'tutti' || t.stato === filtroStato;
-    return matchSearch && matchStato;
+    const dataApertura = t.data_apertura ? new Date(t.data_apertura) : null;
+    const inizio = startOfMonth(meseFiltrato);
+    const fine = endOfMonth(meseFiltrato);
+    const matchMese = !dataApertura || (dataApertura >= inizio && dataApertura <= fine);
+    return matchSearch && matchStato && matchMese;
   });
 
   const counts = {
@@ -147,6 +152,12 @@ export default function Ticket({ centroSelezionato, user }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
         </div>
+        <Input 
+          type="month" 
+          value={format(meseFiltrato, 'yyyy-MM')} 
+          onChange={e => setMeseFiltrato(new Date(e.target.value + '-01'))}
+          className="h-9 text-sm w-32"
+        />
         <div className="flex gap-1">
           {['tutti', 'aperto', 'chiuso'].map(s => (
             <button
