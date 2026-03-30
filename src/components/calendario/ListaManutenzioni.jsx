@@ -61,14 +61,14 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   );
 }
 
-function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus }) {
+function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus, ordinamentoDecrescente }) {
   const perGiorno = {};
   lista.forEach(m => {
     const giorno = m.data_scadenza.slice(0, 10);
     if (!perGiorno[giorno]) perGiorno[giorno] = [];
     perGiorno[giorno].push(m);
   });
-  const giorni = Object.keys(perGiorno).sort();
+  const giorni = Object.keys(perGiorno).sort(ordinamentoDecrescente ? (a, b) => b.localeCompare(a) : undefined);
 
   return (
     <div className="space-y-4">
@@ -116,7 +116,7 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
               {vistaApertiChiusi === 'chiusi' ? '✅ Completati' : '🔴 Aperti'}
               <span className="text-xs font-normal text-slate-400">({damostrare.length})</span>
             </h3>
-            <GruppoPerGiorno lista={damostrare} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+            <GruppoPerGiorno lista={damostrare} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} ordinamentoDecrescente={vistaApertiChiusi === 'chiusi'} />
           </div>
         </div>
       )}
