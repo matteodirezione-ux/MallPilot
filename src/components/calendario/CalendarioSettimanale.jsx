@@ -134,7 +134,11 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    {prenotazioniGiorno.map(p => {
+                    {[...prenotazioniGiorno].sort((a, b) => {
+                      const sa = spazi.find(s => s.id === a.spazio_id)?.numero_spazio || '';
+                      const sb = spazi.find(s => s.id === b.spazio_id)?.numero_spazio || '';
+                      return sa.localeCompare(sb, undefined, { numeric: true });
+                    }).map(p => {
                       const spazio = getSpazioById(p.spazio_id);
                       const cliente = getClienteById(p.cliente_id);
                       const color = getPrenotazioneColor(p);
