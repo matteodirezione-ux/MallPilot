@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay, subDays } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
@@ -84,10 +84,17 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
             </div>
           ))}
 
-          {/* Padding iniziale */}
-          {Array.from({ length: (giorni[0]?.getDay() + 6) % 7 }).map((_, i) => (
-            <div key={`pad-${i}`} className="min-h-24 bg-slate-50 rounded-lg"></div>
-          ))}
+          {/* Giorni del mese precedente */}
+          {Array.from({ length: (giorni[0]?.getDay() + 6) % 7 }).map((_, i, arr) => {
+            const giornoPrecedente = subDays(giorni[0], arr.length - i);
+            return (
+              <div key={`pad-${i}`} className="min-h-24 p-2 bg-slate-50 border border-slate-100 rounded-lg">
+                <div className="text-sm font-medium text-slate-300">
+                  {format(giornoPrecedente, 'd')}
+                </div>
+              </div>
+            );
+          })}
 
           {/* Giorni del mese */}
           {giorni.map(giorno => {
