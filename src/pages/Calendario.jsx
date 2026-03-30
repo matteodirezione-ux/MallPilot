@@ -387,12 +387,13 @@ export default function Calendario({ centroSelezionato, user }) {
         <TabsContent value="settimanale">
           <CalendarioSettimanale
             prenotazioni={prenotazioniFiltrate}
-            spazi={spaziFiltrati}
+            spazi={spazi}
             clienti={clienti}
             currentWeek={currentWeek}
             setCurrentWeek={setCurrentWeek}
             onEdit={isVigilanza ? null : handleEdit}
             isVigilanza={isVigilanza}
+            mostraDisponibili={mostraDisponibili}
           />
         </TabsContent>
 

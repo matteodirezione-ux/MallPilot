@@ -7,7 +7,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, ad
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
-export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, isVigilanza }) {
+export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, isVigilanza, mostraDisponibili }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
 
   const giorni = useMemo(() => {
@@ -109,7 +109,26 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                   isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
                 }`}
               >
-                {prenotazioniGiorno.length === 0 ? (
+                {mostraDisponibili ? (() => {
+                  const occupati = new Set(prenotazioniGiorno.flatMap(p => p.spazi_ids?.length ? p.spazi_ids : [p.spazio_id].filter(Boolean)));
+                  const liberi = spazi.filter(s => !occupati.has(s.id)).sort((a, b) => a.numero_spazio?.localeCompare(b.numero_spazio, undefined, { numeric: true }));
+                  return liberi.length === 0 ? (
+                    <div className="h-full flex items-center justify-center">
+                      <span className="text-xs text-slate-400 italic">Tutto occupato</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {liberi.map(s => (
+                        <div key={s.id} className="text-xs px-2 py-1 rounded border-2 border-dashed border-green-400 bg-green-50 text-green-700 flex items-center gap-1.5">
+                          <div className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white" style={{ borderColor: s.colore || '#22c55e', color: s.colore || '#22c55e' }}>
+                            {s.numero_spazio || '?'}
+                          </div>
+                          <span className="font-medium truncate">{s.nome || `Spazio ${s.numero_spazio}`}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })() : prenotazioniGiorno.length === 0 ? (
                   <div className="h-full flex items-center justify-center">
                     <span className="text-xs text-slate-300">—</span>
                   </div>
@@ -165,6 +184,7 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
           })}
         </div>
       </CardContent>
+
 
       {selectedPrenotazione && (
         <Dialog open={!!selectedPrenotazione} onOpenChange={() => setSelectedPrenotazione(null)}>
