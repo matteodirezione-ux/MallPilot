@@ -16,6 +16,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [centri, setCentri] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
+  const [vistaApertiChiusi, setVistaApertiChiusi] = useState('aperti');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
   const [formData, setFormData] = useState({
@@ -294,7 +295,21 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                 <span className="sm:hidden">Lista</span>
               </TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
+              <div className="flex rounded-md border border-slate-200 overflow-hidden">
+                <button
+                  onClick={() => setVistaApertiChiusi('aperti')}
+                  className={`px-3 py-1 text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                >
+                  Aperti
+                </button>
+                <button
+                  onClick={() => setVistaApertiChiusi('chiusi')}
+                  className={`px-3 py-1 text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-red-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                >
+                  Chiusi
+                </button>
+              </div>
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -330,6 +345,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
               onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
               annoSelezionato={annoSelezionato}
+              vistaApertiChiusi={vistaApertiChiusi}
             />
           </TabsContent>
         </Tabs>

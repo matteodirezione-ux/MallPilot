@@ -92,7 +92,7 @@ function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus }) {
   );
 }
 
-export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato }) {
+export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onToggleStatus, annoSelezionato, vistaApertiChiusi }) {
   const lista = manutenzioni
     .filter(m => m.data_scadenza && m.data_scadenza.startsWith(String(annoSelezionato)))
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
@@ -100,30 +100,23 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
   const attivi = lista.filter(m => m.stato !== 'completato' && m.stato !== 'annullato');
   const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato');
 
+  const damostrare = vistaApertiChiusi === 'chiusi' ? completati : attivi;
+
   return (
     <div>
-      {lista.length === 0 ? (
+      {damostrare.length === 0 ? (
         <div className="text-center py-12 text-slate-400">
           <p>Nessuna attività per il {annoSelezionato}</p>
         </div>
       ) : (
         <div className="space-y-8">
-          {attivi.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                🔴 Da fare / In corso <span className="text-xs font-normal text-slate-400">({attivi.length})</span>
-              </h3>
-              <GruppoPerGiorno lista={attivi} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
-            </div>
-          )}
-          {completati.length > 0 && (
-            <div>
-              <h3 className="text-sm font-bold text-slate-500 mb-3 flex items-center gap-2">
-                ✅ Completati / Annullati <span className="text-xs font-normal text-slate-400">({completati.length})</span>
-              </h3>
-              <GruppoPerGiorno lista={completati} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
-            </div>
-          )}
+          <div>
+            <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${vistaApertiChiusi === 'chiusi' ? 'text-slate-500' : 'text-slate-700'}`}>
+              {vistaApertiChiusi === 'chiusi' ? '✅ Completati' : '🔴 Aperti'}
+              <span className="text-xs font-normal text-slate-400">({damostrare.length})</span>
+            </h3>
+            <GruppoPerGiorno lista={damostrare} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+          </div>
         </div>
       )}
     </div>
