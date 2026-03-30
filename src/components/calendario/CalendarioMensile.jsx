@@ -146,10 +146,10 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
               <div
                 key={dataKey}
                 className={`min-h-24 p-2 border rounded-lg ${
-                  isToday ? 'bg-blue-50 border-blue-300' : 'bg-white border-slate-200'
+                  isToday ? 'bg-red-50 border-red-400 border-2' : 'bg-white border-slate-200'
                 } hover:shadow-md transition-shadow`}
               >
-                <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-700' : 'text-slate-700'}`}>
+                <div className={`text-sm font-bold mb-1 ${isToday ? 'text-white bg-red-500 rounded-full w-6 h-6 flex items-center justify-center' : 'text-slate-700'}`}>
                   {format(giorno, 'd')}
                 </div>
                 <div className="space-y-1">
