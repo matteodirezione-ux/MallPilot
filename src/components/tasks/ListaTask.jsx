@@ -154,7 +154,7 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className={`font-medium text-slate-800 ${task.stato === 'completato' ? 'line-through' : ''}`}>
+          <p className="font-medium text-slate-800">
             {task.titolo}
           </p>
           <div className="flex items-center gap-1 flex-shrink-0">
