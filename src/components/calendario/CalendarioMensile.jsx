@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay, subDays, addDays } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
@@ -221,6 +221,54 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
               </div>
             );
           })}
+          {/* Giorni del mese successivo */}
+          {(() => {
+            const ultimoGiorno = giorni[giorni.length - 1];
+            const giorniDopo = (7 - (ultimoGiorno?.getDay() + 6) % 7 - 1) % 7;
+            return Array.from({ length: giorniDopo }).map((_, i) => {
+              const giornoSuccessivo = addDays(ultimoGiorno, i + 1);
+              const prenotazioniGiorno = prenotazioni.filter(p => {
+                const dataInizio = parseLocalDate(p.data_inizio);
+                const dataFine = parseLocalDate(p.data_fine);
+                return isWithinInterval(giornoSuccessivo, { start: dataInizio, end: dataFine }) && p.stato !== 'cancellata';
+              }).sort((a, b) => {
+                const nA = spazi.find(s => s.id === a.spazio_id)?.numero_spazio || '';
+                const nB = spazi.find(s => s.id === b.spazio_id)?.numero_spazio || '';
+                return nA.localeCompare(nB, undefined, { numeric: true });
+              });
+              return (
+                <div key={`pad-end-${i}`} className="min-h-24 p-2 bg-slate-50 border border-slate-100 rounded-lg opacity-50">
+                  <div className="text-sm font-medium text-slate-300 mb-1">
+                    {format(giornoSuccessivo, 'd')}
+                  </div>
+                  <div className="space-y-1">
+                    {prenotazioniGiorno.map(p => {
+                      const spazio = getSpazioById(p.spazio_id);
+                      const color = getPrenotazioneColor(p);
+                      const rgb = hexToRgb(color);
+                      return (
+                        <div
+                          key={p.id}
+                          style={{ backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`, borderColor: color }}
+                          className="text-xs px-2 py-1 rounded border-2"
+                        >
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center font-bold text-[10px] bg-white" style={{ borderColor: color, color: color }}>
+                              {spazio?.numero_spazio || '?'}
+                            </div>
+                            {p.is_event && <Sparkles className="flex-shrink-0 w-3 h-3 text-purple-500" />}
+                            <div className="font-medium truncate flex-1 text-slate-600">
+                              {p.is_event ? (p.nome_evento || 'Evento') : (getClienteById(p.cliente_id)?.ragione_sociale || 'Cliente')}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            });
+          })()}
         </div>
 
 
