@@ -20,6 +20,7 @@ export default function TaskPage({ centroSelezionato, user }) {
   const [taskSelezionato, setTaskSelezionato] = useState(null);
   const [filtroStato, setFiltroStato] = useState('tutti');
   const [filtroPriorita, setFiltroPriorita] = useState('tutti');
+  const [vistaApertiChiusi, setVistaApertiChiusi] = useState('aperti');
   const [cerca, setCerca] = useState('');
 
   useEffect(() => {
@@ -251,7 +252,13 @@ export default function TaskPage({ centroSelezionato, user }) {
     return [...singoli, ...accorpati].sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
   }, [tasks, user]);
 
+  const statiAperti = ['da_fare', 'in_corso'];
+  const statiChiusi = ['completato', 'annullato'];
+
   const taskFiltrati = taskPerVista.filter(t => {
+    // Filtro aperti/chiusi
+    if (vistaApertiChiusi === 'aperti' && !statiAperti.includes(t.stato)) return false;
+    if (vistaApertiChiusi === 'chiusi' && !statiChiusi.includes(t.stato)) return false;
     if (filtroStato !== 'tutti' && t.stato !== filtroStato) return false;
     if (filtroPriorita !== 'tutti' && t.priorita !== filtroPriorita) return false;
     if (cerca && !t.titolo?.toLowerCase().includes(cerca.toLowerCase())) return false;
@@ -309,14 +316,30 @@ export default function TaskPage({ centroSelezionato, user }) {
       </div>
 
       <Tabs defaultValue="lista">
-        <TabsList className="mb-4">
-          <TabsTrigger value="lista" className="gap-2">
-            <ListTodo className="w-4 h-4" /> Lista
-          </TabsTrigger>
-          <TabsTrigger value="calendario" className="gap-2">
-            <CalendarDays className="w-4 h-4" /> Calendario
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="lista" className="gap-2">
+              <ListTodo className="w-4 h-4" /> Lista
+            </TabsTrigger>
+            <TabsTrigger value="calendario" className="gap-2">
+              <CalendarDays className="w-4 h-4" /> Calendario
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex rounded-md border border-slate-200 overflow-hidden">
+            <button
+              onClick={() => setVistaApertiChiusi('aperti')}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+            >
+              Aperti
+            </button>
+            <button
+              onClick={() => setVistaApertiChiusi('chiusi')}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+            >
+              Chiusi
+            </button>
+          </div>
+        </div>
 
         <TabsContent value="lista">
           {loading ? (
