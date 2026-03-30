@@ -706,8 +706,9 @@ export default function Dashboard({ centroSelezionato, user }) {
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                       <p className="text-xs font-medium text-slate-700 whitespace-nowrap">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}</p>
-                     </div>
+                      <p className="text-xs font-medium text-slate-700 whitespace-nowrap">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd MMM', { locale: it })}</p>
+                      <p className="text-xs text-green-700 font-semibold whitespace-nowrap">scade {giorniMancanti(prenotazione.data_fine)}</p>
+                    </div>
                     </div>
                     ))}
                     </div>
