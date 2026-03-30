@@ -215,7 +215,7 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
   // Separa da fare e completati
   const daFare = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
   const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
-    .sort((a, b) => new Date(a.data_scadenza) - new Date(b.data_scadenza));
+    .sort((a, b) => new Date(b.data_scadenza) - new Date(a.data_scadenza));
 
   // Raggruppa da fare per data
   const gruppi = {};
