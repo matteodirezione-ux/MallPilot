@@ -3,7 +3,7 @@ import { format, parseISO, isPast, isToday } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
 
 const statoConfig = {
   da_fare: { label: 'Da Fare', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200' },
@@ -48,8 +48,13 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
 
           {/* Riga 3: data + assegnato */}
           <div className="flex flex-wrap items-center gap-2 mt-1.5">
-            <span className={`text-xs font-semibold ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
+            <span className={`text-xs font-semibold flex items-center gap-1 ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
               📅 {format(dataScad, 'd MMM yyyy', { locale: it })}
+              {isScaduto && (
+                <span className="inline-flex items-center gap-0.5 bg-red-100 text-red-700 text-xs font-bold px-1.5 py-0.5 rounded-full">
+                  <AlertTriangle className="w-3 h-3" /> Scaduto
+                </span>
+              )}
             </span>
             {manutenzione.assegnato_a_nome && (
               <span className="text-xs text-slate-500">→ {manutenzione.assegnato_a_nome}</span>
