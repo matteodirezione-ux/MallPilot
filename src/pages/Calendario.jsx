@@ -338,9 +338,9 @@ export default function Calendario({ centroSelezionato, user }) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
-                  id="mostra-disponibili"
-                  checked={mostraDisponibili}
-                  onCheckedChange={setMostraDisponibili}
+                 id="mostra-disponibili"
+                 checked={mostraDisponibili}
+                 onCheckedChange={(val) => setMostraDisponibili(val === true)}
                 />
                 <Label htmlFor="mostra-disponibili" className="text-xs text-slate-600 cursor-pointer">
                   Mostra disponibili
