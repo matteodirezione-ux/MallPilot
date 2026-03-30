@@ -98,7 +98,8 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
 
   const attivi = lista.filter(m => m.stato !== 'completato' && m.stato !== 'annullato');
-  const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato');
+  const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato')
+    .sort((a, b) => b.data_scadenza.localeCompare(a.data_scadenza));
 
   const damostrare = vistaApertiChiusi === 'chiusi' ? completati : attivi;
 
