@@ -36,6 +36,19 @@ export default function Layout({ children, currentPageName }) {
     loadUserAndCentri();
   }, []);
 
+  useEffect(() => {
+    const scheduleReload = () => {
+      const now = new Date();
+      const next = new Date();
+      next.setHours(5, 0, 0, 0);
+      if (next <= now) next.setDate(next.getDate() + 1);
+      const msUntil = next - now;
+      return setTimeout(() => { window.location.reload(); }, msUntil);
+    };
+    const t = scheduleReload();
+    return () => clearTimeout(t);
+  }, []);
+
   const loadUserAndCentri = async () => {
     try {
       const userData = await base44.auth.me();
