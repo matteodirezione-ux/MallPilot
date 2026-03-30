@@ -211,7 +211,7 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
   );
 }
 
-export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canEdit, canDelete }) {
+export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canEdit, canDelete, vistaApertiChiusi }) {
   // Separa da fare e completati
   const daFare = tasks.filter(t => t.stato !== 'completato' && t.stato !== 'annullato');
   const completati = tasks.filter(t => t.stato === 'completato' || t.stato === 'annullato')
@@ -253,12 +253,12 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
   return (
     <div>
       <div className="mb-8">
+        {vistaApertiChiusi !== 'chiusi' && (
         <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          📋 Da Fare
+          📋 Aperti
         </h2>
-        {daFare.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">Nessun task da fare</div>
-        ) : (
+        )}
+        {daFare.length > 0 && (
           <div>
             {dateOrdinate.map(dateStr => {
               const { label, color } = getLabelData(dateStr);
@@ -298,7 +298,7 @@ export default function ListaTask({ tasks, onEdit, onDelete, onToggleStato, canE
       {completati.length > 0 && (
         <div className="mb-5">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            ✓ Completati / Annullati
+            ✓ Completati
           </h2>
           <div className="space-y-2">
             {completati.map(t => (

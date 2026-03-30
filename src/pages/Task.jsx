@@ -352,6 +352,7 @@ export default function TaskPage({ centroSelezionato, user }) {
               onToggleStato={handleToggleStato}
               canEdit={(task) => canEdit(task)}
               canDelete={(task) => canDelete(task)}
+              vistaApertiChiusi={vistaApertiChiusi}
             />
           )}
         </TabsContent>
