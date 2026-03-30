@@ -80,10 +80,12 @@ function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus, ordinamentoD
       {giorni.map(giorno => {
         const data = parseISO(giorno);
         const oggi = isToday(data);
+        const isScaduto = isPast(data) && !oggi;
         return (
           <div key={giorno}>
-            <h4 className={`text-xs font-bold mb-2 uppercase tracking-wide ${oggi ? 'text-blue-600' : 'text-slate-500'}`}>
+            <h4 className={`text-xs font-bold mb-2 uppercase tracking-wide flex items-center gap-1.5 ${oggi ? 'text-blue-600' : isScaduto ? 'text-red-600' : 'text-slate-500'}`}>
               {oggi ? '📌 Oggi — ' : ''}{format(data, 'EEEE d MMMM yyyy', { locale: it })}
+              {isScaduto && <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
             </h4>
             <div className="space-y-2">
               {perGiorno[giorno].map(m => (
