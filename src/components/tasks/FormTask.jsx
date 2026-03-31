@@ -108,6 +108,21 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validazione obbligatoria: Centro
+    if ((isProprieta || user?.tipo_account === 'direttore') && centri?.length > 0) {
+      if (!isMultipla && centriSelezionati.length === 0) {
+        alert('Seleziona un centro commerciale');
+        return;
+      }
+    }
+
+    // Validazione obbligatoria: Assegna a
+    if (assegnatari.length > 0 && assegnatiSelezionati.length === 0) {
+      alert('Seleziona a chi assegnare il task');
+      return;
+    }
+
     // Se stiamo modificando un task esistente, non sovrascrivere chi l'ha assegnato
     const base = {
       ...form,
@@ -218,7 +233,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
           {(isProprieta || user?.tipo_account === 'direttore') && centri?.length > 0 && (
             <div className={rowClass}>
-              <label className={labelClass}>{isMultipla ? 'Centri' : 'Centro'}</label>
+              <label className={labelClass}>{isMultipla ? 'Centri' : 'Centro *'}</label>
               <div className={fieldClass}>
                 {isMultipla ? (
                   <div className="flex flex-wrap gap-2 pt-1">
@@ -257,7 +272,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
 
           {assegnatari.length > 0 && (
             <div className={rowClass}>
-              <label className={labelClass}>Assegna a</label>
+              <label className={labelClass}>Assegna a *</label>
               <div className={fieldClass}>
                 {isMultipla ? (
                   <div className="flex flex-wrap gap-2 pt-1">
