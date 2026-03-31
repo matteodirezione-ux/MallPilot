@@ -163,7 +163,7 @@ export default function Ticket({ centroSelezionato, user }) {
             <button
               key={s}
               onClick={() => setFiltroStato(s)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === s ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === s ? (s === 'aperto' ? 'bg-red-600 text-white' : s === 'chiuso' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white') : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
             >
               {s === 'tutti' ? 'Tutti' : statoConfig[s]?.label}
             </button>

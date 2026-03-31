@@ -328,13 +328,13 @@ export default function TaskPage({ centroSelezionato, user }) {
           <div className="flex rounded-md border border-slate-200 overflow-hidden">
             <button
               onClick={() => setVistaApertiChiusi('aperti')}
-              className={`px-4 py-1.5 text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-red-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
             >
               Aperti
             </button>
             <button
               onClick={() => setVistaApertiChiusi('chiusi')}
-              className={`px-4 py-1.5 text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-red-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
             >
               Chiusi
             </button>
