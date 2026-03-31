@@ -60,7 +60,14 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     setLoading(true);
     try {
       const allCentri = await base44.entities.CentroCommerciale.list();
-      setCentri(allCentri);
+
+      let centriVisibili = allCentri;
+      if (user?.tipo_account === 'direttore' || user?.tipo_account === 'vigilanza') {
+        const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user.email });
+        const centriIds = new Set(assegnazioni.map(a => a.centro_id));
+        centriVisibili = allCentri.filter(c => centriIds.has(c.id));
+      }
+      setCentri(centriVisibili);
 
       let allManutenzioni = await base44.entities.Manutenzione.list();
 
