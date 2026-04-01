@@ -152,12 +152,7 @@ export default function Ticket({ centroSelezionato, user }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
         </div>
-        <Input 
-          type="month" 
-          value={format(meseFiltrato, 'yyyy-MM')} 
-          onChange={e => setMeseFiltrato(new Date(e.target.value + '-01'))}
-          className="h-9 text-sm w-32"
-        />
+
         <div className="flex gap-1">
           {['tutti', 'aperto', 'chiuso'].map(s => (
             <button
