@@ -306,8 +306,8 @@ export default function Dashboard({ centroSelezionato, user }) {
       );
 
       setStats({
-        prossimiAffitti: prossimiConDettagli,
-        affittiCorrenti: affittiCorrentiConDettagli,
+        prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
+        affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
         spaziOccupati: spaziOccupatiOggi,
         spaziTotali: spazi.length,
         incassiMese,
