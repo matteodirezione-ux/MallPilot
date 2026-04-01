@@ -92,8 +92,7 @@ export default function Ticket({ centroSelezionato, user }) {
     const dataApertura = t.data_apertura ? new Date(t.data_apertura) : null;
     const inizio = startOfMonth(meseFiltrato);
     const fine = endOfMonth(meseFiltrato);
-    const matchMese = !dataApertura || (dataApertura >= inizio && dataApertura <= fine);
-    return matchSearch && matchStato && matchMese;
+    return matchSearch && matchStato;
   });
 
   const counts = {
