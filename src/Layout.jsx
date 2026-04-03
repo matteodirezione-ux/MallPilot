@@ -16,7 +16,8 @@ import {
   Ticket,
   BookOpen,
   Menu,
-  X
+  X,
+  TrendingUp
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
@@ -187,6 +188,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
   { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
   ];

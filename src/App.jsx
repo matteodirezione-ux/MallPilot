@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ReportPage from './pages/Report';
+import CapexPage from './pages/Capex';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
         />
       ))}
       <Route path="/Report" element={<LayoutWrapper currentPageName="Report"><ReportPage /></LayoutWrapper>} />
+      <Route path="/Capex" element={<LayoutWrapper currentPageName="Capex"><CapexPage /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

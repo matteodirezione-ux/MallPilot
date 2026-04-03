@@ -1,0 +1,80 @@
+{
+  "name": "Capex",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "titolo": {
+      "type": "string",
+      "description": "Titolo dell'intervento Capex"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione dell'intervento"
+    },
+    "data_inizio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di inizio intervento"
+    },
+    "data_fine": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di fine intervento"
+    },
+    "costo_previsto": {
+      "type": "number",
+      "description": "Costo previsto dell'intervento"
+    },
+    "costo_effettivo": {
+      "type": "number",
+      "description": "Costo effettivo a consuntivo"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "pianificato",
+        "in_corso",
+        "completato",
+        "annullato"
+      ],
+      "default": "pianificato",
+      "description": "Stato dell'intervento"
+    },
+    "categoria": {
+      "type": "string",
+      "enum": [
+        "strutturale",
+        "impiantistico",
+        "tecnologico",
+        "estetico",
+        "sicurezza",
+        "altro"
+      ],
+      "default": "altro",
+      "description": "Categoria dell'intervento"
+    },
+    "fornitore": {
+      "type": "string",
+      "description": "Nome del fornitore/appaltatore"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive"
+    },
+    "allegati_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL degli allegati/foto caricati"
+    }
+  },
+  "required": [
+    "centro_id",
+    "titolo",
+    "data_inizio"
+  ]
+}

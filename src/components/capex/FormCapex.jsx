@@ -1,0 +1,194 @@
+import React, { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Upload, X, Loader2 } from 'lucide-react';
+
+const defaultCapex = (centroId) => ({
+  centro_id: centroId || '',
+  titolo: '',
+  descrizione: '',
+  data_inizio: '',
+  data_fine: '',
+  costo_previsto: '',
+  costo_effettivo: '',
+  stato: 'pianificato',
+  categoria: 'altro',
+  fornitore: '',
+  note: '',
+  allegati_urls: []
+});
+
+export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
+  const [form, setForm] = useState(defaultCapex(centroId));
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (capex) {
+      setForm({ ...defaultCapex(centroId), ...capex });
+    } else {
+      setForm(defaultCapex(centroId));
+    }
+  }, [capex, centroId, open]);
+
+  const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploading(true);
+    const urls = [];
+    for (const file of files) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      urls.push(file_url);
+    }
+    setForm(prev => ({ ...prev, allegati_urls: [...(prev.allegati_urls || []), ...urls] }));
+    setUploading(false);
+  };
+
+  const removeAllegato = (idx) => {
+    setForm(prev => ({ ...prev, allegati_urls: prev.allegati_urls.filter((_, i) => i !== idx) }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    const data = {
+      ...form,
+      costo_previsto: form.costo_previsto !== '' ? parseFloat(form.costo_previsto) : null,
+      costo_effettivo: form.costo_effettivo !== '' ? parseFloat(form.costo_effettivo) : null,
+    };
+    if (capex?.id) {
+      await base44.entities.Capex.update(capex.id, data);
+    } else {
+      await base44.entities.Capex.create(data);
+    }
+    setSaving(false);
+    onSave();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{capex ? 'Modifica Capex' : 'Nuovo Capex'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          <div>
+            <Label>Titolo *</Label>
+            <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Categoria</Label>
+              <Select value={form.categoria} onValueChange={v => set('categoria', v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="strutturale">Strutturale</SelectItem>
+                  <SelectItem value="impiantistico">Impiantistico</SelectItem>
+                  <SelectItem value="tecnologico">Tecnologico</SelectItem>
+                  <SelectItem value="estetico">Estetico</SelectItem>
+                  <SelectItem value="sicurezza">Sicurezza</SelectItem>
+                  <SelectItem value="altro">Altro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Stato</Label>
+              <Select value={form.stato} onValueChange={v => set('stato', v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pianificato">Pianificato</SelectItem>
+                  <SelectItem value="in_corso">In corso</SelectItem>
+                  <SelectItem value="completato">Completato</SelectItem>
+                  <SelectItem value="annullato">Annullato</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label>Descrizione</Label>
+            <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={3} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Data inizio *</Label>
+              <Input type="date" value={form.data_inizio} onChange={e => set('data_inizio', e.target.value)} required />
+            </div>
+            <div>
+              <Label>Data fine</Label>
+              <Input type="date" value={form.data_fine} onChange={e => set('data_fine', e.target.value)} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Costo previsto (€)</Label>
+              <Input type="number" min="0" step="0.01" value={form.costo_previsto} onChange={e => set('costo_previsto', e.target.value)} />
+            </div>
+            <div>
+              <Label>Costo effettivo (€)</Label>
+              <Input type="number" min="0" step="0.01" value={form.costo_effettivo} onChange={e => set('costo_effettivo', e.target.value)} />
+            </div>
+          </div>
+
+          <div>
+            <Label>Fornitore / Appaltatore</Label>
+            <Input value={form.fornitore} onChange={e => set('fornitore', e.target.value)} />
+          </div>
+
+          <div>
+            <Label>Note</Label>
+            <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} />
+          </div>
+
+          {/* Allegati */}
+          <div>
+            <Label>Allegati / Foto</Label>
+            <div className="mt-1">
+              <label className="flex items-center gap-2 cursor-pointer w-fit px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {uploading ? 'Caricamento...' : 'Carica file'}
+                <input type="file" multiple className="hidden" onChange={handleUpload} accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+              </label>
+            </div>
+            {form.allegati_urls?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {form.allegati_urls.map((url, i) => (
+                  <div key={i} className="relative group">
+                    {url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                      <img src={url} className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                    ) : (
+                      <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-1 bg-slate-100 rounded text-xs text-blue-600 hover:underline">
+                        📎 Allegato {i + 1}
+                      </a>
+                    )}
+                    <button type="button" onClick={() => removeAllegato(i)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+              {capex ? 'Salva modifiche' : 'Crea Capex'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
