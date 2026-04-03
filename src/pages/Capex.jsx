@@ -74,10 +74,7 @@ export default function CapexPage({ centroSelezionato, user }) {
     loadCapex();
   };
 
-  // Anni disponibili dai dati
-  const anniDisponibili = [...new Set(capexList.map(c => c.data_inizio ? parseInt(c.data_inizio.substring(0, 4)) : null).filter(Boolean))].sort();
-  const anniNav = anniDisponibili.length > 0 ? anniDisponibili : [new Date().getFullYear()];
-  const idxAnno = anniNav.indexOf(annoSelezionato);
+  const annoCorrente = new Date().getFullYear();
 
   // Capex dell'anno selezionato
   const capexAnno = capexList.filter(c => c.data_inizio && parseInt(c.data_inizio.substring(0, 4)) === annoSelezionato);
@@ -117,11 +114,11 @@ export default function CapexPage({ centroSelezionato, user }) {
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Navigatore Anno */}
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniNav[idxAnno - 1])} disabled={idxAnno <= 0}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniNav[idxAnno + 1])} disabled={idxAnno >= anniNav.length - 1}>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)} disabled={annoSelezionato >= annoCorrente}>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
