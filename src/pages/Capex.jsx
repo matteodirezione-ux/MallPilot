@@ -44,6 +44,7 @@ export default function CapexPage({ centroSelezionato, user }) {
   const [editing, setEditing] = useState(null);
   const [dettaglio, setDettaglio] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [annoSelezionato, setAnnoSelezionato] = useState(new Date().getFullYear());
 
   const isVigilanza = user?.tipo_account === 'vigilanza';
   const canEdit = !isVigilanza;
@@ -73,20 +74,28 @@ export default function CapexPage({ centroSelezionato, user }) {
     loadCapex();
   };
 
-  const filtered = capexList.filter(c => {
+  // Anni disponibili dai dati
+  const anniDisponibili = [...new Set(capexList.map(c => c.data_inizio ? parseInt(c.data_inizio.substring(0, 4)) : null).filter(Boolean))].sort();
+  const anniNav = anniDisponibili.length > 0 ? anniDisponibili : [new Date().getFullYear()];
+  const idxAnno = anniNav.indexOf(annoSelezionato);
+
+  // Capex dell'anno selezionato
+  const capexAnno = capexList.filter(c => c.data_inizio && parseInt(c.data_inizio.substring(0, 4)) === annoSelezionato);
+
+  const filtered = capexAnno.filter(c => {
     const matchSearch = !search || c.titolo?.toLowerCase().includes(search.toLowerCase()) || c.descrizione?.toLowerCase().includes(search.toLowerCase());
     const matchStato = filterStato === 'tutti' || c.stato === filterStato;
     const matchCat = filterCategoria === 'tutti' || c.categoria === filterCategoria;
     return matchSearch && matchStato && matchCat;
   }).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio));
 
-  // Riepilogo costi (solo per non-vigilanza)
-  const totalePrevisto = capexList.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_previsto || 0), 0);
-  const totaleEffettivo = capexList.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_effettivo || 0), 0);
+  // Riepilogo costi (solo per non-vigilanza) - solo anno selezionato
+  const totalePrevisto = capexAnno.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_previsto || 0), 0);
+  const totaleEffettivo = capexAnno.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_effettivo || 0), 0);
 
   // Calendario mensile
   const giorni = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
-  const capexPerGiorno = (giorno) => capexList.filter(c => {
+  const capexPerGiorno = (giorno) => capexAnno.filter(c => {
     if (!c.data_inizio) return false;
     const inizio = parseLocalDate(c.data_inizio);
     const fine = c.data_fine ? parseLocalDate(c.data_fine) : inizio;
@@ -105,6 +114,17 @@ export default function CapexPage({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Capex</h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Navigatore Anno */}
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniNav[idxAnno - 1])} disabled={idxAnno <= 0}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniNav[idxAnno + 1])} disabled={idxAnno >= anniNav.length - 1}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         <div className="flex gap-2">
           <Button variant={view === 'lista' ? 'default' : 'outline'} size="sm" onClick={() => setView('lista')}>
             <List className="w-4 h-4 mr-1" /> Lista
@@ -117,6 +137,7 @@ export default function CapexPage({ centroSelezionato, user }) {
               <Plus className="w-4 h-4 mr-1" /> Nuovo Capex
             </Button>
           )}
+        </div>
         </div>
       </div>
 
