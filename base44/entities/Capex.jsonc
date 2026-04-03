@@ -35,12 +35,11 @@
     "stato": {
       "type": "string",
       "enum": [
+        "da_pianificare",
         "pianificato",
-        "in_corso",
-        "completato",
-        "annullato"
+        "completato"
       ],
-      "default": "pianificato",
+      "default": "da_pianificare",
       "description": "Stato dell'intervento"
     },
     "categoria": {

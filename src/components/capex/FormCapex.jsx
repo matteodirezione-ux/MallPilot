@@ -16,7 +16,7 @@ const defaultCapex = (centroId) => ({
   data_fine: '',
   costo_previsto: '',
   costo_effettivo: '',
-  stato: 'pianificato',
+  stato: 'da_pianificare',
   categoria: 'altro',
   fornitore: '',
   note: '',
@@ -104,10 +104,9 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
               <Select value={form.stato} onValueChange={v => set('stato', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="da_pianificare">Da pianificare</SelectItem>
                   <SelectItem value="pianificato">Pianificato</SelectItem>
-                  <SelectItem value="in_corso">In corso</SelectItem>
                   <SelectItem value="completato">Completato</SelectItem>
-                  <SelectItem value="annullato">Annullato</SelectItem>
                 </SelectContent>
               </Select>
             </div>

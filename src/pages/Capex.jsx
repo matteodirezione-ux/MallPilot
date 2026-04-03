@@ -14,10 +14,9 @@ import { it } from 'date-fns/locale';
 import FormCapex from '@/components/capex/FormCapex';
 
 const STATO_CONFIG = {
+  da_pianificare: { label: 'Da pianificare', color: 'bg-orange-100 text-orange-700 border-orange-200' },
   pianificato: { label: 'Pianificato', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  in_corso: { label: 'In corso', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
-  annullato: { label: 'Annullato', color: 'bg-slate-100 text-slate-500 border-slate-200' },
 };
 
 const CATEGORIA_CONFIG = {
@@ -87,16 +86,17 @@ export default function CapexPage({ centroSelezionato, user }) {
   }).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio));
 
   // Riepilogo costi (solo per non-vigilanza) - solo anno selezionato
-  const totalePrevisto = capexAnno.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_previsto || 0), 0);
-  const totaleEffettivo = capexAnno.filter(c => c.stato !== 'annullato').reduce((s, c) => s + (c.costo_effettivo || 0), 0);
+  const totalePrevisto = capexAnno.reduce((s, c) => s + (c.costo_previsto || 0), 0);
+  const totaleEffettivo = capexAnno.reduce((s, c) => s + (c.costo_effettivo || 0), 0);
 
   // Calendario mensile
   const giorni = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
   const capexPerGiorno = (giorno) => capexAnno.filter(c => {
     if (!c.data_inizio) return false;
+    if (c.stato === 'da_pianificare') return false; // non mostrare nel calendario
     const inizio = parseLocalDate(c.data_inizio);
     const fine = c.data_fine ? parseLocalDate(c.data_fine) : inizio;
-    return isWithinInterval(giorno, { start: inizio, end: fine }) && c.stato !== 'annullato';
+    return isWithinInterval(giorno, { start: inizio, end: fine });
   });
 
   if (!centroSelezionato?.id) {
@@ -143,7 +143,7 @@ export default function CapexPage({ centroSelezionato, user }) {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <p className="text-xs text-slate-500 uppercase font-medium mb-1">Totale Capex</p>
-            <p className="text-xl font-bold text-slate-800">{capexList.filter(c => c.stato !== 'annullato').length}</p>
+            <p className="text-xl font-bold text-slate-800">{capexAnno.length}</p>
           </div>
           <div className="bg-white rounded-lg border border-slate-200 p-4">
             <p className="text-xs text-slate-500 uppercase font-medium mb-1">Costo Previsto</p>
@@ -172,10 +172,9 @@ export default function CapexPage({ centroSelezionato, user }) {
           <SelectTrigger className="w-36"><SelectValue placeholder="Stato" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="tutti">Tutti gli stati</SelectItem>
+            <SelectItem value="da_pianificare">Da pianificare</SelectItem>
             <SelectItem value="pianificato">Pianificato</SelectItem>
-            <SelectItem value="in_corso">In corso</SelectItem>
             <SelectItem value="completato">Completato</SelectItem>
-            <SelectItem value="annullato">Annullato</SelectItem>
           </SelectContent>
         </Select>
         <Select value={filterCategoria} onValueChange={setFilterCategoria}>
