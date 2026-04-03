@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Titolo dell'intervento Capex"
     },
+    "anno_capex": {
+      "type": "number",
+      "description": "Anno di riferimento del Capex (per la lista)"
+    },
     "descrizione": {
       "type": "string",
       "description": "Descrizione dell'intervento"
@@ -17,12 +21,12 @@
     "data_inizio": {
       "type": "string",
       "format": "date",
-      "description": "Data di inizio intervento"
+      "description": "Data di inizio intervento programmato (visibile nel calendario)"
     },
     "data_fine": {
       "type": "string",
       "format": "date",
-      "description": "Data di fine intervento"
+      "description": "Data di fine intervento programmato"
     },
     "costo_previsto": {
       "type": "number",
@@ -74,6 +78,6 @@
   "required": [
     "centro_id",
     "titolo",
-    "data_inizio"
+    "anno_capex"
   ]
 }

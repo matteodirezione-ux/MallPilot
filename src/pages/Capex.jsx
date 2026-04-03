@@ -75,25 +75,33 @@ export default function CapexPage({ centroSelezionato, user }) {
 
   const annoCorrente = new Date().getFullYear();
 
-  // Capex dell'anno selezionato
-  const capexAnno = capexList.filter(c => c.data_inizio && parseInt(c.data_inizio.substring(0, 4)) === annoSelezionato);
+  // Capex dell'anno selezionato — la lista usa anno_capex (con fallback a data_inizio per retrocompatibilità)
+  const capexAnno = capexList.filter(c => {
+    const anno = c.anno_capex || (c.data_inizio ? parseInt(c.data_inizio.substring(0, 4)) : null);
+    return anno === annoSelezionato;
+  });
 
   const filtered = capexAnno.filter(c => {
     const matchSearch = !search || c.titolo?.toLowerCase().includes(search.toLowerCase()) || c.descrizione?.toLowerCase().includes(search.toLowerCase());
     const matchStato = filterStato === 'tutti' || c.stato === filterStato;
     const matchCat = filterCategoria === 'tutti' || c.categoria === filterCategoria;
     return matchSearch && matchStato && matchCat;
-  }).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio));
+  }).sort((a, b) => {
+    // Ordina per data intervento se disponibile, altrimenti metti in fondo
+    if (a.data_inizio && b.data_inizio) return new Date(a.data_inizio) - new Date(b.data_inizio);
+    if (a.data_inizio) return -1;
+    if (b.data_inizio) return 1;
+    return 0;
+  });
 
   // Riepilogo costi (solo per non-vigilanza) - solo anno selezionato
   const totalePrevisto = capexAnno.reduce((s, c) => s + (c.costo_previsto || 0), 0);
   const totaleEffettivo = capexAnno.reduce((s, c) => s + (c.costo_effettivo || 0), 0);
 
-  // Calendario mensile
+  // Calendario mensile - usa tutti i capex con date programmate (non solo quell'anno)
   const giorni = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) });
-  const capexPerGiorno = (giorno) => capexAnno.filter(c => {
-    if (!c.data_inizio) return false;
-    if (c.stato === 'da_pianificare') return false; // non mostrare nel calendario
+  const capexProgrammati = capexList.filter(c => c.stato !== 'da_pianificare' && c.data_inizio);
+  const capexPerGiorno = (giorno) => capexProgrammati.filter(c => {
     const inizio = parseLocalDate(c.data_inizio);
     const fine = c.data_fine ? parseLocalDate(c.data_fine) : inizio;
     return isWithinInterval(giorno, { start: inizio, end: fine });
@@ -213,7 +221,10 @@ export default function CapexPage({ centroSelezionato, user }) {
                   </div>
                   {c.descrizione && <p className="text-xs text-slate-500 truncate mb-2">{c.descrizione}</p>}
                   <div className="flex flex-wrap gap-3 text-xs text-slate-500">
-                    <span>📅 {format(parseLocalDate(c.data_inizio), 'dd MMM yyyy', { locale: it })}{c.data_fine ? ` → ${format(parseLocalDate(c.data_fine), 'dd MMM yyyy', { locale: it })}` : ''}</span>
+                    <span>📅 Anno: <strong>{c.anno_capex || (c.data_inizio ? c.data_inizio.substring(0,4) : '—')}</strong></span>
+                    {c.data_inizio && (
+                      <span>🔧 Intervento: {format(parseLocalDate(c.data_inizio), 'dd MMM yyyy', { locale: it })}{c.data_fine ? ` → ${format(parseLocalDate(c.data_fine), 'dd MMM yyyy', { locale: it })}` : ''}</span>
+                    )}
                     {c.fornitore && <span>🏢 {c.fornitore}</span>}
                     {!isVigilanza && c.costo_previsto && <span>💰 Prev: <strong>{fmt(c.costo_previsto)}</strong></span>}
                     {!isVigilanza && c.costo_effettivo && <span>✅ Eff: <strong>{fmt(c.costo_effettivo)}</strong></span>}
@@ -314,8 +325,9 @@ export default function CapexPage({ centroSelezionato, user }) {
               </div>
               {dettaglio.descrizione && <p className="text-sm text-slate-600">{dettaglio.descrizione}</p>}
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><p className="text-xs text-slate-400 font-medium">Data inizio</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_inizio), 'dd MMM yyyy', { locale: it })}</p></div>
-                {dettaglio.data_fine && <div><p className="text-xs text-slate-400 font-medium">Data fine</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_fine), 'dd MMM yyyy', { locale: it })}</p></div>}
+                <div><p className="text-xs text-slate-400 font-medium">Anno Capex</p><p className="font-medium">{dettaglio.anno_capex || (dettaglio.data_inizio ? dettaglio.data_inizio.substring(0,4) : '—')}</p></div>
+                {dettaglio.data_inizio && <div><p className="text-xs text-slate-400 font-medium">Data inizio intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_inizio), 'dd MMM yyyy', { locale: it })}</p></div>}
+                {dettaglio.data_fine && <div><p className="text-xs text-slate-400 font-medium">Data fine intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_fine), 'dd MMM yyyy', { locale: it })}</p></div>}
                 {dettaglio.fornitore && <div><p className="text-xs text-slate-400 font-medium">Fornitore</p><p className="font-medium">{dettaglio.fornitore}</p></div>}
                 {!isVigilanza && dettaglio.costo_previsto && <div><p className="text-xs text-slate-400 font-medium">Costo previsto</p><p className="font-medium text-blue-700">{fmt(dettaglio.costo_previsto)}</p></div>}
                 {!isVigilanza && dettaglio.costo_effettivo && <div><p className="text-xs text-slate-400 font-medium">Costo effettivo</p><p className="font-medium text-green-700">{fmt(dettaglio.costo_effettivo)}</p></div>}

@@ -11,6 +11,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 const defaultCapex = (centroId) => ({
   centro_id: centroId || '',
   titolo: '',
+  anno_capex: new Date().getFullYear(),
   descrizione: '',
   data_inizio: '',
   data_fine: '',
@@ -79,9 +80,22 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
           <DialogTitle>{capex ? 'Modifica Capex' : 'Nuovo Capex'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <div>
-            <Label>Titolo *</Label>
-            <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Titolo *</Label>
+              <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required />
+            </div>
+            <div>
+              <Label>Anno Capex *</Label>
+              <Input
+                type="number"
+                min="2000"
+                max="2100"
+                value={form.anno_capex}
+                onChange={e => set('anno_capex', parseInt(e.target.value))}
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -117,16 +131,19 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={3} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Data inizio *</Label>
-              <Input type="date" value={form.data_inizio} onChange={e => set('data_inizio', e.target.value)} required />
+          {/* Date intervento: visibili solo se pianificato o completato */}
+          {(form.stato === 'pianificato' || form.stato === 'completato') && (
+            <div className="grid grid-cols-2 gap-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div>
+                <Label>Data inizio intervento</Label>
+                <Input type="date" value={form.data_inizio} onChange={e => set('data_inizio', e.target.value)} />
+              </div>
+              <div>
+                <Label>Data fine intervento</Label>
+                <Input type="date" value={form.data_fine} onChange={e => set('data_fine', e.target.value)} />
+              </div>
             </div>
-            <div>
-              <Label>Data fine</Label>
-              <Input type="date" value={form.data_fine} onChange={e => set('data_fine', e.target.value)} />
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
