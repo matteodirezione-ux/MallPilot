@@ -232,7 +232,8 @@ export default function Layout({ children, currentPageName }) {
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
+                <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
+                <div style={{display:'none'}} className="w-8 h-8 rounded-lg bg-blue-600 items-center justify-center text-white font-bold text-sm">M</div>
                 <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
               </div>
               {(user?.tipo_account === 'vigilanza' || user?.tipo_account === 'direttore') && (
