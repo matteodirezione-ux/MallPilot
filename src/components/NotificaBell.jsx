@@ -61,7 +61,7 @@ export default function NotificaBell({ user }) {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start" side="right">
+      <PopoverContent className="w-80 p-0" align="end" side="bottom" sideOffset={8}>
         <div className="p-3 border-b border-slate-200">
           <h3 className="font-semibold text-slate-800">Notifiche</h3>
         </div>
