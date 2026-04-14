@@ -19,13 +19,15 @@ const FREQUENZA_GIORNI = {
   annuale: () => addMonths(new Date(), 12),
 };
 
+const today = () => new Date().toISOString().split('T')[0];
+
 const defaultForm = (centroId) => ({
   centro_id: centroId || '',
   titolo: '',
   descrizione: '',
   frequenza: 'mensile',
-  ultima_esecuzione: '',
-  prossima_scadenza: '',
+  ultima_esecuzione: today(),
+  prossima_scadenza: today(),
   stato: 'da_programmare',
   fornitore: '',
   note: '',
@@ -58,20 +60,7 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
   const handleUltimaEsecuzioneChange = (val) => {
     setForm(prev => {
       if (!val) return { ...prev, ultima_esecuzione: val };
-      const base = new Date(val + 'T00:00:00');
-      const nextDate = (() => {
-        switch (prev.frequenza) {
-          case 'giornaliera': return addDays(base, 1);
-          case 'settimanale': return addWeeks(base, 1);
-          case 'quindicinale': return addDays(base, 15);
-          case 'mensile': return addMonths(base, 1);
-          case 'trimestrale': return addMonths(base, 3);
-          case 'semestrale': return addMonths(base, 6);
-          case 'annuale': return addMonths(base, 12);
-          default: return addMonths(base, 1);
-        }
-      })();
-      return { ...prev, ultima_esecuzione: val, prossima_scadenza: nextDate.toISOString().split('T')[0] };
+      return { ...prev, ultima_esecuzione: val, prossima_scadenza: val };
     });
   };
 
