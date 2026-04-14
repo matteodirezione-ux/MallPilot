@@ -84,14 +84,16 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
       await base44.entities.PuliziaPeriodica.update(pulizia.id, form);
     } else {
       await base44.entities.PuliziaPeriodica.create(form);
-      // Crea automaticamente un controllo nella sezione Manutenzioni
-      await base44.entities.Manutenzione.create({
-        titolo: form.titolo,
-        descrizione: form.descrizione || '',
-        centro_id: form.centro_id,
-        data_scadenza: form.prossima_scadenza || form.ultima_esecuzione,
-        stato: 'da_fare',
-      });
+      // Crea automaticamente un controllo solo se lo stato è "programmato"
+      if (form.stato === 'programmato') {
+        await base44.entities.Manutenzione.create({
+          titolo: form.titolo,
+          descrizione: form.descrizione || '',
+          centro_id: form.centro_id,
+          data_scadenza: form.prossima_scadenza || form.ultima_esecuzione,
+          stato: 'da_fare',
+        });
+      }
     }
     setSaving(false);
     onSave();
