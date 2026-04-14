@@ -1,0 +1,100 @@
+{
+  "name": "Manutenzione",
+  "type": "object",
+  "properties": {
+    "titolo": {
+      "type": "string",
+      "description": "Titolo della manutenzione"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione della manutenzione"
+    },
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "data_scadenza": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di scadenza"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "da_fare",
+        "in_corso",
+        "completato",
+        "annullato"
+      ],
+      "default": "da_fare",
+      "description": "Stato della manutenzione"
+    },
+    "assegnato_a_email": {
+      "type": "string",
+      "description": "Email dell'utente a cui \u00e8 assegnato"
+    },
+    "assegnato_a_nome": {
+      "type": "string",
+      "description": "Nome dell'utente a cui \u00e8 assegnato"
+    },
+    "assegnato_da_email": {
+      "type": "string",
+      "description": "Email di chi ha creato"
+    },
+    "assegnato_da_nome": {
+      "type": "string",
+      "description": "Nome di chi ha creato"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive"
+    },
+    "ricorrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se la manutenzione \u00e8 ricorrente"
+    },
+    "ricorrenza_tipo": {
+      "type": "string",
+      "enum": [
+        "giornaliero",
+        "settimanale",
+        "mensile",
+        "annuale",
+        "personalizzato"
+      ],
+      "description": "Tipo di ricorrenza"
+    },
+    "ricorrenza_ogni": {
+      "type": "number",
+      "description": "Ogni quante unit\u00e0 si ripete"
+    },
+    "ricorrenza_unita": {
+      "type": "string",
+      "enum": [
+        "giorni",
+        "settimane",
+        "mesi"
+      ],
+      "description": "Unit\u00e0 per ricorrenza personalizzata"
+    },
+    "ricorrenza_fine": {
+      "type": "string",
+      "format": "date",
+      "description": "Data fine ricorrenza"
+    },
+    "manutenzione_padre_id": {
+      "type": "string",
+      "description": "ID della manutenzione padre (per ricorrenze generate)"
+    },
+    "pulizia_periodica_id": {
+      "type": "string",
+      "description": "ID della pulizia periodica collegata"
+    }
+  },
+  "required": [
+    "titolo",
+    "data_scadenza"
+  ]
+}

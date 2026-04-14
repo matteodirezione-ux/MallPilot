@@ -77,14 +77,26 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
     setForm(prev => ({ ...prev, foto_urls: prev.foto_urls.filter((_, i) => i !== idx) }));
   };
 
-  const creaManutenzione = async (f) => {
+  const creaManutenzione = async (puliziaId, f) => {
     await base44.entities.Manutenzione.create({
       titolo: f.titolo,
       descrizione: f.descrizione || '',
       centro_id: f.centro_id,
       data_scadenza: f.prossima_scadenza || f.ultima_esecuzione,
       stato: 'da_fare',
+      pulizia_periodica_id: puliziaId,
     });
+  };
+
+  const aggiornaManutenzione = async (puliziaId, f) => {
+    const esistenti = await base44.entities.Manutenzione.filter({ pulizia_periodica_id: puliziaId });
+    if (esistenti.length > 0) {
+      await base44.entities.Manutenzione.update(esistenti[0].id, {
+        titolo: f.titolo,
+        data_scadenza: f.prossima_scadenza || f.ultima_esecuzione,
+        descrizione: f.descrizione || '',
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -92,15 +104,17 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
     setSaving(true);
     if (pulizia?.id) {
       await base44.entities.PuliziaPeriodica.update(pulizia.id, form);
-      // Se lo stato è cambiato a "programmato", crea il controllo
       if (form.stato === 'programmato' && pulizia.stato !== 'programmato') {
-        await creaManutenzione(form);
+        // Stato appena diventato "programmato": crea il controllo
+        await creaManutenzione(pulizia.id, form);
+      } else if (form.stato === 'programmato') {
+        // Era già programmato: aggiorna date e titolo del controllo collegato
+        await aggiornaManutenzione(pulizia.id, form);
       }
     } else {
-      await base44.entities.PuliziaPeriodica.create(form);
-      // Crea automaticamente un controllo solo se lo stato è "programmato"
+      const nuova = await base44.entities.PuliziaPeriodica.create(form);
       if (form.stato === 'programmato') {
-        await creaManutenzione(form);
+        await creaManutenzione(nuova.id, form);
       }
     }
     setSaving(false);
