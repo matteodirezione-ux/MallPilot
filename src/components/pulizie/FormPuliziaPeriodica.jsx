@@ -33,7 +33,7 @@ const defaultForm = (centroId) => ({
 });
 
 export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId, onSave }) {
-  const [form, setForm] = useState(defaultForm(centroId));
+  const [form, setForm] = useState({ ...defaultForm(centroId), stato: 'da_programmare' });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -137,9 +137,9 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
               <Select value={form.stato} onValueChange={v => set('stato', v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="attiva">Attiva</SelectItem>
-                  <SelectItem value="scaduta">Scaduta</SelectItem>
-                  <SelectItem value="sospesa">Sospesa</SelectItem>
+                  <SelectItem value="da_programmare">Da programmare</SelectItem>
+                  <SelectItem value="programmato">Programmato</SelectItem>
+                  <SelectItem value="completato">Completato</SelectItem>
                 </SelectContent>
               </Select>
             </div>

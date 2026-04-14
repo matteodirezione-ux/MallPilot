@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Search, Pencil, Trash2, X, RefreshCw } from 'lucide-react';
-import { format, isPast, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormPuliziaPeriodica from './FormPuliziaPeriodica';
 
@@ -21,19 +21,12 @@ const FREQUENZA_LABEL = {
 };
 
 const STATO_CONFIG = {
-  attiva: { label: 'Attiva', color: 'bg-green-100 text-green-700 border-green-200' },
-  scaduta: { label: 'Scaduta', color: 'bg-red-100 text-red-700 border-red-200' },
-  sospesa: { label: 'Sospesa', color: 'bg-slate-100 text-slate-600 border-slate-200' },
+  da_programmare: { label: 'Da programmare', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+  programmato: { label: 'Programmato', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
 };
 
-const getStatoEffettivo = (p) => {
-  if (p.stato === 'sospesa') return 'sospesa';
-  if (p.prossima_scadenza) {
-    const scadenza = parseLocalDate(p.prossima_scadenza);
-    if (isPast(scadenza) && !isToday(scadenza)) return 'scaduta';
-  }
-  return 'attiva';
-};
+const getStatoEffettivo = (p) => p.stato || 'da_programmare';
 
 export default function ListaPuliziePeriodiche({ lista, loading, centroId, onReload }) {
   const [search, setSearch] = useState('');

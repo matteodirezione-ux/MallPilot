@@ -41,11 +41,11 @@
     "stato": {
       "type": "string",
       "enum": [
-        "attiva",
-        "scaduta",
-        "sospesa"
+        "da_programmare",
+        "programmato",
+        "completato"
       ],
-      "default": "attiva",
+      "default": "da_programmare",
       "description": "Stato della pulizia periodica"
     },
     "fornitore": {
