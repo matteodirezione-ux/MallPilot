@@ -115,7 +115,13 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             </div>
             <div>
               <Label>Stato</Label>
-              <Select value={form.stato} onValueChange={v => set('stato', v)}>
+              <Select value={form.stato} onValueChange={v => {
+                if (v === 'da_pianificare') {
+                  setForm(prev => ({ ...prev, stato: v, data_inizio: '', data_fine: '' }));
+                } else {
+                  set('stato', v);
+                }
+              }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="da_pianificare">Da pianificare</SelectItem>
