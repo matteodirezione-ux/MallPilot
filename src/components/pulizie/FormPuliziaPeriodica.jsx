@@ -147,18 +147,13 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Ultima esecuzione</Label>
+              <Label>Da (ultima esecuzione)</Label>
               <Input type="date" value={form.ultima_esecuzione} onChange={e => handleUltimaEsecuzioneChange(e.target.value)} />
             </div>
             <div>
-              <Label>Prossima scadenza</Label>
+              <Label>A (prossima scadenza)</Label>
               <Input type="date" value={form.prossima_scadenza} onChange={e => set('prossima_scadenza', e.target.value)} />
             </div>
-          </div>
-
-          <div>
-            <Label>Fornitore</Label>
-            <Input value={form.fornitore} onChange={e => set('fornitore', e.target.value)} />
           </div>
 
           <div>
@@ -177,7 +172,7 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
               <label className="flex items-center gap-2 cursor-pointer w-fit px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                 {uploading ? 'Caricamento...' : 'Carica foto'}
-                <input type="file" multiple className="hidden" onChange={handleUpload} accept="image/*" />
+                <input type="file" multiple className="hidden" onChange={handleUpload} accept="image/*" capture="environment" />
               </label>
             </div>
             {form.foto_urls?.length > 0 && (
