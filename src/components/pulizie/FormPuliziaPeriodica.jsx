@@ -50,11 +50,7 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleFrequenzaChange = (val) => {
-    setForm(prev => {
-      const nextDate = FREQUENZA_GIORNI[val]?.();
-      const prossima = nextDate ? nextDate.toISOString().split('T')[0] : prev.prossima_scadenza;
-      return { ...prev, frequenza: val, prossima_scadenza: prossima };
-    });
+    set('frequenza', val);
   };
 
   const handleUltimaEsecuzioneChange = (val) => {
