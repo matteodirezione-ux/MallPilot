@@ -17,7 +17,10 @@ import {
   CheckCircle,
   Sparkles,
   ClipboardList,
-  Ticket
+  Ticket,
+  HardHat,
+  RefreshCw,
+  BookOpen
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -25,30 +28,33 @@ import TasksDashboard from '@/components/dashboard/TasksDashboard';
 
 export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
-    prossimiAffitti: [],
-    affittiCorrenti: [],
-    spaziOccupati: 0,
-    spaziTotali: 0,
-    incassiMese: 0,
-    incassiAnno: 0,
-    budgetAnno: 0,
-    clientiTotali: 0,
-    affittoMedioGiornaliero: 0,
-    tassoOccupazioneAnnuale: 0,
-    taskStats: {
-      urgenti: 0,
-      inCorso: 0,
-      completati: 0,
-      totali: 0
-    },
-    eventStats: {
-      giorniEvento: 0,
-      eventiCorrenti: 0,
-      prossimiEventi: []
-    },
-    tasksList: [],
-    controlliList: [],
-    ticketsList: []
+  prossimiAffitti: [],
+  affittiCorrenti: [],
+  spaziOccupati: 0,
+  spaziTotali: 0,
+  incassiMese: 0,
+  incassiAnno: 0,
+  budgetAnno: 0,
+  clientiTotali: 0,
+  affittoMedioGiornaliero: 0,
+  tassoOccupazioneAnnuale: 0,
+  taskStats: {
+    urgenti: 0,
+    inCorso: 0,
+    completati: 0,
+    totali: 0
+  },
+  eventStats: {
+    giorniEvento: 0,
+    eventiCorrenti: 0,
+    prossimiEventi: []
+  },
+  tasksList: [],
+  controlliList: [],
+  ticketsList: [],
+  capexList: [],
+  puliziePeriodiche: [],
+  reportList: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -292,6 +298,30 @@ export default function Dashboard({ centroSelezionato, user }) {
         ? await base44.entities.Ticket.list()
         : await base44.entities.Ticket.filter({ centro_id: centroSelezionato.id });
 
+      // Capex prossimi (pianificati, ordinati per data_inizio)
+      const oggi2 = new Date(); oggi2.setHours(0,0,0,0);
+      const allCapex = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Capex.list()
+        : await base44.entities.Capex.filter({ centro_id: centroSelezionato.id });
+      const capexList = allCapex
+        .filter(c => c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) >= oggi2)
+        .sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio))
+        .slice(0, 5);
+
+      // Pulizie Periodiche (da programmare o programmate)
+      const allPulizie = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.PuliziaPeriodica.list()
+        : await base44.entities.PuliziaPeriodica.filter({ centro_id: centroSelezionato.id });
+      const puliziePeriodiche = allPulizie
+        .filter(p => p.stato !== 'completato')
+        .sort((a, b) => new Date(a.prossima_scadenza || a.ultima_esecuzione || 0) - new Date(b.prossima_scadenza || b.ultima_esecuzione || 0))
+        .slice(0, 5);
+
+      // Report recenti
+      const allReport = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Report.list('-data', 5)
+        : await base44.entities.Report.filter({ centro_id: centroSelezionato.id }, '-data', 5);
+
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
         tasksList.map(async (t) => {
@@ -320,7 +350,10 @@ export default function Dashboard({ centroSelezionato, user }) {
         eventStats,
         tasksList: tasksConDettagli,
         controlliList: controlliList || [],
-        ticketsList: ticketsList || []
+        ticketsList: ticketsList || [],
+        capexList: capexList || [],
+        puliziePeriodiche: puliziePeriodiche || [],
+        reportList: allReport || []
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
@@ -755,6 +788,103 @@ export default function Dashboard({ centroSelezionato, user }) {
                        </CardContent>
                        </Card>
                        </div>
+
+      {/* Seconda riga card: Capex, Pulizie Periodiche, Report */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
+        {/* Capex */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3">
+            <div className="flex items-center gap-2">
+              <HardHat className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Capex Programmati</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
+            {stats.capexList.length === 0 ? (
+              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun Capex in programma</p>
+            ) : (
+              <div className="space-y-1.5 sm:space-y-2">
+                {stats.capexList.map(c => (
+                  <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                      <p className="text-xs text-slate-500">{c.categoria || ''}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-yellow-700 whitespace-nowrap">{c.data_inizio ? format(new Date(c.data_inizio), 'dd MMM', { locale: it }) : '-'}</p>
+                      {c.costo_previsto > 0 && <p className="text-xs text-slate-500">{new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(c.costo_previsto)}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pulizie Periodiche */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Pulizie Periodiche</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
+            {stats.puliziePeriodiche.length === 0 ? (
+              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessuna pulizia da programmare</p>
+            ) : (
+              <div className="space-y-1.5 sm:space-y-2">
+                {stats.puliziePeriodiche.map(p => {
+                  const isProgrammato = p.stato === 'programmato';
+                  return (
+                    <div key={p.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${isProgrammato ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`}>
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
+                        <p className="text-xs text-slate-500">{p.frequenza}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isProgrammato ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                          {isProgrammato ? 'Programmato' : 'Da programmare'}
+                        </span>
+                        {p.prossima_scadenza && <p className="text-xs text-slate-500 mt-0.5">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Report Recenti */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-600" />
+              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Report Recenti</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
+            {stats.reportList.length === 0 ? (
+              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun report disponibile</p>
+            ) : (
+              <div className="space-y-1.5 sm:space-y-2">
+                {stats.reportList.map(r => (
+                  <div key={r.id} className="flex items-center justify-between p-2 sm:p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs sm:text-sm">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <p className="font-medium text-slate-800 truncate">{r.operatore}</p>
+                      <p className="text-xs text-slate-500 truncate line-clamp-1">{r.contenuto || ''}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-xs font-medium text-emerald-700 whitespace-nowrap">{r.data ? format(new Date(r.data), 'dd MMM', { locale: it }) : '-'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
