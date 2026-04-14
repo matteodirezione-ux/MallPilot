@@ -1,0 +1,72 @@
+{
+  "name": "PuliziaPeriodica",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "titolo": {
+      "type": "string",
+      "description": "Titolo della pulizia periodica"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione dell'attivit\u00e0"
+    },
+    "frequenza": {
+      "type": "string",
+      "enum": [
+        "giornaliera",
+        "settimanale",
+        "quindicinale",
+        "mensile",
+        "trimestrale",
+        "semestrale",
+        "annuale"
+      ],
+      "default": "mensile",
+      "description": "Frequenza della pulizia"
+    },
+    "ultima_esecuzione": {
+      "type": "string",
+      "format": "date",
+      "description": "Data dell'ultima esecuzione"
+    },
+    "prossima_scadenza": {
+      "type": "string",
+      "format": "date",
+      "description": "Data della prossima scadenza"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "attiva",
+        "scaduta",
+        "sospesa"
+      ],
+      "default": "attiva",
+      "description": "Stato della pulizia periodica"
+    },
+    "fornitore": {
+      "type": "string",
+      "description": "Fornitore/azienda di pulizie"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive"
+    },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Foto dell'ultima esecuzione"
+    }
+  },
+  "required": [
+    "centro_id",
+    "titolo",
+    "frequenza"
+  ]
+}
