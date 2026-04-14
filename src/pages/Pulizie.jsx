@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormPulizia from '@/components/pulizie/FormPulizia';
 import ListaPuliziePeriodiche from '@/components/pulizie/ListaPuliziePeriodiche';
+import FormPuliziaPeriodica from '@/components/pulizie/FormPuliziaPeriodica';
 
 const parseLocalDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -28,6 +29,8 @@ export default function PuliziePage({ centroSelezionato, user }) {
   // Periodiche
   const [listaPeriodiche, setListaPeriodiche] = useState([]);
   const [loadingPer, setLoadingPer] = useState(true);
+  const [annoPeriodiche, setAnnoPeriodiche] = useState(new Date().getFullYear());
+  const [showFormPeriodica, setShowFormPeriodica] = useState(false);
 
   useEffect(() => {
     if (centroSelezionato?.id) {
@@ -96,23 +99,41 @@ export default function PuliziePage({ centroSelezionato, user }) {
           </h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
-        {/* Anno navigator (solo per segnalazioni) */}
-        {tab === 'segnalazioni' && (
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
-                <ChevronLeft className="w-4 h-4" />
+        {/* Anno navigator + bottone nuovo */}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {tab === 'segnalazioni' && (
+            <>
+              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
+                <Plus className="w-4 h-4 mr-1" /> Nuova Segnalazione
               </Button>
-              <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)}>
-                <ChevronRight className="w-4 h-4" />
+            </>
+          )}
+          {tab === 'periodiche' && (
+            <>
+              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoPeriodiche(a => a - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoPeriodiche}</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoPeriodiche(a => a + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <Button size="sm" onClick={() => setShowFormPeriodica(true)}>
+                <Plus className="w-4 h-4 mr-1" /> Nuova pulizia periodica
               </Button>
-            </div>
-            <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
-              <Plus className="w-4 h-4 mr-1" /> Nuova Segnalazione
-            </Button>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Tab switch */}
@@ -246,12 +267,22 @@ export default function PuliziePage({ centroSelezionato, user }) {
 
       {/* PERIODICHE */}
       {tab === 'periodiche' && (
-        <ListaPuliziePeriodiche
-          lista={listaPeriodiche}
-          loading={loadingPer}
-          centroId={centroSelezionato?.id}
-          onReload={loadPeriodiche}
-        />
+        <>
+          <ListaPuliziePeriodiche
+            lista={listaPeriodiche}
+            loading={loadingPer}
+            centroId={centroSelezionato?.id}
+            onReload={loadPeriodiche}
+            anno={annoPeriodiche}
+          />
+          <FormPuliziaPeriodica
+            open={showFormPeriodica}
+            onClose={() => setShowFormPeriodica(false)}
+            pulizia={null}
+            centroId={centroSelezionato?.id}
+            onSave={() => { setShowFormPeriodica(false); loadPeriodiche(); }}
+          />
+        </>
       )}
 
       {/* Fullscreen image */}

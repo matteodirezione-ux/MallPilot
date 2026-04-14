@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Search, Pencil, Trash2, X, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Pencil, Trash2, X, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormPuliziaPeriodica from './FormPuliziaPeriodica';
@@ -23,9 +23,8 @@ const STATO_CONFIG = {
   completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
 };
 
-export default function ListaPuliziePeriodiche({ lista, loading, centroId, onReload }) {
+export default function ListaPuliziePeriodiche({ lista, loading, centroId, onReload, anno }) {
   const [search, setSearch] = useState('');
-  const [anno, setAnno] = useState(new Date().getFullYear());
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [dettaglio, setDettaglio] = useState(null);
@@ -65,25 +64,11 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap justify-between">
-        <div className="flex items-center gap-2 flex-1 flex-wrap">
-          <div className="relative min-w-[160px] flex-1 max-w-sm">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a - 1)}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{anno}</span>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a + 1)}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="relative min-w-[160px] flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
-        <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="w-4 h-4 mr-1" /> Nuova pulizia periodica
-        </Button>
       </div>
 
       {/* Lista raggruppata per mese */}
