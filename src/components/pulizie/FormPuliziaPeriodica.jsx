@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, Camera } from 'lucide-react';
 import { addDays, addWeeks, addMonths } from 'date-fns';
 
 const FREQUENZA_GIORNI = {
@@ -26,7 +26,7 @@ const defaultForm = (centroId) => ({
   frequenza: 'mensile',
   ultima_esecuzione: '',
   prossima_scadenza: '',
-  stato: 'attiva',
+  stato: 'da_programmare',
   fornitore: '',
   note: '',
   foto_urls: []
@@ -147,11 +147,11 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Da (ultima esecuzione)</Label>
+              <Label>Da</Label>
               <Input type="date" value={form.ultima_esecuzione} onChange={e => handleUltimaEsecuzioneChange(e.target.value)} />
             </div>
             <div>
-              <Label>A (prossima scadenza)</Label>
+              <Label>A</Label>
               <Input type="date" value={form.prossima_scadenza} onChange={e => set('prossima_scadenza', e.target.value)} />
             </div>
           </div>
@@ -168,12 +168,17 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
 
           <div>
             <Label>Foto ultima esecuzione</Label>
-            <div className="mt-1">
-              <label className="flex items-center gap-2 cursor-pointer w-fit px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
-                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                {uploading ? 'Caricamento...' : 'Carica foto'}
-                <input type="file" multiple className="hidden" onChange={handleUpload} accept="image/*" capture="environment" />
-              </label>
+            <div className="mt-1 flex gap-2 flex-wrap">
+               <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
+                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                 {uploading ? 'Caricamento...' : 'Galleria'}
+                 <input type="file" multiple className="hidden" onChange={handleUpload} accept="image/*" />
+               </label>
+               <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-dashed border-blue-300 rounded-lg hover:border-blue-500 text-sm text-blue-600 bg-blue-50">
+                 <Camera className="w-4 h-4" />
+                 Fotocamera
+                 <input type="file" className="hidden" onChange={handleUpload} accept="image/*" capture="environment" />
+               </label>
             </div>
             {form.foto_urls?.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
