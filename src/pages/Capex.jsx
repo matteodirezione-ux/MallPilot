@@ -222,7 +222,7 @@ export default function CapexPage({ centroSelezionato, user }) {
                   {c.descrizione && <p className="text-xs text-slate-500 truncate mb-2">{c.descrizione}</p>}
                   <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                     <span>📅 Anno: <strong>{c.anno_capex || (c.data_inizio ? c.data_inizio.substring(0,4) : '—')}</strong></span>
-                    {c.data_inizio && (
+                    {c.stato !== 'da_pianificare' && c.data_inizio && (
                       <span>🔧 Intervento: {format(parseLocalDate(c.data_inizio), 'dd MMM yyyy', { locale: it })}{c.data_fine ? ` → ${format(parseLocalDate(c.data_fine), 'dd MMM yyyy', { locale: it })}` : ''}</span>
                     )}
                     {c.fornitore && <span>🏢 {c.fornitore}</span>}
@@ -326,8 +326,8 @@ export default function CapexPage({ centroSelezionato, user }) {
               {dettaglio.descrizione && <p className="text-sm text-slate-600">{dettaglio.descrizione}</p>}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><p className="text-xs text-slate-400 font-medium">Anno Capex</p><p className="font-medium">{dettaglio.anno_capex || (dettaglio.data_inizio ? dettaglio.data_inizio.substring(0,4) : '—')}</p></div>
-                {dettaglio.data_inizio && <div><p className="text-xs text-slate-400 font-medium">Data inizio intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_inizio), 'dd MMM yyyy', { locale: it })}</p></div>}
-                {dettaglio.data_fine && <div><p className="text-xs text-slate-400 font-medium">Data fine intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_fine), 'dd MMM yyyy', { locale: it })}</p></div>}
+                {dettaglio.stato !== 'da_pianificare' && dettaglio.data_inizio && <div><p className="text-xs text-slate-400 font-medium">Data inizio intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_inizio), 'dd MMM yyyy', { locale: it })}</p></div>}
+                {dettaglio.stato !== 'da_pianificare' && dettaglio.data_fine && <div><p className="text-xs text-slate-400 font-medium">Data fine intervento</p><p className="font-medium">{format(parseLocalDate(dettaglio.data_fine), 'dd MMM yyyy', { locale: it })}</p></div>}
                 {dettaglio.fornitore && <div><p className="text-xs text-slate-400 font-medium">Fornitore</p><p className="font-medium">{dettaglio.fornitore}</p></div>}
                 {!isVigilanza && dettaglio.costo_previsto && <div><p className="text-xs text-slate-400 font-medium">Costo previsto</p><p className="font-medium text-blue-700">{fmt(dettaglio.costo_previsto)}</p></div>}
                 {!isVigilanza && dettaglio.costo_effettivo && <div><p className="text-xs text-slate-400 font-medium">Costo effettivo</p><p className="font-medium text-green-700">{fmt(dettaglio.costo_effettivo)}</p></div>}
