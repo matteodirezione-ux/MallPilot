@@ -82,7 +82,7 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
           </div>
         </div>
         <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
-          <Plus className="w-4 h-4 mr-1" /> Nuova
+          <Plus className="w-4 h-4 mr-1" /> Nuova pulizia periodica
         </Button>
       </div>
 
