@@ -102,27 +102,31 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    if (pulizia?.id) {
-      await base44.entities.PuliziaPeriodica.update(pulizia.id, form);
-      if (form.stato === 'programmato' && pulizia.stato !== 'programmato') {
-        // Stato appena diventato "programmato": crea il controllo
-        await creaManutenzione(pulizia.id, form);
-      } else if (form.stato === 'programmato') {
-        // Era già programmato: aggiorna date e titolo del controllo collegato
-        await aggiornaManutenzione(pulizia.id, form);
-      } else if (form.stato !== 'programmato' && pulizia.stato === 'programmato') {
-        // Stato rimosso da "programmato": elimina il controllo collegato
-        const esistenti = await base44.entities.Manutenzione.filter({ pulizia_periodica_id: pulizia.id });
-        for (const m of esistenti) await base44.entities.Manutenzione.delete(m.id);
+    try {
+      if (pulizia?.id) {
+        const statoOriginale = pulizia.stato || 'da_programmare';
+        await base44.entities.PuliziaPeriodica.update(pulizia.id, form);
+        if (form.stato === 'programmato' && statoOriginale !== 'programmato') {
+          // Stato appena diventato "programmato": crea il controllo
+          await creaManutenzione(pulizia.id, form);
+        } else if (form.stato === 'programmato' && statoOriginale === 'programmato') {
+          // Era già programmato: aggiorna date e titolo del controllo collegato
+          await aggiornaManutenzione(pulizia.id, form);
+        } else if (form.stato !== 'programmato' && statoOriginale === 'programmato') {
+          // Stato rimosso da "programmato": elimina il controllo collegato
+          const esistenti = await base44.entities.Manutenzione.filter({ pulizia_periodica_id: pulizia.id });
+          for (const m of esistenti) await base44.entities.Manutenzione.delete(m.id);
+        }
+      } else {
+        const nuova = await base44.entities.PuliziaPeriodica.create(form);
+        if (form.stato === 'programmato') {
+          await creaManutenzione(nuova.id, form);
+        }
       }
-    } else {
-      const nuova = await base44.entities.PuliziaPeriodica.create(form);
-      if (form.stato === 'programmato') {
-        await creaManutenzione(nuova.id, form);
-      }
+    } finally {
+      setSaving(false);
+      onSave();
     }
-    setSaving(false);
-    onSave();
   };
 
   return (
