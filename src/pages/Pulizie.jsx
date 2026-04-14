@@ -82,7 +82,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
     if (!perMese[mese]) perMese[mese] = [];
     perMese[mese].push(p);
   });
-  const mesiConDati = Object.keys(perMese).map(Number).sort((a, b) => a - b);
+  const mesiConDati = Object.keys(perMese).map(Number).sort((a, b) => b - a);
 
   if (!centroSelezionato?.id) {
     return <div className="p-8 text-center text-slate-500">Seleziona un centro commerciale</div>;
