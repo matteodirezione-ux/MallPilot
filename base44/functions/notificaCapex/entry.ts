@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
   const capexDaNotificare = [
     ...capexOggi.map(c => ({ ...c, tipo: 'oggi' })),
     ...capexDomani.map(c => ({ ...c, tipo: 'domani' })),
-  ].filter(c => c.stato !== 'annullato');
+  ].filter(c => c.stato !== 'annullato' && c.stato !== 'da_pianificare');
 
   if (capexDaNotificare.length === 0) {
     return Response.json({ message: 'Nessun capex da notificare', count: 0 });
