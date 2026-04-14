@@ -32,6 +32,9 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
 
   const handleDelete = async (id) => {
     if (!window.confirm('Eliminare questa pulizia periodica?')) return;
+    // Elimina anche il controllo collegato se esiste
+    const esistenti = await base44.entities.Manutenzione.filter({ pulizia_periodica_id: id });
+    for (const m of esistenti) await base44.entities.Manutenzione.delete(m.id);
     await base44.entities.PuliziaPeriodica.delete(id);
     setDettaglio(null);
     onReload();

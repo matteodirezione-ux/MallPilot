@@ -110,6 +110,10 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
       } else if (form.stato === 'programmato') {
         // Era già programmato: aggiorna date e titolo del controllo collegato
         await aggiornaManutenzione(pulizia.id, form);
+      } else if (form.stato !== 'programmato' && pulizia.stato === 'programmato') {
+        // Stato rimosso da "programmato": elimina il controllo collegato
+        const esistenti = await base44.entities.Manutenzione.filter({ pulizia_periodica_id: pulizia.id });
+        for (const m of esistenti) await base44.entities.Manutenzione.delete(m.id);
       }
     } else {
       const nuova = await base44.entities.PuliziaPeriodica.create(form);
