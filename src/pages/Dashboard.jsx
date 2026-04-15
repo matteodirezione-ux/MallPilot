@@ -416,9 +416,18 @@ export default function Dashboard({ centroSelezionato, user }) {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="mb-4 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-0.5">Dashboard</h1>
-        <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
+      <div className="mb-4 sm:mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-0.5">Dashboard</h1>
+          <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
+        </div>
+        {centroSelezionato?.logo_url && (
+          <img
+            src={centroSelezionato.logo_url}
+            alt={centroSelezionato.nome}
+            className="h-12 sm:h-16 max-w-[120px] sm:max-w-[180px] object-contain flex-shrink-0"
+          />
+        )}
       </div>
 
       {/* Summary Cards - Responsive Grid */}
