@@ -1,0 +1,51 @@
+{
+  "name": "CentroCommerciale",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome del centro commerciale"
+    },
+    "indirizzo": {
+      "type": "string",
+      "description": "Indirizzo completo"
+    },
+    "citta": {
+      "type": "string",
+      "description": "Citt\u00e0"
+    },
+    "provincia": {
+      "type": "string",
+      "description": "Provincia"
+    },
+    "cap": {
+      "type": "string",
+      "description": "CAP"
+    },
+    "numero_spazi_totali": {
+      "type": "number",
+      "description": "Numero totale di spazi disponibili nel centro"
+    },
+    "iban": {
+      "type": "string",
+      "description": "IBAN bancario per i pagamenti (es. IT29H0538713202000001501918)"
+    },
+    "piantina_url": {
+      "type": "string",
+      "description": "URL della mappa/piantina del centro commerciale"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL del logo del centro commerciale"
+    },
+    "attivo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se il centro \u00e8 attivo o meno"
+    }
+  },
+  "required": [
+    "nome",
+    "citta"
+  ]
+}

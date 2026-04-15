@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck } from 'lucide-react';
+import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Gestione({ user }) {
@@ -327,8 +327,11 @@ export default function Gestione({ user }) {
                 <CardContent className="p-6">
                   <div className="flex justify-between mb-4">
                     <div className="flex gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-blue-600" />
+                      <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {centro.logo_url
+                          ? <img src={centro.logo_url} alt="logo" className="w-full h-full object-contain" />
+                          : <Building2 className="w-5 h-5 text-blue-600" />
+                        }
                       </div>
                       <div>
                         <h3 className="font-semibold">{centro.nome}</h3>
@@ -581,18 +584,26 @@ export default function Gestione({ user }) {
 // === DIALOG COMPONENTS ===
 function CentroDialog({ open, data, onClose, onSave }) {
   const [form, setForm] = useState({
-    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', attivo: true
+    nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', logo_url: '', attivo: true
   });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     if (data) {
-      setForm(data);
+      setForm({ logo_url: '', ...data });
     } else {
-      setForm({ 
-        nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', attivo: true
-      });
+      setForm({ nome: '', citta: '', indirizzo: '', provincia: '', cap: '', numero_spazi_totali: '', iban: '', logo_url: '', attivo: true });
     }
   }, [data, open]);
+
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    const { file_url } = await base44.integrations.Core.UploadFile({ file });
+    setForm(prev => ({ ...prev, logo_url: file_url }));
+    setUploadingLogo(false);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -606,6 +617,31 @@ function CentroDialog({ open, data, onClose, onSave }) {
           <DialogTitle>{data ? 'Modifica Centro' : 'Nuovo Centro'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Logo */}
+          <div>
+            <Label>Logo</Label>
+            <div className="flex items-center gap-4 mt-2">
+              <div className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {form.logo_url
+                  ? <img src={form.logo_url} alt="logo" className="w-full h-full object-contain p-1" />
+                  : <Building2 className="w-8 h-8 text-slate-300" />
+                }
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 cursor-pointer px-3 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 text-sm text-slate-600 w-fit">
+                  {uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                  {uploadingLogo ? 'Caricamento...' : 'Carica logo'}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={uploadingLogo} />
+                </label>
+                {form.logo_url && (
+                  <button type="button" onClick={() => setForm(prev => ({ ...prev, logo_url: '' }))} className="text-xs text-red-500 hover:text-red-700 text-left">
+                    Rimuovi logo
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div>
             <Label>Nome Centro *</Label>
             <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
@@ -642,7 +678,7 @@ function CentroDialog({ open, data, onClose, onSave }) {
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
-            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea'}</Button>
+            <Button type="submit" className="bg-blue-600" disabled={uploadingLogo}>{data ? 'Aggiorna' : 'Crea'}</Button>
           </div>
         </form>
       </DialogContent>
