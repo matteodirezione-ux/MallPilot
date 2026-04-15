@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/ui/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -173,11 +174,11 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Da</Label>
-              <Input type="date" value={form.ultima_esecuzione} onChange={e => handleUltimaEsecuzioneChange(e.target.value)} />
+              <DatePicker value={form.ultima_esecuzione} onChange={handleUltimaEsecuzioneChange} placeholder="Seleziona data inizio" />
             </div>
             <div>
               <Label>A</Label>
-              <Input type="date" value={form.prossima_scadenza} onChange={e => set('prossima_scadenza', e.target.value)} />
+              <DatePicker value={form.prossima_scadenza} onChange={v => set('prossima_scadenza', v)} placeholder="Seleziona data fine" />
             </div>
           </div>
 

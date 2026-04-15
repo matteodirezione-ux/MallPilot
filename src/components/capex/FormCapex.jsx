@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/ui/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -142,11 +143,11 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             <div className="grid grid-cols-2 gap-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <div>
                 <Label>Data inizio intervento</Label>
-                <Input type="date" value={form.data_inizio} onChange={e => set('data_inizio', e.target.value)} />
+                <DatePicker value={form.data_inizio} onChange={v => set('data_inizio', v)} placeholder="Seleziona data inizio" />
               </div>
               <div>
                 <Label>Data fine intervento</Label>
-                <Input type="date" value={form.data_fine} onChange={e => set('data_fine', e.target.value)} />
+                <DatePicker value={form.data_fine} onChange={v => set('data_fine', v)} placeholder="Seleziona data fine" />
               </div>
             </div>
           )}

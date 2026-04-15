@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -213,7 +214,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
           <div className={rowClass}>
             <label className={labelClass}>Data scadenza *</label>
             <div className={fieldClass}>
-              <Input type="date" value={form.data_scadenza} onChange={e => set('data_scadenza', e.target.value)} required className="h-8 text-sm w-full" />
+              <DatePicker value={form.data_scadenza} onChange={v => set('data_scadenza', v)} placeholder="Seleziona data scadenza" />
             </div>
           </div>
 
@@ -366,7 +367,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
               <div className={rowClass}>
                 <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Fine</label>
                 <div className="flex-1">
-                  <Input type="date" value={form.ricorrenza_fine} onChange={e => set('ricorrenza_fine', e.target.value)} className="h-8 text-sm w-full" />
+                  <DatePicker value={form.ricorrenza_fine} onChange={v => set('ricorrenza_fine', v)} placeholder="Data fine ricorrenza" />
                 </div>
               </div>
             </div>

@@ -7,13 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { X, AlertTriangle, Zap, Sparkles, Building2, Plus, CalendarIcon } from 'lucide-react';
+import { X, AlertTriangle, Zap, Sparkles, Building2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
-import { isWithinInterval, format, parse } from 'date-fns';
-import { it } from 'date-fns/locale';
+import { isWithinInterval, format } from 'date-fns';
+import DatePicker from '@/components/ui/DatePicker';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato, onClienteCreated }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
@@ -226,39 +224,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const labelClass = "w-28 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
   const fieldClass = "flex-1 min-w-0";
 
-  const DatePicker = ({ value, onChange, placeholder }) => {
-    const [open, setOpen] = useState(false);
-    const selected = value ? parse(value, 'yyyy-MM-dd', new Date()) : undefined;
-    return (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className="h-8 w-full flex items-center gap-2 px-3 rounded-md border border-input bg-background text-sm hover:bg-accent transition-colors"
-          >
-            <CalendarIcon className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <span className={value ? 'text-slate-800' : 'text-slate-400'}>
-              {value ? format(selected, 'dd/MM/yyyy') : (placeholder || 'Seleziona data')}
-            </span>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={selected}
-            onSelect={(date) => {
-              if (date) {
-                onChange(format(date, 'yyyy-MM-dd'));
-                setOpen(false);
-              }
-            }}
-            locale={it}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
-    );
-  };
+
 
   // Spazio selector condiviso
   const SpazioSelector = () => (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
@@ -102,7 +103,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
           <div className={rowClass}>
             <label className={labelClass}>Data apertura *</label>
             <div className={fieldClass}>
-              <Input type="date" value={form.data_apertura} onChange={e => set('data_apertura', e.target.value)} required className="h-8 text-sm w-full" />
+              <DatePicker value={form.data_apertura} onChange={v => set('data_apertura', v)} placeholder="Data apertura" />
             </div>
           </div>
 
@@ -129,7 +130,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
           <div className={rowClass}>
             <label className={labelClass}>Scadenza</label>
             <div className={fieldClass}>
-              <Input type="date" value={form.scadenza} onChange={e => set('scadenza', e.target.value)} className="h-8 text-sm w-full" />
+              <DatePicker value={form.scadenza} onChange={v => set('scadenza', v)} placeholder="Data scadenza" />
             </div>
           </div>
 

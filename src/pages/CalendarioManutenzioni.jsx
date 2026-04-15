@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -389,12 +390,9 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-slate-700">Data *</label>
-                <Input
-                  type="date"
-                  value={formData.data_scadenza}
-                  onChange={(e) => setFormData({ ...formData, data_scadenza: e.target.value })}
-                  className="mt-1"
-                />
+                <div className="mt-1">
+                  <DatePicker value={formData.data_scadenza} onChange={v => setFormData({ ...formData, data_scadenza: v })} placeholder="Seleziona data" />
+                </div>
               </div>
 
               <div>
@@ -474,12 +472,9 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
 
                     <div>
                       <label className="text-xs font-medium text-slate-700">Fino al</label>
-                      <Input
-                        type="date"
-                        value={formData.ricorrenza_fine}
-                        onChange={(e) => setFormData({ ...formData, ricorrenza_fine: e.target.value })}
-                        className="mt-1 h-8"
-                      />
+                      <div className="mt-1">
+                        <DatePicker value={formData.ricorrenza_fine} onChange={v => setFormData({ ...formData, ricorrenza_fine: v })} placeholder="Data fine" />
+                      </div>
                     </div>
                   </div>
                 </div>
