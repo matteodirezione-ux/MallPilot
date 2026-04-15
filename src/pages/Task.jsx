@@ -378,6 +378,7 @@ export default function TaskPage({ centroSelezionato, user }) {
         centri={centri}
         direttori={direttori}
         vigilanze={vigilanze}
+        centroDefault={centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : null}
       />
     </div>
   );

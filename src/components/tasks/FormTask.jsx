@@ -35,7 +35,7 @@ const defaultForm = {
   note: '',
 };
 
-export default function FormTask({ open, onClose, onSave, task, user, centri, direttori, vigilanze }) {
+export default function FormTask({ open, onClose, onSave, task, user, centri, direttori, vigilanze, centroDefault }) {
   const [form, setForm] = useState(defaultForm);
   const [centriSelezionati, setCentriSelezionati] = useState([]);
   const [assegnatiSelezionati, setAssegnatiSelezionati] = useState([]);
@@ -52,7 +52,7 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
       setModalitaAssegnazione('singola');
     } else {
       setForm(defaultForm);
-      setCentriSelezionati([]);
+      setCentriSelezionati(centroDefault ? [centroDefault] : []);
       setAssegnatiSelezionati([]);
       setModalitaAssegnazione('singola');
     }
