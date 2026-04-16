@@ -379,7 +379,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                           <div className="grid grid-cols-4 gap-1 mt-2">
                             {formData.foto_urls.map((url, index) => (
                               <div key={index} className="relative group">
-                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-16 object-cover rounded" loading="lazy" crossOrigin="anonymous" />
+                                <img src={url} alt={`Foto ${index + 1}`} className="w-full h-16 object-cover rounded" loading="lazy" />
                                 <button type="button" onClick={() => removeFoto(index)}
                                   className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 md:opacity-0 opacity-100 transition-opacity">
                                   <Trash2 className="w-2.5 h-2.5" />
