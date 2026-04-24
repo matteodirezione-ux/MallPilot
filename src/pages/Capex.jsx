@@ -123,30 +123,22 @@ export default function CapexPage({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          {/* Navigatore Anno */}
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)} disabled={false}>
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        <div className="flex gap-2">
-          <Button variant={view === 'lista' ? 'default' : 'outline'} size="sm" onClick={() => setView('lista')}>
-            <List className="w-4 h-4 mr-1" /> Lista
-          </Button>
-          <Button variant={view === 'calendario' ? 'default' : 'outline'} size="sm" onClick={() => setView('calendario')}>
-            <Calendar className="w-4 h-4 mr-1" /> Calendario
-          </Button>
-          {canEdit && (
-            <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
-              <Plus className="w-4 h-4 mr-1" /> Nuovo Capex
-            </Button>
-          )}
-        </div>
-        </div>
+           {/* Navigatore Anno */}
+           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
+               <ChevronLeft className="w-4 h-4" />
+             </Button>
+             <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)} disabled={false}>
+               <ChevronRight className="w-4 h-4" />
+             </Button>
+           </div>
+           {canEdit && (
+             <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
+               <Plus className="w-4 h-4 mr-1" /> Nuovo Capex
+             </Button>
+           )}
+         </div>
       </div>
 
       {/* KPI Cards - solo per non vigilanza */}
@@ -174,12 +166,20 @@ export default function CapexPage({ centroSelezionato, user }) {
       )}
 
       {/* Filtri */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <div className="relative flex-1 min-w-[160px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
-        </div>
-        <Select value={filterStato} onValueChange={setFilterStato}>
+       <div className="flex flex-wrap gap-2 mb-4">
+         <div className="flex gap-2">
+           <Button variant={view === 'lista' ? 'default' : 'outline'} size="sm" onClick={() => setView('lista')}>
+             <List className="w-4 h-4 mr-1" /> Lista
+           </Button>
+           <Button variant={view === 'calendario' ? 'default' : 'outline'} size="sm" onClick={() => setView('calendario')}>
+             <Calendar className="w-4 h-4 mr-1" /> Calendario
+           </Button>
+         </div>
+         <div className="relative flex-1 min-w-[160px]">
+           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+           <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
+         </div>
+         <Select value={filterStato} onValueChange={setFilterStato}>
           <SelectTrigger className="w-36"><SelectValue placeholder="Stato" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="tutti">Tutti gli stati</SelectItem>
