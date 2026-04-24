@@ -364,13 +364,38 @@ export default function Gestione({ user }) {
 
       <Tabs defaultValue={isDirettore ? "vigilanza" : "centri"} className="w-full">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-          <TabsList className="w-full sm:w-auto overflow-x-auto">
-            {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
-            {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
-            <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
-            <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
-            {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
-          </TabsList>
+          {/* Desktop tabs */}
+          <div className="hidden sm:block">
+            <TabsList className="w-full sm:w-auto">
+              {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
+              {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
+              <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
+              <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
+              {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
+            </TabsList>
+          </div>
+          
+          {/* Mobile select dropdown */}
+          <div className="sm:hidden w-full">
+            <select
+              value={Object.values(["centri", "direttori", "vigilanza", "manutentori", "budget"].filter((v, i) => 
+                (v !== "centri" && v !== "direttori" && v !== "budget") || isPropieta
+              ))[0]}
+              onChange={(e) => {
+                const tabs = document.querySelector('[role="tablist"]');
+                const trigger = tabs?.querySelector(`[value="${e.target.value}"]`);
+                trigger?.click();
+              }}
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+            >
+              {isPropieta && <option value="centri">Centri</option>}
+              {isPropieta && <option value="direttori">Direttori</option>}
+              <option value="vigilanza">Vigilanza</option>
+              <option value="manutentori">Manutentori</option>
+              {isPropieta && <option value="budget">Budget</option>}
+            </select>
+          </div>
+
           {isPropieta && (
             <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
