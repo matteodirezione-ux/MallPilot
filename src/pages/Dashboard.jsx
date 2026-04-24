@@ -490,7 +490,7 @@ export default function Dashboard({ centroSelezionato, user }) {
 
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Allert Fornitori DUVRI */}
           <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
