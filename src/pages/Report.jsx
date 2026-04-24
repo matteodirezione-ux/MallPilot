@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,7 +18,7 @@ export default function Report({ centroSelezionato, user }) {
   const [espansi, setEspansi] = useState({});
   const [meseFiltrato, setMeseFiltrato] = useState(new Date());
 
-  const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', foto_urls: [] });
+  const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', furto: false, foto_urls: [] });
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
 
@@ -43,7 +43,7 @@ export default function Report({ centroSelezionato, user }) {
 
   const openModifica = (r) => {
     setReportSelezionato(r);
-    setForm({ data: r.data, operatore: r.operatore, contenuto: r.contenuto || '', foto_urls: r.foto_urls || [] });
+    setForm({ data: r.data, operatore: r.operatore, contenuto: r.contenuto || '', furto: r.furto || false, foto_urls: r.foto_urls || [] });
     setFormOpen(true);
   };
 
@@ -182,6 +182,11 @@ export default function Report({ centroSelezionato, user }) {
                           <span className={`text-sm ${nonLetto ? 'text-blue-500' : 'text-slate-500'}`}>· {r.operatore}</span>
                         </div>
                         <div className="flex items-center gap-2">
+                          {r.furto && (
+                            <span className="flex items-center gap-1 text-xs font-medium text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
+                              <AlertTriangle className="w-3 h-3" /> Furto
+                            </span>
+                          )}
                           {nonLetto && (
                             <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
                           )}
@@ -239,6 +244,19 @@ export default function Report({ centroSelezionato, user }) {
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Operatore</label>
               <Input placeholder="Es. Mario Rossi" value={form.operatore} onChange={e => setForm(p => ({ ...p, operatore: e.target.value }))} />
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <input
+                type="checkbox"
+                id="furto-check"
+                checked={form.furto}
+                onChange={e => setForm(p => ({ ...p, furto: e.target.checked }))}
+                className="w-4 h-4 accent-red-600 cursor-pointer"
+              />
+              <label htmlFor="furto-check" className="text-sm font-medium text-red-700 cursor-pointer flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+                Furto verificato durante il turno
+              </label>
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Contenuto del report</label>

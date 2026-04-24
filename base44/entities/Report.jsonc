@@ -19,6 +19,11 @@
       "type": "string",
       "description": "Contenuto del report"
     },
+    "furto": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se durante il turno si \u00e8 verificato un furto"
+    },
     "foto_urls": {
       "type": "array",
       "items": {
