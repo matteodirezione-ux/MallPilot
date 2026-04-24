@@ -167,13 +167,29 @@ export default function CapexPage({ centroSelezionato, user }) {
 
       {/* Filtri */}
        <div className="flex flex-wrap gap-2 mb-4">
-         <div className="flex gap-2">
-           <Button variant={view === 'lista' ? 'default' : 'outline'} size="sm" onClick={() => setView('lista')}>
-             <List className="w-4 h-4 mr-1" /> Lista
-           </Button>
-           <Button variant={view === 'calendario' ? 'default' : 'outline'} size="sm" onClick={() => setView('calendario')}>
-             <Calendar className="w-4 h-4 mr-1" /> Calendario
-           </Button>
+         <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+           <button
+             onClick={() => setView('lista')}
+             className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+               view === 'lista' 
+                 ? 'bg-background text-foreground shadow' 
+                 : 'text-muted-foreground'
+             }`}
+           >
+             <List className="w-4 h-4" />
+             <span className="hidden sm:inline">Lista</span>
+           </button>
+           <button
+             onClick={() => setView('calendario')}
+             className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+               view === 'calendario' 
+                 ? 'bg-background text-foreground shadow' 
+                 : 'text-muted-foreground'
+             }`}
+           >
+             <Calendar className="w-4 h-4" />
+             <span className="hidden sm:inline">Calendario</span>
+           </button>
          </div>
          <div className="relative flex-1 min-w-[160px]">
            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
