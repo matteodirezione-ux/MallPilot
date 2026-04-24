@@ -144,6 +144,15 @@ export default function Report({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
         <div className="flex items-center gap-4">
+           <div className="relative w-64">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+             <Input
+               placeholder="Cerca nei report..."
+               value={searchText || ''}
+               onChange={(e) => setSearchText(e.target.value)}
+               className="pl-9 h-9"
+             />
+           </div>
            <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
              <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
                <ChevronLeft className="w-4 h-4 text-slate-600" />
@@ -154,15 +163,6 @@ export default function Report({ centroSelezionato, user }) {
              <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() + 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
                <ChevronRight className="w-4 h-4 text-slate-600" />
              </button>
-           </div>
-           <div className="relative w-64">
-             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-             <Input
-               placeholder="Cerca nei report..."
-               value={searchText || ''}
-               onChange={(e) => setSearchText(e.target.value)}
-               className="pl-9 h-9"
-             />
            </div>
            <Button onClick={openNuovo} className="flex items-center gap-2">
              <Plus className="w-4 h-4" /> Nuovo Report
