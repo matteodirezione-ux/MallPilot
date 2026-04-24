@@ -36,7 +36,7 @@ const defaultForm = {
   foto_urls: [],
 };
 
-export default function FormTicket({ open, onClose, onSave, ticket, user }) {
+export default function FormTicket({ open, onClose, onSave, ticket, user, readOnly = false }) {
   const [form, setForm] = useState(defaultForm);
   const [uploadingFoto, setUploadingFoto] = useState(false);
 
@@ -89,8 +89,46 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{ticket ? 'Modifica Ticket' : 'Nuovo Ticket'}</DialogTitle>
+          <DialogTitle>{readOnly ? 'Dettaglio Ticket' : (ticket ? 'Modifica Ticket' : 'Nuovo Ticket')}</DialogTitle>
         </DialogHeader>
+
+        {readOnly ? (
+          <div className="space-y-3">
+            {[
+              { label: 'N° Ticket', value: form.numero_ticket },
+              { label: 'Data apertura', value: form.data_apertura },
+              { label: 'Operatore', value: form.operatore },
+              { label: 'Tipologia', value: form.tipologia === 'urgente' ? 'Urgente' : 'Ordinario' },
+              { label: 'Scadenza', value: form.scadenza || '-' },
+              { label: 'Stato', value: form.stato === 'chiuso' ? 'Chiuso' : 'Aperto' },
+              { label: 'Sollecito', value: form.numero_sollecito > 0 ? `Sollecito ${form.numero_sollecito}` : 'Nessun sollecito' },
+            ].map(({ label, value }) => (
+              <div key={label} className={rowClass}>
+                <span className={labelClass}>{label}</span>
+                <span className="flex-1 text-sm text-slate-800 pt-2">{value}</span>
+              </div>
+            ))}
+            {form.descrizione && (
+              <div className={rowClass}>
+                <span className={labelClass}>Descrizione</span>
+                <span className="flex-1 text-sm text-slate-800 pt-2 whitespace-pre-wrap">{form.descrizione}</span>
+              </div>
+            )}
+            {(form.foto_urls || []).length > 0 && (
+              <div className={rowClass}>
+                <span className={labelClass}>Foto</span>
+                <div className="flex-1 grid grid-cols-4 gap-1 pt-1">
+                  {(form.foto_urls || []).map((url, i) => (
+                    <img key={i} src={url} alt="" className="w-full h-16 object-cover rounded cursor-pointer" onClick={() => window.open(url, '_blank')} />
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={onClose}>Chiudi</Button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
 
           <div className={rowClass}>
@@ -220,6 +258,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
             <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );

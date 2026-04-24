@@ -271,16 +271,22 @@ export default function Ticket({ centroSelezionato, user }) {
                     </div>
                   )}
                 </div>
-                {!isReadOnly && (
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
-                      <Pencil className="w-4 h-4" />
+                <div className="flex gap-1 flex-shrink-0">
+                  {isReadOnly ? (
+                    <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors" title="Visualizza dettaglio">
+                      <Search className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             );
           };
@@ -310,6 +316,7 @@ export default function Ticket({ centroSelezionato, user }) {
         onSave={handleSave}
         ticket={ticketSelezionato}
         user={user}
+        readOnly={isReadOnly}
       />
     </div>
   );
