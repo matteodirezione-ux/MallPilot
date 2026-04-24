@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { compressImages } from '@/lib/compressImage';
 import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, AlertTriangle, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,7 +54,8 @@ export default function Report({ centroSelezionato, user }) {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploading(true);
-    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+    const compressed = await compressImages(files);
+    const urls = await Promise.all(compressed.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
     setForm(prev => ({ ...prev, foto_urls: [...prev.foto_urls, ...urls] }));
     setUploading(false);
   };

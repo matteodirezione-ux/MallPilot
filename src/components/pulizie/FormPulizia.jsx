@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import { compressImages } from '@/lib/compressImage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,8 +36,9 @@ export default function FormPulizia({ open, onClose, pulizia, centroId, user, on
   const handleFiles = async (files) => {
     if (!files?.length) return;
     setUploading(true);
+    const compressed = await compressImages(Array.from(files));
     const urls = [];
-    for (const file of Array.from(files)) {
+    for (const file of compressed) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       urls.push(file_url);
     }

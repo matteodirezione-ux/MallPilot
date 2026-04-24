@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { compressImages } from '@/lib/compressImage';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -123,7 +124,8 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploadingFoto(true);
-    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+    const compressed = await compressImages(files);
+    const urls = await Promise.all(compressed.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
     setFormData(prev => ({ ...prev, foto_urls: [...(prev.foto_urls || []), ...urls] }));
     setUploadingFoto(false);
     e.target.value = '';

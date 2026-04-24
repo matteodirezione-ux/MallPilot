@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import { compressImages } from '@/lib/compressImage';
 import {
   Select,
   SelectContent,
@@ -65,8 +66,9 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
     const files = Array.from(e.target.files);
     if (!files.length) return;
     setUploadingFoto(true);
+    const compressed = await compressImages(files);
     const nuoveUrls = [];
-    for (const file of files) {
+    for (const file of compressed) {
       const { file_url } = await base44.integrations.Core.UploadFile({ file });
       nuoveUrls.push(file_url);
     }
