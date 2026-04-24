@@ -368,62 +368,102 @@ export default function Gestione({ user }) {
 
       <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-          {/* Desktop tabs */}
-          <div className="hidden sm:block">
-            <TabsList className="w-full sm:w-auto">
-              {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
-              {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
-              <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
-              <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
-              {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
-            </TabsList>
-          </div>
-          
-          {/* Mobile select dropdown */}
-          <div className="sm:hidden w-full">
-            <select
-              value={currentTab}
-              onChange={(e) => setActiveTab(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
-            >
-              {isPropieta && <option value="centri">Centri</option>}
-              {isPropieta && <option value="direttori">Direttori</option>}
-              <option value="vigilanza">Vigilanza</option>
-              <option value="manutentori">Manutentori</option>
-              {isPropieta && <option value="budget">Budget</option>}
-            </select>
-          </div>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 w-full">
+            {/* Desktop tabs */}
+            <div className="hidden sm:block">
+              <TabsList className="w-full sm:w-auto">
+                {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
+                {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
+                <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
+                <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
+                {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
+              </TabsList>
+            </div>
 
-          {currentTab === 'centri' && isPropieta && (
-            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Centro</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          )}
+            {/* Buttons on the right */}
+            <div className="hidden sm:flex gap-2">
+              {currentTab === 'centri' && isPropieta && (
+                <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Centro
+                </Button>
+              )}
+              {currentTab === 'direttori' && isPropieta && (
+                <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Nuovo Direttore
+                </Button>
+              )}
+              {currentTab === 'vigilanza' && (
+                <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Nuovo Account Vigilanza
+                </Button>
+              )}
+              {currentTab === 'manutentori' && (
+                <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <Wrench className="w-4 h-4 mr-2" />
+                  Nuovo Account Manutentore
+                </Button>
+              )}
+              {currentTab === 'budget' && isPropieta && (
+                <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Budget
+                </Button>
+              )}
+            </div>
+          </div>
+            
+            {/* Mobile select dropdown */}
+            <div className="sm:hidden w-full">
+              <select
+                value={currentTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
+              >
+                {isPropieta && <option value="centri">Centri</option>}
+                {isPropieta && <option value="direttori">Direttori</option>}
+                <option value="vigilanza">Vigilanza</option>
+                <option value="manutentori">Manutentori</option>
+                {isPropieta && <option value="budget">Budget</option>}
+              </select>
+            </div>
 
-          {currentTab === 'vigilanza' && (
-            <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Account Vigilanza</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          )}
-          {currentTab === 'manutentori' && (
-            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-              <Wrench className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Account Manutentore</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          )}
-          {currentTab === 'budget' && isPropieta && (
-            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Budget</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          )}
-        </div>
+            {/* Mobile buttons */}
+            <div className="sm:hidden w-full">
+              {currentTab === 'centri' && isPropieta && (
+                <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Centro
+                </Button>
+              )}
+              {currentTab === 'direttori' && isPropieta && (
+                <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Nuovo Direttore
+                </Button>
+              )}
+              {currentTab === 'vigilanza' && (
+                <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <ShieldCheck className="w-4 h-4 mr-2" />
+                  Nuovo Account Vigilanza
+                </Button>
+              )}
+              {currentTab === 'manutentori' && (
+                <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <Wrench className="w-4 h-4 mr-2" />
+                  Nuovo Account Manutentore
+                </Button>
+              )}
+              {currentTab === 'budget' && isPropieta && (
+                <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nuovo Budget
+                </Button>
+              )}
+            </div>
+          </div>
 
         {/* === TAB CENTRI === */}
         <TabsContent value="centri">
@@ -465,13 +505,6 @@ export default function Gestione({ user }) {
 
         {/* === TAB DIRETTORI === */}
         <TabsContent value="direttori">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
-              <UserPlus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Direttore</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          </div>
 
           <div className="space-y-4">
             {direttori.map(dir => {
@@ -602,13 +635,6 @@ export default function Gestione({ user }) {
 
         {/* === TAB MANUTENTORI === */}
         <TabsContent value="manutentori">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
-              <Wrench className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Account Manutentore</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          </div>
 
           <div className="space-y-4">
             {manutentori.map(man => {
@@ -677,13 +703,6 @@ export default function Gestione({ user }) {
 
         {/* === TAB BUDGET === */}
         <TabsContent value="budget">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Budget</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {budgets.map(budget => {
