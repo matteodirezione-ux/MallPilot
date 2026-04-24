@@ -134,7 +134,7 @@ export default function CapexPage({ centroSelezionato, user }) {
              </Button>
            </div>
            {canEdit && (
-             <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }}>
+             <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
                <Plus className="w-4 h-4 mr-1" /> Nuovo Capex
              </Button>
            )}

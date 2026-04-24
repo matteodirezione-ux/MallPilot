@@ -150,7 +150,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
-              <Button size="sm" onClick={() => setShowFormPeriodica(true)}>
+              <Button size="sm" onClick={() => setShowFormPeriodica(true)} className="bg-blue-600 hover:bg-blue-700">
                 <Plus className="w-4 h-4 mr-1" /> Nuova pulizia periodica
               </Button>
             </>
