@@ -23,6 +23,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
   const [uploadingFoto, setUploadingFoto] = useState(false);
   const fileInputRef = useRef();
+  const cameraInputRef = useRef();
 
   // Apertura automatica da URL param ?edit=<id>
   useEffect(() => {
@@ -527,11 +528,18 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingFoto} className="gap-2">
-                <Camera className="w-4 h-4" />
-                {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingFoto} className="gap-2">
+                  <Camera className="w-4 h-4" />
+                  {uploadingFoto ? 'Caricamento...' : 'Galleria'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} disabled={uploadingFoto} className="gap-2">
+                  <Camera className="w-4 h-4" />
+                  Fotocamera
+                </Button>
+              </div>
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFoto} />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFoto} />
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">
