@@ -33,6 +33,13 @@
     "creato_da_nome": {
       "type": "string",
       "description": "Nome di chi ha creato la segnalazione"
+    },
+    "letto_da": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista delle email dei direttori che hanno letto la segnalazione"
     }
   },
   "required": [

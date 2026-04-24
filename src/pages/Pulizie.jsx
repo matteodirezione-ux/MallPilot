@@ -70,6 +70,22 @@ export default function PuliziePage({ centroSelezionato, user }) {
     loadSegnalazioni();
   };
 
+  const isDirettore = user?.tipo_account === 'direttore';
+
+  const isLetta = (p) => {
+    if (!isDirettore) return true;
+    return (p.letto_da || []).includes(user.email);
+  };
+
+  const handleClickSegnalazione = async (p) => {
+    setDettaglio(p);
+    if (isDirettore && !isLetta(p)) {
+      const nuoviLetti = [...(p.letto_da || []), user.email];
+      await base44.entities.Pulizia.update(p.id, { letto_da: nuoviLetti });
+      setLista(prev => prev.map(item => item.id === p.id ? { ...item, letto_da: nuoviLetti } : item));
+    }
+  };
+
   const filtrati = lista.filter(p => {
     const annoOk = p.data && parseInt(p.data.substring(0, 4)) === annoSelezionato;
     const searchOk = !search || p.titolo?.toLowerCase().includes(search.toLowerCase()) || p.descrizione?.toLowerCase().includes(search.toLowerCase());
