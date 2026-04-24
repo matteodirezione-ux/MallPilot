@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, BarChart3, RefreshCw, Loader2 } from 'lucide-react';
+import { HardDrive, BarChart3, RefreshCw, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function StorageReport({ user }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [compressing, setCompressing] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -25,6 +26,20 @@ export default function StorageReport({ user }) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const compressImages = async () => {
+    setCompressing(true);
+    try {
+      const response = await base44.functions.invoke('compressExistingImages', {});
+      toast.success(`Compresso ${response.data.total_compressed} immagini da ${response.data.total_records} record`);
+      setTimeout(loadReport, 2000);
+    } catch (error) {
+      toast.error('Errore nella compressione');
+      console.error(error);
+    } finally {
+      setCompressing(false);
     }
   };
 
@@ -70,10 +85,16 @@ export default function StorageReport({ user }) {
             Analizzato il {new Date(data.timestamp).toLocaleString('it-IT')}
           </p>
         </div>
-        <Button onClick={loadReport} variant="outline" className="gap-2">
-          <RefreshCw className="w-4 h-4" />
-          Aggiorna
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={compressImages} disabled={compressing} className="gap-2 bg-green-600 hover:bg-green-700">
+            <Zap className="w-4 h-4" />
+            {compressing ? 'Compressione...' : 'Comprimi Tutte'}
+          </Button>
+          <Button onClick={loadReport} variant="outline" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Aggiorna
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
