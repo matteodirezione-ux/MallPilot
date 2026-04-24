@@ -306,56 +306,34 @@ export default function TaskPage({ centroSelezionato, user }) {
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <TabsList>
             <TabsTrigger value="lista" className="gap-2">
-              <ListTodo className="w-4 h-4" /> <span className="hidden sm:inline">Lista</span>
+              <ListTodo className="w-4 h-4" /> Lista
             </TabsTrigger>
             <TabsTrigger value="calendario" className="gap-2">
-              <CalendarDays className="w-4 h-4" /> <span className="hidden sm:inline">Calendario</span>
+              <CalendarDays className="w-4 h-4" /> Calendario
             </TabsTrigger>
           </TabsList>
-
-          <div className="flex items-center gap-2 ml-auto">
-            {/* Search bar - Desktop */}
-            <div className="relative hidden sm:block">
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input placeholder="Cerca task..." className="pl-9 w-64 h-9" value={cerca} onChange={e => setCerca(e.target.value)} />
             </div>
 
-            {/* Search icon - Mobile */}
-            <Button
-              variant="outline"
-              size="icon"
-              className="sm:hidden"
-              onClick={() => setCerca(cerca ? '' : cerca)}
+          </div>
+          <div className="flex rounded-md border border-slate-200 overflow-hidden">
+            <button
+              onClick={() => setVistaApertiChiusi('aperti')}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-red-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
             >
-              <Search className="w-4 h-4" />
-            </Button>
-
-            <div className="flex rounded-md border border-slate-200 overflow-hidden">
-              <button
-                onClick={() => setVistaApertiChiusi('aperti')}
-                className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors ${vistaApertiChiusi === 'aperti' ? 'bg-red-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
-              >
-                <span className="hidden sm:inline">Aperti</span>
-                <span className="sm:hidden">A</span>
-              </button>
-              <button
-                onClick={() => setVistaApertiChiusi('chiusi')}
-                className={`px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
-              >
-                <span className="hidden sm:inline">Chiusi</span>
-                <span className="sm:hidden">C</span>
-              </button>
-            </div>
+              Aperti
+            </button>
+            <button
+              onClick={() => setVistaApertiChiusi('chiusi')}
+              className={`px-4 py-1.5 text-sm font-medium transition-colors border-l border-slate-200 ${vistaApertiChiusi === 'chiusi' ? 'bg-green-600 text-white' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+            >
+              Chiusi
+            </button>
           </div>
         </div>
-
-        {/* Search input - Mobile expanded */}
-        {cerca !== undefined && (
-          <div className="relative sm:hidden mb-3">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input placeholder="Cerca task..." className="pl-9 w-full h-9" value={cerca} onChange={e => setCerca(e.target.value)} autoFocus />
-          </div>
-        )}
 
         <TabsContent value="lista">
           {loading ? (

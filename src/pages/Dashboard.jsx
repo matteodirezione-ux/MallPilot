@@ -537,7 +537,15 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </div>
 
-
+          {/* Segnalazioni Pulizie da leggere */}
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-500" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.pulizieDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.pulizieDaLeggere}</p>
+            {stats.pulizieDaLeggere > 0 && <p className="text-xs text-blue-500 mt-1">non lette</p>}
+          </div>
 
           {/* Numero Eventi */}
           <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
@@ -866,10 +874,10 @@ export default function Dashboard({ centroSelezionato, user }) {
                        </Card>
                        </div>
 
-      {/* Seconda riga card: Capex, Pulizie Periodiche, Report, Seg. Pulizie */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
-        {/* Capex - Hidden on mobile */}
-        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow hidden lg:flex flex-col">
+      {/* Seconda riga card: Capex, Pulizie Periodiche, Report */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
+        {/* Capex */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Capex')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -903,8 +911,8 @@ export default function Dashboard({ centroSelezionato, user }) {
           </CardContent>
         </Card>
 
-        {/* Pulizie Periodiche - Hidden on mobile */}
-        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow hidden lg:flex flex-col">
+        {/* Pulizie Periodiche */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
           <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Pulizie')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -972,17 +980,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             )}
           </CardContent>
         </Card>
-
-        {/* Segnalazioni Pulizie da leggere */}
-        <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
-          <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
-            <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-500" /></div>
-          </div>
-          <p className={`text-lg sm:text-2xl font-bold ${stats.pulizieDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>28</p>
-          {28 > 0 && <p className="text-xs text-blue-500 mt-1">non letti</p>}
-        </div>
-        </div>
+      </div>
 
       <DashboardDetailModal
         open={detailModal.open}
