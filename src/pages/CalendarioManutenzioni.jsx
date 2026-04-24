@@ -20,6 +20,19 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [vistaApertiChiusi, setVistaApertiChiusi] = useState('aperti');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
+
+  // Apertura automatica da URL param ?edit=<id>
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && manutenzioni.length > 0) {
+      const m = manutenzioni.find(m => m.id === editId);
+      if (m) {
+        handleManutenzioneClick(m);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [manutenzioni]);
   const [formData, setFormData] = useState({
     titolo: '',
     descrizione: '',

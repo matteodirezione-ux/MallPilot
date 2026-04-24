@@ -18,6 +18,20 @@ export default function TaskPage({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [taskSelezionato, setTaskSelezionato] = useState(null);
+
+  // Apertura automatica da URL param ?edit=<id>
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && tasks.length > 0) {
+      const task = tasks.find(t => t.id === editId);
+      if (task) {
+        setTaskSelezionato(task);
+        setDialogOpen(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [tasks]);
   const [filtroStato, setFiltroStato] = useState('tutti');
   const [filtroPriorita, setFiltroPriorita] = useState('tutti');
   const [vistaApertiChiusi, setVistaApertiChiusi] = useState('aperti');

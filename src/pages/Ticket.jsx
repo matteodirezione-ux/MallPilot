@@ -29,6 +29,20 @@ export default function Ticket({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [ticketSelezionato, setTicketSelezionato] = useState(null);
+
+  // Apertura automatica da URL param ?edit=<id>
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && tickets.length > 0) {
+      const ticket = tickets.find(t => t.id === editId);
+      if (ticket) {
+        setTicketSelezionato(ticket);
+        setFormOpen(true);
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [tickets]);
   const [search, setSearch] = useState('');
   const [filtroStato, setFiltroStato] = useState('aperto');
   const [meseFiltrato, setMeseFiltrato] = useState(new Date());

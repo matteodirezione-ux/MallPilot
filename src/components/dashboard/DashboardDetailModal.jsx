@@ -1,8 +1,11 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 const priorityConfig = {
   bassa: { label: 'Bassa', color: 'bg-sky-100 text-sky-700' },
@@ -205,7 +208,14 @@ const titleMap = {
   prenotazione: 'Dettaglio Affitto',
 };
 
+const editRouteMap = {
+  task: (id) => `/Task?edit=${id}`,
+  manutenzione: (id) => `/CalendarioManutenzioni?edit=${id}`,
+  ticket: (id) => `/Ticket?edit=${id}`,
+};
+
 export default function DashboardDetailModal({ open, onClose, type, item }) {
+  const navigate = useNavigate();
   if (!item) return null;
 
   const renderContent = () => {
@@ -221,11 +231,26 @@ export default function DashboardDetailModal({ open, onClose, type, item }) {
     }
   };
 
+  const editRoute = editRouteMap[type];
+
+  const handleEdit = () => {
+    onClose();
+    navigate(editRoute(item.id));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{titleMap[type] || 'Dettaglio'}</DialogTitle>
+          <div className="flex items-center justify-between pr-6">
+            <DialogTitle>{titleMap[type] || 'Dettaglio'}</DialogTitle>
+            {editRoute && (
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={handleEdit}>
+                <Pencil className="w-3.5 h-3.5" />
+                Modifica
+              </Button>
+            )}
+          </div>
         </DialogHeader>
         <div className="divide-y divide-slate-100">
           {renderContent()}
