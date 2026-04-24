@@ -568,13 +568,13 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Allert Capex Scaduti */}
-          <div className="bg-orange-50 rounded-lg border border-orange-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
+          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Capex</p>
-              <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
+              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
             </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
-            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Duvri mancanti</p>}
+            <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
+            {stats.capexAlertCount > 0 && <p className="text-xs text-red-500 mt-1">Duvri mancanti</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
