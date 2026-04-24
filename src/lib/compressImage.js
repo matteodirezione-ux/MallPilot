@@ -1,12 +1,12 @@
 /**
  * Comprime un'immagine ridimensionandola e convertendola a JPEG con qualità ridotta
  * @param {File} file - Il file immagine da comprimere
- * @param {number} maxWidth - Larghezza massima in pixel (default: 800)
- * @param {number} maxHeight - Altezza massima in pixel (default: 800)
- * @param {number} quality - Qualità JPEG 0-1 (default: 0.6)
+ * @param {number} maxWidth - Larghezza massima in pixel (default: 600)
+ * @param {number} maxHeight - Altezza massima in pixel (default: 600)
+ * @param {number} quality - Qualità JPEG 0-1 (default: 0.5)
  * @returns {Promise<File>} - Il file compresso
  */
-export async function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+export async function compressImage(file, maxWidth = 600, maxHeight = 600, quality = 0.5) {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -57,6 +57,6 @@ export async function compressImage(file, maxWidth = 800, maxHeight = 800, quali
  * @param {number} quality - Qualità JPEG 0-1
  * @returns {Promise<File[]>} - Array di file compressi
  */
-export async function compressImages(files, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+export async function compressImages(files, maxWidth = 600, maxHeight = 600, quality = 0.5) {
   return Promise.all(files.map(f => compressImage(f, maxWidth, maxHeight, quality)));
 }
