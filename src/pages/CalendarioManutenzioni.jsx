@@ -531,7 +531,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                 <Camera className="w-4 h-4" />
                 {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
               </Button>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFoto} />
+              <input ref={fileInputRef} type="file" accept="image/*" multiple capture="environment" className="hidden" onChange={handleFoto} />
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">
