@@ -394,10 +394,38 @@ export default function Gestione({ user }) {
             </select>
           </div>
 
-          {isPropieta && (
+          {currentTab === 'centri' && isPropieta && (
             <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Nuovo Centro</span>
+              <span className="sm:hidden">Nuovo</span>
+            </Button>
+          )}
+          {currentTab === 'direttori' && isPropieta && (
+            <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+              <UserPlus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Nuovo Direttore</span>
+              <span className="sm:hidden">Nuovo</span>
+            </Button>
+          )}
+          {currentTab === 'vigilanza' && (
+            <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+              <ShieldCheck className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Nuovo Account Vigilanza</span>
+              <span className="sm:hidden">Nuovo</span>
+            </Button>
+          )}
+          {currentTab === 'manutentori' && (
+            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+              <Wrench className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Nuovo Account Manutentore</span>
+              <span className="sm:hidden">Nuovo</span>
+            </Button>
+          )}
+          {currentTab === 'budget' && isPropieta && (
+            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Nuovo Budget</span>
               <span className="sm:hidden">Nuovo</span>
             </Button>
           )}
