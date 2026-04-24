@@ -92,7 +92,11 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
                 <span className="text-xs font-normal text-slate-400">({perMese[mese].length})</span>
               </h2>
               <div className="space-y-2">
-                {perMese[mese].map(p => {
+                {perMese[mese].sort((a, b) => {
+                  const dataA = a.prossima_scadenza || a.ultima_esecuzione || a.created_date;
+                  const dataB = b.prossima_scadenza || b.ultima_esecuzione || b.created_date;
+                  return parseLocalDate(dataA) - parseLocalDate(dataB);
+                }).map(p => {
                    const cfg = STATO_CONFIG[p.stato || 'da_programmare'];
                    const stato = p.stato || 'da_programmare';
                    const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
