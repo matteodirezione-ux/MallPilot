@@ -315,7 +315,7 @@ export default function TaskPage({ centroSelezionato, user }) {
           <div className="flex items-center gap-2 flex-wrap justify-center">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input placeholder="Cerca task..." className="pl-9 w-48 h-9" value={cerca} onChange={e => setCerca(e.target.value)} />
+              <Input placeholder="Cerca task..." className="pl-9 w-64 h-9" value={cerca} onChange={e => setCerca(e.target.value)} />
             </div>
             <Select value={filtroStato} onValueChange={setFiltroStato}>
               <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
