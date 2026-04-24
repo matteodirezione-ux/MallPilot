@@ -25,6 +25,7 @@ import {
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import TasksDashboard from '@/components/dashboard/TasksDashboard';
+import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
 
 export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
@@ -58,6 +59,10 @@ export default function Dashboard({ centroSelezionato, user }) {
   });
   const [loading, setLoading] = useState(true);
   const [completingIds, setCompletingIds] = useState(new Set());
+  const [detailModal, setDetailModal] = useState({ open: false, type: null, item: null });
+
+  const openDetail = (type, item) => setDetailModal({ open: true, type, item });
+  const closeDetail = () => setDetailModal({ open: false, type: null, item: null });
 
   const handleCompleteTask = async (taskId) => {
     setCompletingIds(prev => new Set(prev).add(taskId));
@@ -562,7 +567,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
-            <TasksDashboard tasks={stats.tasksList} onComplete={handleCompleteTask} />
+            <TasksDashboard tasks={stats.tasksList} onComplete={handleCompleteTask} onSelect={(t) => openDetail('task', t)} />
           </CardContent>
           </Card>
 
@@ -613,9 +618,13 @@ export default function Dashboard({ centroSelezionato, user }) {
                       <h4 className="text-sm font-semibold text-slate-700 mb-2">{groupLabels[key]}</h4>
                       <div className="space-y-1.5 sm:space-y-2">
                         {groups[key].map(c => (
-                          <div key={c.id} className={`flex items-center gap-2 p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${groupStyles[key]}`}>
+                          <div
+                            key={c.id}
+                            className={`flex items-center gap-2 p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${groupStyles[key]}`}
+                            onClick={() => openDetail('manutenzione', c)}
+                          >
                             <button
-                              onClick={() => handleCompleteControllo(c.id)}
+                              onClick={(e) => { e.stopPropagation(); handleCompleteControllo(c.id); }}
                               disabled={completingIds.has(c.id)}
                               className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
                               title="Segna come completato"
@@ -654,7 +663,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               const inCorso = aperti.filter(t => !t.scadenza || new Date(t.scadenza) >= oggi);
 
               const TicketCard = ({ t, isScaduto }) => (
-                <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${isScaduto ? 'bg-red-50 border-red-200' : t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`}>
+                <div key={t.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${isScaduto ? 'bg-red-50 border-red-200' : t.tipologia === 'urgente' ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-100'}`} onClick={() => openDetail('ticket', t)}>
                   <div className="flex-1 min-w-0 mr-2">
                     <p className="font-medium text-slate-800 truncate">#{t.numero_ticket} · Solleciti: {t.numero_sollecito || 0}</p>
                     <p className="text-xs text-slate-500 truncate">{t.descrizione}</p>
@@ -705,7 +714,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                 {stats.eventStats.eventiCorrentiList?.map((evento) => (
                   <div 
                     key={evento.id}
-                    className="flex items-center justify-between p-2 sm:p-3 bg-purple-100 rounded-lg border border-purple-200 text-xs sm:text-sm"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-purple-100 rounded-lg border border-purple-200 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                    onClick={() => openDetail('prenotazione', evento)}
                   >
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
@@ -723,7 +733,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                       {stats.eventStats.prossimiEventi.map((evento) => (
                       <div 
                       key={evento.id}
-                      className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm"
+                      className="flex items-center justify-between p-2 sm:p-3 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => openDetail('prenotazione', evento)}
                       >
                       <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
@@ -763,7 +774,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                 {stats.affittiCorrenti?.map((prenotazione) => (
                   <div 
                     key={prenotazione.id}
-                    className="flex items-center justify-between p-2 sm:p-3 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm"
+                    className="flex items-center justify-between p-2 sm:p-3 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                    onClick={() => openDetail('prenotazione', prenotazione)}
                   >
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
@@ -803,7 +815,8 @@ export default function Dashboard({ centroSelezionato, user }) {
                     {stats.prossimiAffitti.map((prenotazione) => (
                     <div 
                      key={prenotazione.id}
-                     className="flex items-center justify-between p-2 sm:p-3 bg-slate-50 rounded-lg text-xs sm:text-sm"
+                     className="flex items-center justify-between p-2 sm:p-3 bg-slate-50 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-slate-100 transition-all"
+                     onClick={() => openDetail('prenotazione', prenotazione)}
                     >
                      <div className="flex-1 min-w-0 mr-2">
                        <p className="font-medium text-slate-800 truncate text-xs sm:text-sm">
@@ -840,7 +853,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             ) : (
               <div className="space-y-1.5 sm:space-y-2">
                 {stats.capexList.map(c => (
-                  <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm">
+                  <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('capex', c)}>
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
                       {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
@@ -874,7 +887,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                 {stats.puliziePeriodiche.map(p => {
                   const isProgrammato = p.stato === 'programmato';
                   return (
-                    <div key={p.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm ${isProgrammato ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`}>
+                    <div key={p.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${isProgrammato ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`} onClick={() => openDetail('pulizia_periodica', p)}>
                       <div className="flex-1 min-w-0 mr-2">
                         <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
                         <p className="text-xs text-slate-500">{p.frequenza}</p>
@@ -907,7 +920,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             ) : (
               <div className="space-y-1.5 sm:space-y-2">
                 {stats.reportList.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-2 sm:p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs sm:text-sm">
+                  <div key={r.id} className="flex items-center justify-between p-2 sm:p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('report', r)}>
                     <div className="flex-1 min-w-0 mr-2">
                       <p className="font-medium text-slate-800 truncate">{r.operatore}</p>
                       <p className="text-xs text-slate-500 truncate line-clamp-1">{r.contenuto || ''}</p>
@@ -922,6 +935,13 @@ export default function Dashboard({ centroSelezionato, user }) {
           </CardContent>
         </Card>
       </div>
+
+      <DashboardDetailModal
+        open={detailModal.open}
+        onClose={closeDetail}
+        type={detailModal.type}
+        item={detailModal.item}
+      />
     </div>
   );
 }
