@@ -252,12 +252,17 @@ export default function Gestione({ user }) {
         ]);
         toast.success('Manutentore aggiornato');
       } else {
-        await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false });
+        const nuovoMan = await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false });
         await Promise.all(
           formData.centri_ids.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
         );
-        await base44.users.inviteUser(formData.email, 'user');
-        toast.success('Account manutentore creato, invito inviato via email');
+        try {
+          await base44.users.inviteUser(formData.email, 'user');
+          toast.success('Account manutentore creato, invito inviato via email');
+        } catch (inviteErr) {
+          // L'utente potrebbe già esistere - il record è comunque stato creato
+          toast.success('Account manutentore creato. Se l\'utente è già registrato potrà accedere direttamente.');
+        }
       }
       setManutentoreDialog({ open: false, data: null });
       loadData();

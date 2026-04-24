@@ -110,6 +110,20 @@ export default function Layout({ children, currentPageName }) {
         if (!manutentori[0].invito_accettato) {
           await base44.entities.Manutentore.update(manutentori[0].id, { invito_accettato: true });
         }
+
+        // Carica centri assegnati al manutentore
+        const assegnazioniMan = await base44.entities.Assegnazione.filter({ user_email: userData.email });
+        const centriIds = [...new Set(assegnazioniMan.map(a => a.centro_id))];
+        if (centriIds.length > 0) {
+          const allCentri = await base44.entities.CentroCommerciale.list();
+          const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id) && c.attivo);
+          setCentri(centriAssegnati);
+          if (centriAssegnati.length > 0) {
+            const savedCentroId = localStorage.getItem('centroSelezionatoId');
+            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati[0];
+            setCentroSelezionato(centroIniziale);
+          }
+        }
       } else if (userData.role === 'admin') {
         // Solo gli admin della piattaforma sono proprietà
         if (userData.tipo_account !== 'proprieta') {
