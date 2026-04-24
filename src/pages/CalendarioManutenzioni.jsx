@@ -305,10 +305,21 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
             Controlli da effettuare
           </p>
         </div>
-        <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700" size="sm">
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline ml-1">Nuovo Controllo</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={idx >= anniDisponibili.length - 1}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+          <Button onClick={() => { setManutenzioneSelezionata(null); setFormData({ titolo: '', descrizione: '', data_scadenza: format(new Date(), 'yyyy-MM-dd'), centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '', stato: 'da_fare' }); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700" size="sm">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">Nuovo Controllo</span>
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -351,15 +362,6 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                 >
                   Chiusi
                 </button>
-              </div>
-              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={idx >= anniDisponibili.length - 1}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           </div>
