@@ -195,7 +195,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                           rel="noreferrer"
                           className="text-sm text-blue-600 hover:underline"
                         >
-                          📄 Scarica DUVRI
+                          📄 Scarica DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
                         </a>
                       </div>
                     )}
