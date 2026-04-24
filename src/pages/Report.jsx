@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Pencil, FileText, Camera, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, AlertTriangle, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,7 @@ export default function Report({ centroSelezionato, user }) {
   const [reportSelezionato, setReportSelezionato] = useState(null);
   const [espansi, setEspansi] = useState({});
   const [meseFiltrato, setMeseFiltrato] = useState(new Date());
+  const [searchText, setSearchText] = useState('');
 
   const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', furto: false, foto_urls: [] });
   const [uploading, setUploading] = useState(false);
@@ -103,11 +104,19 @@ export default function Report({ centroSelezionato, user }) {
     }
   };
 
-  // Filtra report per mese
+  // Filtra report per mese e ricerca
   const reportsMese = reports.filter(r => {
     const dataReport = new Date(r.data);
-    return dataReport.getFullYear() === meseFiltrato.getFullYear() && 
+    const meseMatch = dataReport.getFullYear() === meseFiltrato.getFullYear() && 
            dataReport.getMonth() === meseFiltrato.getMonth();
+    
+    if (!searchText.trim()) return meseMatch;
+    
+    const search = searchText.toLowerCase();
+    return meseMatch && (
+      r.operatore?.toLowerCase().includes(search) ||
+      r.contenuto?.toLowerCase().includes(search)
+    );
   });
 
   // Raggruppa per data
@@ -135,21 +144,30 @@ export default function Report({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
-            <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-              <ChevronLeft className="w-4 h-4 text-slate-600" />
-            </button>
-            <span className="text-sm font-medium text-slate-700 min-w-max">
-              {format(meseFiltrato, 'MMMM yyyy', { locale: it })}
-            </span>
-            <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() + 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
-              <ChevronRight className="w-4 h-4 text-slate-600" />
-            </button>
-          </div>
-          <Button onClick={openNuovo} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Report
-          </Button>
-        </div>
+           <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
+             <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+               <ChevronLeft className="w-4 h-4 text-slate-600" />
+             </button>
+             <span className="text-sm font-medium text-slate-700 min-w-max">
+               {format(meseFiltrato, 'MMMM yyyy', { locale: it })}
+             </span>
+             <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() + 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+               <ChevronRight className="w-4 h-4 text-slate-600" />
+             </button>
+           </div>
+           <div className="relative w-64">
+             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+             <Input
+               placeholder="Cerca nei report..."
+               value={searchText || ''}
+               onChange={(e) => setSearchText(e.target.value)}
+               className="pl-9 h-9"
+             />
+           </div>
+           <Button onClick={openNuovo} className="flex items-center gap-2">
+             <Plus className="w-4 h-4" /> Nuovo Report
+           </Button>
+         </div>
       </div>
 
       {loading ? (
