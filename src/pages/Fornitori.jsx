@@ -152,7 +152,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-3 border-y border-slate-200">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3 border-y border-slate-200">
                     {/* Email */}
                     {fornitore.referente_email && (
                       <div className="flex items-center gap-2">
@@ -184,6 +184,19 @@ export default function Fornitori({ centroSelezionato, user }) {
                         <span className="text-sm text-slate-600">
                           {fornitore.lavoratori.length} lavoratore{fornitore.lavoratori.length > 1 ? 'i' : ''}
                         </span>
+                      </div>
+                    )}
+                    {/* DUVRI */}
+                    {fornitore.duvri_url && (
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={fornitore.duvri_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          📄 Scarica DUVRI
+                        </a>
                       </div>
                     )}
                   </div>
@@ -223,19 +236,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                     )}
                   </div>
 
-                  {/* DUVRI */}
-                  {fornitore.duvri_url && (
-                    <div className="pt-3 border-t border-slate-200">
-                      <a
-                        href={fornitore.duvri_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        📄 Scarica DUVRI
-                      </a>
-                    </div>
-                  )}
+
 
                   {/* Subornitori */}
                   {fornitore.subornitori?.length > 0 && (
