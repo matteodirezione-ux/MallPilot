@@ -316,8 +316,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       ) : (
         <>
         <Tabs defaultValue="lista">
-        <div className="flex flex-col gap-3 mb-3 md:mb-4">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between mb-3 md:mb-4 gap-2 flex-wrap">
             <TabsList>
               <TabsTrigger value="lista" className="gap-1 text-xs md:text-sm px-2 md:px-3">
                 <ListTodo className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -329,6 +328,15 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                 <span className="hidden sm:inline">Calendario</span>
               </TabsTrigger>
             </TabsList>
+            <div className="relative flex-1 max-w-xs mx-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Cerca per titolo o descrizione..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <div className="flex rounded-md border border-slate-200 overflow-hidden">
                 <button
@@ -352,18 +360,6 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-          </div>
-          <div className="flex justify-center">
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                placeholder="Cerca per titolo o descrizione..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
           </div>
 
           <TabsContent value="calendario">
