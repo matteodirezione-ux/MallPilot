@@ -32,6 +32,7 @@ export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
   reportDaLeggere: 0,
   pulizieDaLeggere: 0,
+  fornitoriAlertCount: 0,
   prossimiAffitti: [],
   affittiCorrenti: [],
   spaziOccupati: 0,
@@ -357,6 +358,17 @@ export default function Dashboard({ centroSelezionato, user }) {
         ? await base44.entities.Pulizia.list()
         : await base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id });
 
+      // Fornitori con DUVRI mancante
+      const allFornitori = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Fornitore.list()
+        : await base44.entities.Fornitore.filter({ centro_id: centroSelezionato.id });
+      const fornitoriAlertCount = allFornitori.reduce((count, f) => {
+        // Alert se DUVRI principale mancante o subornitori senza DUVRI
+        if (!f.duvri_urls || f.duvri_urls.length === 0) return count + 1;
+        const subAlerts = (f.subornitori || []).filter(s => !s.duvri_urls || s.duvri_urls.length === 0).length;
+        return count + subAlerts;
+      }, 0);
+
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
         tasksList.map(async (t) => {
@@ -371,27 +383,28 @@ export default function Dashboard({ centroSelezionato, user }) {
       );
 
       setStats({
-        prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
-        affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
-        spaziOccupati: spaziOccupatiOggi,
-        spaziTotali: spazi.length,
-        incassiMese,
-        incassiAnno,
-        budgetAnno,
-        clientiTotali: clienti.length,
-        affittoMedioGiornaliero,
-        tassoOccupazioneAnnuale,
-        taskStats,
-        eventStats,
-        tasksList: tasksConDettagli,
-        controlliList: controlliList || [],
-        ticketsList: ticketsList || [],
-        capexList: capexList || [],
-        puliziePeriodiche: puliziePeriodiche || [],
-        reportList: allReport?.slice(0, 5) || [],
-        reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
-        pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0
-      });
+         prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
+         affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
+         spaziOccupati: spaziOccupatiOggi,
+         spaziTotali: spazi.length,
+         incassiMese,
+         incassiAnno,
+         budgetAnno,
+         clientiTotali: clienti.length,
+         affittoMedioGiornaliero,
+         tassoOccupazioneAnnuale,
+         taskStats,
+         eventStats,
+         tasksList: tasksConDettagli,
+         controlliList: controlliList || [],
+         ticketsList: ticketsList || [],
+         capexList: capexList || [],
+         puliziePeriodiche: puliziePeriodiche || [],
+         reportList: allReport?.slice(0, 5) || [],
+         reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
+         pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0,
+         fornitoriAlertCount
+       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
     } finally {
@@ -908,6 +921,25 @@ export default function Dashboard({ centroSelezionato, user }) {
                 ))}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Allert Fornitori DUVRI */}
+        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Fornitori')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 sm:w-5 h-4 sm:h-5 text-red-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Allert Fornitori</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
+            </div>
+          </CardHeader>
+          <CardContent className="flex items-center justify-center py-6">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-red-600 mb-2">{stats.fornitoriAlertCount}</p>
+              <p className="text-xs text-slate-500">DUVRI Mancanti</p>
+            </div>
           </CardContent>
         </Card>
 
