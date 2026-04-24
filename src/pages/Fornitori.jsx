@@ -117,8 +117,8 @@ export default function Fornitori({ centroSelezionato, user }) {
       ) : (
         <div className="grid gap-4">
           {filteredFornitori.sort((a, b) => a.nome_ditta.localeCompare(b.nome_ditta, 'it')).map((fornitore) => (
-            <Card key={fornitore.id} className={`hover:shadow-md transition-shadow ${!fornitore.duvri_url ? 'border-2 border-red-400 bg-red-50' : ''}`}>
-              {!fornitore.duvri_url && (
+            <Card key={fornitore.id} className={`hover:shadow-md transition-shadow ${!fornitore.duvri_urls?.length ? 'border-2 border-red-400 bg-red-50' : ''}`}>
+              {!fornitore.duvri_urls?.length && (
                 <div className="bg-red-500 text-white px-4 py-2 font-bold text-sm">
                   ⚠️ DUVRI MANCANTE
                 </div>
