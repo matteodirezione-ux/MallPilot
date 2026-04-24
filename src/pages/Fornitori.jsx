@@ -269,48 +269,35 @@ export default function Fornitori({ centroSelezionato, user }) {
                       <p className="font-medium text-slate-700 mb-2">Subornitori:</p>
                       <div className="space-y-2">
                         {fornitore.subornitori.map((sub, idx) => (
-                          <div key={idx} className="p-3 bg-amber-50 rounded border border-amber-200 space-y-2">
-                            <div>
-                              <p className="font-medium text-amber-900 text-sm">{sub.nome_ditta}</p>
-                              {sub.referente_nome && (
-                                <p className="text-xs text-amber-700">{sub.referente_nome}</p>
+                          <div key={idx} className="p-3 bg-amber-50 rounded border border-amber-200">
+                            <div className="flex flex-wrap items-center gap-3 text-xs">
+                              <p className="font-medium text-amber-900">{sub.nome_ditta}</p>
+                              {sub.referente_nome && <span className="text-amber-700">{sub.referente_nome}</span>}
+                              {sub.referente_email && <a href={`mailto:${sub.referente_email}`} className="text-blue-600 hover:underline">{sub.referente_email}</a>}
+                              {sub.referente_telefono && <a href={`tel:${sub.referente_telefono}`} className="text-blue-600 hover:underline">{sub.referente_telefono}</a>}
+                              
+                              {sub.lavoratori?.length > 0 && (
+                                <span className="text-amber-700">
+                                  {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}
+                                </span>
                               )}
-                              {sub.referente_email && (
-                                <p className="text-xs text-amber-600">{sub.referente_email}</p>
-                              )}
-                              {sub.referente_telefono && (
-                                <p className="text-xs text-amber-600">{sub.referente_telefono}</p>
+                              
+                              {sub.duvri_urls?.length > 0 && (
+                                <span className="flex gap-2">
+                                  {sub.duvri_urls.map((url, dIdx) => (
+                                    <a
+                                      key={dIdx}
+                                      href={url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-blue-600 hover:underline"
+                                    >
+                                      📄 DUVRI {dIdx + 1}
+                                    </a>
+                                  ))}
+                                </span>
                               )}
                             </div>
-                            
-                            {sub.lavoratori?.length > 0 && (
-                              <div>
-                                <p className="text-xs font-medium text-amber-800">Lavoratori:</p>
-                                <ul className="text-xs text-amber-700 space-y-1">
-                                  {sub.lavoratori.map((lav, lIdx) => (
-                                    <li key={lIdx} className="ml-2">
-                                      • {lav.nome} {lav.mansione && `(${lav.mansione})`}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                            
-                            {sub.duvri_urls?.length > 0 && (
-                              <div className="flex gap-1 flex-wrap">
-                                {sub.duvri_urls.map((url, dIdx) => (
-                                  <a
-                                    key={dIdx}
-                                    href={url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-xs text-blue-600 hover:underline"
-                                  >
-                                    📄 DUVRI {dIdx + 1}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
