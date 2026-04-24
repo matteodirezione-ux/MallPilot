@@ -307,30 +307,10 @@ export default function TaskPage({ centroSelezionato, user }) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input placeholder="Cerca task..." className="pl-9" value={cerca} onChange={e => setCerca(e.target.value)} />
         </div>
-        <Select value={filtroStato} onValueChange={setFiltroStato}>
-          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="tutti">Tutti gli stati</SelectItem>
-            <SelectItem value="da_fare">Da fare</SelectItem>
-            <SelectItem value="in_corso">In corso</SelectItem>
-            <SelectItem value="completato">Completato</SelectItem>
-            <SelectItem value="annullato">Annullato</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filtroPriorita} onValueChange={setFiltroPriorita}>
-          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="tutti">Tutte le priorità</SelectItem>
-            <SelectItem value="bassa">Bassa</SelectItem>
-            <SelectItem value="media">Media</SelectItem>
-            <SelectItem value="alta">Alta</SelectItem>
-            <SelectItem value="urgente">Urgente</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <Tabs defaultValue="lista">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <TabsList>
             <TabsTrigger value="lista" className="gap-2">
               <ListTodo className="w-4 h-4" /> Lista
@@ -339,6 +319,28 @@ export default function TaskPage({ centroSelezionato, user }) {
               <CalendarDays className="w-4 h-4" /> Calendario
             </TabsTrigger>
           </TabsList>
+          <div className="flex items-center gap-2 flex-wrap justify-center">
+            <Select value={filtroStato} onValueChange={setFiltroStato}>
+              <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tutti">Tutti gli stati</SelectItem>
+                <SelectItem value="da_fare">Da fare</SelectItem>
+                <SelectItem value="in_corso">In corso</SelectItem>
+                <SelectItem value="completato">Completato</SelectItem>
+                <SelectItem value="annullato">Annullato</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filtroPriorita} onValueChange={setFiltroPriorita}>
+              <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="tutti">Tutte le priorità</SelectItem>
+                <SelectItem value="bassa">Bassa</SelectItem>
+                <SelectItem value="media">Media</SelectItem>
+                <SelectItem value="alta">Alta</SelectItem>
+                <SelectItem value="urgente">Urgente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="flex rounded-md border border-slate-200 overflow-hidden">
             <button
               onClick={() => setVistaApertiChiusi('aperti')}
