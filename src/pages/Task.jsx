@@ -317,16 +317,6 @@ export default function TaskPage({ centroSelezionato, user }) {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input placeholder="Cerca task..." className="pl-9 w-64 h-9" value={cerca} onChange={e => setCerca(e.target.value)} />
             </div>
-            <Select value={filtroStato} onValueChange={setFiltroStato}>
-              <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tutti">Tutti gli stati</SelectItem>
-                <SelectItem value="da_fare">Da fare</SelectItem>
-                <SelectItem value="in_corso">In corso</SelectItem>
-                <SelectItem value="completato">Completato</SelectItem>
-                <SelectItem value="annullato">Annullato</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={filtroPriorita} onValueChange={setFiltroPriorita}>
               <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
