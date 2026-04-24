@@ -278,32 +278,33 @@ export default function Documenti({ centroSelezionato }) {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
          <div>
-           <h1 className="text-3xl font-bold text-slate-800 mb-2">Documenti</h1>
-           <p className="text-slate-600">Contratti di affitto spazi</p>
+           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Documenti</h1>
+           <p className="text-slate-600 text-sm">Contratti di affitto spazi</p>
          </div>
-         <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2 w-full md:w-auto flex-col md:flex-row">
            <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
                <ChevronLeft className="w-4 h-4" />
              </Button>
-             <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+             <span className="text-xs md:text-sm font-bold text-slate-800 min-w-[35px] md:min-w-[44px] text-center">{annoSelezionato}</span>
              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)}>
                <ChevronRight className="w-4 h-4" />
              </Button>
            </div>
            <Dialog open={dialogOpen} onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700">
+           setDialogOpen(open);
+           if (!open) resetForm();
+           }}>
+           <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Archivia Documento
+              <span className="hidden sm:inline">Archivia Documento</span>
+              <span className="sm:hidden">Archivia</span>
             </Button>
-          </DialogTrigger>
+           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Archivia Nuovo Documento</DialogTitle>
@@ -501,10 +502,10 @@ export default function Documenti({ centroSelezionato }) {
               {prenotazioniSenzaContratto.map(p => {
                 const cliente = clienti.find(c => c.id === p.cliente_id);
                 return (
-                  <div key={p.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
+                  <div key={p.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white rounded-lg gap-3">
                     <div>
-                      <p className="font-medium text-slate-800">{cliente?.ragione_sociale}</p>
-                      <p className="text-sm text-slate-600">
+                      <p className="font-medium text-slate-800 text-sm">{cliente?.ragione_sociale}</p>
+                      <p className="text-xs text-slate-600">
                         {format(new Date(p.data_inizio), 'dd MMM', { locale: it })} - {format(new Date(p.data_fine), 'dd MMM yyyy', { locale: it })}
                       </p>
                     </div>
@@ -512,10 +513,11 @@ export default function Documenti({ centroSelezionato }) {
                       size="sm"
                       onClick={() => handleGeneraContratto(p)}
                       disabled={generatingContract}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
                     >
                       <FileText className="w-4 h-4 mr-2" />
-                      Genera Contratto
+                      <span className="hidden sm:inline">Genera Contratto</span>
+                      <span className="sm:hidden">Genera</span>
                     </Button>
                   </div>
                 );
@@ -549,16 +551,16 @@ export default function Documenti({ centroSelezionato }) {
                 const isFirmato = !!doc.contratto_firmato_url;
                 const isContratto = doc.tipo_documento === 'contratto';
                 return (
-                  <div key={doc.id} className={`p-4 rounded-lg transition-colors ${isContratto ? (isFirmato ? 'bg-green-50 border border-green-200 hover:bg-green-100' : 'bg-red-50 border border-red-200 hover:bg-red-100') : 'bg-slate-50 hover:bg-slate-100'}`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isContratto ? (isFirmato ? 'bg-green-100' : 'bg-red-100') : 'bg-blue-50'}`}>
+                  <div key={doc.id} className={`p-3 md:p-4 rounded-lg transition-colors ${isContratto ? (isFirmato ? 'bg-green-50 border border-green-200 hover:bg-green-100' : 'bg-red-50 border border-red-200 hover:bg-red-100') : 'bg-slate-50 hover:bg-slate-100'}`}>
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 md:gap-3 mb-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start gap-2 mb-1">
+                          <div className={`w-8 h-8 flex-shrink-0 rounded-lg flex items-center justify-center ${isContratto ? (isFirmato ? 'bg-green-100' : 'bg-red-100') : 'bg-blue-50'}`}>
                             <Icon className={`w-4 h-4 ${isContratto ? (isFirmato ? 'text-green-600' : 'text-red-600') : 'text-blue-600'}`} />
                           </div>
-                          <div>
-                            <p className="font-semibold text-slate-800">{doc.nome_file}</p>
-                            <div className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-slate-800 text-sm truncate">{doc.nome_file}</p>
+                            <div className="flex flex-wrap items-center gap-2">
                               <p className="text-xs text-slate-500 capitalize">
                                 {doc.tipo_documento.replace('_', ' ')}
                               </p>
@@ -577,78 +579,78 @@ export default function Documenti({ centroSelezionato }) {
                           </div>
                         </div>
                         {cliente && (
-                          <p className="text-sm text-slate-600 ml-10">Cliente: {cliente.ragione_sociale}</p>
+                          <p className="text-xs md:text-sm text-slate-600">Cliente: <span className="font-medium">{cliente.ragione_sociale}</span></p>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 md:gap-2 flex-wrap">
                         {isContratto && (
-                          <label className={`cursor-pointer inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-blue-50 text-blue-600 transition-colors ${uploadingFirmato === doc.id ? 'opacity-50 pointer-events-none' : ''}`} title="Carica contratto firmato">
-                            <Upload className="w-4 h-4" />
-                            <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={(e) => handleUploadContratto(e, doc)} disabled={uploadingFirmato === doc.id} />
-                          </label>
-                        )}
-                        {isFirmato && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => window.open(doc.contratto_firmato_url, '_blank')}
-                            className="text-green-600 hover:bg-green-50"
-                            title="Scarica contratto firmato"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => window.open(doc.file_url, '_blank')}
-                          className="text-slate-600 hover:bg-slate-200"
-                          title="Scarica documento originale"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(doc.id)}
-                          className="text-red-600 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                           <label className={`cursor-pointer inline-flex items-center justify-center h-8 w-8 md:h-9 md:w-9 rounded-md hover:bg-blue-50 text-blue-600 transition-colors ${uploadingFirmato === doc.id ? 'opacity-50 pointer-events-none' : ''}`} title="Carica contratto firmato">
+                             <Upload className="w-4 h-4" />
+                             <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={(e) => handleUploadContratto(e, doc)} disabled={uploadingFirmato === doc.id} />
+                           </label>
+                         )}
+                         {isFirmato && (
+                           <Button
+                             variant="ghost"
+                             size="icon"
+                             onClick={() => window.open(doc.contratto_firmato_url, '_blank')}
+                             className="h-8 w-8 md:h-9 md:w-9 text-green-600 hover:bg-green-50"
+                             title="Scarica contratto firmato"
+                           >
+                             <Download className="w-4 h-4" />
+                           </Button>
+                         )}
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => window.open(doc.file_url, '_blank')}
+                           className="h-8 w-8 md:h-9 md:w-9 text-slate-600 hover:bg-slate-200"
+                           title="Scarica documento originale"
+                         >
+                           <Download className="w-4 h-4" />
+                         </Button>
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => handleDelete(doc.id)}
+                           className="h-8 w-8 md:h-9 md:w-9 text-red-600 hover:bg-red-50"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
                       </div>
                     </div>
                     {prenotazione && (
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm ml-10">
-                        <div>
-                          <p className="text-xs text-slate-500">Postazione</p>
-                          <p className="font-medium text-slate-700">
-                            {spazio ? `${spazio.numero_spazio}${spazio.nome ? ' - ' + spazio.nome : ''}` : '-'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500">Periodo</p>
-                          <p className="font-medium text-slate-700">
-                            {format(new Date(prenotazione.data_inizio), 'dd/MM/yy', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd/MM/yy', { locale: it })}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500">Prezzo Totale</p>
-                          <p className="font-medium text-slate-700">
-                            € {prenotazione.prezzo_totale?.toFixed(2) || '0.00'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500">Centro</p>
-                          <p className="font-medium text-slate-700">{centro?.nome || '-'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-slate-500">Data Creazione</p>
-                          <p className="font-medium text-slate-700">
-                            {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 text-xs md:text-sm">
+                         <div>
+                           <p className="text-xs text-slate-500">Postazione</p>
+                           <p className="font-medium text-slate-700 truncate">
+                             {spazio ? `${spazio.numero_spazio}${spazio.nome ? ' - ' + spazio.nome : ''}` : '-'}
+                           </p>
+                         </div>
+                         <div>
+                           <p className="text-xs text-slate-500">Periodo</p>
+                           <p className="font-medium text-slate-700">
+                             {format(new Date(prenotazione.data_inizio), 'dd/MM/yy', { locale: it })} - {format(new Date(prenotazione.data_fine), 'dd/MM/yy', { locale: it })}
+                           </p>
+                         </div>
+                         <div>
+                           <p className="text-xs text-slate-500">Prezzo Totale</p>
+                           <p className="font-medium text-slate-700">
+                             € {prenotazione.prezzo_totale?.toFixed(2) || '0.00'}
+                           </p>
+                         </div>
+                         <div>
+                           <p className="text-xs text-slate-500">Centro</p>
+                           <p className="font-medium text-slate-700 truncate">{centro?.nome || '-'}</p>
+                         </div>
+                         <div>
+                           <p className="text-xs text-slate-500">Data Creazione</p>
+                           <p className="font-medium text-slate-700">
+                             {format(new Date(doc.created_date), 'dd MMM yyyy', { locale: it })}
+                           </p>
+                         </div>
+                       </div>
+                     )}
                   </div>
                 );
               })}
