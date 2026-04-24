@@ -26,6 +26,7 @@ import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfY
 import { it } from 'date-fns/locale';
 import TasksDashboard from '@/components/dashboard/TasksDashboard';
 import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
@@ -60,6 +61,7 @@ export default function Dashboard({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
   const [completingIds, setCompletingIds] = useState(new Set());
   const [detailModal, setDetailModal] = useState({ open: false, type: null, item: null });
+  const navigate = useNavigate();
 
   const openDetail = (type, item) => setDetailModal({ open: true, type, item });
   const closeDetail = () => setDetailModal({ open: false, type: null, item: null });
@@ -558,12 +560,13 @@ export default function Dashboard({ centroSelezionato, user }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
           {/* Task */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <ListTodo className="w-4 sm:w-5 h-4 sm:h-5 text-slate-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                Task
-              </CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Task')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ListTodo className="w-4 sm:w-5 h-4 sm:h-5 text-slate-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Task</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
@@ -573,12 +576,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
           {/* Controlli */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow flex flex-col">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <ClipboardList className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                Controlli
-              </CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/CalendarioManutenzioni')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Controlli</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto">
@@ -645,12 +649,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
           {/* Ticket */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <Ticket className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                Ticket
-              </CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Ticket')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Ticket className="w-4 sm:w-5 h-4 sm:h-5 text-orange-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Ticket</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
@@ -696,12 +701,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
           {/* Eventi */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                Eventi
-              </CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 sm:w-5 h-4 sm:h-5 text-purple-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Eventi</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
@@ -756,12 +762,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
           {/* Affitti Correnti */}
           <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                Affitti Correnti
-              </CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 sm:w-5 h-4 sm:h-5 text-green-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Affitti Correnti</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
@@ -797,12 +804,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
                     {/* Prossimi Affitti */}
                     <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2 sm:pb-3">
+                    <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
+                    <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                     <Calendar className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />
-                    <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">
-                    Prossimi Affitti
-                    </CardTitle>
+                    <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Prossimi Affitti</CardTitle>
+                    </div>
+                    <span className="text-xs text-blue-600 font-medium">Vai →</span>
                     </div>
                     </CardHeader>
                     <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
@@ -841,10 +849,13 @@ export default function Dashboard({ centroSelezionato, user }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
         {/* Capex */}
         <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <HardHat className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Capex Programmati</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Capex')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <HardHat className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Capex Programmati</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
@@ -873,10 +884,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
         {/* Pulizie Periodiche */}
         <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <RefreshCw className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Pulizie Periodiche</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Pulizie')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Pulizie Periodiche</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
@@ -908,10 +922,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
         {/* Report Recenti */}
         <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-600" />
-              <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Report Recenti</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Report')}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-600" />
+                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Report Recenti</CardTitle>
+              </div>
+              <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
