@@ -35,7 +35,19 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
 
   useEffect(() => {
     if (fornitore) {
-      setForm(fornitore);
+      // Migrazione da duvri_url singolare a duvri_urls array
+      const formData = {
+        ...fornitore,
+        duvri_urls: fornitore.duvri_urls || (fornitore.duvri_url ? [fornitore.duvri_url] : [])
+      };
+      // Migrazione subornitori
+      if (formData.subornitori) {
+        formData.subornitori = formData.subornitori.map(sub => ({
+          ...sub,
+          duvri_urls: sub.duvri_urls || (sub.duvri_url ? [sub.duvri_url] : [])
+        }));
+      }
+      setForm(formData);
     }
   }, [fornitore]);
 
