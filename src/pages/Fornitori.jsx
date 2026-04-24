@@ -269,13 +269,35 @@ export default function Fornitori({ centroSelezionato, user }) {
                       <p className="font-medium text-slate-700 mb-2">Subornitori:</p>
                       <div className="space-y-2">
                         {fornitore.subornitori.map((sub, idx) => (
-                          <div key={idx} className="p-2 bg-amber-50 rounded border border-amber-200">
-                            <p className="font-medium text-amber-900 text-sm">{sub.nome_ditta}</p>
-                            {sub.referente_nome && (
-                              <p className="text-xs text-amber-700">{sub.referente_nome}</p>
+                          <div key={idx} className="p-3 bg-amber-50 rounded border border-amber-200 space-y-2">
+                            <div>
+                              <p className="font-medium text-amber-900 text-sm">{sub.nome_ditta}</p>
+                              {sub.referente_nome && (
+                                <p className="text-xs text-amber-700">{sub.referente_nome}</p>
+                              )}
+                              {sub.referente_email && (
+                                <p className="text-xs text-amber-600">{sub.referente_email}</p>
+                              )}
+                              {sub.referente_telefono && (
+                                <p className="text-xs text-amber-600">{sub.referente_telefono}</p>
+                              )}
+                            </div>
+                            
+                            {sub.lavoratori?.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-amber-800">Lavoratori:</p>
+                                <ul className="text-xs text-amber-700 space-y-1">
+                                  {sub.lavoratori.map((lav, lIdx) => (
+                                    <li key={lIdx} className="ml-2">
+                                      • {lav.nome} {lav.mansione && `(${lav.mansione})`}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
                             )}
+                            
                             {sub.duvri_urls?.length > 0 && (
-                              <div className="flex gap-1 mt-1 flex-wrap">
+                              <div className="flex gap-1 flex-wrap">
                                 {sub.duvri_urls.map((url, dIdx) => (
                                   <a
                                     key={dIdx}
@@ -288,11 +310,6 @@ export default function Fornitori({ centroSelezionato, user }) {
                                   </a>
                                 ))}
                               </div>
-                            )}
-                            {sub.lavoratori?.length > 0 && (
-                              <p className="text-xs text-amber-700 mt-1">
-                                {sub.lavoratori.length} lavoratore{sub.lavoratori.length > 1 ? 'i' : ''}
-                              </p>
                             )}
                           </div>
                         ))}
