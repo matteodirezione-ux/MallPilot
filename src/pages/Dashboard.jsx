@@ -483,6 +483,16 @@ export default function Dashboard({ centroSelezionato, user }) {
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
+          {/* Allert Fornitori DUVRI */}
+          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
+              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.fornitoriAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.fornitoriAlertCount}</p>
+            {stats.fornitoriAlertCount > 0 && <p className="text-xs text-red-500 mt-1">DUVRI Mancanti</p>}
+          </div>
+
           {/* Report da leggere */}
           <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -548,16 +558,6 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
               <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
             </div>
-          </div>
-
-          {/* Allert Fornitori DUVRI */}
-          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
-              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
-            </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.fornitoriAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.fornitoriAlertCount}</p>
-            {stats.fornitoriAlertCount > 0 && <p className="text-xs text-red-500 mt-1">DUVRI Mancanti</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
