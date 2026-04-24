@@ -30,6 +30,8 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ centroSelezionato, user }) {
   const [stats, setStats] = useState({
+  reportDaLeggere: 0,
+  pulizieDaLeggere: 0,
   prossimiAffitti: [],
   affittiCorrenti: [],
   spaziOccupati: 0,
@@ -345,10 +347,15 @@ export default function Dashboard({ centroSelezionato, user }) {
         .sort((a, b) => new Date(a.prossima_scadenza || a.ultima_esecuzione || 0) - new Date(b.prossima_scadenza || b.ultima_esecuzione || 0))
         .slice(0, 5);
 
-      // Report recenti
+      // Report recenti (tutti per conteggio non letti)
       const allReport = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Report.list('-data', 5)
-        : await base44.entities.Report.filter({ centro_id: centroSelezionato.id }, '-data', 5);
+        ? await base44.entities.Report.list('-data')
+        : await base44.entities.Report.filter({ centro_id: centroSelezionato.id }, '-data');
+
+      // Segnalazioni pulizie (per conteggio non lette)
+      const allPulizieSegnalazioni = centroSelezionato?.id === 'tutti'
+        ? await base44.entities.Pulizia.list()
+        : await base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id });
 
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
@@ -381,7 +388,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         ticketsList: ticketsList || [],
         capexList: capexList || [],
         puliziePeriodiche: puliziePeriodiche || [],
-        reportList: allReport || []
+        reportList: allReport?.slice(0, 5) || [],
+        reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
+        pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0
       });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
@@ -461,6 +470,16 @@ export default function Dashboard({ centroSelezionato, user }) {
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
+          {/* Report da leggere */}
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Report da Leggere</p>
+              <div className="bg-emerald-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BookOpen className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-600" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.reportDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.reportDaLeggere}</p>
+            {stats.reportDaLeggere > 0 && <p className="text-xs text-blue-500 mt-1">non letti</p>}
+          </div>
+
           {/* Incassi Mese */}
           <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -516,6 +535,16 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
               <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
             </div>
+          </div>
+
+          {/* Segnalazioni Pulizie da leggere */}
+          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-500" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.pulizieDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.pulizieDaLeggere}</p>
+            {stats.pulizieDaLeggere > 0 && <p className="text-xs text-blue-500 mt-1">non lette</p>}
           </div>
 
           {/* Numero Eventi */}
