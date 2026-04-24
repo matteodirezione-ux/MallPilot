@@ -241,9 +241,21 @@ export default function Gestione({ user }) {
           email: formData.email,
           azienda: formData.azienda
         });
+        // Aggiorna assegnazioni centri
+        const vecchieAssegnazioni = assegnazioni.filter(a => a.user_email === formData.email);
+        const vecchieIds = vecchieAssegnazioni.map(a => a.centro_id);
+        const daAggiungere = formData.centri_ids.filter(id => !vecchieIds.includes(id));
+        const daRimuovere = vecchieAssegnazioni.filter(a => !formData.centri_ids.includes(a.centro_id));
+        await Promise.all([
+          ...daAggiungere.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id })),
+          ...daRimuovere.map(a => base44.entities.Assegnazione.delete(a.id))
+        ]);
         toast.success('Manutentore aggiornato');
       } else {
         await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false });
+        await Promise.all(
+          formData.centri_ids.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
+        );
         await base44.users.inviteUser(formData.email, 'user');
         toast.success('Account manutentore creato, invito inviato via email');
       }
@@ -257,7 +269,11 @@ export default function Gestione({ user }) {
   const deleteManutentore = async (man) => {
     if (!confirm(`Eliminare l'account manutentore ${man.full_name}?`)) return;
     try {
-      await base44.entities.Manutentore.delete(man.id);
+      const assegnazioniMan = assegnazioni.filter(a => a.user_email === man.email);
+      await Promise.all([
+        base44.entities.Manutentore.delete(man.id),
+        ...assegnazioniMan.map(a => base44.entities.Assegnazione.delete(a.id))
+      ]);
       toast.success('Account manutentore eliminato');
       loadData();
     } catch (error) {
@@ -547,11 +563,14 @@ export default function Gestione({ user }) {
           </div>
 
           <div className="space-y-4">
-            {manutentori.map(man => (
+            {manutentori.map(man => {
+              const centriAssegnati = getCentriAssegnati(man.email);
+              return (
               <Card key={man.id}>
                 <CardContent className="p-6">
                   <div className="flex justify-between">
-                    <div className="flex gap-3">
+                    <div className="flex-1">
+                      <div className="flex gap-3 mb-3">
                       <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
                         <Wrench className="w-5 h-5 text-yellow-600" />
                       </div>
@@ -565,6 +584,27 @@ export default function Gestione({ user }) {
                         <p className="text-sm text-slate-600">{man.email}</p>
                         {man.azienda && <p className="text-sm text-slate-500">{man.azienda}</p>}
                       </div>
+                      </div>
+                      <div className="ml-13">
+                        <p className="text-sm font-medium mb-2">Centri abbinati ({centriAssegnati.length}):</p>
+                        {centriAssegnati.length > 0 ? (
+                          <div className="flex flex-wrap gap-2">
+                            {centriAssegnati.map(centro => {
+                              const assegnazione = assegnazioni.find(a => a.user_email === man.email && a.centro_id === centro.id);
+                              return (
+                                <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                                  <span>{centro.nome}</span>
+                                  <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-yellow-600">
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-slate-500">Nessun centro</p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" onClick={() => setManutentoreDialog({ open: true, data: man })}>
@@ -577,7 +617,8 @@ export default function Gestione({ user }) {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
             {manutentori.length === 0 && (
               <Card><CardContent className="py-12 text-center text-slate-500">
                 Nessun account manutentore configurato
@@ -660,6 +701,8 @@ export default function Gestione({ user }) {
       <ManutentoreDialog
         open={manutentoreDialog.open}
         data={manutentoreDialog.data}
+        centri={centri}
+        assegnazioni={assegnazioni}
         onClose={() => setManutentoreDialog({ open: false, data: null })}
         onSave={saveManutentore}
       />
@@ -925,16 +968,26 @@ function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
   );
 }
 
-function ManutentoreDialog({ open, data, onClose, onSave }) {
-  const [form, setForm] = useState({ full_name: '', email: '', azienda: '' });
+function ManutentoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
+  const [form, setForm] = useState({ full_name: '', email: '', azienda: '', centri_ids: [] });
 
   useEffect(() => {
     if (data) {
-      setForm({ full_name: data.full_name, email: data.email, azienda: data.azienda || '' });
+      const centriIds = (assegnazioni || []).filter(a => a.user_email === data.email).map(a => a.centro_id);
+      setForm({ full_name: data.full_name, email: data.email, azienda: data.azienda || '', centri_ids: centriIds });
     } else {
-      setForm({ full_name: '', email: '', azienda: '' });
+      setForm({ full_name: '', email: '', azienda: '', centri_ids: [] });
     }
-  }, [data, open]);
+  }, [data, open, assegnazioni]);
+
+  const toggleCentro = (centroId) => {
+    setForm(prev => ({
+      ...prev,
+      centri_ids: prev.centri_ids.includes(centroId)
+        ? prev.centri_ids.filter(id => id !== centroId)
+        : [...prev.centri_ids, centroId]
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -959,6 +1012,21 @@ function ManutentoreDialog({ open, data, onClose, onSave }) {
           <div>
             <Label>Azienda</Label>
             <Input value={form.azienda} onChange={(e) => setForm({ ...form, azienda: e.target.value })} placeholder="Nome azienda di manutenzione" />
+          </div>
+          <div>
+            <Label>Centri da abbinare</Label>
+            <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
+              {(centri || []).filter(c => c.attivo).map(centro => (
+                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.centri_ids.includes(centro.id)}
+                    onChange={() => toggleCentro(centro.id)}
+                  />
+                  <span className="text-sm">{centro.nome}</span>
+                </label>
+              ))}
+            </div>
           </div>
           {!data && (
             <p className="text-xs text-slate-500 bg-yellow-50 p-3 rounded-lg">
