@@ -574,7 +574,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
             </div>
             <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
-            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Senza Allegati</p>}
+            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Duvri mancanti</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
