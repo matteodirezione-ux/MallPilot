@@ -126,12 +126,63 @@ export default function Fornitori({ centroSelezionato, user }) {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   {/* Intestazione */}
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-slate-800">{fornitore.nome_ditta}</h3>
-                      <p className="text-sm text-slate-600">{fornitore.referente_nome}</p>
+                      <p className="text-sm text-slate-600 mb-3">{fornitore.referente_nome}</p>
+
+                      {/* Info inline */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        {/* Email */}
+                        {fornitore.referente_email && (
+                          <div className="flex items-center gap-2">
+                            <Mail className="w-4 h-4 text-slate-500" />
+                            <a
+                              href={`mailto:${fornitore.referente_email}`}
+                              className="text-sm text-blue-600 hover:underline truncate"
+                            >
+                              {fornitore.referente_email}
+                            </a>
+                          </div>
+                        )}
+                        {/* Telefono */}
+                        {fornitore.referente_telefono && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-slate-500" />
+                            <a
+                              href={`tel:${fornitore.referente_telefono}`}
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              {fornitore.referente_telefono}
+                            </a>
+                          </div>
+                        )}
+                        {/* Lavoratori */}
+                        {fornitore.lavoratori?.length > 0 && (
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-slate-500" />
+                            <span className="text-sm text-slate-600">
+                              {fornitore.lavoratori.length} lavoratore{fornitore.lavoratori.length > 1 ? 'i' : ''}
+                            </span>
+                          </div>
+                        )}
+                        {/* DUVRI */}
+                        {fornitore.duvri_url && (
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={fornitore.duvri_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sm text-blue-600 hover:underline"
+                            >
+                              📄 Scarica DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
+                            </a>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex gap-2">
+
+                    <div className="flex gap-2 flex-shrink-0">
                       <Button
                         variant="outline"
                         size="icon"
@@ -151,55 +202,6 @@ export default function Fornitori({ centroSelezionato, user }) {
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3 border-y border-slate-200">
-                    {/* Email */}
-                    {fornitore.referente_email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-slate-500" />
-                        <a
-                          href={`mailto:${fornitore.referente_email}`}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {fornitore.referente_email}
-                        </a>
-                      </div>
-                    )}
-                    {/* Telefono */}
-                    {fornitore.referente_telefono && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-slate-500" />
-                        <a
-                          href={`tel:${fornitore.referente_telefono}`}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {fornitore.referente_telefono}
-                        </a>
-                      </div>
-                    )}
-                    {/* Lavoratori */}
-                    {fornitore.lavoratori?.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-slate-500" />
-                        <span className="text-sm text-slate-600">
-                          {fornitore.lavoratori.length} lavoratore{fornitore.lavoratori.length > 1 ? 'i' : ''}
-                        </span>
-                      </div>
-                    )}
-                    {/* DUVRI */}
-                    {fornitore.duvri_url && (
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={fornitore.duvri_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          📄 Scarica DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
-                        </a>
-                      </div>
-                    )}
                   </div>
 
                   {/* Dettagli */}
