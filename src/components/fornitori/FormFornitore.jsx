@@ -22,6 +22,16 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
   const [newLavoratore, setNewLavoratore] = useState({ nome: '', mansione: '' });
   const [newDpi, setNewDpi] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [newSubfornitore, setNewSubfornitore] = useState({
+    nome_ditta: '',
+    referente_nome: '',
+    referente_email: '',
+    referente_telefono: '',
+    lavoratori: [],
+    duvri_url: ''
+  });
+  const [editingSubindex, setEditingSubindex] = useState(null);
+  const [newSubLavoratore, setNewSubLavoratore] = useState({ nome: '', mansione: '' });
 
   useEffect(() => {
     if (fornitore) {
@@ -68,6 +78,81 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     setForm(prev => ({
       ...prev,
       dpi: prev.dpi.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const addSubLavoratore = () => {
+    if (!newSubLavoratore.nome.trim()) return;
+    setNewSubfornitore(prev => ({
+      ...prev,
+      lavoratori: [...prev.lavoratori, newSubLavoratore]
+    }));
+    setNewSubLavoratore({ nome: '', mansione: '' });
+  };
+
+  const removeSubLavoratore = (idx) => {
+    setNewSubfornitore(prev => ({
+      ...prev,
+      lavoratori: prev.lavoratori.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const uploadSubDuvri = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploading(true);
+    try {
+      const result = await base44.integrations.Core.UploadFile({ file });
+      setNewSubfornitore(prev => ({ ...prev, duvri_url: result.file_url }));
+      toast.success('DUVRI subfornitore caricato');
+    } catch (error) {
+      toast.error('Errore upload DUVRI');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const addSubfornitore = () => {
+    if (!newSubfornitore.nome_ditta.trim()) {
+      toast.error('Inserisci il nome della ditta subfornitrice');
+      return;
+    }
+    
+    if (editingSubindex !== null) {
+      setForm(prev => ({
+        ...prev,
+        subornitori: prev.subornitori.map((s, i) =>
+          i === editingSubindex ? newSubfornitore : s
+        )
+      }));
+      setEditingSubindex(null);
+    } else {
+      setForm(prev => ({
+        ...prev,
+        subornitori: [...(prev.subornitori || []), newSubfornitore]
+      }));
+    }
+    
+    setNewSubfornitore({
+      nome_ditta: '',
+      referente_nome: '',
+      referente_email: '',
+      referente_telefono: '',
+      lavoratori: [],
+      duvri_url: ''
+    });
+  };
+
+  const editSubfornitore = (idx) => {
+    setNewSubfornitore(form.subornitori[idx]);
+    setEditingSubindex(idx);
+  };
+
+  const removeSubfornitore = (idx) => {
+    setForm(prev => ({
+      ...prev,
+      subornitori: prev.subornitori.filter((_, i) => i !== idx)
     }));
   };
 
@@ -257,6 +342,155 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
               />
               <Button onClick={addDpi} variant="outline">
                 <Plus className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Subornitori */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-slate-800">Subornitori</h3>
+            
+            {/* Lista Subornitori */}
+            <div className="space-y-2">
+              {form.subornitori?.map((sub, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-800">{sub.nome_ditta}</p>
+                    {sub.referente_nome && (
+                      <p className="text-sm text-slate-500">{sub.referente_nome}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => editSubfornitore(idx)}
+                      className="p-1 hover:bg-blue-100 rounded text-blue-600 text-sm"
+                    >
+                      Modifica
+                    </button>
+                    <button
+                      onClick={() => removeSubfornitore(idx)}
+                      className="p-1 hover:bg-red-100 rounded text-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Form Nuovo Subfornitore */}
+            <div className="p-4 bg-slate-50 rounded-lg space-y-4 border-2 border-dashed border-slate-300">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Nome Ditta *</Label>
+                  <Input
+                    value={newSubfornitore.nome_ditta}
+                    onChange={(e) => setNewSubfornitore(prev => ({ ...prev, nome_ditta: e.target.value }))}
+                    placeholder="Nome subfornitore"
+                  />
+                </div>
+                <div>
+                  <Label>Referente</Label>
+                  <Input
+                    value={newSubfornitore.referente_nome}
+                    onChange={(e) => setNewSubfornitore(prev => ({ ...prev, referente_nome: e.target.value }))}
+                    placeholder="Nome referente"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={newSubfornitore.referente_email}
+                    onChange={(e) => setNewSubfornitore(prev => ({ ...prev, referente_email: e.target.value }))}
+                    placeholder="email@esempio.it"
+                  />
+                </div>
+                <div>
+                  <Label>Cellulare</Label>
+                  <Input
+                    value={newSubfornitore.referente_telefono}
+                    onChange={(e) => setNewSubfornitore(prev => ({ ...prev, referente_telefono: e.target.value }))}
+                    placeholder="Numero cellulare"
+                  />
+                </div>
+              </div>
+
+              {/* Lavoratori Subfornitore */}
+              <div>
+                <Label className="block mb-2">Lavoratori</Label>
+                <div className="space-y-2 mb-3">
+                  {newSubfornitore.lavoratori?.map((lav, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border">
+                      <span className="flex-1 text-sm">{lav.nome} {lav.mansione && `(${lav.mansione})`}</span>
+                      <button
+                        onClick={() => removeSubLavoratore(idx)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2">
+                  <Input
+                    value={newSubLavoratore.nome}
+                    onChange={(e) => setNewSubLavoratore(prev => ({ ...prev, nome: e.target.value }))}
+                    placeholder="Nome lavoratore"
+                    size="sm"
+                  />
+                  <Input
+                    value={newSubLavoratore.mansione}
+                    onChange={(e) => setNewSubLavoratore(prev => ({ ...prev, mansione: e.target.value }))}
+                    placeholder="Mansione (opzionale)"
+                    size="sm"
+                  />
+                  <Button
+                    onClick={addSubLavoratore}
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Aggiungi
+                  </Button>
+                </div>
+              </div>
+
+              {/* DUVRI Subfornitore */}
+              <div>
+                <Label className="block mb-2">DUVRI Subfornitore</Label>
+                {newSubfornitore.duvri_url && (
+                  <a
+                    href={newSubfornitore.duvri_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 text-sm hover:underline block mb-2"
+                  >
+                    📄 DUVRI caricato
+                  </a>
+                )}
+                <label className="flex items-center gap-2 px-3 py-2 border border-dashed rounded cursor-pointer hover:bg-white">
+                  <Upload className="w-4 h-4 text-slate-600" />
+                  <span className="text-sm text-slate-600">
+                    {uploading ? 'Caricamento...' : 'Carica DUVRI'}
+                  </span>
+                  <input
+                    type="file"
+                    onChange={uploadSubDuvri}
+                    disabled={uploading}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                  />
+                </label>
+              </div>
+
+              <Button onClick={addSubfornitore} className="w-full gap-2 bg-amber-600 hover:bg-amber-700">
+                <Plus className="w-4 h-4" />
+                {editingSubindex !== null ? 'Aggiorna Subfornitore' : 'Aggiungi Subfornitore'}
               </Button>
             </div>
           </div>

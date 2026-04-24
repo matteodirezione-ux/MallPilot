@@ -232,6 +232,38 @@ export default function Fornitori({ centroSelezionato, user }) {
                     </div>
                   )}
 
+                  {/* Subornitori */}
+                  {fornitore.subornitori?.length > 0 && (
+                    <div className="pt-3 border-t border-slate-200">
+                      <p className="font-medium text-slate-700 mb-2">Subornitori:</p>
+                      <div className="space-y-2">
+                        {fornitore.subornitori.map((sub, idx) => (
+                          <div key={idx} className="p-2 bg-amber-50 rounded border border-amber-200">
+                            <p className="font-medium text-amber-900 text-sm">{sub.nome_ditta}</p>
+                            {sub.referente_nome && (
+                              <p className="text-xs text-amber-700">{sub.referente_nome}</p>
+                            )}
+                            {sub.duvri_url && (
+                              <a
+                                href={sub.duvri_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-xs text-blue-600 hover:underline block mt-1"
+                              >
+                                📄 DUVRI
+                              </a>
+                            )}
+                            {sub.lavoratori?.length > 0 && (
+                              <p className="text-xs text-amber-700 mt-1">
+                                {sub.lavoratori.length} lavoratore{sub.lavoratori.length > 1 ? 'i' : ''}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Note */}
                   {fornitore.note && (
                     <div className="pt-3 border-t border-slate-200">

@@ -54,6 +54,57 @@
       },
       "description": "Lista dei Dispositivi di Protezione Individuale previsti"
     },
+    "subornitori": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome_ditta": {
+            "type": "string",
+            "description": "Nome della ditta subfornitrice"
+          },
+          "referente_nome": {
+            "type": "string",
+            "description": "Nome del referente"
+          },
+          "referente_email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email del referente"
+          },
+          "referente_telefono": {
+            "type": "string",
+            "description": "Numero di cellulare del referente"
+          },
+          "lavoratori": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string"
+                },
+                "mansione": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "nome"
+              ]
+            },
+            "description": "Lavoratori del subfornitore"
+          },
+          "duvri_url": {
+            "type": "string",
+            "description": "URL del DUVRI del subfornitore"
+          }
+        },
+        "required": [
+          "nome_ditta"
+        ]
+      },
+      "description": "Lista dei subornitori"
+    },
     "note": {
       "type": "string",
       "description": "Note aggiuntive"
