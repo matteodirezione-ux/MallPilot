@@ -126,11 +126,10 @@ export default function Fornitori({ centroSelezionato, user }) {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   {/* Intestazione */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-slate-800">{fornitore.nome_ditta}</h3>
-                      <p className="text-sm text-slate-600">{fornitore.referente_nome}</p>
-                    </div>
+                   <div className="flex items-start justify-between">
+                     <div className="flex-1">
+                       <h3 className="text-lg font-bold text-slate-800">{fornitore.nome_ditta}</h3>
+                     </div>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -154,6 +153,14 @@ export default function Fornitori({ centroSelezionato, user }) {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-3 border-y border-slate-200">
+                    {/* Referente */}
+                    {fornitore.referente_nome && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-600">
+                          <strong>{fornitore.referente_nome}</strong>
+                        </span>
+                      </div>
+                    )}
                     {/* Email */}
                     {fornitore.referente_email && (
                       <div className="flex items-center gap-2">
