@@ -13,6 +13,12 @@ import FormPuliziaPeriodica from '@/components/pulizie/FormPuliziaPeriodica';
 const parseLocalDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
+const STATO_CONFIG = {
+  da_programmare: { label: 'Da programmare', color: 'bg-red-100 text-red-700 border-red-200' },
+  programmato: { label: 'Programmato', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
+};
+
 export default function PuliziePage({ centroSelezionato, user }) {
   const [tab, setTab] = useState('segnalazioni');
 
@@ -200,10 +206,12 @@ export default function PuliziePage({ centroSelezionato, user }) {
                   <div className="space-y-2">
                     {perMese[mese].map(p => {
                       const nonLetta = !isLetta(p);
+                      const stato = p.stato || 'da_programmare';
+                      const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
                       return (
                       <div
                         key={p.id}
-                        className={`bg-white rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${nonLetta ? 'border-blue-400' : 'border-slate-200'}`}
+                        className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`}
                         onClick={() => handleClickSegnalazione(p)}
                       >
                         <div className="flex items-start justify-between gap-2">
