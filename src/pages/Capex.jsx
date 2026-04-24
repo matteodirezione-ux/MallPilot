@@ -81,13 +81,16 @@ export default function CapexPage({ centroSelezionato, user }) {
     return anno === annoSelezionato;
   });
 
+  const STATO_ORDER = { da_pianificare: 2, pianificato: 1, completato: 0 };
+
   const filtered = capexAnno.filter(c => {
     const matchSearch = !search || c.titolo?.toLowerCase().includes(search.toLowerCase()) || c.descrizione?.toLowerCase().includes(search.toLowerCase());
     const matchStato = filterStato === 'tutti' || c.stato === filterStato;
     const matchCat = filterCategoria === 'tutti' || c.categoria === filterCategoria;
     return matchSearch && matchStato && matchCat;
   }).sort((a, b) => {
-    // Ordina per data intervento se disponibile, altrimenti metti in fondo
+    const orderDiff = (STATO_ORDER[a.stato] ?? 3) - (STATO_ORDER[b.stato] ?? 3);
+    if (orderDiff !== 0) return orderDiff;
     if (a.data_inizio && b.data_inizio) return new Date(a.data_inizio) - new Date(b.data_inizio);
     if (a.data_inizio) return -1;
     if (b.data_inizio) return 1;
@@ -206,8 +209,10 @@ export default function CapexPage({ centroSelezionato, user }) {
             <div className="text-center py-12 text-slate-400">Caricamento...</div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-12 text-slate-400">Nessun Capex trovato</div>
-          ) : filtered.map(c => (
-            <div key={c.id} className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setDettaglio(c)}>
+          ) : filtered.map(c => {
+            const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-200' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+            return (
+            <div key={c.id} className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`} onClick={() => setDettaglio(c)}>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -242,7 +247,8 @@ export default function CapexPage({ centroSelezionato, user }) {
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
