@@ -370,10 +370,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         return count + subAlerts;
       }, 0);
 
-      // Capex scaduti (data_inizio passata e non completato)
-      const oggi2Check = new Date(); oggi2Check.setHours(0,0,0,0);
+      // Capex senza allegati (DUVRI mancanti) e non completato
       const capexAlertCount = allCapex.filter(c => 
-        c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) < oggi2Check
+        c.stato !== 'completato' && (!c.allegati_urls || c.allegati_urls.length === 0)
       ).length;
 
       // Enrich tasks with additional data if needed
@@ -575,7 +574,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
             </div>
             <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
-            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Scaduti</p>}
+            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Senza Allegati</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
