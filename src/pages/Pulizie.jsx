@@ -205,13 +205,13 @@ export default function PuliziePage({ centroSelezionato, user }) {
                   </h2>
                   <div className="space-y-2">
                     {perMese[mese].map(p => {
-                      const nonLetta = !isLetta(p);
-                      const stato = p.stato || 'da_programmare';
-                      const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
-                      return (
-                      <div
-                        key={p.id}
-                        className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`}
+                       const nonLetta = !isLetta(p);
+                       const stato = p.stato || 'da_programmare';
+                       const cardBg = nonLetta ? 'bg-blue-50 border-blue-200' : stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-200';
+                       return (
+                       <div
+                         key={p.id}
+                         className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`}
                         onClick={() => handleClickSegnalazione(p)}
                       >
                         <div className="flex items-start justify-between gap-2">
