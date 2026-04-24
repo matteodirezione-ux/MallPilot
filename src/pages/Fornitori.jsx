@@ -221,25 +221,15 @@ export default function Fornitori({ centroSelezionato, user }) {
                     {/* Lavoratori Lista */}
                     {fornitore.lavoratori?.length > 0 && (
                       <div>
-                        <button
-                          onClick={() => setExpandedFornitore(expandedFornitore === fornitore.id ? null : fornitore.id)}
-                          className="flex items-center gap-2 font-medium text-slate-700 mb-2 hover:text-slate-900 cursor-pointer"
-                        >
-                          <ChevronDown
-                            className={`w-4 h-4 transition-transform ${expandedFornitore === fornitore.id ? 'rotate-180' : ''}`}
-                          />
-                          Lavoratori:
-                        </button>
-                        {expandedFornitore === fornitore.id && (
-                          <ul className="space-y-1">
-                            {fornitore.lavoratori.map((lav, idx) => (
-                              <li key={idx} className="text-slate-600">
-                                • {lav.nome}
-                                {lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                        <p className="font-medium text-slate-700 mb-2">Lavoratori:</p>
+                        <ul className="space-y-1">
+                          {fornitore.lavoratori.map((lav, idx) => (
+                            <li key={idx} className="text-slate-600">
+                              • {lav.nome}
+                              {lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
 
