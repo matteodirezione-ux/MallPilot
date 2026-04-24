@@ -33,6 +33,7 @@ export default function Dashboard({ centroSelezionato, user }) {
   reportDaLeggere: 0,
   pulizieDaLeggere: 0,
   fornitoriAlertCount: 0,
+  capexAlertCount: 0,
   prossimiAffitti: [],
   affittiCorrenti: [],
   spaziOccupati: 0,
@@ -369,6 +370,12 @@ export default function Dashboard({ centroSelezionato, user }) {
         return count + subAlerts;
       }, 0);
 
+      // Capex scaduti (data_inizio passata e non completato)
+      const oggi2Check = new Date(); oggi2Check.setHours(0,0,0,0);
+      const capexAlertCount = allCapex.filter(c => 
+        c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) < oggi2Check
+      ).length;
+
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
         tasksList.map(async (t) => {
@@ -403,7 +410,8 @@ export default function Dashboard({ centroSelezionato, user }) {
          reportList: allReport?.slice(0, 5) || [],
          reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
          pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0,
-         fornitoriAlertCount
+         fornitoriAlertCount,
+         capexAlertCount
        });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
@@ -558,6 +566,16 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
               <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
             </div>
+          </div>
+
+          {/* Allert Capex Scaduti */}
+          <div className="bg-orange-50 rounded-lg border border-orange-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Capex</p>
+              <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-orange-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
+            {stats.capexAlertCount > 0 && <p className="text-xs text-orange-500 mt-1">Scaduti</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
