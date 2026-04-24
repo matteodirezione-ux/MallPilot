@@ -550,6 +550,16 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </div>
 
+          {/* Allert Fornitori DUVRI */}
+          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
+              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
+            </div>
+            <p className={`text-lg sm:text-2xl font-bold ${stats.fornitoriAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.fornitoriAlertCount}</p>
+            {stats.fornitoriAlertCount > 0 && <p className="text-xs text-red-500 mt-1">DUVRI Mancanti</p>}
+          </div>
+
           {/* Segnalazioni Pulizie da leggere */}
           <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
@@ -921,25 +931,6 @@ export default function Dashboard({ centroSelezionato, user }) {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Allert Fornitori DUVRI */}
-        <Card className="bg-white border-slate-200 hover:shadow-md transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Fornitori')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 sm:w-5 h-4 sm:h-5 text-red-600" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Allert Fornitori</CardTitle>
-              </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="flex items-center justify-center py-6">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-red-600 mb-2">{stats.fornitoriAlertCount}</p>
-              <p className="text-xs text-slate-500">DUVRI Mancanti</p>
-            </div>
           </CardContent>
         </Card>
 
