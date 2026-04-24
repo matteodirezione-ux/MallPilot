@@ -185,13 +185,16 @@ export default function Fornitori({ centroSelezionato, user }) {
                         </a>
                       </div>
                     )}
-                    {/* Lavoratori */}
+                    {/* Lavoratori Button */}
                     {fornitore.lavoratori?.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-slate-500" />
-                        <span className="text-sm text-slate-600">
+                        <button
+                          onClick={() => setExpandedFornitore(expandedFornitore === fornitore.id ? null : fornitore.id)}
+                          className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hover:bg-blue-200 transition-colors flex items-center gap-1"
+                        >
+                          <Users className="w-3 h-3" />
                           {fornitore.lavoratori.length} lavoratore{fornitore.lavoratori.length > 1 ? 'i' : ''}
-                        </span>
+                        </button>
                       </div>
                     )}
                     {/* DUVRI */}
@@ -201,9 +204,9 @@ export default function Fornitori({ centroSelezionato, user }) {
                           href={fornitore.duvri_url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
+                          className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
                         >
-                          📄 Scarica DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
+                          📄 DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
                         </a>
                       </div>
                     )}
