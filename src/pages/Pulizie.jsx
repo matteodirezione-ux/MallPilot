@@ -194,16 +194,19 @@ export default function PuliziePage({ centroSelezionato, user }) {
                     <span className="text-xs font-normal text-slate-400">({perMese[mese].length})</span>
                   </h2>
                   <div className="space-y-2">
-                    {perMese[mese].map(p => (
+                    {perMese[mese].map(p => {
+                      const nonLetta = !isLetta(p);
+                      return (
                       <div
                         key={p.id}
-                        className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                        onClick={() => setDettaglio(p)}
+                        className={`bg-white rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${nonLetta ? 'border-blue-400' : 'border-slate-200'}`}
+                        onClick={() => handleClickSegnalazione(p)}
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h3 className="font-semibold text-slate-800 text-sm">{p.titolo}</h3>
+                              <h3 className={`font-semibold text-sm ${nonLetta ? 'text-blue-700' : 'text-slate-800'}`}>{p.titolo}</h3>
+                              {nonLetta && <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />}
                               <span className="text-xs text-slate-400">{format(parseLocalDate(p.data), 'dd MMM yyyy', { locale: it })}</span>
                             </div>
                             {p.descrizione && <p className="text-xs text-slate-500 truncate">{p.descrizione}</p>}
@@ -229,7 +232,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 </div>
               ))}
