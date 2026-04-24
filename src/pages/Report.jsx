@@ -188,7 +188,7 @@ export default function Report({ centroSelezionato, user }) {
                   const espanso = espansi[r.id];
                   const nonLetto = !isLetto(r);
                    return (
-                    <div key={r.id} className={`bg-white rounded-xl border overflow-hidden ${nonLetto ? 'border-blue-400' : 'border-slate-200'}`}>
+                    <div key={r.id} className={`rounded-xl border overflow-hidden ${nonLetto ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`}>
                       <div
                         className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         onClick={() => toggleEspanso(r.id)}
