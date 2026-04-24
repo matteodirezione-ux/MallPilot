@@ -471,7 +471,7 @@ export default function Dashboard({ centroSelezionato, user }) {
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Report da leggere */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Report da Leggere</p>
               <div className="bg-emerald-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BookOpen className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-600" /></div>
@@ -481,7 +481,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Incassi Mese */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
               <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
@@ -490,7 +490,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Incassi Anno */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
               <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><TrendingUp className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
@@ -506,7 +506,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Spazi Occupati */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
               <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
@@ -522,7 +522,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Affitto Medio Giornaliero */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
               <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BarChart2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
@@ -538,7 +538,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
               <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-500" /></div>
@@ -548,7 +548,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Numero Eventi */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">N. Eventi</p>
               <div className="bg-purple-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-purple-600" /></div>
@@ -557,7 +557,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Giorni Evento */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Giorni Evento</p>
               <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
@@ -566,7 +566,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Costo Eventi */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Eventi</p>
               <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
@@ -575,7 +575,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Costo Medio Giorno Evento */}
-          <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2 sm:mb-3">
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Med/Gg Ev</p>
               <div className="bg-green-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Target className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-green-600" /></div>
