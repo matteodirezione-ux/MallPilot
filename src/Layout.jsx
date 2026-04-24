@@ -226,6 +226,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Pulizie', page: 'Pulizie', icon: Sparkles, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Fornitori', page: 'Fornitori', icon: Users, roles: ['proprieta', 'direttore'] },
   { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
     { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },

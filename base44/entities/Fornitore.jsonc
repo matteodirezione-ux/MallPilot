@@ -1,0 +1,67 @@
+{
+  "name": "Fornitore",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "nome_ditta": {
+      "type": "string",
+      "description": "Nome della ditta fornitrice"
+    },
+    "referente_nome": {
+      "type": "string",
+      "description": "Nome del referente"
+    },
+    "referente_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email del referente"
+    },
+    "referente_telefono": {
+      "type": "string",
+      "description": "Numero di cellulare del referente"
+    },
+    "lavoratori": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome del lavoratore"
+          },
+          "mansione": {
+            "type": "string",
+            "description": "Mansione/ruolo del lavoratore"
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "description": "Lista dei lavoratori"
+    },
+    "duvri_url": {
+      "type": "string",
+      "description": "URL del DUVRI (Documento Unico di Valutazione dei Rischi di Interferenza)"
+    },
+    "dpi": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista dei Dispositivi di Protezione Individuale previsti"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive"
+    }
+  },
+  "required": [
+    "centro_id",
+    "nome_ditta",
+    "referente_nome"
+  ]
+}

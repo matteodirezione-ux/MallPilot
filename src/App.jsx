@@ -11,6 +11,7 @@ import ReportPage from './pages/Report';
 import CapexPage from './pages/Capex';
 import PuliziePage from './pages/Pulizie';
 import StorageReport from './pages/StorageReport';
+import Fornitori from './pages/Fornitori';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/Capex" element={<LayoutWrapper currentPageName="Capex"><CapexPage /></LayoutWrapper>} />
       <Route path="/Pulizie" element={<LayoutWrapper currentPageName="Pulizie"><PuliziePage /></LayoutWrapper>} />
       <Route path="/StorageReport" element={<LayoutWrapper currentPageName="StorageReport"><StorageReport /></LayoutWrapper>} />
+      <Route path="/Fornitori" element={<LayoutWrapper currentPageName="Fornitori"><Fornitori /></LayoutWrapper>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
