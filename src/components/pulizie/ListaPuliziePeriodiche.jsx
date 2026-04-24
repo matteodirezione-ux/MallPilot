@@ -95,7 +95,7 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
                 {perMese[mese].map(p => {
                    const cfg = STATO_CONFIG[p.stato || 'da_programmare'];
                    const stato = p.stato || 'da_programmare';
-                   const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200';
+                   const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
                    return (
                      <div
                        key={p.id}
