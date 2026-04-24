@@ -109,9 +109,11 @@ export default function Ticket({ centroSelezionato, user }) {
     return matchSearch && matchStato;
   });
 
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
   const counts = {
     aperto: tickets.filter(t => t.stato === 'aperto').length,
     sollecitati: tickets.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
+    scaduti: tickets.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso').length,
     chiuso: tickets.filter(t => t.stato === 'chiuso').length,
   };
 
@@ -133,7 +135,7 @@ export default function Ticket({ centroSelezionato, user }) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
             <TicketIcon className="w-5 h-5 text-blue-600" />
@@ -141,6 +143,15 @@ export default function Ticket({ centroSelezionato, user }) {
           <div>
             <p className="text-2xl font-bold text-slate-800">{counts.aperto}</p>
             <p className="text-xs text-slate-500">Aperti</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-800">{counts.scaduti}</p>
+            <p className="text-xs text-slate-500">Scaduti</p>
           </div>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
