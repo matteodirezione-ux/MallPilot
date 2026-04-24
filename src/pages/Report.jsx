@@ -138,22 +138,22 @@ export default function Report({ centroSelezionato, user }) {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-col md:flex-row gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Report</h1>
           <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="relative w-64">
+        <div className="flex items-center gap-4 w-full md:w-auto flex-col md:flex-row">
+           <div className="relative w-full md:w-64">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
              <Input
                placeholder="Cerca nei report..."
                value={searchText || ''}
                onChange={(e) => setSearchText(e.target.value)}
-               className="pl-9 h-9"
+               className="pl-9 h-9 w-full"
              />
            </div>
-           <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
+           <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 w-full md:w-auto">
              <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
                <ChevronLeft className="w-4 h-4 text-slate-600" />
              </button>
@@ -164,7 +164,7 @@ export default function Report({ centroSelezionato, user }) {
                <ChevronRight className="w-4 h-4 text-slate-600" />
              </button>
            </div>
-           <Button onClick={openNuovo} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+           <Button onClick={openNuovo} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 w-full md:w-auto">
              <Plus className="w-4 h-4" /> Nuovo Report
            </Button>
          </div>
@@ -193,13 +193,13 @@ export default function Report({ centroSelezionato, user }) {
                         className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}
                         onClick={() => toggleEspanso(r.id)}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-col md:flex-row w-full md:w-auto">
                           <p className={`text-sm font-bold ${nonLetto ? 'text-blue-700' : 'text-slate-800'}`}>
                             {format(new Date(r.data + 'T00:00:00'), 'EEEE d MMMM yyyy', { locale: it })}
                           </p>
                           <span className={`text-sm ${nonLetto ? 'text-blue-500' : 'text-slate-500'}`}>· {r.operatore}</span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap justify-end">
                           {r.furto && (
                             <span className="flex items-center gap-1 text-xs font-medium text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
                               <AlertTriangle className="w-3 h-3" /> Furto
