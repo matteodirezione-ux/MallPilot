@@ -227,8 +227,14 @@ export default function CapexPage({ centroSelezionato, user }) {
             <div className="text-center py-12 text-slate-400">Nessun Capex trovato</div>
           ) : filtered.map(c => {
             const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-200' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+            const missingDuvri = c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0);
             return (
             <div key={c.id} className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`} onClick={() => setDettaglio(c)}>
+              {missingDuvri && (
+                <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
+                  ⚠️ DUVRI MANCANTE
+                </div>
+              )}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -355,6 +361,40 @@ export default function CapexPage({ centroSelezionato, user }) {
                 {!isVigilanza && dettaglio.costo_effettivo && <div><p className="text-xs text-slate-400 font-medium">Costo effettivo</p><p className="font-medium text-green-700">{fmt(dettaglio.costo_effettivo)}</p></div>}
               </div>
               {dettaglio.note && <div><p className="text-xs text-slate-400 font-medium mb-1">Note</p><p className="text-sm text-slate-600 bg-slate-50 p-2 rounded">{dettaglio.note}</p></div>}
+
+              {dettaglio.duvri_urls?.length > 0 && (
+                <div>
+                  <p className="text-xs text-slate-400 font-medium mb-2">DUVRI</p>
+                  <div className="flex flex-wrap gap-2">
+                    {dettaglio.duvri_urls.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded hover:underline">📄 DUVRI {i + 1}</a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {dettaglio.lavoratori?.length > 0 && (
+                <div>
+                  <p className="text-xs text-slate-400 font-medium mb-2">Lavoratori</p>
+                  <div className="space-y-1">
+                    {dettaglio.lavoratori.map((lav, i) => (
+                      <p key={i} className="text-sm text-slate-600">{lav.nome} {lav.mansione && `(${lav.mansione})`}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {dettaglio.dpi?.length > 0 && (
+                <div>
+                  <p className="text-xs text-slate-400 font-medium mb-2">DPI</p>
+                  <div className="flex flex-wrap gap-2">
+                    {dettaglio.dpi.map((dpi, i) => (
+                      <span key={i} className="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs rounded">✓ {dpi}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {dettaglio.allegati_urls?.length > 0 && (
                 <div>
                   <p className="text-xs text-slate-400 font-medium mb-2">Allegati</p>

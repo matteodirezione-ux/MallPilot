@@ -8,7 +8,7 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, Plus } from 'lucide-react';
 
 const defaultCapex = (centroId) => ({
   centro_id: centroId || '',
@@ -23,13 +23,18 @@ const defaultCapex = (centroId) => ({
   categoria: 'altro',
   fornitore: '',
   note: '',
-  allegati_urls: []
+  allegati_urls: [],
+  duvri_urls: [],
+  lavoratori: [],
+  dpi: []
 });
 
 export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
   const [form, setForm] = useState(defaultCapex(centroId));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [newLavoratore, setNewLavoratore] = useState({ nome: '', mansione: '' });
+  const [newDpi, setNewDpi] = useState('');
 
   useEffect(() => {
     if (capex) {
@@ -63,6 +68,55 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
 
   const removeAllegato = (idx) => {
     setForm(prev => ({ ...prev, allegati_urls: prev.allegati_urls.filter((_, i) => i !== idx) }));
+  };
+
+  const uploadDuvri = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploading(true);
+    const urls = [];
+    for (const file of files) {
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      urls.push(file_url);
+    }
+    setForm(prev => ({ ...prev, duvri_urls: [...(prev.duvri_urls || []), ...urls] }));
+    setUploading(false);
+  };
+
+  const removeDuvri = (idx) => {
+    setForm(prev => ({ ...prev, duvri_urls: prev.duvri_urls.filter((_, i) => i !== idx) }));
+  };
+
+  const addLavoratore = () => {
+    if (!newLavoratore.nome.trim()) return;
+    setForm(prev => ({
+      ...prev,
+      lavoratori: [...(prev.lavoratori || []), newLavoratore]
+    }));
+    setNewLavoratore({ nome: '', mansione: '' });
+  };
+
+  const removeLavoratore = (idx) => {
+    setForm(prev => ({
+      ...prev,
+      lavoratori: prev.lavoratori.filter((_, i) => i !== idx)
+    }));
+  };
+
+  const addDpi = () => {
+    if (!newDpi.trim()) return;
+    setForm(prev => ({
+      ...prev,
+      dpi: [...(prev.dpi || []), newDpi]
+    }));
+    setNewDpi('');
+  };
+
+  const removeDpi = (idx) => {
+    setForm(prev => ({
+      ...prev,
+      dpi: prev.dpi.filter((_, i) => i !== idx)
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -179,6 +233,96 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
           <div>
             <Label>Note</Label>
             <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} />
+          </div>
+
+          {/* DUVRI */}
+          <div>
+            <Label>DUVRI</Label>
+            <div className="mt-1">
+              <label className="flex items-center gap-2 cursor-pointer w-fit px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {uploading ? 'Caricamento...' : 'Carica DUVRI'}
+                <input type="file" multiple className="hidden" onChange={uploadDuvri} accept=".pdf,.doc,.docx" />
+              </label>
+            </div>
+            {form.duvri_urls?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {form.duvri_urls.map((url, i) => (
+                  <div key={i} className="relative group">
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded text-xs text-blue-600 hover:underline">
+                      📄 DUVRI {i + 1}
+                    </a>
+                    <button type="button" onClick={() => removeDuvri(i)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Lavoratori */}
+          <div>
+            <Label>Lavoratori</Label>
+            {form.lavoratori?.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {form.lavoratori.map((lav, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded border text-sm">
+                    <span>{lav.nome} {lav.mansione && `(${lav.mansione})`}</span>
+                    <button type="button" onClick={() => removeLavoratore(idx)} className="text-red-600 hover:text-red-700">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Input
+                value={newLavoratore.nome}
+                onChange={(e) => setNewLavoratore(prev => ({ ...prev, nome: e.target.value }))}
+                placeholder="Nome lavoratore"
+                size="sm"
+              />
+              <Input
+                value={newLavoratore.mansione}
+                onChange={(e) => setNewLavoratore(prev => ({ ...prev, mansione: e.target.value }))}
+                placeholder="Mansione (opzionale)"
+                size="sm"
+              />
+              <Button type="button" onClick={addLavoratore} variant="outline" className="w-full gap-2" size="sm">
+                <Plus className="w-3 h-3" />
+                Aggiungi Lavoratore
+              </Button>
+            </div>
+          </div>
+
+          {/* DPI */}
+          <div>
+            <Label>Dispositivi di Protezione Individuale</Label>
+            {form.dpi?.length > 0 && (
+              <div className="space-y-2 mb-2">
+                {form.dpi.map((dpi, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded border text-sm">
+                    <span>✓ {dpi}</span>
+                    <button type="button" onClick={() => removeDpi(idx)} className="text-red-600 hover:text-red-700">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={newDpi}
+                onChange={(e) => setNewDpi(e.target.value)}
+                placeholder="Es. Casco, Guanti..."
+                onKeyDown={(e) => e.key === 'Enter' && addDpi()}
+                size="sm"
+              />
+              <Button type="button" onClick={addDpi} variant="outline" size="sm">
+                <Plus className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
 
           {/* Allegati */}
