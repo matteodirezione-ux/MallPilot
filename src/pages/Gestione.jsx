@@ -595,17 +595,11 @@ export default function Gestione({ user }) {
                           <p className="text-sm font-medium mb-2">Centri assegnati ({centriAssegnati.length}):</p>
                           {centriAssegnati.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
-                              {centriAssegnati.map(centro => {
-                                const assegnazione = assegnazioni.find(a => a.user_email === vig.email && a.centro_id === centro.id);
-                                return (
-                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-800 rounded-lg text-xs md:text-sm">
-                                    <span className="truncate">{centro.nome}</span>
-                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-orange-600 flex-shrink-0">
-                                      <Trash2 className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                );
-                              })}
+                              {centriAssegnati.map(centro => (
+                                <div key={centro.id} className="px-3 py-1 bg-orange-50 text-orange-800 rounded-lg text-xs md:text-sm">
+                                  {centro.nome}
+                                </div>
+                              ))}
                             </div>
                           ) : (
                             <p className="text-sm text-slate-500">Nessun centro</p>
