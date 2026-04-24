@@ -164,7 +164,7 @@ export default function Report({ centroSelezionato, user }) {
                <ChevronRight className="w-4 h-4 text-slate-600" />
              </button>
            </div>
-           <Button onClick={openNuovo} className="flex items-center gap-2">
+           <Button onClick={openNuovo} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
              <Plus className="w-4 h-4" /> Nuovo Report
            </Button>
          </div>
