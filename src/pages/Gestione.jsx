@@ -363,22 +363,24 @@ export default function Gestione({ user }) {
       </div>
 
       <Tabs defaultValue={isDirettore ? "vigilanza" : "centri"} className="w-full">
-        <TabsList className="mb-6">
-          {isPropieta && <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>}
-          {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
-          <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
-          <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
-          {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
-        </TabsList>
-
-        {/* === TAB CENTRI === */}
-        <TabsContent value="centri">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            {isPropieta && <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>}
+            {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
+            <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
+            <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
+            {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
+          </TabsList>
+          {isPropieta && (
+            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
               <Plus className="w-4 h-4 mr-2" />
               Nuovo Centro
             </Button>
-          </div>
+          )}
+        </div>
+
+        {/* === TAB CENTRI === */}
+        <TabsContent value="centri">
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {centri.map(centro => (
