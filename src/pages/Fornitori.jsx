@@ -198,16 +198,19 @@ export default function Fornitori({ centroSelezionato, user }) {
                       </div>
                     )}
                     {/* DUVRI */}
-                    {fornitore.duvri_url && (
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={fornitore.duvri_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
-                        >
-                          📄 DUVRI {fornitore.updated_date && `(${new Date(fornitore.updated_date).toLocaleDateString('it-IT')})`}
-                        </a>
+                    {fornitore.duvri_urls?.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {fornitore.duvri_urls.map((url, idx) => (
+                          <a
+                            key={idx}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
+                          >
+                            📄 DUVRI {idx + 1}
+                          </a>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -270,15 +273,20 @@ export default function Fornitori({ centroSelezionato, user }) {
                             {sub.referente_nome && (
                               <p className="text-xs text-amber-700">{sub.referente_nome}</p>
                             )}
-                            {sub.duvri_url && (
-                              <a
-                                href={sub.duvri_url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-xs text-blue-600 hover:underline block mt-1"
-                              >
-                                📄 DUVRI
-                              </a>
+                            {sub.duvri_urls?.length > 0 && (
+                              <div className="flex gap-1 mt-1 flex-wrap">
+                                {sub.duvri_urls.map((url, dIdx) => (
+                                  <a
+                                    key={dIdx}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-xs text-blue-600 hover:underline"
+                                  >
+                                    📄 DUVRI {dIdx + 1}
+                                  </a>
+                                ))}
+                              </div>
                             )}
                             {sub.lavoratori?.length > 0 && (
                               <p className="text-xs text-amber-700 mt-1">

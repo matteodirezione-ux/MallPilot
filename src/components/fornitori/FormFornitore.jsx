@@ -15,7 +15,7 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     referente_email: '',
     referente_telefono: '',
     lavoratori: [],
-    duvri_url: '',
+    duvri_urls: [],
     dpi: [],
     note: ''
   });
@@ -98,14 +98,21 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
   };
 
   const uploadSubDuvri = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
     setUploading(true);
     try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      setNewSubfornitore(prev => ({ ...prev, duvri_url: result.file_url }));
-      toast.success('DUVRI subfornitore caricato');
+      const newUrls = [];
+      for (let i = 0; i < files.length; i++) {
+        const result = await base44.integrations.Core.UploadFile({ file: files[i] });
+        newUrls.push(result.file_url);
+      }
+      setNewSubfornitore(prev => ({
+        ...prev,
+        duvri_urls: [...(prev.duvri_urls || []), ...newUrls]
+      }));
+      toast.success(`${files.length} DUVRI caricato${files.length > 1 ? 'i' : ''}`);
     } catch (error) {
       toast.error('Errore upload DUVRI');
     } finally {
@@ -140,7 +147,7 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
       referente_email: '',
       referente_telefono: '',
       lavoratori: [],
-      duvri_url: ''
+      duvri_urls: []
     });
   };
 
@@ -157,14 +164,21 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
   };
 
   const uploadDuvri = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
     try {
-      const result = await base44.integrations.Core.UploadFile({ file });
-      setForm(prev => ({ ...prev, duvri_url: result.file_url }));
-      toast.success('DUVRI caricato');
+      const newUrls = [];
+      for (let i = 0; i < files.length; i++) {
+        const result = await base44.integrations.Core.UploadFile({ file: files[i] });
+        newUrls.push(result.file_url);
+      }
+      setForm(prev => ({
+        ...prev,
+        duvri_urls: [...(prev.duvri_urls || []), ...newUrls]
+      }));
+      toast.success(`${files.length} DUVRI caricato${files.length > 1 ? 'i' : ''}`);
     } catch (error) {
       toast.error('Errore upload DUVRI');
     } finally {
@@ -292,15 +306,30 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
           {/* DUVRI */}
           <div className="space-y-4">
             <h3 className="font-semibold text-slate-800">DUVRI</h3>
-            {form.duvri_url && (
-              <a
-                href={form.duvri_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 text-sm hover:underline block"
-              >
-                📄 Visualizza DUVRI caricato
-              </a>
+            {form.duvri_urls?.length > 0 && (
+              <div className="space-y-2">
+                {form.duvri_urls.map((url, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded border">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 text-sm hover:underline flex-1"
+                    >
+                      📄 DUVRI {idx + 1}
+                    </a>
+                    <button
+                      onClick={() => setForm(prev => ({
+                        ...prev,
+                        duvri_urls: prev.duvri_urls.filter((_, i) => i !== idx)
+                      }))}
+                      className="text-red-600 hover:text-red-700 p-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
             <label className="flex items-center gap-2 px-4 py-2 border border-dashed rounded-lg cursor-pointer hover:bg-slate-50">
               <Upload className="w-4 h-4 text-slate-600" />
@@ -313,6 +342,7 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
                 disabled={uploading}
                 className="hidden"
                 accept=".pdf,.doc,.docx"
+                multiple
               />
             </label>
           </div>
@@ -463,15 +493,30 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
               {/* DUVRI Subfornitore */}
               <div>
                 <Label className="block mb-2">DUVRI Subfornitore</Label>
-                {newSubfornitore.duvri_url && (
-                  <a
-                    href={newSubfornitore.duvri_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 text-sm hover:underline block mb-2"
-                  >
-                    📄 DUVRI caricato
-                  </a>
+                {newSubfornitore.duvri_urls?.length > 0 && (
+                  <div className="space-y-2 mb-2">
+                    {newSubfornitore.duvri_urls.map((url, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 bg-white rounded border text-sm">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 hover:underline flex-1"
+                        >
+                          📄 DUVRI {idx + 1}
+                        </a>
+                        <button
+                          onClick={() => setNewSubfornitore(prev => ({
+                            ...prev,
+                            duvri_urls: prev.duvri_urls.filter((_, i) => i !== idx)
+                          }))}
+                          className="text-red-600 hover:text-red-700 p-1"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
                 <label className="flex items-center gap-2 px-3 py-2 border border-dashed rounded cursor-pointer hover:bg-white">
                   <Upload className="w-4 h-4 text-slate-600" />
@@ -484,6 +529,7 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
                     disabled={uploading}
                     className="hidden"
                     accept=".pdf,.doc,.docx"
+                    multiple
                   />
                 </label>
               </div>

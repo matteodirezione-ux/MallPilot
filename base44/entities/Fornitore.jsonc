@@ -43,9 +43,12 @@
       },
       "description": "Lista dei lavoratori"
     },
-    "duvri_url": {
-      "type": "string",
-      "description": "URL del DUVRI (Documento Unico di Valutazione dei Rischi di Interferenza)"
+    "duvri_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL dei DUVRI (Documento Unico di Valutazione dei Rischi di Interferenza)"
     },
     "dpi": {
       "type": "array",
@@ -94,9 +97,12 @@
             },
             "description": "Lavoratori del subfornitore"
           },
-          "duvri_url": {
-            "type": "string",
-            "description": "URL del DUVRI del subfornitore"
+          "duvri_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "URL dei DUVRI del subfornitore"
           }
         },
         "required": [
