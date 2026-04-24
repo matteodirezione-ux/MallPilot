@@ -256,15 +256,20 @@ export default function Fornitori({ centroSelezionato, user }) {
                       <p className="font-medium text-slate-700 mb-2">Subornitori:</p>
                       <div className="space-y-2">
                         {fornitore.subornitori.map((sub, idx) => (
-                          <div key={idx} className="p-3 bg-amber-50 rounded border border-amber-200">
+                          <div key={idx} className={`p-3 rounded border ${!sub.duvri_urls?.length ? 'border-2 border-red-400 bg-red-50' : 'bg-amber-50 border-amber-200'}`}>
+                            {!sub.duvri_urls?.length && (
+                              <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
+                                ⚠️ DUVRI MANCANTE
+                              </div>
+                            )}
                             <div className="flex flex-wrap items-center gap-3 text-xs">
-                              <p className="font-medium text-amber-900">{sub.nome_ditta}</p>
-                              {sub.referente_nome && <span className="text-amber-700">{sub.referente_nome}</span>}
+                              <p className="font-medium">{sub.nome_ditta}</p>
+                              {sub.referente_nome && <span>{sub.referente_nome}</span>}
                               {sub.referente_email && <a href={`mailto:${sub.referente_email}`} className="text-blue-600 hover:underline">{sub.referente_email}</a>}
                               {sub.referente_telefono && <a href={`tel:${sub.referente_telefono}`} className="text-blue-600 hover:underline">{sub.referente_telefono}</a>}
                               
                               {sub.lavoratori?.length > 0 && (
-                                <span className="text-amber-700">
+                                <span>
                                   Lavoratori: {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}
                                 </span>
                               )}
