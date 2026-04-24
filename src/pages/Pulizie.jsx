@@ -153,32 +153,34 @@ export default function PuliziePage({ centroSelezionato, user }) {
       </div>
 
       {/* Tab switch */}
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit mb-6">
-        <button
-          onClick={() => setTab('segnalazioni')}
-          className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'segnalazioni' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-        >
-          Segnalazioni
-        </button>
-        <button
-          onClick={() => setTab('periodiche')}
-          className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'periodiche' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-        >
-          <RefreshCw className="w-3.5 h-3.5 inline mr-1" />
-          Periodiche
-        </button>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+          <button
+            onClick={() => setTab('segnalazioni')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'segnalazioni' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            Segnalazioni
+          </button>
+          <button
+            onClick={() => setTab('periodiche')}
+            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'periodiche' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <RefreshCw className="w-3.5 h-3.5 inline mr-1" />
+            Periodiche
+          </button>
+        </div>
+        
+        {tab === 'segnalazioni' && (
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
+        )}
       </div>
 
       {/* SEGNALAZIONI */}
       {tab === 'segnalazioni' && (
         <>
-          <div className="flex items-center justify-end gap-3 mb-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-          </div>
-
           {loadingSeg ? (
             <div className="text-center py-12 text-slate-400">Caricamento...</div>
           ) : mesiConDati.length === 0 ? (
