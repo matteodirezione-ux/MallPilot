@@ -352,13 +352,15 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                   Chiusi
                 </button>
               </div>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={idx >= anniDisponibili.length - 1}>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx - 1])} disabled={idx <= 0}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(anniDisponibili[idx + 1])} disabled={idx >= anniDisponibili.length - 1}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
