@@ -172,9 +172,11 @@ export default function PuliziePage({ centroSelezionato, user }) {
       {/* SEGNALAZIONI */}
       {tab === 'segnalazioni' && (
         <>
-          <div className="relative mb-4 max-w-sm">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
+          <div className="flex items-center justify-end gap-3 mb-4">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
           </div>
 
           {loadingSeg ? (
