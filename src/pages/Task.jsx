@@ -317,16 +317,7 @@ export default function TaskPage({ centroSelezionato, user }) {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input placeholder="Cerca task..." className="pl-9 w-64 h-9" value={cerca} onChange={e => setCerca(e.target.value)} />
             </div>
-            <Select value={filtroPriorita} onValueChange={setFiltroPriorita}>
-              <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="tutti">Tutte le priorità</SelectItem>
-                <SelectItem value="bassa">Bassa</SelectItem>
-                <SelectItem value="media">Media</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="urgente">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
+
           </div>
           <div className="flex rounded-md border border-slate-200 overflow-hidden">
             <button
