@@ -14,8 +14,8 @@ import { it } from 'date-fns/locale';
 import FormCapex from '@/components/capex/FormCapex';
 
 const STATO_CONFIG = {
-  da_pianificare: { label: 'Da pianificare', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-  pianificato: { label: 'Pianificato', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  da_pianificare: { label: 'Da pianificare', color: 'bg-red-100 text-red-700 border-red-200' },
+  pianificato: { label: 'Pianificato', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
   completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
 };
 
