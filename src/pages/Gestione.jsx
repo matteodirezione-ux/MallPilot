@@ -6,13 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2 } from 'lucide-react';
+import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Gestione({ user }) {
   const [centri, setCentri] = useState([]);
   const [direttori, setDirettori] = useState([]);
   const [vigilanze, setVigilanze] = useState([]);
+  const [manutentori, setManutentori] = useState([]);
   const [assegnazioni, setAssegnazioni] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +22,7 @@ export default function Gestione({ user }) {
   const [centroDialog, setCentroDialog] = useState({ open: false, data: null });
   const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
   const [vigilanzaDialog, setVigilanzaDialog] = useState({ open: false, data: null });
+  const [manutentoreDialog, setManutentoreDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
@@ -32,10 +34,11 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [centriData, direttoriData, vigilanzeData, assegnazioniData, budgetsData] = await Promise.all([
+      const [centriData, direttoriData, vigilanzeData, manutentoriData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.Direttore.list(),
         base44.entities.Vigilanza.list(),
+        base44.entities.Manutentore.list(),
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
@@ -50,6 +53,7 @@ export default function Gestione({ user }) {
 
       setDirettori(direttoriData);
       setVigilanze(vigilanzeData);
+      setManutentori(manutentoriData);
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
@@ -228,6 +232,39 @@ export default function Gestione({ user }) {
     }
   };
 
+  // === MANUTENTORI ===
+  const saveManutentore = async (formData) => {
+    try {
+      if (manutentoreDialog.data) {
+        await base44.entities.Manutentore.update(manutentoreDialog.data.id, {
+          full_name: formData.full_name,
+          email: formData.email,
+          azienda: formData.azienda
+        });
+        toast.success('Manutentore aggiornato');
+      } else {
+        await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false });
+        await base44.users.inviteUser(formData.email, 'user');
+        toast.success('Account manutentore creato, invito inviato via email');
+      }
+      setManutentoreDialog({ open: false, data: null });
+      loadData();
+    } catch (error) {
+      toast.error('Errore: ' + error.message);
+    }
+  };
+
+  const deleteManutentore = async (man) => {
+    if (!confirm(`Eliminare l'account manutentore ${man.full_name}?`)) return;
+    try {
+      await base44.entities.Manutentore.delete(man.id);
+      toast.success('Account manutentore eliminato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore eliminazione');
+    }
+  };
+
   // === BUDGET ===
   const saveBudget = async (formData) => {
     try {
@@ -309,6 +346,7 @@ export default function Gestione({ user }) {
           {isPropieta && <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>}
           {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
           <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
+          <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
           {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
         </TabsList>
 
@@ -499,6 +537,55 @@ export default function Gestione({ user }) {
           </div>
         </TabsContent>
 
+        {/* === TAB MANUTENTORI === */}
+        <TabsContent value="manutentori">
+          <div className="flex justify-end mb-4">
+            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600">
+              <Wrench className="w-4 h-4 mr-2" />
+              Nuovo Account Manutentore
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {manutentori.map(man => (
+              <Card key={man.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                        <Wrench className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{man.full_name}</h3>
+                          {!man.invito_accettato && (
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">In attesa</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-600">{man.email}</p>
+                        {man.azienda && <p className="text-sm text-slate-500">{man.azienda}</p>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => setManutentoreDialog({ open: true, data: man })}>
+                        <Pencil className="w-4 h-4 text-blue-600" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteManutentore(man)}>
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {manutentori.length === 0 && (
+              <Card><CardContent className="py-12 text-center text-slate-500">
+                Nessun account manutentore configurato
+              </CardContent></Card>
+            )}
+          </div>
+        </TabsContent>
+
         {/* === TAB BUDGET === */}
         <TabsContent value="budget">
           <div className="flex justify-end mb-4">
@@ -568,6 +655,13 @@ export default function Gestione({ user }) {
         assegnazioni={assegnazioni}
         onClose={() => setVigilanzaDialog({ open: false, data: null })}
         onSave={saveVigilanza}
+      />
+
+      <ManutentoreDialog
+        open={manutentoreDialog.open}
+        data={manutentoreDialog.data}
+        onClose={() => setManutentoreDialog({ open: false, data: null })}
+        onSave={saveManutentore}
       />
 
       <BudgetDialog 
@@ -819,6 +913,56 @@ function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
           {!data && (
             <p className="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg">
               Verrà inviato un invito via email all'indirizzo specificato. L'utente potrà accedere solo al Calendario Vigilanza.
+            </p>
+          )}
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea e Invita'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ManutentoreDialog({ open, data, onClose, onSave }) {
+  const [form, setForm] = useState({ full_name: '', email: '', azienda: '' });
+
+  useEffect(() => {
+    if (data) {
+      setForm({ full_name: data.full_name, email: data.email, azienda: data.azienda || '' });
+    } else {
+      setForm({ full_name: '', email: '', azienda: '' });
+    }
+  }, [data, open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Manutentore' : 'Nuovo Account Manutentore'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label>Nome e Cognome *</Label>
+            <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} required />
+          </div>
+          <div>
+            <Label>Email *</Label>
+            <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required disabled={!!data} />
+          </div>
+          <div>
+            <Label>Azienda</Label>
+            <Input value={form.azienda} onChange={(e) => setForm({ ...form, azienda: e.target.value })} placeholder="Nome azienda di manutenzione" />
+          </div>
+          {!data && (
+            <p className="text-xs text-slate-500 bg-yellow-50 p-3 rounded-lg">
+              Verrà inviato un invito via email. Il manutentore potrà visualizzare solo i Ticket.
             </p>
           )}
           <div className="flex justify-end gap-3 pt-4">

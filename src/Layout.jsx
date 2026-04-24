@@ -56,9 +56,10 @@ export default function Layout({ children, currentPageName }) {
       const userData = await base44.auth.me();
       
       // Verifica sempre se l'utente è un direttore registrato
-      const [direttori, vigilanze] = await Promise.all([
+      const [direttori, vigilanze, manutentori] = await Promise.all([
         base44.entities.Direttore.filter({ email: userData.email }),
-        base44.entities.Vigilanza.filter({ email: userData.email })
+        base44.entities.Vigilanza.filter({ email: userData.email }),
+        base44.entities.Manutentore.filter({ email: userData.email })
       ]);
       
       if (direttori.length > 0) {
@@ -93,6 +94,22 @@ export default function Layout({ children, currentPageName }) {
         if (!vigilanze[0].invito_accettato) {
           await base44.entities.Vigilanza.update(vigilanze[0].id, { invito_accettato: true });
         }
+      } else if (manutentori.length > 0) {
+        // Questo utente è un manutentore
+        setDisplayName(manutentori[0].full_name);
+        if (userData.tipo_account !== 'manutentore') {
+          await base44.auth.updateMe({ 
+            tipo_account: 'manutentore',
+            full_name: manutentori[0].full_name
+          });
+          userData.tipo_account = 'manutentore';
+          userData.full_name = manutentori[0].full_name;
+        }
+        
+        // Marca l'invito come accettato
+        if (!manutentori[0].invito_accettato) {
+          await base44.entities.Manutentore.update(manutentori[0].id, { invito_accettato: true });
+        }
       } else if (userData.role === 'admin') {
         // Solo gli admin della piattaforma sono proprietà
         if (userData.tipo_account !== 'proprieta') {
@@ -109,6 +126,9 @@ export default function Layout({ children, currentPageName }) {
       // Redirect direttore e vigilanza alla dashboard se aprono la root
       if ((userData.tipo_account === 'direttore' || userData.tipo_account === 'vigilanza') && location.pathname === '/') {
         navigate(createPageUrl('Dashboard'));
+      }
+      if (userData.tipo_account === 'manutentore' && (location.pathname === '/' || location.pathname === '/Dashboard')) {
+        navigate(createPageUrl('Ticket'));
       }
 
       if (userData.tipo_account === 'proprieta') {
@@ -184,7 +204,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Controlli', page: 'CalendarioManutenzioni', icon: ClipboardList, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza'] },
+    { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
     { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
     { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },

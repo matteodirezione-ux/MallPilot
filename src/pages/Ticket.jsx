@@ -48,8 +48,8 @@ export default function Ticket({ centroSelezionato, user }) {
   const [meseFiltrato, setMeseFiltrato] = useState(new Date());
 
   useEffect(() => {
-    if (centroSelezionato) loadTickets();
-  }, [centroSelezionato]);
+    if (centroSelezionato || user?.tipo_account === 'manutentore') loadTickets();
+  }, [centroSelezionato, user]);
 
   const loadTickets = async () => {
     setLoading(true);
@@ -115,17 +115,21 @@ export default function Ticket({ centroSelezionato, user }) {
     chiuso: tickets.filter(t => t.stato === 'chiuso').length,
   };
 
+  const isReadOnly = user?.tipo_account === 'manutentore';
+
   return (
     <div className="p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Ticket</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Gestione ticket manutenzione</p>
+          <p className="text-sm text-slate-500 mt-0.5">{isReadOnly ? 'Visualizzazione ticket manutenzione' : 'Gestione ticket manutenzione'}</p>
         </div>
-        <Button onClick={handleNuovo} className="bg-blue-600 hover:bg-blue-700 gap-2">
-          <Plus className="w-4 h-4" /> Nuovo Ticket
-        </Button>
+        {!isReadOnly && (
+          <Button onClick={handleNuovo} className="bg-blue-600 hover:bg-blue-700 gap-2">
+            <Plus className="w-4 h-4" /> Nuovo Ticket
+          </Button>
+        )}
       </div>
 
       {/* KPI Cards */}
@@ -209,41 +213,54 @@ export default function Ticket({ centroSelezionato, user }) {
               <div key={ticket.id} className={`rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
-                    <Badge className={tipologiaConfig[ticket.tipologia]?.color}>{tipologiaConfig[ticket.tipologia]?.label}</Badge>
-                    <Select value={ticket.stato} onValueChange={v => handleStatoChange(ticket, v)}>
-                      <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 ${statoConfig[ticket.stato]?.color}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="aperto">Aperto</SelectItem>
-                        <SelectItem value="chiuso">Chiuso</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
-                      <SelectTrigger className={`h-6 text-xs px-2 py-0 rounded-full font-medium w-auto gap-1 ${(ticket.numero_sollecito > 0) ? 'border-0 bg-orange-100 text-orange-700' : 'border border-slate-200 text-slate-400 bg-white'}`}>
-                        <SelectValue>{ticket.numero_sollecito > 0 ? `Sollecito ${ticket.numero_sollecito}` : '+ Sollecito'}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">Nessun sollecito</SelectItem>
-                        {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
+                   <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
+                   <Badge className={tipologiaConfig[ticket.tipologia]?.color}>{tipologiaConfig[ticket.tipologia]?.label}</Badge>
+                   {isReadOnly ? (
+                     <span className={`h-6 text-xs px-2 py-1 rounded-full font-medium ${statoConfig[ticket.stato]?.color}`}>{statoConfig[ticket.stato]?.label}</span>
+                   ) : (
+                     <Select value={ticket.stato} onValueChange={v => handleStatoChange(ticket, v)}>
+                       <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 ${statoConfig[ticket.stato]?.color}`}>
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="aperto">Aperto</SelectItem>
+                         <SelectItem value="chiuso">Chiuso</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   )}
+                   {!isReadOnly && (
+                     <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => handleFieldChange(ticket, 'numero_sollecito', Number(v))}>
+                       <SelectTrigger className={`h-6 text-xs px-2 py-0 rounded-full font-medium w-auto gap-1 ${(ticket.numero_sollecito > 0) ? 'border-0 bg-orange-100 text-orange-700' : 'border border-slate-200 text-slate-400 bg-white'}`}>
+                         <SelectValue>{ticket.numero_sollecito > 0 ? `Sollecito ${ticket.numero_sollecito}` : '+ Sollecito'}</SelectValue>
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="0">Nessun sollecito</SelectItem>
+                         {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)}>Sollecito {n}</SelectItem>)}
+                       </SelectContent>
+                     </Select>
+                   )}
+                   {ticket.numero_sollecito > 0 && isReadOnly && (
+                     <span className="h-6 text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</span>
+                   )}
+                   {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
                   </div>
                   {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 items-center">
-                    <span>Operatore: <strong className="text-slate-700">{ticket.operatore}</strong></span>
-                    <span>Apertura: <strong className="text-slate-700">{formatData(ticket.data_apertura)}</strong></span>
-                    <span className={`flex items-center gap-1 ${isScaduto ? 'text-red-600 font-medium' : ''}`}>
-                      Scadenza:
-                      <input
-                        type="date"
-                        value={ticket.scadenza || ''}
-                        onChange={e => handleFieldChange(ticket, 'scadenza', e.target.value)}
-                        className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
-                      />
-                    </span>
+                   <span>Operatore: <strong className="text-slate-700">{ticket.operatore}</strong></span>
+                   <span>Apertura: <strong className="text-slate-700">{formatData(ticket.data_apertura)}</strong></span>
+                   <span className={`flex items-center gap-1 ${isScaduto ? 'text-red-600 font-medium' : ''}`}>
+                     Scadenza:
+                     {isReadOnly ? (
+                       <strong className="text-slate-700 ml-1">{formatData(ticket.scadenza)}</strong>
+                     ) : (
+                       <input
+                         type="date"
+                         value={ticket.scadenza || ''}
+                         onChange={e => handleFieldChange(ticket, 'scadenza', e.target.value)}
+                         className="ml-1 border border-slate-200 rounded px-1.5 py-0.5 text-xs text-slate-700 bg-white cursor-pointer hover:border-blue-400 focus:outline-none focus:border-blue-500"
+                       />
+                     )}
+                   </span>
                   </div>
                   {ticket.foto_urls?.length > 0 && (
                     <div className="flex gap-1 mt-2">
@@ -254,14 +271,16 @@ export default function Ticket({ centroSelezionato, user }) {
                     </div>
                   )}
                 </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                {!isReadOnly && (
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           };
