@@ -299,15 +299,6 @@ export default function Calendario({ centroSelezionato, user }) {
       {/* Tabs */}
       <Tabs defaultValue={tabDefault} className="w-full">
         <div className="mb-3 md:mb-4 flex flex-col gap-2 md:gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Cerca..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="pl-9"
-            />
-          </div>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <TabsList className="h-8">
               <TabsTrigger value="mensile" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
@@ -335,6 +326,15 @@ export default function Calendario({ centroSelezionato, user }) {
                 </>
               )}
             </TabsList>
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Cerca..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                className="pl-9 h-9"
+              />
+            </div>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <div className="flex items-center gap-2">
                 <Checkbox
