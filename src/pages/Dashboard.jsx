@@ -57,6 +57,27 @@ export default function Dashboard({ centroSelezionato, user }) {
   reportList: []
   });
   const [loading, setLoading] = useState(true);
+  const [completingIds, setCompletingIds] = useState(new Set());
+
+  const handleCompleteTask = async (taskId) => {
+    setCompletingIds(prev => new Set(prev).add(taskId));
+    await base44.entities.Task.update(taskId, { stato: 'completato' });
+    setStats(prev => ({
+      ...prev,
+      tasksList: prev.tasksList.map(t => t.id === taskId ? { ...t, stato: 'completato' } : t)
+    }));
+    setCompletingIds(prev => { const s = new Set(prev); s.delete(taskId); return s; });
+  };
+
+  const handleCompleteControllo = async (controlloId) => {
+    setCompletingIds(prev => new Set(prev).add(controlloId));
+    await base44.entities.Manutenzione.update(controlloId, { stato: 'completato' });
+    setStats(prev => ({
+      ...prev,
+      controlliList: prev.controlliList.map(c => c.id === controlloId ? { ...c, stato: 'completato' } : c)
+    }));
+    setCompletingIds(prev => { const s = new Set(prev); s.delete(controlloId); return s; });
+  };
 
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id && user) {
@@ -541,7 +562,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             </div>
           </CardHeader>
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
-            <TasksDashboard tasks={stats.tasksList} />
+            <TasksDashboard tasks={stats.tasksList} onComplete={handleCompleteTask} />
           </CardContent>
           </Card>
 
@@ -596,7 +617,12 @@ export default function Dashboard({ centroSelezionato, user }) {
                             <div className="flex-1 min-w-0 mr-2">
                               <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
                             </div>
-
+                            <button
+                              onClick={() => handleCompleteControllo(c.id)}
+                              disabled={completingIds.has(c.id)}
+                              className="shrink-0 w-5 h-5 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
+                              title="Segna come completato"
+                            />
                           </div>
                         ))}
                       </div>

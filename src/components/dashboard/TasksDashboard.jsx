@@ -17,7 +17,7 @@ const statusConfig = {
   annullato: { label: 'Annullato', icon: 'x', color: '#9ca3af' }
 };
 
-export default function TasksDashboard({ tasks = [] }) {
+export default function TasksDashboard({ tasks = [], onComplete }) {
   const getDueDateLabel = (date) => {
     const taskDate = new Date(date);
     if (isToday(taskDate)) return 'Oggi';
@@ -94,6 +94,14 @@ export default function TasksDashboard({ tasks = [] }) {
                 className={`p-2 rounded-lg border transition-colors ${groupKey === 'scaduti' ? 'bg-red-50 border-red-200 hover:border-red-300' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}
               >
                 <div className="flex items-start gap-2">
+                  {/* Checkbox completamento */}
+                  {onComplete && (
+                    <button
+                      onClick={() => onComplete(task.id)}
+                      className="shrink-0 mt-0.5 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center"
+                      title="Segna come completato"
+                    />
+                  )}
                   {/* Priority indicator */}
                   <div 
                     className="w-1 h-6 rounded-full shrink-0 mt-0.5"
