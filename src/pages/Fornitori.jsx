@@ -207,8 +207,9 @@ export default function Fornitori({ centroSelezionato, user }) {
                             target="_blank"
                             rel="noreferrer"
                             className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
+                            title={`Caricato: ${new Date(fornitore.updated_date).toLocaleDateString('it-IT')}`}
                           >
-                            📄 DUVRI {idx + 1}
+                            📄 DUVRI {idx + 1} ({new Date(fornitore.updated_date).toLocaleDateString('it-IT')})
                           </a>
                         ))}
                       </div>
