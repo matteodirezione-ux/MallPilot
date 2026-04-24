@@ -22,6 +22,7 @@ export default function Report({ centroSelezionato, user }) {
   const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', furto: false, foto_urls: [] });
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
+  const cameraInputRef = useRef();
 
   useEffect(() => {
     if (centroSelezionato?.id) loadReports();
@@ -297,11 +298,17 @@ export default function Report({ centroSelezionato, user }) {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2">
-                <Camera className="w-4 h-4" />
-                {uploading ? 'Caricamento...' : 'Aggiungi foto'}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="gap-2 flex-1">
+                  <Camera className="w-4 h-4" />
+                  {uploading ? 'Caricamento...' : 'Galleria'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()} className="gap-2">
+                  <Camera className="w-4 h-4" />
+                </Button>
+              </div>
               <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFoto} />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFoto} />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setFormOpen(false)}>Annulla</Button>
