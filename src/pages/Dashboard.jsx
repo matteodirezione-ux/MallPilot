@@ -370,9 +370,9 @@ export default function Dashboard({ centroSelezionato, user }) {
         return count + subAlerts;
       }, 0);
 
-      // Capex senza allegati (DUVRI mancanti) e non completato
+      // Capex pianificati senza allegati (DUVRI mancanti)
       const capexAlertCount = allCapex.filter(c => 
-        c.stato !== 'completato' && (!c.allegati_urls || c.allegati_urls.length === 0)
+        c.stato === 'pianificato' && (!c.allegati_urls || c.allegati_urls.length === 0)
       ).length;
 
       // Enrich tasks with additional data if needed
