@@ -958,6 +958,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         onClose={closeDetail}
         type={detailModal.type}
         item={detailModal.item}
+        user={user}
       />
     </div>
   );

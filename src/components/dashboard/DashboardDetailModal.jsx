@@ -104,7 +104,7 @@ function TicketDetail({ item }) {
   );
 }
 
-function CapexDetail({ item }) {
+function CapexDetail({ item, isVigilanza }) {
   const fmtEur = (n) => n != null ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n) : null;
   return (
     <>
@@ -115,8 +115,8 @@ function CapexDetail({ item }) {
       <Row label="Fornitore" value={item.fornitore} />
       <Row label="Data inizio" value={fmt(item.data_inizio)} />
       <Row label="Data fine" value={fmt(item.data_fine)} />
-      <Row label="Costo previsto" value={fmtEur(item.costo_previsto)} />
-      <Row label="Costo effettivo" value={fmtEur(item.costo_effettivo)} />
+      {!isVigilanza && <Row label="Costo previsto" value={fmtEur(item.costo_previsto)} />}
+      {!isVigilanza && <Row label="Costo effettivo" value={fmtEur(item.costo_effettivo)} />}
       <Row label="Note" value={item.note} />
       {item.allegati_urls?.length > 0 && (
         <div className="pt-2">
@@ -181,7 +181,7 @@ function ReportDetail({ item }) {
   );
 }
 
-function PrenotazioneDetail({ item }) {
+function PrenotazioneDetail({ item, isVigilanza }) {
   const fmtEur = (n) => n != null ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n) : null;
   return (
     <>
@@ -190,7 +190,7 @@ function PrenotazioneDetail({ item }) {
       <Row label="Stato" value={<span className={`px-2 py-0.5 rounded text-xs font-medium ${statoConfig[item.stato]}`}>{item.stato}</span>} />
       <Row label="Data inizio" value={fmt(item.data_inizio)} />
       <Row label="Data fine" value={fmt(item.data_fine)} />
-      <Row label="Prezzo totale" value={fmtEur(item.prezzo_totale)} />
+      {!isVigilanza && <Row label="Prezzo totale" value={fmtEur(item.prezzo_totale)} />}
       <Row label="Materiale" value={item.materiale_dimostrativo} />
       <Row label="Elettricità" value={item.necessita_elettricita ? 'Sì' : null} />
       <Row label="Note" value={item.note} />
@@ -214,19 +214,21 @@ const editRouteMap = {
   ticket: (id) => `/Ticket?edit=${id}`,
 };
 
-export default function DashboardDetailModal({ open, onClose, type, item }) {
+export default function DashboardDetailModal({ open, onClose, type, item, user }) {
   const navigate = useNavigate();
   if (!item) return null;
+
+  const isVigilanza = user?.tipo_account === 'vigilanza';
 
   const renderContent = () => {
     switch (type) {
       case 'task': return <TaskDetail item={item} />;
       case 'manutenzione': return <ManutenzioneDetail item={item} />;
       case 'ticket': return <TicketDetail item={item} />;
-      case 'capex': return <CapexDetail item={item} />;
+      case 'capex': return <CapexDetail item={item} isVigilanza={isVigilanza} />;
       case 'pulizia_periodica': return <PuliziaPeriodicaDetail item={item} />;
       case 'report': return <ReportDetail item={item} />;
-      case 'prenotazione': return <PrenotazioneDetail item={item} />;
+      case 'prenotazione': return <PrenotazioneDetail item={item} isVigilanza={isVigilanza} />;
       default: return null;
     }
   };
