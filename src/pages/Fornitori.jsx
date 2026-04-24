@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Edit, Trash2, Search, Mail, Phone, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Mail, Phone, Users, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import FormFornitore from '@/components/fornitori/FormFornitore';
 import {
@@ -21,6 +21,7 @@ export default function Fornitori({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [editingFornitore, setEditingFornitore] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(null);
+  const [expandedFornitore, setExpandedFornitore] = useState(null);
 
   useEffect(() => {
     loadFornitori();
@@ -206,15 +207,25 @@ export default function Fornitori({ centroSelezionato, user }) {
                     {/* Lavoratori Lista */}
                     {fornitore.lavoratori?.length > 0 && (
                       <div>
-                        <p className="font-medium text-slate-700 mb-2">Lavoratori:</p>
-                        <ul className="space-y-1">
-                          {fornitore.lavoratori.map((lav, idx) => (
-                            <li key={idx} className="text-slate-600">
-                              • {lav.nome}
-                              {lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}
-                            </li>
-                          ))}
-                        </ul>
+                        <button
+                          onClick={() => setExpandedFornitore(expandedFornitore === fornitore.id ? null : fornitore.id)}
+                          className="flex items-center gap-2 font-medium text-slate-700 mb-2 hover:text-slate-900 cursor-pointer"
+                        >
+                          <ChevronDown
+                            className={`w-4 h-4 transition-transform ${expandedFornitore === fornitore.id ? 'rotate-180' : ''}`}
+                          />
+                          Lavoratori:
+                        </button>
+                        {expandedFornitore === fornitore.id && (
+                          <ul className="space-y-1">
+                            {fornitore.lavoratori.map((lav, idx) => (
+                              <li key={idx} className="text-slate-600">
+                                • {lav.nome}
+                                {lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     )}
 
