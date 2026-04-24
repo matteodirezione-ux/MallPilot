@@ -1,4 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import Jimp from 'npm:jimp@0.22.12';
 
 Deno.serve(async (req) => {
   try {
@@ -17,9 +18,7 @@ Deno.serve(async (req) => {
       { name: 'Pulizia', field: 'foto_urls' },
       { name: 'PuliziaPeriodica', field: 'foto_urls' },
       { name: 'Capex', field: 'allegati_urls' },
-      { name: 'Documento', field: 'file_url' },
-      { name: 'SpazioExpo', field: 'foto_urls' },
-      { name: 'CentroCommerciale', field: 'logo_url' }
+      { name: 'SpazioExpo', field: 'foto_urls' }
     ];
 
     let totalProcessed = 0;
@@ -47,18 +46,25 @@ Deno.serve(async (req) => {
               continue;
             }
 
-            const blob = await response.blob();
-            const arrayBuffer = await blob.arrayBuffer();
+            const buffer = await response.arrayBuffer();
+            
+            // Comprimi con Jimp
+            const image = await Jimp.read(Buffer.from(buffer));
+            const compressed = image
+              .resize({ w: 600, h: 600, fit: 'contain' })
+              .quality(50);
 
-            // Carica il file compresso
+            const compressedBuffer = await compressed.toBuffer({ format: 'image/jpeg' });
+
+            // Carica l'immagine compressa
             const result = await base44.integrations.Core.UploadFile({
-              file: arrayBuffer
+              file: compressedBuffer
             });
 
             newUrls.push(result.file_url);
             totalCompressed++;
           } catch (err) {
-            // Se fallisce, mantieni l'URL originale
+            console.error(`Errore compressione ${url}:`, err.message);
             newUrls.push(url);
           }
         }
@@ -78,7 +84,7 @@ Deno.serve(async (req) => {
       success: true,
       total_records: totalProcessed,
       total_compressed: totalCompressed,
-      message: `Compresso ${totalCompressed} immagini da ${totalProcessed} record`
+      message: `Compresso ${totalCompressed} immagini su ${totalProcessed} record`
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
