@@ -7,7 +7,8 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Wrench, Calendar, ListTodo, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Wrench, Calendar, ListTodo, Search, ChevronLeft, ChevronRight, Camera, X } from 'lucide-react';
+import { useRef } from 'react';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
 import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
@@ -20,6 +21,8 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
   const [vistaApertiChiusi, setVistaApertiChiusi] = useState('aperti');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [manutenzioneSelezionata, setManutenzioneSelezionata] = useState(null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
+  const fileInputRef = useRef();
 
   // Apertura automatica da URL param ?edit=<id>
   useEffect(() => {
@@ -39,6 +42,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     data_scadenza: format(new Date(), 'yyyy-MM-dd'),
     centro_id: '',
     stato: 'da_fare',
+    foto_urls: [],
     ricorrente: false,
     ricorrenza_tipo: 'settimanale',
     ricorrenza_ogni: 1,
@@ -104,6 +108,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       data_scadenza: format(giorno, 'yyyy-MM-dd'),
       centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '',
       stato: 'da_fare',
+      foto_urls: [],
       ricorrente: false,
       ricorrenza_tipo: 'settimanale',
       ricorrenza_ogni: 1,
@@ -111,6 +116,20 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       ricorrenza_fine: ''
     });
     setDialogOpen(true);
+  };
+
+  const handleFoto = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingFoto(true);
+    const urls = await Promise.all(files.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url)));
+    setFormData(prev => ({ ...prev, foto_urls: [...(prev.foto_urls || []), ...urls] }));
+    setUploadingFoto(false);
+    e.target.value = '';
+  };
+
+  const rimuoviFoto = (i) => {
+    setFormData(prev => ({ ...prev, foto_urls: prev.foto_urls.filter((_, idx) => idx !== i) }));
   };
 
   const handleManutenzioneClick = (manutenzione) => {
@@ -121,6 +140,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
       data_scadenza: manutenzione.data_scadenza,
       centro_id: manutenzione.centro_id,
       stato: manutenzione.stato,
+      foto_urls: manutenzione.foto_urls || [],
       ricorrente: manutenzione.ricorrente || false,
       ricorrenza_tipo: manutenzione.ricorrenza_tipo || 'settimanale',
       ricorrenza_ogni: manutenzione.ricorrenza_ogni || 1,
@@ -492,6 +512,26 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Foto */}
+            <div className="border-t pt-4">
+              <label className="text-sm font-medium text-slate-700 mb-2 block">Foto</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {(formData.foto_urls || []).map((url, i) => (
+                  <div key={i} className="relative">
+                    <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-slate-200 cursor-pointer hover:opacity-90" onClick={() => window.open(url, '_blank')} />
+                    <button onClick={() => rimuoviFoto(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} disabled={uploadingFoto} className="gap-2">
+                <Camera className="w-4 h-4" />
+                {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
+              </Button>
+              <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFoto} />
             </div>
 
             <div className="flex gap-2 justify-end pt-4 border-t">

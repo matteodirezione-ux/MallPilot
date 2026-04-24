@@ -50,6 +50,13 @@
       "type": "string",
       "description": "Note aggiuntive"
     },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto allegate al controllo"
+    },
     "ricorrente": {
       "type": "boolean",
       "default": false,
