@@ -469,7 +469,7 @@ export default function Dashboard({ centroSelezionato, user }) {
 
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Report da leggere */}
           <div className="bg-white rounded-lg border border-slate-200 p-3 sm:p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
             <div className="flex items-center justify-between mb-2 sm:mb-3">
