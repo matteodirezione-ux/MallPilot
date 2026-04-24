@@ -207,7 +207,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
                     {perMese[mese].map(p => {
                       const nonLetta = !isLetta(p);
                       const stato = p.stato || 'da_programmare';
-                      const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+                      const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-200';
                       return (
                       <div
                         key={p.id}
