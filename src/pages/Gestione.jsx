@@ -536,14 +536,6 @@ export default function Gestione({ user }) {
 
         {/* === TAB VIGILANZA === */}
         <TabsContent value="vigilanza">
-          <div className="flex justify-end mb-4">
-            <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
-              <ShieldCheck className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Nuovo Account Vigilanza</span>
-              <span className="sm:hidden">Nuovo</span>
-            </Button>
-          </div>
-
           <div className="space-y-4">
             {vigilanze.map(vig => {
               const centriAssegnati = getCentriAssegnati(vig.email);
