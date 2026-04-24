@@ -93,13 +93,15 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
               </h2>
               <div className="space-y-2">
                 {perMese[mese].map(p => {
-                  const cfg = STATO_CONFIG[p.stato || 'da_programmare'];
-                  return (
-                    <div
-                      key={p.id}
-                      className="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => setDettaglio(p)}
-                    >
+                   const cfg = STATO_CONFIG[p.stato || 'da_programmare'];
+                   const stato = p.stato || 'da_programmare';
+                   const cardBg = stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200';
+                   return (
+                     <div
+                       key={p.id}
+                       className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`}
+                       onClick={() => setDettaglio(p)}
+                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap mb-1">
