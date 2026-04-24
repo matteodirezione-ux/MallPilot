@@ -17,6 +17,7 @@ export default function Gestione({ user }) {
   const [assegnazioni, setAssegnazioni] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(null);
   
   // Dialogs
   const [centroDialog, setCentroDialog] = useState({ open: false, data: null });
@@ -333,6 +334,9 @@ export default function Gestione({ user }) {
 
   const isDirettore = user?.tipo_account === 'direttore';
   const isPropieta = user?.tipo_account === 'proprieta';
+  
+  const defaultTab = isDirettore ? "vigilanza" : "centri";
+  const currentTab = activeTab || defaultTab;
 
   if (!user || (!isPropieta && !isDirettore)) {
     return (
@@ -362,7 +366,7 @@ export default function Gestione({ user }) {
         <p className="text-slate-600 text-sm">Amministra centri, direttori e budget</p>
       </div>
 
-      <Tabs defaultValue={isDirettore ? "vigilanza" : "centri"} className="w-full">
+      <Tabs value={currentTab} onValueChange={setActiveTab} className="w-full">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           {/* Desktop tabs */}
           <div className="hidden sm:block">
@@ -378,14 +382,8 @@ export default function Gestione({ user }) {
           {/* Mobile select dropdown */}
           <div className="sm:hidden w-full">
             <select
-              value={Object.values(["centri", "direttori", "vigilanza", "manutentori", "budget"].filter((v, i) => 
-                (v !== "centri" && v !== "direttori" && v !== "budget") || isPropieta
-              ))[0]}
-              onChange={(e) => {
-                const tabs = document.querySelector('[role="tablist"]');
-                const trigger = tabs?.querySelector(`[value="${e.target.value}"]`);
-                trigger?.click();
-              }}
+              value={currentTab}
+              onChange={(e) => setActiveTab(e.target.value)}
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
             >
               {isPropieta && <option value="centri">Centri</option>}
