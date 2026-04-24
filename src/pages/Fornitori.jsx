@@ -278,7 +278,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                               
                               {sub.lavoratori?.length > 0 && (
                                 <span className="text-amber-700">
-                                  {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}
+                                  Lavoratori: {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}
                                 </span>
                               )}
                               
