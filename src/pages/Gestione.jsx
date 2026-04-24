@@ -356,25 +356,26 @@ export default function Gestione({ user }) {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Gestione</h1>
-        <p className="text-slate-600">Amministra centri, direttori e budget</p>
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Gestione</h1>
+        <p className="text-slate-600 text-sm">Amministra centri, direttori e budget</p>
       </div>
 
       <Tabs defaultValue={isDirettore ? "vigilanza" : "centri"} className="w-full">
-        <div className="flex justify-between items-center mb-6">
-          <TabsList>
-            {isPropieta && <TabsTrigger value="centri">Centri Commerciali</TabsTrigger>}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+          <TabsList className="w-full sm:w-auto overflow-x-auto">
+            {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
             {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
             <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
             <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
             {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
           </TabsList>
           {isPropieta && (
-            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => setCentroDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Nuovo Centro
+              <span className="hidden sm:inline">Nuovo Centro</span>
+              <span className="sm:hidden">Nuovo</span>
             </Button>
           )}
         </div>
@@ -420,9 +421,10 @@ export default function Gestione({ user }) {
         {/* === TAB DIRETTORI === */}
         <TabsContent value="direttori">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600">
+            <Button onClick={() => setDirettoreDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
               <UserPlus className="w-4 h-4 mr-2" />
-              Nuovo Direttore
+              <span className="hidden sm:inline">Nuovo Direttore</span>
+              <span className="sm:hidden">Nuovo</span>
             </Button>
           </div>
 
@@ -432,14 +434,14 @@ export default function Gestione({ user }) {
               return (
                 <Card key={dir.id}>
                   <CardContent className="p-6">
-                    <div className="flex justify-between">
-                      <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                      <div className="flex-1 min-w-0">
                         <div className="flex gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                             <Users className="w-5 h-5 text-blue-600" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
                               <h3 className="font-semibold">{dir.full_name}</h3>
                               {!dir.invito_accettato && (
                                 <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
@@ -447,19 +449,19 @@ export default function Gestione({ user }) {
                                 </span>
                               )}
                             </div>
-                            <p className="text-sm text-slate-600">{dir.email}</p>
+                            <p className="text-sm text-slate-600 truncate">{dir.email}</p>
                           </div>
                         </div>
-                        <div className="ml-13">
+                        <div>
                           <p className="text-sm font-medium mb-2">Centri assegnati ({centriAssegnati.length}):</p>
                           {centriAssegnati.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {centriAssegnati.map(centro => {
                                 const assegnazione = assegnazioni.find(a => a.user_email === dir.email && a.centro_id === centro.id);
                                 return (
-                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm">
-                                    <span>{centro.nome}</span>
-                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-blue-600">
+                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-xs md:text-sm">
+                                    <span className="truncate">{centro.nome}</span>
+                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-blue-600 flex-shrink-0">
                                       <Trash2 className="w-3 h-3" />
                                     </button>
                                   </div>
@@ -471,11 +473,11 @@ export default function Gestione({ user }) {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
+                      <div className="flex gap-1 flex-shrink-0 self-start md:self-auto">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
                           <Pencil className="w-4 h-4 text-blue-600" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteDirettore(dir)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteDirettore(dir)}>
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
                       </div>
@@ -490,9 +492,10 @@ export default function Gestione({ user }) {
         {/* === TAB VIGILANZA === */}
         <TabsContent value="vigilanza">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600">
+            <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
               <ShieldCheck className="w-4 h-4 mr-2" />
-              Nuovo Account Vigilanza
+              <span className="hidden sm:inline">Nuovo Account Vigilanza</span>
+              <span className="sm:hidden">Nuovo</span>
             </Button>
           </div>
 
@@ -502,32 +505,32 @@ export default function Gestione({ user }) {
               return (
                 <Card key={vig.id}>
                   <CardContent className="p-6">
-                    <div className="flex justify-between">
-                      <div className="flex-1">
+                    <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                      <div className="flex-1 min-w-0">
                         <div className="flex gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
                             <ShieldCheck className="w-5 h-5 text-orange-600" />
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
                               <h3 className="font-semibold">{vig.full_name}</h3>
                               {!vig.invito_accettato && (
                                 <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">In attesa</span>
                               )}
                             </div>
-                            <p className="text-sm text-slate-600">{vig.email}</p>
+                            <p className="text-sm text-slate-600 truncate">{vig.email}</p>
                           </div>
                         </div>
-                        <div className="ml-13">
+                        <div>
                           <p className="text-sm font-medium mb-2">Centri assegnati ({centriAssegnati.length}):</p>
                           {centriAssegnati.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
                               {centriAssegnati.map(centro => {
                                 const assegnazione = assegnazioni.find(a => a.user_email === vig.email && a.centro_id === centro.id);
                                 return (
-                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-800 rounded-lg text-sm">
-                                    <span>{centro.nome}</span>
-                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-orange-600">
+                                  <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-800 rounded-lg text-xs md:text-sm">
+                                    <span className="truncate">{centro.nome}</span>
+                                    <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-orange-600 flex-shrink-0">
                                       <Trash2 className="w-3 h-3" />
                                     </button>
                                   </div>
@@ -539,11 +542,11 @@ export default function Gestione({ user }) {
                           )}
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => setVigilanzaDialog({ open: true, data: vig })}>
+                      <div className="flex gap-1 flex-shrink-0 self-start md:self-auto">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setVigilanzaDialog({ open: true, data: vig })}>
                           <Pencil className="w-4 h-4 text-blue-600" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteVigilanza(vig)}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteVigilanza(vig)}>
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
                       </div>
@@ -563,9 +566,10 @@ export default function Gestione({ user }) {
         {/* === TAB MANUTENTORI === */}
         <TabsContent value="manutentori">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600">
+            <Button onClick={() => setManutentoreDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
               <Wrench className="w-4 h-4 mr-2" />
-              Nuovo Account Manutentore
+              <span className="hidden sm:inline">Nuovo Account Manutentore</span>
+              <span className="sm:hidden">Nuovo</span>
             </Button>
           </div>
 
@@ -575,53 +579,53 @@ export default function Gestione({ user }) {
               return (
               <Card key={man.id}>
                 <CardContent className="p-6">
-                  <div className="flex justify-between">
-                    <div className="flex-1">
-                      <div className="flex gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                        <Wrench className="w-5 h-5 text-yellow-600" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{man.full_name}</h3>
-                          {!man.invito_accettato && (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">In attesa</span>
-                          )}
-                        </div>
-                        <p className="text-sm text-slate-600">{man.email}</p>
-                        {man.azienda && <p className="text-sm text-slate-500">{man.azienda}</p>}
-                      </div>
-                      </div>
-                      <div className="ml-13">
-                        <p className="text-sm font-medium mb-2">Centri abbinati ({centriAssegnati.length}):</p>
-                        {centriAssegnati.length > 0 ? (
-                          <div className="flex flex-wrap gap-2">
-                            {centriAssegnati.map(centro => {
-                              const assegnazione = assegnazioni.find(a => a.user_email === man.email && a.centro_id === centro.id);
-                              return (
-                                <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
-                                  <span>{centro.nome}</span>
-                                  <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-yellow-600">
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <p className="text-sm text-slate-500">Nessun centro</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => setManutentoreDialog({ open: true, data: man })}>
-                        <Pencil className="w-4 h-4 text-blue-600" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => deleteManutentore(man)}>
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </Button>
-                    </div>
-                  </div>
+                  <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                     <div className="flex-1 min-w-0">
+                       <div className="flex gap-3 mb-3">
+                       <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                         <Wrench className="w-5 h-5 text-yellow-600" />
+                       </div>
+                       <div className="min-w-0 flex-1">
+                         <div className="flex flex-wrap items-center gap-2">
+                           <h3 className="font-semibold">{man.full_name}</h3>
+                           {!man.invito_accettato && (
+                             <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">In attesa</span>
+                           )}
+                         </div>
+                         <p className="text-sm text-slate-600 truncate">{man.email}</p>
+                         {man.azienda && <p className="text-sm text-slate-500 truncate">{man.azienda}</p>}
+                       </div>
+                       </div>
+                       <div>
+                         <p className="text-sm font-medium mb-2">Centri abbinati ({centriAssegnati.length}):</p>
+                         {centriAssegnati.length > 0 ? (
+                           <div className="flex flex-wrap gap-2">
+                             {centriAssegnati.map(centro => {
+                               const assegnazione = assegnazioni.find(a => a.user_email === man.email && a.centro_id === centro.id);
+                               return (
+                                 <div key={centro.id} className="flex items-center gap-2 px-3 py-1 bg-yellow-50 text-yellow-800 rounded-lg text-xs md:text-sm">
+                                   <span className="truncate">{centro.nome}</span>
+                                   <button onClick={() => deleteAssegnazione(assegnazione.id)} className="hover:text-yellow-600 flex-shrink-0">
+                                     <Trash2 className="w-3 h-3" />
+                                   </button>
+                                 </div>
+                               );
+                             })}
+                           </div>
+                         ) : (
+                           <p className="text-sm text-slate-500">Nessun centro</p>
+                         )}
+                       </div>
+                     </div>
+                     <div className="flex gap-1 flex-shrink-0 self-start md:self-auto">
+                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setManutentoreDialog({ open: true, data: man })}>
+                         <Pencil className="w-4 h-4 text-blue-600" />
+                       </Button>
+                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteManutentore(man)}>
+                         <Trash2 className="w-4 h-4 text-red-600" />
+                       </Button>
+                     </div>
+                   </div>
                 </CardContent>
               </Card>
               );
@@ -637,9 +641,10 @@ export default function Gestione({ user }) {
         {/* === TAB BUDGET === */}
         <TabsContent value="budget">
           <div className="flex justify-end mb-4">
-            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600">
+            <Button onClick={() => setBudgetDialog({ open: true, data: null })} className="bg-blue-600 w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-2" />
-              Nuovo Budget
+              <span className="hidden sm:inline">Nuovo Budget</span>
+              <span className="sm:hidden">Nuovo</span>
             </Button>
           </div>
 
