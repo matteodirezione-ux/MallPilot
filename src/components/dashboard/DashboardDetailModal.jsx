@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 
 const priorityConfig = {
   bassa: { label: 'Bassa', color: 'bg-sky-100 text-sky-700' },
@@ -36,6 +37,22 @@ const Row = ({ label, value }) => value ? (
   </div>
 ) : null;
 
+function FotoGrid({ urls }) {
+  const [lightbox, setLightbox] = useState(null);
+  if (!urls?.length) return null;
+  return (
+    <div className="pt-2">
+      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
+      <div className="flex gap-2 flex-wrap">
+        {urls.map((url, i) => (
+          <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => setLightbox(i)} />
+        ))}
+      </div>
+      {lightbox !== null && <ImageLightbox urls={urls} startIndex={lightbox} onClose={() => setLightbox(null)} />}
+    </div>
+  );
+}
+
 function TaskDetail({ item }) {
   return (
     <>
@@ -47,18 +64,7 @@ function TaskDetail({ item }) {
       <Row label="Assegnato a" value={item.assegnato_a_nome || item.assegnato_a_email} />
       <Row label="Assegnato da" value={item.assegnato_da_nome || item.assegnato_da_email} />
       <Row label="Note" value={item.note} />
-      {item.foto_urls?.length > 0 && (
-        <div className="pt-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
-          <div className="flex gap-2 flex-wrap">
-            {item.foto_urls.map((url, i) => (
-              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity" />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      <FotoGrid urls={item.foto_urls} />
     </>
   );
 }
@@ -88,24 +94,15 @@ function TicketDetail({ item }) {
       <Row label="Scadenza" value={fmt(item.scadenza)} />
       <Row label="Solleciti" value={item.numero_sollecito != null ? String(item.numero_sollecito) : null} />
       <Row label="Descrizione" value={item.descrizione} />
-      {item.foto_urls?.length > 0 && (
-        <div className="pt-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
-          <div className="flex gap-2 flex-wrap">
-            {item.foto_urls.map((url, i) => (
-              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity" />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      <FotoGrid urls={item.foto_urls} />
     </>
   );
 }
 
 function CapexDetail({ item, isVigilanza }) {
   const fmtEur = (n) => n != null ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n) : null;
+  const imgUrls = (item.allegati_urls || []).filter(u => u.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+  const docUrls = (item.allegati_urls || []).filter(u => !u.match(/\.(jpg|jpeg|png|gif|webp)$/i));
   return (
     <>
       <Row label="Titolo" value={item.titolo} />
@@ -118,11 +115,12 @@ function CapexDetail({ item, isVigilanza }) {
       {!isVigilanza && <Row label="Costo previsto" value={fmtEur(item.costo_previsto)} />}
       {!isVigilanza && <Row label="Costo effettivo" value={fmtEur(item.costo_effettivo)} />}
       <Row label="Note" value={item.note} />
-      {item.allegati_urls?.length > 0 && (
+      <FotoGrid urls={imgUrls} />
+      {docUrls.length > 0 && (
         <div className="pt-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Allegati</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Documenti</p>
           <div className="flex gap-2 flex-wrap">
-            {item.allegati_urls.map((url, i) => (
+            {docUrls.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 underline">Allegato {i+1}</a>
             ))}
           </div>
@@ -143,18 +141,7 @@ function PuliziaPeriodicaDetail({ item }) {
       <Row label="Ultima esecuzione" value={fmt(item.ultima_esecuzione)} />
       <Row label="Prossima scadenza" value={fmt(item.prossima_scadenza)} />
       <Row label="Note" value={item.note} />
-      {item.foto_urls?.length > 0 && (
-        <div className="pt-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
-          <div className="flex gap-2 flex-wrap">
-            {item.foto_urls.map((url, i) => (
-              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity" />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      <FotoGrid urls={item.foto_urls} />
     </>
   );
 }
@@ -165,18 +152,7 @@ function ReportDetail({ item }) {
       <Row label="Operatore" value={item.operatore} />
       <Row label="Data" value={fmt(item.data)} />
       <Row label="Contenuto" value={item.contenuto} />
-      {item.foto_urls?.length > 0 && (
-        <div className="pt-2">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
-          <div className="flex gap-2 flex-wrap">
-            {item.foto_urls.map((url, i) => (
-              <a key={i} href={url} target="_blank" rel="noopener noreferrer">
-                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity" />
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
+      <FotoGrid urls={item.foto_urls} />
     </>
   );
 }

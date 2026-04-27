@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import {
   Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, List, Calendar, X
 } from 'lucide-react';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay, isWithinInterval, addDays, subDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCapex from '@/components/capex/FormCapex';
@@ -44,6 +45,7 @@ export default function CapexPage({ centroSelezionato, user }) {
   const [dettaglio, setDettaglio] = useState(null);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [annoSelezionato, setAnnoSelezionato] = useState(new Date().getFullYear());
+  const [lightbox, setLightbox] = useState(null);
 
   const isVigilanza = user?.tipo_account === 'vigilanza';
   const canEdit = !isVigilanza;
@@ -395,18 +397,34 @@ export default function CapexPage({ centroSelezionato, user }) {
                 </div>
               )}
 
-              {dettaglio.allegati_urls?.length > 0 && (
-                <div>
-                  <p className="text-xs text-slate-400 font-medium mb-2">Allegati</p>
-                  <div className="flex flex-wrap gap-2">
-                    {dettaglio.allegati_urls.map((url, i) => (
-                      url.match(/\.(jpg|jpeg|png|gif|webp)$/i)
-                        ? <img key={i} src={url} className="w-20 h-20 object-cover rounded-lg border cursor-pointer" onClick={() => window.open(url, '_blank')} />
-                        : <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded hover:underline">📎 Allegato {i + 1}</a>
-                    ))}
+              {dettaglio.allegati_urls?.length > 0 && (() => {
+                const imgs = dettaglio.allegati_urls.filter(u => u.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+                const docs = dettaglio.allegati_urls.filter(u => !u.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+                return (
+                  <div className="space-y-3">
+                    {imgs.length > 0 && (
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium mb-2">Foto</p>
+                        <div className="flex flex-wrap gap-2">
+                          {imgs.map((url, i) => (
+                            <img key={i} src={url} className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightbox({ urls: imgs, index: i })} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {docs.length > 0 && (
+                      <div>
+                        <p className="text-xs text-slate-400 font-medium mb-2">Documenti</p>
+                        <div className="flex flex-wrap gap-2">
+                          {docs.map((url, i) => (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded hover:underline">📎 Allegato {i + 1}</a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
               {canEdit && (
                 <div className="flex justify-end gap-2 pt-2 border-t">
                   <Button variant="outline" size="sm" onClick={() => { setDettaglio(null); setEditing(dettaglio); setShowForm(true); }}>
@@ -421,6 +439,9 @@ export default function CapexPage({ centroSelezionato, user }) {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Lightbox */}
+      {lightbox && <ImageLightbox urls={lightbox.urls} startIndex={lightbox.index} onClose={() => setLightbox(null)} />}
 
       {/* Form Capex */}
       <FormCapex
