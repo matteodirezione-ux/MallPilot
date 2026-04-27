@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import FormTicket from '@/components/tickets/FormTicket';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -24,11 +26,64 @@ const formatData = (d) => {
   try { return format(new Date(d), 'dd/MM/yyyy', { locale: it }); } catch { return d; }
 };
 
+function DettaglioTicketDialog({ ticket, onClose, onEdit }) {
+  const [lightbox, setLightbox] = useState(null);
+  const tipConf = tipologiaConfig[ticket.tipologia] || tipologiaConfig.ordinario;
+  const stConf = statoConfig[ticket.stato] || statoConfig.aperto;
+
+  const Row = ({ label, value }) => value ? (
+    <div className="flex flex-col sm:flex-row sm:gap-3 py-2 border-b border-slate-100 last:border-0">
+      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide sm:w-36 shrink-0">{label}</span>
+      <span className="text-sm text-slate-800 mt-0.5 sm:mt-0">{value}</span>
+    </div>
+  ) : null;
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center justify-between pr-6">
+            <DialogTitle>Ticket #{ticket.numero_ticket}</DialogTitle>
+            {onEdit && (
+              <button onClick={onEdit} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors">
+                <Pencil className="w-3.5 h-3.5" /> Modifica
+              </button>
+            )}
+          </div>
+        </DialogHeader>
+        <div className="divide-y divide-slate-100">
+          <Row label="Operatore" value={ticket.operatore} />
+          <Row label="Tipologia" value={<Badge className={tipConf.color}>{tipConf.label}</Badge>} />
+          <Row label="Stato" value={<Badge className={stConf.color}>{stConf.label}</Badge>} />
+          <Row label="Data apertura" value={formatData(ticket.data_apertura)} />
+          <Row label="Scadenza" value={formatData(ticket.scadenza)} />
+          {ticket.numero_sollecito > 0 && <Row label="Sollecito" value={`Sollecito ${ticket.numero_sollecito}`} />}
+          <Row label="Descrizione" value={ticket.descrizione} />
+        </div>
+        {ticket.foto_urls?.length > 0 && (
+          <div className="pt-2">
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
+            <div className="flex gap-2 flex-wrap">
+              {ticket.foto_urls.map((url, i) => (
+                <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => setLightbox(i)} />
+              ))}
+            </div>
+          </div>
+        )}
+        {lightbox !== null && (
+          <ImageLightbox urls={ticket.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function Ticket({ centroSelezionato, user }) {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [ticketSelezionato, setTicketSelezionato] = useState(null);
+  const [dettaglioTicket, setDettaglioTicket] = useState(null);
 
   // Apertura automatica da URL param ?edit=<id>
   useEffect(() => {
@@ -75,8 +130,13 @@ export default function Ticket({ centroSelezionato, user }) {
   };
 
   const handleEdit = (ticket) => {
+    setDettaglioTicket(null);
     setTicketSelezionato(ticket);
     setFormOpen(true);
+  };
+
+  const handleCardClick = (ticket) => {
+    setDettaglioTicket(ticket);
   };
 
   const handleDelete = async (ticket) => {
@@ -221,7 +281,7 @@ export default function Ticket({ centroSelezionato, user }) {
             const isUrgente = ticket.tipologia === 'urgente';
             const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < oggi && ticket.stato !== 'chiuso';
             return (
-              <div key={ticket.id} onClick={() => handleEdit(ticket)} className={`rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm cursor-pointer ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+              <div key={ticket.id} onClick={() => handleCardClick(ticket)} className={`rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm cursor-pointer ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                    <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
@@ -282,16 +342,18 @@ export default function Ticket({ centroSelezionato, user }) {
                     </div>
                   )}
                 </div>
-                {!isReadOnly && (
-                  <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                  {!isReadOnly && (
+                    <>
+                      <button onClick={() => handleEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-blue-600 transition-colors">
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDelete(ticket)} className="p-2 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             );
           };
@@ -313,6 +375,15 @@ export default function Ticket({ centroSelezionato, user }) {
             </div>
           );
         })()
+      )}
+
+      {/* Dialog riepilogo */}
+      {dettaglioTicket && (
+        <DettaglioTicketDialog
+          ticket={dettaglioTicket}
+          onClose={() => setDettaglioTicket(null)}
+          onEdit={!isReadOnly ? () => { handleEdit(dettaglioTicket); } : null}
+        />
       )}
 
       <FormTicket

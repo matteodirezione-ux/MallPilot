@@ -5,6 +5,7 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import { base44 } from '@/api/base44Client';
 import { compressImages } from '@/lib/compressImage';
 import {
@@ -40,6 +41,7 @@ const defaultForm = {
 export default function FormTicket({ open, onClose, onSave, ticket, user, readOnly = false }) {
   const [form, setForm] = useState(defaultForm);
   const [uploadingFoto, setUploadingFoto] = useState(false);
+  const [lightbox, setLightbox] = useState(null);
 
   useEffect(() => {
     if (ticket) {
@@ -121,7 +123,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
                 <span className={labelClass}>Foto</span>
                 <div className="flex-1 grid grid-cols-4 gap-1 pt-1">
                   {(form.foto_urls || []).map((url, i) => (
-                    <img key={i} src={url} alt="" className="w-full h-16 object-cover rounded cursor-pointer" onClick={() => window.open(url, '_blank')} />
+                   <img key={i} src={url} alt="" className="w-full h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightbox(i)} />
                   ))}
                 </div>
               </div>
@@ -130,6 +132,9 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
               <Button type="button" variant="outline" size="sm" onClick={onClose}>Chiudi</Button>
             </div>
           </div>
+          {lightbox !== null && (form.foto_urls || []).length > 0 && (
+            <ImageLightbox urls={form.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
+          )}
         ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
 
