@@ -220,6 +220,17 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             <Input value={form.fornitore} onChange={e => set('fornitore', e.target.value)} />
           </div>
 
+          {/* Lavoratori */}
+          <div>
+            <Label>Lavoratori</Label>
+            <Textarea
+              value={form.lavoratori_note}
+              onChange={e => set('lavoratori_note', e.target.value)}
+              placeholder="Inserisci i lavoratori (uno per riga, es. Mario Rossi - Elettricista)"
+              rows={3}
+            />
+          </div>
+
           <div>
             <Label>Note</Label>
             <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} />
@@ -261,17 +272,6 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Lavoratori */}
-          <div>
-            <Label>Lavoratori</Label>
-            <Textarea
-              value={form.lavoratori_note}
-              onChange={e => set('lavoratori_note', e.target.value)}
-              placeholder="Inserisci i lavoratori (uno per riga, es. Mario Rossi - Elettricista)"
-              rows={3}
-            />
           </div>
 
           {/* DPI */}
