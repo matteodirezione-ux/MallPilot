@@ -132,9 +132,6 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
               <Button type="button" variant="outline" size="sm" onClick={onClose}>Chiudi</Button>
             </div>
           </div>
-          {lightbox !== null && (form.foto_urls || []).length > 0 && (
-            <ImageLightbox urls={form.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
-          )}
         ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
 
@@ -267,6 +264,9 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
         </form>
         )}
       </DialogContent>
+      {lightbox !== null && (form.foto_urls || []).length > 0 && (
+        <ImageLightbox urls={form.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
+      )}
     </Dialog>
   );
 }
