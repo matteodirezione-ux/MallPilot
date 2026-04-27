@@ -29,7 +29,7 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [dettaglio, setDettaglio] = useState(null);
-  const [fullImg, setFullImg] = useState(null);
+  const [lightbox, setLightbox] = useState(null); // { urls, index }
 
   const handleDelete = async (id) => {
     if (!window.confirm('Eliminare questa pulizia periodica?')) return;
@@ -119,12 +119,12 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
                             {p.prossima_scadenza && <span>📅 A: {format(parseLocalDate(p.prossima_scadenza), 'dd MMM yyyy', { locale: it })}</span>}
                           </div>
                           {p.foto_urls?.length > 0 && (
-                            <div className="flex gap-1 mt-2">
+                            <div className="flex gap-1 mt-2" onClick={e => e.stopPropagation()}>
                               {p.foto_urls.slice(0, 4).map((url, i) => (
-                                <img key={i} src={url} className="w-10 h-10 object-cover rounded border" />
+                                <img key={i} src={url} className="w-10 h-10 object-cover rounded border cursor-pointer hover:opacity-80" onClick={() => setLightbox({ urls: p.foto_urls, index: i })} />
                               ))}
                               {p.foto_urls.length > 4 && (
-                                <div className="w-10 h-10 bg-slate-100 rounded border flex items-center justify-center text-xs text-slate-500">+{p.foto_urls.length - 4}</div>
+                                <div className="w-10 h-10 bg-slate-100 rounded border flex items-center justify-center text-xs text-slate-500 cursor-pointer" onClick={() => setLightbox({ urls: p.foto_urls, index: 4 })}>+{p.foto_urls.length - 4}</div>
                               )}
                             </div>
                           )}
@@ -176,7 +176,7 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
                   <p className="text-xs font-medium text-slate-500 mb-2">Foto ({dettaglio.foto_urls.length})</p>
                   <div className="grid grid-cols-3 gap-2">
                     {dettaglio.foto_urls.map((url, i) => (
-                      <img key={i} src={url} className="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90" onClick={() => setFullImg(url)} />
+                      <img key={i} src={url} className="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90" onClick={() => setLightbox({ urls: dettaglio.foto_urls, index: i })} />
                     ))}
                   </div>
                 </div>
@@ -194,12 +194,8 @@ export default function ListaPuliziePeriodiche({ lista, loading, centroId, onRel
         </Dialog>
       )}
 
-      {/* Fullscreen image */}
-      {fullImg && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setFullImg(null)}>
-          <button className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2"><X className="w-5 h-5" /></button>
-          <img src={fullImg} className="max-w-full max-h-full object-contain rounded" />
-        </div>
+      {lightbox && (
+        <ImageLightbox urls={lightbox.urls} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
       )}
 
       <FormPuliziaPeriodica
