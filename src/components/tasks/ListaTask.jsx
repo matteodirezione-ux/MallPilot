@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Pencil, Trash2, CheckCircle2, RefreshCw, Clock, AlertCircle, User, Eye, X, ImageOff } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle2, RefreshCw, Clock, AlertCircle, User, Eye, ImageOff } from 'lucide-react';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -40,7 +41,7 @@ function getScadenzaColor(data, stato) {
 function DettaglioTask({ task, open, onClose }) {
   const pConf = prioritaConfig[task.priorita] || prioritaConfig.media;
   const sConf = statoConfig[task.stato] || statoConfig.da_fare;
-  const [fotoIngrandita, setFotoIngrandita] = useState(null);
+  const [lightbox, setLightbox] = useState(null);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -100,7 +101,7 @@ function DettaglioTask({ task, open, onClose }) {
                     src={url}
                     alt={`Foto ${i + 1}`}
                     className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity border"
-                    onClick={() => setFotoIngrandita(url)}
+                    onClick={() => setLightbox(i)}
                     loading="lazy"
                     onError={(e) => { e.target.src = url + '?t=' + Date.now(); e.target.onerror = null; }}
                   />
@@ -118,14 +119,8 @@ function DettaglioTask({ task, open, onClose }) {
         </div>
       </DialogContent>
 
-      {/* Foto ingrandita */}
-      {fotoIngrandita && (
-        <div className="fixed inset-0 z-[60] bg-black/80 flex items-center justify-center p-4" onClick={() => setFotoIngrandita(null)}>
-          <button className="absolute top-4 right-4 text-white" onClick={() => setFotoIngrandita(null)}>
-            <X className="w-8 h-8" />
-          </button>
-          <img src={fotoIngrandita} alt="Foto ingrandita" className="max-w-full max-h-full rounded-lg object-contain" loading="eager" onError={(e) => { e.target.src = fotoIngrandita + '?t=' + Date.now(); e.target.onerror = null; }} />
-        </div>
+      {lightbox !== null && task.foto_urls?.length > 0 && (
+        <ImageLightbox urls={task.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
       )}
     </Dialog>
   );
