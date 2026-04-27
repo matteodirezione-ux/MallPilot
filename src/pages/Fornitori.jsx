@@ -21,7 +21,9 @@ export default function Fornitori({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [editingFornitore, setEditingFornitore] = useState(null);
   const [deleteDialog, setDeleteDialog] = useState(null);
-  const [expandedFornitore, setExpandedFornitore] = useState(null);
+  const [espansi, setEspansi] = useState({});
+
+  const toggleEspanso = (id) => setEspansi(prev => ({ ...prev, [id]: !prev[id] }));
 
   useEffect(() => {
     loadFornitori();
@@ -115,140 +117,96 @@ export default function Fornitori({ centroSelezionato, user }) {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {filteredFornitori.sort((a, b) => a.nome_ditta.localeCompare(b.nome_ditta, 'it')).map((fornitore) => (
-            <Card key={fornitore.id} className={`hover:shadow-md transition-shadow ${!fornitore.duvri_urls?.length ? 'border-2 border-red-400 bg-red-50' : ''}`}>
-              {!fornitore.duvri_urls?.length && (
-                <div className="bg-red-500 text-white px-4 py-2 font-bold text-sm">
-                  ⚠️ DUVRI MANCANTE
+        <div className="space-y-2">
+          {filteredFornitori.sort((a, b) => a.nome_ditta.localeCompare(b.nome_ditta, 'it')).map((fornitore) => {
+            const espanso = espansi[fornitore.id];
+            const hasDuvri = fornitore.duvri_urls?.length > 0;
+            return (
+            <div key={fornitore.id} className={`rounded-xl border overflow-hidden ${!hasDuvri ? 'border-2 border-red-400 bg-red-50' : 'bg-white border-slate-200'}`}>
+              {/* Header cliccabile */}
+              <div
+                className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${!hasDuvri ? 'hover:bg-red-100' : 'hover:bg-slate-50'}`}
+                onClick={() => toggleEspanso(fornitore.id)}
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {!hasDuvri && <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full shrink-0">⚠️ DUVRI MANCANTE</span>}
+                  <h3 className="text-sm font-bold text-slate-800 truncate">{fornitore.nome_ditta}</h3>
+                  {fornitore.referente_nome && <span className="text-sm text-slate-500 hidden md:inline">· {fornitore.referente_nome}</span>}
+                  {fornitore.lavoratori?.length > 0 && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hidden md:inline-flex items-center gap-1">
+                      <Users className="w-3 h-3" />{fornitore.lavoratori.length}
+                    </span>
+                  )}
                 </div>
-              )}
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {/* Intestazione */}
-                   <div className="flex items-start justify-between">
-                     <div className="flex-1">
-                       <h3 className="text-lg font-bold text-slate-800">{fornitore.nome_ditta}</h3>
-                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => {
-                          setEditingFornitore(fornitore);
-                          setShowForm(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setDeleteDialog(fornitore)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="outline" size="icon" className="w-7 h-7"
+                    onClick={(e) => { e.stopPropagation(); setEditingFornitore(fornitore); setShowForm(true); }}>
+                    <Edit className="w-3.5 h-3.5" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="w-7 h-7 text-red-600 hover:text-red-700"
+                    onClick={(e) => { e.stopPropagation(); setDeleteDialog(fornitore); }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                  {espanso ? <ChevronDown className="w-4 h-4 text-slate-400 rotate-180 transition-transform" /> : <ChevronDown className="w-4 h-4 text-slate-400 transition-transform" />}
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 py-3 border-y border-slate-200">
-                    {/* Referente */}
+              {/* Contenuto espandibile */}
+              {espanso && (
+                <div className="px-4 pb-4 border-t border-slate-100 space-y-4 pt-4">
+                  {/* Contatti */}
+                  <div className="flex flex-wrap gap-4 text-sm">
                     {fornitore.referente_nome && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-600">
-                          <strong>{fornitore.referente_nome}</strong>
-                        </span>
-                      </div>
+                      <span className="text-slate-700"><strong>{fornitore.referente_nome}</strong></span>
                     )}
-                    {/* Email */}
                     {fornitore.referente_email && (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-slate-500" />
-                        <a
-                          href={`mailto:${fornitore.referente_email}`}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {fornitore.referente_email}
-                        </a>
-                      </div>
+                      <a href={`mailto:${fornitore.referente_email}`} className="flex items-center gap-1 text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
+                        <Mail className="w-4 h-4 text-slate-400" />{fornitore.referente_email}
+                      </a>
                     )}
-                    {/* Telefono */}
                     {fornitore.referente_telefono && (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-slate-500" />
-                        <a
-                          href={`tel:${fornitore.referente_telefono}`}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {fornitore.referente_telefono}
-                        </a>
-                      </div>
-                    )}
-                    {/* Lavoratori */}
-                    {fornitore.lavoratori?.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {fornitore.lavoratori.length} lavoratori
-                        </span>
-                      </div>
-                    )}
-                    {/* DUVRI */}
-                    {fornitore.duvri_urls?.length > 0 && (
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {fornitore.duvri_urls.map((url, idx) => (
-                          <a
-                            key={idx}
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
-                            title={`Caricato: ${new Date(fornitore.updated_date).toLocaleDateString('it-IT')}`}
-                          >
-                            📄 DUVRI {idx + 1} ({new Date(fornitore.updated_date).toLocaleDateString('it-IT')})
-                          </a>
-                        ))}
-                      </div>
+                      <a href={`tel:${fornitore.referente_telefono}`} className="flex items-center gap-1 text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
+                        <Phone className="w-4 h-4 text-slate-400" />{fornitore.referente_telefono}
+                      </a>
                     )}
                   </div>
 
-                  {/* Dettagli */}
+                  {/* DUVRI */}
+                  {hasDuvri && (
+                    <div className="flex flex-wrap gap-2">
+                      {fornitore.duvri_urls.map((url, idx) => (
+                        <a key={idx} href={url} target="_blank" rel="noreferrer"
+                          className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
+                          onClick={e => e.stopPropagation()}>
+                          📄 DUVRI {idx + 1} ({new Date(fornitore.updated_date).toLocaleDateString('it-IT')})
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Lavoratori e DPI */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    {/* Lavoratori Lista */}
                     {fornitore.lavoratori?.length > 0 && (
                       <div>
                         <p className="font-medium text-slate-700 mb-2">Lavoratori:</p>
                         <ul className="space-y-1">
                           {fornitore.lavoratori.map((lav, idx) => (
-                            <li key={idx} className="text-slate-600">
-                              • {lav.nome}
-                              {lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}
-                            </li>
+                            <li key={idx} className="text-slate-600">• {lav.nome}{lav.mansione && <span className="text-slate-500"> ({lav.mansione})</span>}</li>
                           ))}
                         </ul>
                       </div>
                     )}
-
-                    {/* DPI */}
                     {fornitore.dpi?.length > 0 && (
                       <div>
                         <p className="font-medium text-slate-700 mb-2">DPI:</p>
                         <div className="flex flex-wrap gap-2">
                           {fornitore.dpi.map((dpi, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs"
-                            >
-                              {dpi}
-                            </span>
+                            <span key={idx} className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs">{dpi}</span>
                           ))}
                         </div>
                       </div>
                     )}
                   </div>
-
-
 
                   {/* Subornitori */}
                   {fornitore.subornitori?.length > 0 && (
@@ -257,35 +215,17 @@ export default function Fornitori({ centroSelezionato, user }) {
                       <div className="space-y-2">
                         {fornitore.subornitori.map((sub, idx) => (
                           <div key={idx} className={`p-3 rounded border ${!sub.duvri_urls?.length ? 'border-2 border-red-400 bg-red-50' : 'bg-amber-50 border-amber-200'}`}>
-                            {!sub.duvri_urls?.length && (
-                              <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
-                                ⚠️ DUVRI MANCANTE
-                              </div>
-                            )}
+                            {!sub.duvri_urls?.length && <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">⚠️ DUVRI MANCANTE</div>}
                             <div className="flex flex-wrap items-center gap-3 text-xs">
                               <p className="font-medium">{sub.nome_ditta}</p>
                               {sub.referente_nome && <span>{sub.referente_nome}</span>}
                               {sub.referente_email && <a href={`mailto:${sub.referente_email}`} className="text-blue-600 hover:underline">{sub.referente_email}</a>}
                               {sub.referente_telefono && <a href={`tel:${sub.referente_telefono}`} className="text-blue-600 hover:underline">{sub.referente_telefono}</a>}
-                              
-                              {sub.lavoratori?.length > 0 && (
-                                <span>
-                                  Lavoratori: {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}
-                                </span>
-                              )}
-                              
+                              {sub.lavoratori?.length > 0 && <span>Lavoratori: {sub.lavoratori.map(l => `${l.nome}${l.mansione ? ` (${l.mansione})` : ''}`).join(', ')}</span>}
                               {sub.duvri_urls?.length > 0 && (
                                 <span className="flex gap-2">
                                   {sub.duvri_urls.map((url, dIdx) => (
-                                    <a
-                                      key={dIdx}
-                                      href={url}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-blue-600 hover:underline"
-                                    >
-                                      📄 DUVRI {dIdx + 1}
-                                    </a>
+                                    <a key={dIdx} href={url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">📄 DUVRI {dIdx + 1}</a>
                                   ))}
                                 </span>
                               )}
@@ -303,9 +243,10 @@ export default function Fornitori({ centroSelezionato, user }) {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              )}
+            </div>
+            );
+          })}
         </div>
       )}
 
