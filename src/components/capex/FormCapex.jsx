@@ -25,7 +25,7 @@ const defaultCapex = (centroId) => ({
   note: '',
   allegati_urls: [],
   duvri_urls: [],
-  lavoratori: [],
+  lavoratori_note: '',
   dpi: []
 });
 
@@ -33,12 +33,14 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
   const [form, setForm] = useState(defaultCapex(centroId));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [newLavoratore, setNewLavoratore] = useState({ nome: '', mansione: '' });
   const [newDpi, setNewDpi] = useState('');
 
   useEffect(() => {
     if (capex) {
-      setForm({ ...defaultCapex(centroId), ...capex });
+      const lavoratori_note = Array.isArray(capex.lavoratori) && capex.lavoratori.length > 0
+        ? capex.lavoratori.map(l => l.nome + (l.mansione ? ` (${l.mansione})` : '')).join('\n')
+        : (capex.lavoratori_note || '');
+      setForm({ ...defaultCapex(centroId), ...capex, lavoratori_note });
     } else {
       setForm(defaultCapex(centroId));
     }
@@ -87,22 +89,6 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
     setForm(prev => ({ ...prev, duvri_urls: prev.duvri_urls.filter((_, i) => i !== idx) }));
   };
 
-  const addLavoratore = () => {
-    if (!newLavoratore.nome.trim()) return;
-    setForm(prev => ({
-      ...prev,
-      lavoratori: [...(prev.lavoratori || []), newLavoratore]
-    }));
-    setNewLavoratore({ nome: '', mansione: '' });
-  };
-
-  const removeLavoratore = (idx) => {
-    setForm(prev => ({
-      ...prev,
-      lavoratori: prev.lavoratori.filter((_, i) => i !== idx)
-    }));
-  };
-
   const addDpi = () => {
     if (!newDpi.trim()) return;
     setForm(prev => ({
@@ -122,8 +108,12 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+    const lavoratori = form.lavoratori_note
+      ? form.lavoratori_note.split('\n').filter(r => r.trim()).map(r => ({ nome: r.trim() }))
+      : [];
     const data = {
       ...form,
+      lavoratori,
       costo_previsto: form.costo_previsto !== '' ? parseFloat(form.costo_previsto) : null,
       costo_effettivo: form.costo_effettivo !== '' ? parseFloat(form.costo_effettivo) : null,
     };
@@ -276,36 +266,12 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
           {/* Lavoratori */}
           <div>
             <Label>Lavoratori</Label>
-            {form.lavoratori?.length > 0 && (
-              <div className="space-y-2 mb-3">
-                {form.lavoratori.map((lav, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded border text-sm">
-                    <span>{lav.nome} {lav.mansione && `(${lav.mansione})`}</span>
-                    <button type="button" onClick={() => removeLavoratore(idx)} className="text-red-600 hover:text-red-700">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="space-y-2">
-              <Input
-                value={newLavoratore.nome}
-                onChange={(e) => setNewLavoratore(prev => ({ ...prev, nome: e.target.value }))}
-                placeholder="Nome lavoratore"
-                size="sm"
-              />
-              <Input
-                value={newLavoratore.mansione}
-                onChange={(e) => setNewLavoratore(prev => ({ ...prev, mansione: e.target.value }))}
-                placeholder="Mansione (opzionale)"
-                size="sm"
-              />
-              <Button type="button" onClick={addLavoratore} variant="outline" className="w-full gap-2" size="sm">
-                <Plus className="w-3 h-3" />
-                Aggiungi Lavoratore
-              </Button>
-            </div>
+            <Textarea
+              value={form.lavoratori_note}
+              onChange={e => set('lavoratori_note', e.target.value)}
+              placeholder="Inserisci i lavoratori (uno per riga, es. Mario Rossi - Elettricista)"
+              rows={3}
+            />
           </div>
 
           {/* DPI */}

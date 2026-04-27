@@ -19,7 +19,6 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     dpi: [],
     note: ''
   });
-  const [newLavoratore, setNewLavoratore] = useState({ nome: '', mansione: '' });
   const [newDpi, setNewDpi] = useState('');
   const [uploading, setUploading] = useState(false);
   const [newSubfornitore, setNewSubfornitore] = useState({
@@ -31,20 +30,24 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     duvri_url: ''
   });
   const [editingSubindex, setEditingSubindex] = useState(null);
-  const [newSubLavoratore, setNewSubLavoratore] = useState({ nome: '', mansione: '' });
+  const [newSubLavoratoreNote, setNewSubLavoratoreNote] = useState('');
 
   useEffect(() => {
     if (fornitore) {
-      // Migrazione da duvri_url singolare a duvri_urls array
       const formData = {
         ...fornitore,
-        duvri_urls: fornitore.duvri_urls || (fornitore.duvri_url ? [fornitore.duvri_url] : [])
+        duvri_urls: fornitore.duvri_urls || (fornitore.duvri_url ? [fornitore.duvri_url] : []),
+        lavoratori_note: Array.isArray(fornitore.lavoratori) && fornitore.lavoratori.length > 0
+          ? fornitore.lavoratori.map(l => l.nome + (l.mansione ? ` (${l.mansione})` : '')).join('\n')
+          : (fornitore.lavoratori_note || '')
       };
-      // Migrazione subornitori
       if (formData.subornitori) {
         formData.subornitori = formData.subornitori.map(sub => ({
           ...sub,
-          duvri_urls: sub.duvri_urls || (sub.duvri_url ? [sub.duvri_url] : [])
+          duvri_urls: sub.duvri_urls || (sub.duvri_url ? [sub.duvri_url] : []),
+          lavoratori_note: Array.isArray(sub.lavoratori) && sub.lavoratori.length > 0
+            ? sub.lavoratori.map(l => l.nome + (l.mansione ? ` (${l.mansione})` : '')).join('\n')
+            : (sub.lavoratori_note || '')
         }));
       }
       setForm(formData);
@@ -53,25 +56,6 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
 
   const handleInputChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const addLavoratore = () => {
-    if (!newLavoratore.nome.trim()) {
-      toast.error('Inserisci il nome del lavoratore');
-      return;
-    }
-    setForm(prev => ({
-      ...prev,
-      lavoratori: [...prev.lavoratori, newLavoratore]
-    }));
-    setNewLavoratore({ nome: '', mansione: '' });
-  };
-
-  const removeLavoratore = (idx) => {
-    setForm(prev => ({
-      ...prev,
-      lavoratori: prev.lavoratori.filter((_, i) => i !== idx)
-    }));
   };
 
   const addDpi = () => {
@@ -93,21 +77,7 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     }));
   };
 
-  const addSubLavoratore = () => {
-    if (!newSubLavoratore.nome.trim()) return;
-    setNewSubfornitore(prev => ({
-      ...prev,
-      lavoratori: [...prev.lavoratori, newSubLavoratore]
-    }));
-    setNewSubLavoratore({ nome: '', mansione: '' });
-  };
 
-  const removeSubLavoratore = (idx) => {
-    setNewSubfornitore(prev => ({
-      ...prev,
-      lavoratori: prev.lavoratori.filter((_, i) => i !== idx)
-    }));
-  };
 
   const uploadSubDuvri = async (e) => {
     const files = e.target.files;
@@ -137,19 +107,19 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
       toast.error('Inserisci il nome della ditta subfornitrice');
       return;
     }
-    
+    const subEntry = { ...newSubfornitore, lavoratori_note: newSubLavoratoreNote };
     if (editingSubindex !== null) {
       setForm(prev => ({
         ...prev,
         subornitori: prev.subornitori.map((s, i) =>
-          i === editingSubindex ? newSubfornitore : s
+          i === editingSubindex ? subEntry : s
         )
       }));
       setEditingSubindex(null);
     } else {
       setForm(prev => ({
         ...prev,
-        subornitori: [...(prev.subornitori || []), newSubfornitore]
+        subornitori: [...(prev.subornitori || []), subEntry]
       }));
     }
     
@@ -159,12 +129,16 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
       referente_email: '',
       referente_telefono: '',
       lavoratori: [],
+      lavoratori_note: '',
       duvri_urls: []
     });
+    setNewSubLavoratoreNote('');
   };
 
   const editSubfornitore = (idx) => {
-    setNewSubfornitore(form.subornitori[idx]);
+    const sub = form.subornitori[idx];
+    setNewSubfornitore(sub);
+    setNewSubLavoratoreNote(sub.lavoratori_note || '');
     setEditingSubindex(idx);
   };
 
@@ -205,8 +179,19 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
     }
 
     try {
+      const lavoratori = form.lavoratori_note
+        ? form.lavoratori_note.split('\n').filter(r => r.trim()).map(r => ({ nome: r.trim() }))
+        : [];
+      const subornitori = (form.subornitori || []).map(sub => ({
+        ...sub,
+        lavoratori: sub.lavoratori_note
+          ? sub.lavoratori_note.split('\n').filter(r => r.trim()).map(r => ({ nome: r.trim() }))
+          : (sub.lavoratori || [])
+      }));
       const data = {
         ...form,
+        lavoratori,
+        subornitori,
         centro_id: centroId
       };
 
@@ -279,40 +264,14 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
           </div>
 
           {/* Lavoratori */}
-          <div className="space-y-4">
+          <div className="space-y-2">
             <h3 className="font-semibold text-slate-800">Lavoratori</h3>
-            <div className="space-y-3">
-              {form.lavoratori.map((lav, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-800">{lav.nome}</p>
-                    {lav.mansione && <p className="text-sm text-slate-500">{lav.mansione}</p>}
-                  </div>
-                  <button
-                    onClick={() => removeLavoratore(idx)}
-                    className="p-1 hover:bg-red-100 rounded text-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-3 p-3 bg-slate-50 rounded-lg">
-              <Input
-                value={newLavoratore.nome}
-                onChange={(e) => setNewLavoratore(prev => ({ ...prev, nome: e.target.value }))}
-                placeholder="Nome lavoratore"
-              />
-              <Input
-                value={newLavoratore.mansione}
-                onChange={(e) => setNewLavoratore(prev => ({ ...prev, mansione: e.target.value }))}
-                placeholder="Mansione (opzionale)"
-              />
-              <Button onClick={addLavoratore} variant="outline" className="w-full gap-2">
-                <Plus className="w-4 h-4" />
-                Aggiungi Lavoratore
-              </Button>
-            </div>
+            <Textarea
+              value={form.lavoratori_note || ''}
+              onChange={(e) => handleInputChange('lavoratori_note', e.target.value)}
+              placeholder="Inserisci i lavoratori (uno per riga, es. Mario Rossi - Elettricista)"
+              rows={3}
+            />
           </div>
 
           {/* DUVRI */}
@@ -464,42 +423,12 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, centroId }
               {/* Lavoratori Subfornitore */}
               <div>
                 <Label className="block mb-2">Lavoratori</Label>
-                <div className="space-y-2 mb-3">
-                  {newSubfornitore.lavoratori?.map((lav, idx) => (
-                    <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded border">
-                      <span className="flex-1 text-sm">{lav.nome} {lav.mansione && `(${lav.mansione})`}</span>
-                      <button
-                        onClick={() => removeSubLavoratore(idx)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Input
-                    value={newSubLavoratore.nome}
-                    onChange={(e) => setNewSubLavoratore(prev => ({ ...prev, nome: e.target.value }))}
-                    placeholder="Nome lavoratore"
-                    size="sm"
-                  />
-                  <Input
-                    value={newSubLavoratore.mansione}
-                    onChange={(e) => setNewSubLavoratore(prev => ({ ...prev, mansione: e.target.value }))}
-                    placeholder="Mansione (opzionale)"
-                    size="sm"
-                  />
-                  <Button
-                    onClick={addSubLavoratore}
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-2"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Aggiungi
-                  </Button>
-                </div>
+                <Textarea
+                  value={newSubLavoratoreNote}
+                  onChange={(e) => setNewSubLavoratoreNote(e.target.value)}
+                  placeholder="Inserisci i lavoratori (uno per riga, es. Mario Rossi - Idraulico)"
+                  rows={3}
+                />
               </div>
 
               {/* DUVRI Subfornitore */}
