@@ -9,6 +9,7 @@ import { it } from 'date-fns/locale';
 import FormPulizia from '@/components/pulizie/FormPulizia';
 import ListaPuliziePeriodiche from '@/components/pulizie/ListaPuliziePeriodiche';
 import FormPuliziaPeriodica from '@/components/pulizie/FormPuliziaPeriodica';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 
 const parseLocalDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -30,7 +31,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
   const [dettaglio, setDettaglio] = useState(null);
-  const [fullImg, setFullImg] = useState(null);
+  const [lightbox, setLightbox] = useState(null);
 
   // Periodiche
   const [listaPeriodiche, setListaPeriodiche] = useState([]);
@@ -267,7 +268,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-500 mb-2">Foto ({dettaglio.foto_urls.length})</p>
                       <div className="grid grid-cols-3 gap-2">
                         {dettaglio.foto_urls.map((url, i) => (
-                          <img key={i} src={url} className="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90" onClick={() => setFullImg(url)} />
+                          <img key={i} src={url} className="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90" onClick={() => setLightbox(i)} />
                         ))}
                       </div>
                     </div>
@@ -316,12 +317,9 @@ export default function PuliziePage({ centroSelezionato, user }) {
         </>
       )}
 
-      {/* Fullscreen image */}
-      {fullImg && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={() => setFullImg(null)}>
-          <button className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2"><X className="w-5 h-5" /></button>
-          <img src={fullImg} className="max-w-full max-h-full object-contain rounded" />
-        </div>
+      {/* Lightbox */}
+      {lightbox !== null && dettaglio?.foto_urls?.length > 0 && (
+        <ImageLightbox urls={dettaglio.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
       )}
     </div>
   );

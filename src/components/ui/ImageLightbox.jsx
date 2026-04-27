@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function ImageLightbox({ urls, startIndex = 0, onClose }) {
@@ -14,7 +15,7 @@ export default function ImageLightbox({ urls, startIndex = 0, onClose }) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [urls.length, onClose]);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center"
       onClick={onClose}
@@ -55,6 +56,7 @@ export default function ImageLightbox({ urls, startIndex = 0, onClose }) {
           {current + 1} / {urls.length}
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
