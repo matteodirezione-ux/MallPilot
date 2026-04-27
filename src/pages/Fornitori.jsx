@@ -171,36 +171,6 @@ export default function Fornitori({ centroSelezionato, user }) {
               {/* Contenuto espandibile */}
               {espanso && (
                 <div className="px-4 pb-4 border-t border-slate-100 space-y-4 pt-4">
-                  {/* Contatti */}
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    {fornitore.referente_nome && (
-                      <span className="text-slate-700"><strong>{fornitore.referente_nome}</strong></span>
-                    )}
-                    {fornitore.referente_email && (
-                      <a href={`mailto:${fornitore.referente_email}`} className="flex items-center gap-1 text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
-                        <Mail className="w-4 h-4 text-slate-400" />{fornitore.referente_email}
-                      </a>
-                    )}
-                    {fornitore.referente_telefono && (
-                      <a href={`tel:${fornitore.referente_telefono}`} className="flex items-center gap-1 text-blue-600 hover:underline" onClick={e => e.stopPropagation()}>
-                        <Phone className="w-4 h-4 text-slate-400" />{fornitore.referente_telefono}
-                      </a>
-                    )}
-                  </div>
-
-                  {/* DUVRI */}
-                  {hasDuvri && (
-                    <div className="flex flex-wrap gap-2">
-                      {fornitore.duvri_urls.map((url, idx) => (
-                        <a key={idx} href={url} target="_blank" rel="noreferrer"
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors inline-flex items-center gap-1"
-                          onClick={e => e.stopPropagation()}>
-                          📄 DUVRI {idx + 1} ({new Date(fornitore.updated_date).toLocaleDateString('it-IT')})
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
                   {/* Lavoratori e DPI */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     {fornitore.lavoratori?.length > 0 && (
