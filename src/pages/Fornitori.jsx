@@ -128,12 +128,29 @@ export default function Fornitori({ centroSelezionato, user }) {
                 className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${!hasDuvri ? 'hover:bg-red-100' : 'hover:bg-slate-50'}`}
                 onClick={() => toggleEspanso(fornitore.id)}
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap">
                   {!hasDuvri && <span className="text-xs font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded-full shrink-0">⚠️ DUVRI MANCANTE</span>}
-                  <h3 className="text-sm font-bold text-slate-800 truncate">{fornitore.nome_ditta}</h3>
-                  {fornitore.referente_nome && <span className="text-sm text-slate-500 hidden md:inline">· {fornitore.referente_nome}</span>}
+                  <h3 className="text-sm font-bold text-slate-800 shrink-0">{fornitore.nome_ditta}</h3>
+                  {fornitore.referente_nome && <span className="text-sm text-slate-500 hidden md:inline shrink-0">· {fornitore.referente_nome}</span>}
+                  {fornitore.referente_email && (
+                    <a href={`mailto:${fornitore.referente_email}`} className="hidden md:inline-flex items-center gap-1 text-xs text-blue-600 hover:underline shrink-0" onClick={e => e.stopPropagation()}>
+                      <Mail className="w-3 h-3" />{fornitore.referente_email}
+                    </a>
+                  )}
+                  {fornitore.referente_telefono && (
+                    <a href={`tel:${fornitore.referente_telefono}`} className="hidden md:inline-flex items-center gap-1 text-xs text-blue-600 hover:underline shrink-0" onClick={e => e.stopPropagation()}>
+                      <Phone className="w-3 h-3" />{fornitore.referente_telefono}
+                    </a>
+                  )}
+                  {hasDuvri && fornitore.duvri_urls.map((url, idx) => (
+                    <a key={idx} href={url} target="_blank" rel="noreferrer"
+                      className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-semibold hover:bg-green-200 transition-colors shrink-0"
+                      onClick={e => e.stopPropagation()}>
+                      📄 DUVRI {idx + 1}
+                    </a>
+                  ))}
                   {fornitore.lavoratori?.length > 0 && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hidden md:inline-flex items-center gap-1">
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold hidden md:inline-flex items-center gap-1 shrink-0">
                       <Users className="w-3 h-3" />{fornitore.lavoratori.length}
                     </span>
                   )}
