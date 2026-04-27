@@ -73,6 +73,43 @@
         "type": "string"
       },
       "description": "URL degli allegati/foto caricati"
+    },
+    "duvri_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL dei DUVRI caricati"
+    },
+    "cse": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se true, \u00e8 presente un CSE che sostituisce il DUVRI (non scatta l'alert DUVRI mancante)"
+    },
+    "lavoratori": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "mansione": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "description": "Lista dei lavoratori"
+    },
+    "dpi": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista dei Dispositivi di Protezione Individuale"
     }
   },
   "required": [

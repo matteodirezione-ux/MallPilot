@@ -237,7 +237,19 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
 
           {/* DUVRI */}
           <div>
-            <Label>DUVRI</Label>
+            <div className="flex items-center justify-between mb-1">
+              <Label>DUVRI</Label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={!!form.cse}
+                  onChange={e => set('cse', e.target.checked)}
+                  className="w-4 h-4 accent-blue-600 cursor-pointer"
+                />
+                <span className="text-sm font-medium text-blue-700">CSE</span>
+                <span className="text-xs text-slate-500">(sostituisce il DUVRI)</span>
+              </label>
+            </div>
             <div className="mt-1">
               <label className="flex items-center gap-2 cursor-pointer w-fit px-3 py-2 border border-dashed border-slate-300 rounded-lg hover:border-blue-400 text-sm text-slate-600">
                 {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
