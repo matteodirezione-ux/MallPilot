@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -21,6 +22,7 @@ export default function Report({ centroSelezionato, user }) {
   const [searchText, setSearchText] = useState('');
 
   const [form, setForm] = useState({ data: today(), operatore: '', contenuto: '', furto: false, foto_urls: [] });
+  const [lightbox, setLightbox] = useState(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef();
   const cameraInputRef = useRef();
@@ -236,7 +238,7 @@ export default function Report({ centroSelezionato, user }) {
                             <div className="flex flex-wrap gap-2 mt-3">
                               {r.foto_urls.map((url, i) => (
                                 <img key={i} src={url} alt="" className="w-20 h-20 rounded-lg object-cover border border-slate-200 cursor-pointer hover:opacity-90"
-                                  onClick={() => window.open(url, '_blank')} />
+                                  onClick={() => setLightbox({ urls: r.foto_urls, index: i })} />
                               ))}
                             </div>
                           )}
@@ -249,6 +251,10 @@ export default function Report({ centroSelezionato, user }) {
             </div>
           ))}
         </div>
+      )}
+
+      {lightbox && (
+        <ImageLightbox urls={lightbox.urls} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
       )}
 
       {/* Form Dialog */}
