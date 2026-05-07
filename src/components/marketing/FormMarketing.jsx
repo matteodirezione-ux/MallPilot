@@ -116,7 +116,23 @@ export default function FormMarketing({ row, onSave, onCancel }) {
 
           {/* Importi mensili */}
           <div>
-            <Label className="mb-2 block">Importi mensili (€)</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Importi mensili (€)</Label>
+              <button
+                type="button"
+                onClick={() => {
+                  const tot = parseFloat(String(form.budget_totale).replace(',', '.'));
+                  if (!tot || tot <= 0) return;
+                  const perMese = Math.round((tot / 12) * 100) / 100;
+                  const update = {};
+                  MESI.forEach(m => { update[m] = perMese; });
+                  setForm(prev => ({ ...prev, ...update }));
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Spalma su tutti i mesi
+              </button>
+            </div>
             <div className="grid grid-cols-4 gap-2">
               {MESI.map((m, i) => (
                 <div key={m} className="space-y-1">
