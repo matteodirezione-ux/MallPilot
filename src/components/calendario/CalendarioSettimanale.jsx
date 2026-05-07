@@ -46,10 +46,11 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
   };
 
   const getPrenotazioneColor = (p) => {
-    if (p.is_event) return '#9333ea'; // viola
+    if (p.is_gratuito) return '#16a34a'; // verde = gratuito
+    if (p.is_event) return '#9333ea'; // viola = evento
     const giorni = Math.abs((new Date(p.data_fine) - new Date(p.data_inizio)) / (1000 * 60 * 60 * 24));
     if (giorni >= 300) return '#3b82f6'; // blu = permanente
-    return '#22c55e'; // verde = non permanente
+    return '#b45309'; // giallo scuro = non permanente
   };
 
   const inizioSettimana = startOfWeek(currentWeek, { weekStartsOn: 1 });
