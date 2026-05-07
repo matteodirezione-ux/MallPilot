@@ -991,7 +991,13 @@ export default function Dashboard({ centroSelezionato, user }) {
                         <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isProgrammato ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                           {isProgrammato ? 'Programmato' : 'Da programmare'}
                         </span>
-                        {p.prossima_scadenza && <p className="text-xs text-slate-500 mt-0.5">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</p>}
+                        {p.prossima_scadenza && (
+                          <p className="text-xs whitespace-nowrap mt-0.5">
+                            <span className="font-bold text-red-600">{giorniMancanti(p.prossima_scadenza)}</span>
+                            {' · '}
+                            <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
