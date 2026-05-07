@@ -493,6 +493,26 @@ export default function Dashboard({ centroSelezionato, user }) {
         )}
       </div>
 
+      {/* Pulsanti rapidi - direttore */}
+      {user?.tipo_account === 'direttore' && (
+        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
+          {[
+            { label: 'Nuovo Task', path: '/Task', color: 'bg-blue-600 hover:bg-blue-700' },
+            { label: 'Nuovo Controllo', path: '/CalendarioManutenzioni', color: 'bg-indigo-600 hover:bg-indigo-700' },
+            { label: 'Nuova Prenotazione', path: '/Calendario', color: 'bg-green-600 hover:bg-green-700' },
+          ].map(({ label, path, color }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Pulsanti rapidi - solo vigilanza */}
       {user?.tipo_account === 'vigilanza' && (
         <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
