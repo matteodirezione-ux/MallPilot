@@ -231,8 +231,10 @@ function InitiativeRow({ row, onEdit, onDelete, isVigilanza }) {
       {/* Riga costo */}
       <tr className="border-b border-slate-100 hover:bg-slate-50">
         <td className="px-3 py-1.5 font-medium text-slate-800">
-          <div>{row.nome}</div>
-          {row.tipologia && <span className={`text-[9px] px-1 py-0.5 rounded font-semibold ${TIPOLOGIA_COLORS[row.tipologia] || 'bg-slate-100 text-slate-600'}`}>{row.tipologia}</span>}
+          <div className="flex items-center gap-1.5">
+            <span>{row.nome}</span>
+            {row.tipologia && <span className={`text-[9px] px-1 py-0.5 rounded font-semibold ${TIPOLOGIA_COLORS[row.tipologia] || 'bg-slate-100 text-slate-600'}`}>{row.tipologia}</span>}
+          </div>
         </td>
         <td className="text-right px-2 py-1.5 font-semibold text-slate-800">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
         {mesi.map(m => (
