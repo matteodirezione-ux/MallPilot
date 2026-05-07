@@ -128,7 +128,7 @@ export default function FormMarketing({ row, onSave, onCancel }) {
                   MESI.forEach(m => { update[m] = perMese; });
                   setForm(prev => ({ ...prev, ...update }));
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
                 Spalma su tutti i mesi
               </button>
