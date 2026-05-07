@@ -1,0 +1,92 @@
+{
+  "name": "Prenotazione",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "spazio_id": {
+      "type": "string",
+      "description": "ID dello spazio principale prenotato (per compatibilit\u00e0)"
+    },
+    "spazi_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista degli ID degli spazi prenotati (supporta pi\u00f9 spazi)"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID del cliente che prenota"
+    },
+    "nome_evento": {
+      "type": "string",
+      "description": "Nome dell'evento (se is_event \u00e8 true)"
+    },
+    "data_inizio": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di inizio affitto"
+    },
+    "data_fine": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di fine affitto"
+    },
+    "prezzo_totale": {
+      "type": "number",
+      "description": "Prezzo totale dell'affitto"
+    },
+    "prezzo_mensile": {
+      "type": "number",
+      "description": "Prezzo mensile (se ricorrente)"
+    },
+    "materiale_dimostrativo": {
+      "type": "string",
+      "description": "Descrizione del materiale dimostrativo/pubblicitario da esporre"
+    },
+    "necessita_elettricita": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se la prenotazione necessita di collegamento elettrico"
+    },
+    "is_event": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se la prenotazione \u00e8 per un evento (non genera contratto, non conta negli affitti)"
+    },
+    "is_gratuito": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se la prenotazione \u00e8 per uno spazio gratuito (non conteggiato n\u00e9 negli eventi n\u00e9 negli affitti)"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "confermata",
+        "in_corso",
+        "completata",
+        "cancellata"
+      ],
+      "default": "confermata",
+      "description": "Stato della prenotazione"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note sulla prenotazione"
+    },
+    "contratto_generato": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se \u00e8 stato generato il contratto"
+    }
+  },
+  "required": [
+    "centro_id",
+    "data_inizio",
+    "data_fine",
+    "prezzo_totale"
+  ]
+}

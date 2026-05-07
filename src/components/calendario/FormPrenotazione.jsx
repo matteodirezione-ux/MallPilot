@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, AlertTriangle, Zap, Sparkles, Building2, Plus } from 'lucide-react';
+import { X, AlertTriangle, Zap, Sparkles, Building2, Plus, Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval, format } from 'date-fns';
@@ -15,7 +15,13 @@ import DatePicker from '@/components/ui/DatePicker';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato, onClienteCreated }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
-  const [activeTab, setActiveTab] = useState(prenotazione?.is_event ? 'evento' : 'affitto');
+  const getInitialTab = (p) => {
+    if (!p) return 'affitto';
+    if (p.is_gratuito) return 'gratuito';
+    if (p.is_event) return 'evento';
+    return 'affitto';
+  };
+  const [activeTab, setActiveTab] = useState(getInitialTab(prenotazione));
   const [showNewClienteDialog, setShowNewClienteDialog] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
   const [nuoClienteData, setNuoClienteData] = useState({
@@ -46,6 +52,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     materiale_dimostrativo: '',
     necessita_elettricita: false,
     is_event: false,
+    is_gratuito: false,
     stato: 'confermata',
     note: ''
   });
@@ -70,10 +77,11 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         materiale_dimostrativo: prenotazione.materiale_dimostrativo || '',
         necessita_elettricita: prenotazione.necessita_elettricita || false,
         is_event: prenotazione.is_event || false,
+        is_gratuito: prenotazione.is_gratuito || false,
         stato: prenotazione.stato,
         note: prenotazione.note || ''
       });
-      setActiveTab(prenotazione.is_event ? 'evento' : 'affitto');
+      setActiveTab(getInitialTab(prenotazione));
     }
   }, [prenotazione]);
 
@@ -183,12 +191,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
   const handleSubmit = (e) => {
     e.preventDefault();
     const isEvent = activeTab === 'evento';
+    const isGratuito = activeTab === 'gratuito';
 
     if (formData.spazi_ids.length === 0) {
       toast.error('Seleziona almeno uno spazio');
       return;
     }
-    if (!isEvent && !formData.cliente_id) {
+    if (!isEvent && !isGratuito && !formData.cliente_id) {
       toast.error('Seleziona un cliente');
       return;
     }
@@ -196,22 +205,27 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Inserisci il nome dell\'evento');
       return;
     }
+    if (isGratuito && !formData.nome_evento) {
+      toast.error('Inserisci il nome/descrizione dello spazio gratuito');
+      return;
+    }
     if (!formData.data_inizio || !formData.data_fine) {
       toast.error('Inserisci le date di inizio e fine');
       return;
     }
-    if (!isEvent && (formData.prezzo_totale === '' || isNaN(parseFloat(formData.prezzo_totale)))) {
+    if (!isEvent && !isGratuito && (formData.prezzo_totale === '' || isNaN(parseFloat(formData.prezzo_totale)))) {
       toast.error('Inserisci un prezzo totale valido');
       return;
     }
-    if (!isEvent && !formData.materiale_dimostrativo) {
+    if (!isEvent && !isGratuito && !formData.materiale_dimostrativo) {
       toast.error('Inserisci il materiale dimostrativo');
       return;
     }
 
     const dataToSave = {
       ...formData,
-      is_event: isEvent,
+      is_event: isEvent || isGratuito,
+      is_gratuito: isGratuito,
       spazio_id: formData.spazi_ids[0],
       prezzo_totale: formData.prezzo_totale ? parseFloat(formData.prezzo_totale) : 0,
       prezzo_mensile: formData.prezzo_mensile ? parseFloat(formData.prezzo_mensile) : null
@@ -291,6 +305,18 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         >
           <Sparkles className="w-4 h-4" />
           Evento
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('gratuito')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+            activeTab === 'gratuito'
+              ? 'bg-green-600 text-white'
+              : 'bg-white text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <Gift className="w-4 h-4" />
+          Gratuito
         </button>
       </div>
 
@@ -470,11 +496,63 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         </>
       )}
 
+      {activeTab === 'gratuito' && (
+        <>
+          <SpazioSelector />
+
+          {/* Nome */}
+          <div className={rowClass}>
+            <label className={labelClass}>Nome *</label>
+            <div className={fieldClass}>
+              <Input value={formData.nome_evento} onChange={(e) => setFormData({ ...formData, nome_evento: e.target.value })} placeholder="Nome / descrizione utilizzo" className="h-8 text-sm" />
+            </div>
+          </div>
+
+          {/* Periodo */}
+          <div className={rowClass}>
+            <label className={labelClass}>Inizio *</label>
+            <div className={fieldClass}>
+              <DatePicker value={formData.data_inizio} onChange={(v) => setFormData(prev => ({ ...prev, data_inizio: v, data_fine: prev.data_fine || v }))} placeholder="Seleziona data inizio" />
+            </div>
+          </div>
+          <div className={rowClass}>
+            <label className={labelClass}>Fine *</label>
+            <div className={fieldClass}>
+              <DatePicker value={formData.data_fine} onChange={(v) => setFormData(prev => ({ ...prev, data_fine: v }))} placeholder="Seleziona data fine" />
+            </div>
+          </div>
+
+          {/* Elettricità */}
+          <div className={rowClass}>
+            <span className={labelClass}>Elettricità</span>
+            <div className={`${fieldClass} flex items-center pt-1.5`}>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={formData.necessita_elettricita} onChange={(e) => setFormData({ ...formData, necessita_elettricita: e.target.checked })} className="w-4 h-4 accent-yellow-500" />
+                <Zap className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm text-slate-700">Necessita di elettricità</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Note */}
+          <div className={rowClass}>
+            <label className={labelClass}>Note</label>
+            <div className={fieldClass}>
+              <Textarea value={formData.note} onChange={(e) => setFormData({ ...formData, note: e.target.value })} rows={2} className="text-sm" />
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           Annulla
         </Button>
-        <Button type="submit" size="sm" className={activeTab === 'evento' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-blue-600 hover:bg-blue-700'}>
+        <Button type="submit" size="sm" className={
+          activeTab === 'evento' ? 'bg-purple-600 hover:bg-purple-700' :
+          activeTab === 'gratuito' ? 'bg-green-600 hover:bg-green-700' :
+          'bg-blue-600 hover:bg-blue-700'
+        }>
           {prenotazione ? 'Aggiorna' : 'Crea'}
         </Button>
       </div>
