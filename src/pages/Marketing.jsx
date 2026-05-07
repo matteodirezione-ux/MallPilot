@@ -89,11 +89,11 @@ export default function Marketing({ centroSelezionato, user }) {
         </div>
         <div className="flex items-center gap-1">
           <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-            <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
+            <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
           </button>
           <span className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white min-w-[70px] text-center">{anno}</span>
           <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-            <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
+            <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
           </button>
         </div>
       </div>
