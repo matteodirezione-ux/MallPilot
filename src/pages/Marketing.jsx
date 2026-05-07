@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, BarChart2, Megaphone } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FormMarketing from '@/components/marketing/FormMarketing';
 
@@ -28,11 +28,19 @@ export default function Marketing({ centroSelezionato, user }) {
   const [formOpen, setFormOpen] = useState(false);
   const [editRow, setEditRow] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [budgetInput, setBudgetInput] = useState('');
+  const [budgetSaved, setBudgetSaved] = useState(0);
 
   const centroId = centroSelezionato?.id;
 
   useEffect(() => {
-    if (centroId && centroId !== 'tutti') loadData();
+    if (centroId && centroId !== 'tutti') {
+      loadData();
+      const key = `mkt_budget_${centroId}_${anno}`;
+      const saved = localStorage.getItem(key);
+      if (saved) { setBudgetSaved(parseFloat(saved)); setBudgetInput(saved); }
+      else { setBudgetSaved(0); setBudgetInput(''); }
+    }
   }, [centroId, anno]);
 
   const loadData = async () => {
@@ -105,6 +113,66 @@ export default function Marketing({ centroSelezionato, user }) {
           </button>
         </div>
       </div>
+
+      {/* 3 card KPI Marketing */}
+      {centroId && centroId !== 'tutti' && (() => {
+        const consuntivo = totaleBudget(rows);
+        const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
+        const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            {/* Budget */}
+            <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Budget</p>
+                <div className="bg-purple-100 p-1.5 rounded-lg"><Megaphone className="w-4 h-4 text-purple-600" /></div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-slate-400 font-medium">€</span>
+                <input
+                  type="number"
+                  value={budgetInput}
+                  onChange={e => setBudgetInput(e.target.value)}
+                  onBlur={() => {
+                    const val = parseFloat(budgetInput) || 0;
+                    setBudgetSaved(val);
+                    localStorage.setItem(`mkt_budget_${centroId}_${anno}`, String(val));
+                  }}
+                  placeholder="Inserisci budget..."
+                  className="flex-1 text-xl font-bold text-slate-900 bg-transparent border-b-2 border-purple-300 focus:border-purple-600 outline-none pb-0.5"
+                />
+              </div>
+              <p className="text-xs text-slate-400 mt-1.5">Modifica e clicca fuori per salvare</p>
+            </div>
+
+            {/* Consuntivo */}
+            <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Consuntivo Piano</p>
+                <div className="bg-purple-100 p-1.5 rounded-lg"><BarChart2 className="w-4 h-4 text-purple-600" /></div>
+              </div>
+              <p className="text-xl font-bold text-slate-900">{fmtC(consuntivo)}</p>
+              <p className="text-xs text-slate-400 mt-1.5">Totale voci pianificate</p>
+            </div>
+
+            {/* Differenza */}
+            <div className={`rounded-xl border p-4 ${diff === null ? 'bg-slate-50 border-slate-200' : diff >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Differenza</p>
+                <div className={`p-1.5 rounded-lg ${diff === null ? 'bg-slate-100' : diff >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <TrendingUp className={`w-4 h-4 ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-600' : 'text-red-600'}`} />
+                </div>
+              </div>
+              <p className={`text-xl font-bold ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                {diff !== null ? fmtC(diff) : '–'}
+              </p>
+              <p className="text-xs text-slate-400 mt-1.5">
+                {diff === null ? 'Inserisci un budget' : diff >= 0 ? 'Avanzo rispetto al piano' : 'Sforamento rispetto al budget'}
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
