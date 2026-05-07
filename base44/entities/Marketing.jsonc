@@ -1,0 +1,133 @@
+{
+  "name": "Marketing",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "anno": {
+      "type": "number",
+      "description": "Anno di riferimento"
+    },
+    "sezione": {
+      "type": "string",
+      "enum": [
+        "iniziativa",
+        "comunicazione_online",
+        "comunicazione_offline",
+        "costo_fisso"
+      ],
+      "description": "Sezione del piano marketing"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome della voce"
+    },
+    "tipologia": {
+      "type": "string",
+      "enum": [
+        "COMMERCIAL",
+        "ENTERTAINMENT",
+        "COMMUNITY",
+        "CULTURAL",
+        "altro"
+      ],
+      "description": "Tipologia (solo per iniziative)"
+    },
+    "budget_totale": {
+      "type": "number",
+      "description": "Budget totale annuale"
+    },
+    "gen": {
+      "type": "number",
+      "description": "Gennaio"
+    },
+    "feb": {
+      "type": "number",
+      "description": "Febbraio"
+    },
+    "mar": {
+      "type": "number",
+      "description": "Marzo"
+    },
+    "apr": {
+      "type": "number",
+      "description": "Aprile"
+    },
+    "mag": {
+      "type": "number",
+      "description": "Maggio"
+    },
+    "giu": {
+      "type": "number",
+      "description": "Giugno"
+    },
+    "lug": {
+      "type": "number",
+      "description": "Luglio"
+    },
+    "ago": {
+      "type": "number",
+      "description": "Agosto"
+    },
+    "set": {
+      "type": "number",
+      "description": "Settembre"
+    },
+    "ott": {
+      "type": "number",
+      "description": "Ottobre"
+    },
+    "nov": {
+      "type": "number",
+      "description": "Novembre"
+    },
+    "dic": {
+      "type": "number",
+      "description": "Dicembre"
+    },
+    "nome_iniziativa_gen": {
+      "type": "string"
+    },
+    "nome_iniziativa_feb": {
+      "type": "string"
+    },
+    "nome_iniziativa_mar": {
+      "type": "string"
+    },
+    "nome_iniziativa_apr": {
+      "type": "string"
+    },
+    "nome_iniziativa_mag": {
+      "type": "string"
+    },
+    "nome_iniziativa_giu": {
+      "type": "string"
+    },
+    "nome_iniziativa_lug": {
+      "type": "string"
+    },
+    "nome_iniziativa_ago": {
+      "type": "string"
+    },
+    "nome_iniziativa_set": {
+      "type": "string"
+    },
+    "nome_iniziativa_ott": {
+      "type": "string"
+    },
+    "nome_iniziativa_nov": {
+      "type": "string"
+    },
+    "nome_iniziativa_dic": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "centro_id",
+    "anno",
+    "sezione",
+    "nome"
+  ]
+}

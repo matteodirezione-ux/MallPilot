@@ -19,7 +19,8 @@ import {
   X,
   TrendingUp,
   Sparkles,
-  HardDrive
+  HardDrive,
+  Megaphone
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
@@ -227,6 +228,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Pulizie', page: 'Pulizie', icon: Sparkles, roles: ['proprieta', 'direttore', 'vigilanza'] },
     { name: 'Fornitori', page: 'Fornitori', icon: Users, roles: ['proprieta', 'direttore', 'vigilanza'] },
+  { name: 'Marketing', page: 'Marketing', icon: Megaphone, roles: ['proprieta', 'direttore'] },
   { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
     { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
     { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
