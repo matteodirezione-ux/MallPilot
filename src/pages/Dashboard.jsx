@@ -7,6 +7,7 @@ import FormTicket from '@/components/tickets/FormTicket';
 import FormPulizia from '@/components/pulizie/FormPulizia';
 import QuickFormControllo from '@/components/dashboard/QuickFormControllo';
 import QuickFormReport from '@/components/dashboard/QuickFormReport';
+import QuickFormPrenotazione from '@/components/dashboard/QuickFormPrenotazione';
 import { 
   TrendingUp, 
   Calendar, 
@@ -555,7 +556,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           {[
             { label: 'Nuovo Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
             { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Nuova Prenotazione', tipo: null, path: '/Calendario', color: 'bg-green-600 hover:bg-green-700' },
+            { label: 'Nuova Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
           ].map(({ label, tipo, path, color }) => (
             <button
               key={label}
@@ -1187,6 +1188,12 @@ export default function Dashboard({ centroSelezionato, user }) {
         centroId={centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : ''}
         user={user}
         onSave={() => setQuickForm(null)}
+      />
+      <QuickFormPrenotazione
+        open={quickForm === 'prenotazione'}
+        onClose={() => setQuickForm(null)}
+        centroSelezionato={centroSelezionato}
+        user={user}
       />
     </div>
   );
