@@ -155,7 +155,7 @@ export default function Marketing({ centroSelezionato, user }) {
                 {MESI.map(m => <td key={m} className="text-right px-2 py-2">{fmt(totalePianoMese(m)) !== '–' ? fmt(totalePianoMese(m)) : ''}</td>)}
                 {!isVigilanza && <td />}
               </tr>
-              <PercRow label="DISTRIBUZIONE MENSILE" totFn={totalePianoMese} total={totaleBudget(iniziative) + totaleBudget(online) + totaleBudget(offline)} mesi={MESI} />
+
 
               {/* ── COSTI FISSI ── */}
               <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" />
