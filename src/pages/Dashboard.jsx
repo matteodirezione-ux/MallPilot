@@ -939,16 +939,23 @@ export default function Dashboard({ centroSelezionato, user }) {
               <div className="space-y-1.5 sm:space-y-2">
                 {stats.capexList.map(c => (
                   <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('capex', c)}>
-                    <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
-                      {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-xs font-medium text-yellow-700 whitespace-nowrap">
-                        {c.data_inizio ? format(new Date(c.data_inizio), 'dd MMM', { locale: it }) : '-'}
-                        {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
+                  <div className="flex-1 min-w-0 mr-2">
+                    <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                    {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
+                  </div>
+                  <div className="shrink-0 text-right">
+                    {c.data_inizio && (
+                      <p className="text-xs whitespace-nowrap">
+                        <span className="font-bold text-red-600">{giorniMancanti(c.data_inizio)}</span>
+                        {' · '}
+                        <span className="font-medium text-yellow-700">
+                          {format(new Date(c.data_inizio), 'dd MMM', { locale: it })}
+                          {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
+                        </span>
                       </p>
-                    </div>
+                    )}
+                    {!c.data_inizio && <p className="text-xs text-slate-400">-</p>}
+                  </div>
                   </div>
                 ))}
               </div>
