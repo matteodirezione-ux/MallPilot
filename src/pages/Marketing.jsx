@@ -106,7 +106,7 @@ export default function Marketing({ centroSelezionato, user }) {
           <table className="w-full text-xs min-w-[1200px]">
             <thead>
               <tr className="bg-slate-800 text-white">
-                <th className="text-left px-3 py-3 w-48 font-semibold">VOCE</th>
+                <th className="text-left px-3 py-3 w-64 font-semibold">VOCE</th>
                 <th className="text-right px-2 py-3 font-semibold">TOTALE</th>
                 {MESI_LABEL.map(m => (
                   <th key={m} className="text-right px-2 py-3 font-semibold w-20">{m}</th>
