@@ -342,7 +342,7 @@ export default function Layout({ children, currentPageName }) {
                 if (visibleItems.length === 0) return null;
                 return (
                   <div key={group.label}>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-1">{group.label}</p>
+                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest px-3 mb-1">{group.label}</p>
                     <div className="space-y-0.5">
                       {visibleItems.map((item) => {
                         const Icon = item.icon;
