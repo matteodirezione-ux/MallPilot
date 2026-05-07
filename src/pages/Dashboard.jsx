@@ -477,6 +477,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-0.5">Dashboard</h1>
           <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
+          <p className="text-slate-400 text-xs mt-0.5">{new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
         </div>
         {centroSelezionato?.logo_url && (
           <img
