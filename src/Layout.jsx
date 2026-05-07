@@ -216,23 +216,45 @@ export default function Layout({ children, currentPageName }) {
     base44.auth.logout();
   };
 
-  const navigationItems = [
-    { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Controlli', page: 'CalendarioManutenzioni', icon: ClipboardList, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
-    { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
-    { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Pulizie', page: 'Pulizie', icon: Sparkles, roles: ['proprieta', 'direttore', 'vigilanza'] },
-    { name: 'Fornitori', page: 'Fornitori', icon: Users, roles: ['proprieta', 'direttore', 'vigilanza'] },
-  { name: 'Marketing', page: 'Marketing', icon: Megaphone, roles: ['proprieta', 'direttore'] },
-  { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
-    { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
-    { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
+  const navigationGroups = [
+    {
+      label: 'OPERATIVITÀ',
+      items: [
+        { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
+        { name: 'Controlli', page: 'CalendarioManutenzioni', icon: ClipboardList, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Calendario', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
+      ]
+    },
+    {
+      label: 'COMMERCIALE',
+      items: [
+        { name: 'Clienti', page: 'Clienti', icon: Users, roles: ['proprieta', 'direttore'] },
+        { name: 'Spazi Expo', page: 'SpaziExpo', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Marketing', page: 'Marketing', icon: Megaphone, roles: ['proprieta', 'direttore'] },
+      ]
+    },
+    {
+      label: 'FACILITY',
+      items: [
+        { name: 'Fornitori', page: 'Fornitori', icon: Users, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Pulizie', page: 'Pulizie', icon: Sparkles, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
+      ]
+    },
+    {
+      label: 'AMMINISTRAZIONE',
+      items: [
+        { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
+        { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
+        { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
+      ]
+    },
   ];
+
+  const navigationItems = navigationGroups.flatMap(g => g.items);
 
   const filteredNav = navigationItems.filter(item => 
     user?.tipo_account && item.roles.includes(user.tipo_account)
@@ -312,24 +334,37 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
-            <div className="space-y-1">
-              {filteredNav.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentPageName === item.page;
+            <div className="space-y-4">
+              {navigationGroups.map((group) => {
+                const visibleItems = group.items.filter(item =>
+                  user?.tipo_account && item.roles.includes(user.tipo_account)
+                );
+                if (visibleItems.length === 0) return null;
                 return (
-                  <Link
-                    key={item.page}
-                    to={createPageUrl(item.page)}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                      isActive
-                        ? 'bg-blue-50 text-blue-700 font-medium'
-                        : 'text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                    <span>{item.name}</span>
-                  </Link>
+                  <div key={group.label}>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-1">{group.label}</p>
+                    <div className="space-y-0.5">
+                      {visibleItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = currentPageName === item.page;
+                        return (
+                          <Link
+                            key={item.page}
+                            to={createPageUrl(item.page)}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                              isActive
+                                ? 'bg-blue-50 text-blue-700 font-medium'
+                                : 'text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                            <span>{item.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
             </div>
