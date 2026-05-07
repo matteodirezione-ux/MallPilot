@@ -20,7 +20,8 @@ import {
   Ticket,
   HardHat,
   RefreshCw,
-  BookOpen
+  BookOpen,
+  Plus
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -491,6 +492,28 @@ export default function Dashboard({ centroSelezionato, user }) {
           />
         )}
       </div>
+
+      {/* Pulsanti rapidi - solo vigilanza */}
+      {user?.tipo_account === 'vigilanza' && (
+        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
+          {[
+            { label: 'Nuovo Task', path: '/Task', color: 'bg-blue-600 hover:bg-blue-700' },
+            { label: 'Nuovo Ticket', path: '/Ticket', color: 'bg-orange-500 hover:bg-orange-600' },
+            { label: 'Nuovo Controllo', path: '/CalendarioManutenzioni', color: 'bg-indigo-600 hover:bg-indigo-700' },
+            { label: 'Nuovo Report', path: '/Report', color: 'bg-emerald-600 hover:bg-emerald-700' },
+            { label: 'Segnalazione Pulizie', path: '/Pulizie', color: 'bg-purple-600 hover:bg-purple-700' },
+          ].map(({ label, path, color }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Summary Cards - Responsive Grid */}
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
