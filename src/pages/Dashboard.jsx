@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import FormTask from '@/components/tasks/FormTask';
+import FormTicket from '@/components/tickets/FormTicket';
+import FormPulizia from '@/components/pulizie/FormPulizia';
+import QuickFormControllo from '@/components/dashboard/QuickFormControllo';
+import QuickFormReport from '@/components/dashboard/QuickFormReport';
 import { 
   TrendingUp, 
   Calendar, 
@@ -67,6 +72,57 @@ export default function Dashboard({ centroSelezionato, user }) {
   const [completingIds, setCompletingIds] = useState(new Set());
   const [detailModal, setDetailModal] = useState({ open: false, type: null, item: null });
   const navigate = useNavigate();
+
+  // Quick form state
+  const [quickForm, setQuickForm] = useState(null); // 'task' | 'ticket' | 'controllo' | 'report' | 'pulizia'
+  const [quickDirettori, setQuickDirettori] = useState([]);
+  const [quickVigilanze, setQuickVigilanze] = useState([]);
+  const [quickCentri, setQuickCentri] = useState([]);
+
+  const openQuickForm = async (tipo) => {
+    // Carica dati solo se non già caricati
+    if (quickCentri.length === 0) {
+      const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: user?.email });
+      const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
+      const allCentri = await base44.entities.CentroCommerciale.list();
+      const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id));
+      setQuickCentri(centriAssegnati);
+
+      if (user?.tipo_account === 'direttore') {
+        const assegnazioniCentri = await Promise.all(centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id })));
+        const emails = [...new Set(assegnazioniCentri.flat().map(a => a.user_email).filter(e => e !== user.email))];
+        const allVigilanze = await base44.entities.Vigilanza.list();
+        setQuickVigilanze(allVigilanze.filter(v => emails.includes(v.email)));
+        const direttoreRecord = await base44.entities.Direttore.filter({ email: user.email });
+        const nomeDirettore = direttoreRecord[0]?.full_name || user.full_name;
+        setQuickDirettori([{ email: user.email, full_name: nomeDirettore }]);
+      } else if (user?.tipo_account === 'vigilanza') {
+        const assegnazioniCentri = await Promise.all(centriIds.map(id => base44.entities.Assegnazione.filter({ centro_id: id })));
+        const emails = [...new Set(assegnazioniCentri.flat().map(a => a.user_email))];
+        const [allDirettori, allVigilanze] = await Promise.all([
+          base44.entities.Direttore.list(),
+          base44.entities.Vigilanza.list(),
+        ]);
+        setQuickDirettori(allDirettori.filter(d => emails.includes(d.email)));
+        setQuickVigilanze(allVigilanze.filter(v => emails.includes(v.email)));
+      }
+    }
+    setQuickForm(tipo);
+  };
+
+  const handleQuickTaskSave = async (data) => {
+    if (Array.isArray(data)) {
+      await Promise.all(data.map(t => base44.entities.Task.create(t)));
+    } else {
+      await base44.entities.Task.create(data);
+    }
+    setQuickForm(null);
+  };
+
+  const handleQuickTicketSave = async (data) => {
+    await base44.entities.Ticket.create({ ...data, centro_id: centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : '' });
+    setQuickForm(null);
+  };
 
   const openDetail = (type, item) => setDetailModal({ open: true, type, item });
   const closeDetail = () => setDetailModal({ open: false, type: null, item: null });
@@ -497,13 +553,13 @@ export default function Dashboard({ centroSelezionato, user }) {
       {user?.tipo_account === 'direttore' && (
         <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
           {[
-            { label: 'Nuovo Task', path: '/Task', color: 'bg-blue-600 hover:bg-blue-700' },
-            { label: 'Nuovo Controllo', path: '/CalendarioManutenzioni', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Nuova Prenotazione', path: '/Calendario', color: 'bg-green-600 hover:bg-green-700' },
-          ].map(({ label, path, color }) => (
+            { label: 'Nuovo Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
+            { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
+            { label: 'Nuova Prenotazione', tipo: null, path: '/Calendario', color: 'bg-green-600 hover:bg-green-700' },
+          ].map(({ label, tipo, path, color }) => (
             <button
-              key={path}
-              onClick={() => navigate(path)}
+              key={label}
+              onClick={() => tipo ? openQuickForm(tipo) : navigate(path)}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -517,15 +573,15 @@ export default function Dashboard({ centroSelezionato, user }) {
       {user?.tipo_account === 'vigilanza' && (
         <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
           {[
-            { label: 'Nuovo Task', path: '/Task', color: 'bg-blue-600 hover:bg-blue-700' },
-            { label: 'Nuovo Ticket', path: '/Ticket', color: 'bg-orange-500 hover:bg-orange-600' },
-            { label: 'Nuovo Controllo', path: '/CalendarioManutenzioni', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Nuovo Report', path: '/Report', color: 'bg-emerald-600 hover:bg-emerald-700' },
-            { label: 'Segnalazione Pulizie', path: '/Pulizie', color: 'bg-purple-600 hover:bg-purple-700' },
-          ].map(({ label, path, color }) => (
+            { label: 'Nuovo Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
+            { label: 'Nuovo Ticket', tipo: 'ticket', color: 'bg-orange-500 hover:bg-orange-600' },
+            { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
+            { label: 'Nuovo Report', tipo: 'report', color: 'bg-emerald-600 hover:bg-emerald-700' },
+            { label: 'Segnalazione Pulizie', tipo: 'pulizia', color: 'bg-purple-600 hover:bg-purple-700' },
+          ].map(({ label, tipo, color }) => (
             <button
-              key={path}
-              onClick={() => navigate(path)}
+              key={label}
+              onClick={() => openQuickForm(tipo)}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -1089,6 +1145,48 @@ export default function Dashboard({ centroSelezionato, user }) {
         type={detailModal.type}
         item={detailModal.item}
         user={user}
+      />
+
+      {/* Quick forms */}
+      <FormTask
+        open={quickForm === 'task'}
+        onClose={() => setQuickForm(null)}
+        onSave={handleQuickTaskSave}
+        task={null}
+        user={user}
+        centri={quickCentri}
+        direttori={quickDirettori}
+        vigilanze={quickVigilanze}
+        centroDefault={centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : null}
+      />
+      <FormTicket
+        open={quickForm === 'ticket'}
+        onClose={() => setQuickForm(null)}
+        onSave={handleQuickTicketSave}
+        ticket={null}
+        user={user}
+      />
+      <QuickFormControllo
+        open={quickForm === 'controllo'}
+        onClose={() => setQuickForm(null)}
+        onSaved={() => {}}
+        centroSelezionato={centroSelezionato}
+        user={user}
+      />
+      <QuickFormReport
+        open={quickForm === 'report'}
+        onClose={() => setQuickForm(null)}
+        onSaved={() => {}}
+        centroSelezionato={centroSelezionato}
+        user={user}
+      />
+      <FormPulizia
+        open={quickForm === 'pulizia'}
+        onClose={() => setQuickForm(null)}
+        pulizia={null}
+        centroId={centroSelezionato?.id !== 'tutti' ? centroSelezionato?.id : ''}
+        user={user}
+        onSave={() => setQuickForm(null)}
       />
     </div>
   );
