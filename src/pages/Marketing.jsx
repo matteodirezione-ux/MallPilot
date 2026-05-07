@@ -148,13 +148,7 @@ export default function Marketing({ centroSelezionato, user }) {
               </tr>
               <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleComunicazioneMese} total={totaleBudget(online) + totaleBudget(offline)} mesi={MESI} />
 
-              {/* Totale pianificato */}
-              <tr className="bg-blue-50 font-bold border-t-2 border-blue-400 text-blue-900">
-                <td className="px-3 py-2">TOTALE PIANIFICATO</td>
-                <td className="text-right px-2 py-2">{fmtEuro(totaleBudget(iniziative) + totaleBudget(online) + totaleBudget(offline))}</td>
-                {MESI.map(m => <td key={m} className="text-right px-2 py-2">{fmt(totalePianoMese(m)) !== '–' ? fmt(totalePianoMese(m)) : ''}</td>)}
-                {!isVigilanza && <td />}
-              </tr>
+
 
 
               {/* ── COSTI FISSI ── */}
