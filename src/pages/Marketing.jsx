@@ -87,15 +87,14 @@ export default function Marketing({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Piano Marketing</h1>
           <p className="text-sm text-slate-500 mt-1">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Select value={String(anno)} onValueChange={v => setAnno(Number(v))}>
-            <SelectTrigger className="w-28">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {[2024,2025,2026,2027].map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+            <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
+          </button>
+          <span className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white min-w-[70px] text-center">{anno}</span>
+          <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+            <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
+          </button>
         </div>
       </div>
 
