@@ -228,24 +228,17 @@ function InitiativeRow({ row, onEdit, onDelete, isVigilanza }) {
 
   return (
     <>
-      {/* Riga nome iniziativa per mese */}
-      <tr className="border-b border-slate-100 hover:bg-slate-50">
-        <td className="px-3 py-1.5 text-slate-500 text-[10px]">Nome Iniziativa</td>
-        <td className="px-2 py-1.5"></td>
-        {mesi.map(m => (
-          <td key={m} className="text-right px-2 py-1.5 text-slate-700 font-medium text-[10px]">
-            {row[`nome_iniziativa_${m}`] || ''}
-          </td>
-        ))}
-        {!isVigilanza && <td />}
-      </tr>
       {/* Riga costo */}
       <tr className="border-b border-slate-100 hover:bg-slate-50">
-        <td className="px-3 py-1.5 font-medium text-slate-800">{row.nome}</td>
+        <td className="px-3 py-1.5 font-medium text-slate-800">
+          <div>{row.nome}</div>
+          {row.tipologia && <span className={`text-[9px] px-1 py-0.5 rounded font-semibold ${TIPOLOGIA_COLORS[row.tipologia] || 'bg-slate-100 text-slate-600'}`}>{row.tipologia}</span>}
+        </td>
         <td className="text-right px-2 py-1.5 font-semibold text-slate-800">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
         {mesi.map(m => (
           <td key={m} className="text-right px-2 py-1.5 text-slate-700">
-            {row[m] ? row[m].toLocaleString('it-IT') : ''}
+            <div>{row[m] ? row[m].toLocaleString('it-IT') : ''}</div>
+            {row[`nome_iniziativa_${m}`] && <div className="text-[9px] text-slate-500">{row[`nome_iniziativa_${m}`]}</div>}
           </td>
         ))}
         {!isVigilanza && (
@@ -256,21 +249,6 @@ function InitiativeRow({ row, onEdit, onDelete, isVigilanza }) {
             </div>
           </td>
         )}
-      </tr>
-      {/* Riga tipologia */}
-      <tr className="border-b-2 border-slate-200 hover:bg-slate-50">
-        <td className="px-3 py-1 text-[10px] text-slate-400">Tipologia</td>
-        <td className="px-2 py-1"></td>
-        {mesi.map(m => (
-          <td key={m} className="text-right px-2 py-1">
-            {row[`nome_iniziativa_${m}`] && row.tipologia ? (
-              <span className={`text-[9px] px-1 py-0.5 rounded font-semibold ${TIPOLOGIA_COLORS[row.tipologia] || 'bg-slate-100 text-slate-600'}`}>
-                {row.tipologia}
-              </span>
-            ) : ''}
-          </td>
-        ))}
-        {!isVigilanza && <td />}
       </tr>
     </>
   );
