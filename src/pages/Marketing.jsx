@@ -79,6 +79,14 @@ export default function Marketing({ centroSelezionato, user }) {
 
   const isVigilanza = user?.tipo_account === 'vigilanza';
 
+  const [collapsed, setCollapsed] = useState({
+    iniziativa: false,
+    comunicazione_online: false,
+    comunicazione_offline: false,
+    costo_fisso: false,
+  });
+  const toggleCollapse = (key) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
+
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
@@ -118,23 +126,23 @@ export default function Marketing({ centroSelezionato, user }) {
             <tbody>
 
               {/* ── INIZIATIVE ── */}
-              <SectionHeader label="INIZIATIVE" onAdd={!isVigilanza ? () => openNew('iniziativa') : null} colSpan={15} color="bg-blue-700" />
-              {iniziative.map(row => (
+              <SectionHeader label="INIZIATIVE" onAdd={!isVigilanza ? () => openNew('iniziativa') : null} colSpan={15} color="bg-blue-700" collapsed={collapsed.iniziativa} onToggle={() => toggleCollapse('iniziativa')} />
+              {!collapsed.iniziativa && iniziative.map(row => (
                 <InitiativeRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
               ))}
               <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />
-              <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleIniziativeMese} total={totaleBudget(iniziative)} mesi={MESI} />
+              {!collapsed.iniziativa && <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleIniziativeMese} total={totaleBudget(iniziative)} mesi={MESI} />}
 
               {/* ── COMUNICAZIONE ONLINE ── */}
-              <SectionHeader label="ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" />
-              {online.map(row => (
+              <SectionHeader label="ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" collapsed={collapsed.comunicazione_online} onToggle={() => toggleCollapse('comunicazione_online')} />
+              {!collapsed.comunicazione_online && online.map(row => (
                 <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
               ))}
               <TotaleRow label="TOTALE ONLINE" rows={online} mesi={MESI} bold isVigilanza={isVigilanza} />
 
               {/* ── COMUNICAZIONE OFFLINE ── */}
-              <SectionHeader label="OFFLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_offline') : null} colSpan={15} color="bg-amber-700" />
-              {offline.map(row => (
+              <SectionHeader label="OFFLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_offline') : null} colSpan={15} color="bg-amber-700" collapsed={collapsed.comunicazione_offline} onToggle={() => toggleCollapse('comunicazione_offline')} />
+              {!collapsed.comunicazione_offline && offline.map(row => (
                 <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
               ))}
               <TotaleRow label="TOTALE OFFLINE" rows={offline} mesi={MESI} bold isVigilanza={isVigilanza} />
@@ -148,16 +156,13 @@ export default function Marketing({ centroSelezionato, user }) {
               </tr>
               <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleComunicazioneMese} total={totaleBudget(online) + totaleBudget(offline)} mesi={MESI} />
 
-
-
-
               {/* ── COSTI FISSI ── */}
-              <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" />
-              {fissi.map(row => (
+              <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" collapsed={collapsed.costo_fisso} onToggle={() => toggleCollapse('costo_fisso')} />
+              {!collapsed.costo_fisso && fissi.map(row => (
                 <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
               ))}
               <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} bold isVigilanza={isVigilanza} />
-              <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleFissiMese} total={totaleBudget(fissi)} mesi={MESI} />
+              {!collapsed.costo_fisso && <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleFissiMese} total={totaleBudget(fissi)} mesi={MESI} />}
 
               {/* Grand Total */}
               <tr className="bg-slate-800 text-white font-bold border-t-2 border-slate-600 text-sm">
@@ -200,10 +205,15 @@ export default function Marketing({ centroSelezionato, user }) {
 
 /* ── Sub-components ── */
 
-function SectionHeader({ label, onAdd, colSpan, color }) {
+function SectionHeader({ label, onAdd, colSpan, color, collapsed, onToggle }) {
   return (
     <tr className={`${color} text-white text-xs font-bold`}>
-      <td className="px-3 py-2 uppercase tracking-wide">{label}</td>
+      <td className="px-3 py-2 uppercase tracking-wide">
+        <button onClick={onToggle} className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+          {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+          {label}
+        </button>
+      </td>
       <td colSpan={colSpan - 1} className="px-2 py-2 text-right">
         {onAdd && (
           <button onClick={onAdd} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/20 hover:bg-white/30 transition-colors text-white text-xs">
