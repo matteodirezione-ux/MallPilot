@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FormMarketing from '@/components/marketing/FormMarketing';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
@@ -87,13 +88,14 @@ export default function Marketing({ centroSelezionato, user }) {
           <p className="text-sm text-slate-500 mt-1">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={anno}
-            onChange={e => setAnno(Number(e.target.value))}
-            className="px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
-          >
-            {[2024,2025,2026,2027].map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <Select value={String(anno)} onValueChange={v => setAnno(Number(v))}>
+            <SelectTrigger className="w-28">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[2024,2025,2026,2027].map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
