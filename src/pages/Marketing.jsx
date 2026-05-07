@@ -98,81 +98,78 @@ export default function Marketing({ centroSelezionato, user }) {
   return (
     <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex-shrink-0">
           <h1 className="text-2xl font-bold text-slate-800">Piano Marketing</h1>
           <p className="text-sm text-slate-500 mt-1">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-            <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
-          </button>
-          <span className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white min-w-[70px] text-center">{anno}</span>
-          <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-            <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
-          </button>
+
+        {/* 3 card KPI + anno selector */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 lg:justify-end">
+          {centroId && centroId !== 'tutti' && (() => {
+            const consuntivo = totaleBudget(rows);
+            const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
+            const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
+            return (
+              <>
+                {/* Budget */}
+                <div className="bg-purple-50 rounded-xl border border-purple-200 px-3 py-2.5 min-w-[160px]">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Megaphone className="w-3.5 h-3.5 text-purple-500" />
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Budget</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-slate-400 text-sm">€</span>
+                    <input
+                      type="number"
+                      value={budgetInput}
+                      onChange={e => setBudgetInput(e.target.value)}
+                      onBlur={() => {
+                        const val = parseFloat(budgetInput) || 0;
+                        setBudgetSaved(val);
+                        localStorage.setItem(`mkt_budget_${centroId}_${anno}`, String(val));
+                      }}
+                      placeholder="–"
+                      className="flex-1 text-base font-bold text-slate-900 bg-transparent border-b border-purple-300 focus:border-purple-600 outline-none w-28"
+                    />
+                  </div>
+                </div>
+
+                {/* Consuntivo */}
+                <div className="bg-purple-50 rounded-xl border border-purple-200 px-3 py-2.5 min-w-[160px]">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <BarChart2 className="w-3.5 h-3.5 text-purple-500" />
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Consuntivo</p>
+                  </div>
+                  <p className="text-base font-bold text-slate-900">{fmtC(consuntivo)}</p>
+                </div>
+
+                {/* Differenza */}
+                <div className={`rounded-xl border px-3 py-2.5 min-w-[140px] ${diff === null ? 'bg-slate-50 border-slate-200' : diff >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <TrendingUp className={`w-3.5 h-3.5 ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Differenza</p>
+                  </div>
+                  <p className={`text-base font-bold ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                    {diff !== null ? fmtC(diff) : '–'}
+                  </p>
+                </div>
+              </>
+            );
+          })()}
+
+          {/* Anno selector */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+              <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
+            </button>
+            <span className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white min-w-[70px] text-center">{anno}</span>
+            <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
+              <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* 3 card KPI Marketing */}
-      {centroId && centroId !== 'tutti' && (() => {
-        const consuntivo = totaleBudget(rows);
-        const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
-        const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
-        return (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {/* Budget */}
-            <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Budget</p>
-                <div className="bg-purple-100 p-1.5 rounded-lg"><Megaphone className="w-4 h-4 text-purple-600" /></div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-slate-400 font-medium">€</span>
-                <input
-                  type="number"
-                  value={budgetInput}
-                  onChange={e => setBudgetInput(e.target.value)}
-                  onBlur={() => {
-                    const val = parseFloat(budgetInput) || 0;
-                    setBudgetSaved(val);
-                    localStorage.setItem(`mkt_budget_${centroId}_${anno}`, String(val));
-                  }}
-                  placeholder="Inserisci budget..."
-                  className="flex-1 text-xl font-bold text-slate-900 bg-transparent border-b-2 border-purple-300 focus:border-purple-600 outline-none pb-0.5"
-                />
-              </div>
-              <p className="text-xs text-slate-400 mt-1.5">Modifica e clicca fuori per salvare</p>
-            </div>
-
-            {/* Consuntivo */}
-            <div className="bg-purple-50 rounded-xl border border-purple-200 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Consuntivo Piano</p>
-                <div className="bg-purple-100 p-1.5 rounded-lg"><BarChart2 className="w-4 h-4 text-purple-600" /></div>
-              </div>
-              <p className="text-xl font-bold text-slate-900">{fmtC(consuntivo)}</p>
-              <p className="text-xs text-slate-400 mt-1.5">Totale voci pianificate</p>
-            </div>
-
-            {/* Differenza */}
-            <div className={`rounded-xl border p-4 ${diff === null ? 'bg-slate-50 border-slate-200' : diff >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Differenza</p>
-                <div className={`p-1.5 rounded-lg ${diff === null ? 'bg-slate-100' : diff >= 0 ? 'bg-green-100' : 'bg-red-100'}`}>
-                  <TrendingUp className={`w-4 h-4 ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-600' : 'text-red-600'}`} />
-                </div>
-              </div>
-              <p className={`text-xl font-bold ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                {diff !== null ? fmtC(diff) : '–'}
-              </p>
-              <p className="text-xs text-slate-400 mt-1.5">
-                {diff === null ? 'Inserisci un budget' : diff >= 0 ? 'Avanzo rispetto al piano' : 'Sforamento rispetto al budget'}
-              </p>
-            </div>
-          </div>
-        );
-      })()}
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
