@@ -42,7 +42,7 @@ export default function Marketing({ centroSelezionato, user }) {
   };
 
   const handleSave = async (formData) => {
-    if (editRow) {
+    if (editRow?.id) {
       await base44.entities.Marketing.update(editRow.id, formData);
     } else {
       await base44.entities.Marketing.create({ ...formData, centro_id: centroId, anno });
