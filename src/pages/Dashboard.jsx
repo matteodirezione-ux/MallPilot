@@ -20,7 +20,8 @@ import {
   Ticket,
   HardHat,
   RefreshCw,
-  BookOpen
+  BookOpen,
+  Megaphone
 } from 'lucide-react';
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -29,6 +30,10 @@ import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ centroSelezionato, user }) {
+  const [marketingConsuntivo, setMarketingConsuntivo] = useState(0);
+  const [marketingBudget, setMarketingBudget] = useState('');
+  const [marketingBudgetSaved, setMarketingBudgetSaved] = useState(0);
+
   const [stats, setStats] = useState({
   reportDaLeggere: 0,
   pulizieDaLeggere: 0,
@@ -375,6 +380,22 @@ export default function Dashboard({ centroSelezionato, user }) {
         c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse
       ).length;
 
+      // Marketing consuntivo (somma budget_totale di tutte le voci dell'anno corrente)
+      if (centroSelezionato?.id !== 'tutti') {
+        const mktRows = await base44.entities.Marketing.filter({ centro_id: centroSelezionato.id, anno });
+        const consuntivo = mktRows.reduce((s, r) => s + (r.budget_totale || 0), 0);
+        setMarketingConsuntivo(consuntivo);
+        // Carica budget salvato in localStorage
+        const savedBudget = localStorage.getItem(`mkt_budget_${centroSelezionato.id}_${anno}`);
+        if (savedBudget) {
+          setMarketingBudgetSaved(parseFloat(savedBudget));
+          setMarketingBudget(savedBudget);
+        } else {
+          setMarketingBudgetSaved(0);
+          setMarketingBudget('');
+        }
+      }
+
       // Enrich tasks with additional data if needed
       const tasksConDettagli = await Promise.all(
         tasksList.map(async (t) => {
@@ -628,6 +649,65 @@ export default function Dashboard({ centroSelezionato, user }) {
             <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
           </div>
           </div>
+          )}
+
+          {/* Marketing Cards */}
+          {centroSelezionato?.id !== 'tutti' && (
+            <div className="mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Megaphone className="w-4 h-4 text-purple-600" />
+                <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Marketing</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Budget */}
+                <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Budget Marketing</p>
+                    <div className="bg-purple-100 p-1.5 rounded-lg"><Megaphone className="w-3.5 h-3.5 text-purple-600" /></div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-slate-400 text-sm">€</span>
+                    <input
+                      type="number"
+                      value={marketingBudget}
+                      onChange={e => setMarketingBudget(e.target.value)}
+                      onBlur={() => {
+                        const val = parseFloat(marketingBudget) || 0;
+                        setMarketingBudgetSaved(val);
+                        localStorage.setItem(`mkt_budget_${centroSelezionato.id}_${new Date().getFullYear()}`, val);
+                      }}
+                      placeholder="Inserisci budget..."
+                      className="flex-1 text-lg font-bold text-slate-900 bg-transparent border-b border-purple-300 focus:border-purple-600 outline-none pb-0.5"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">Clicca fuori per salvare</p>
+                </div>
+
+                {/* Consuntivo */}
+                <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Piano Marketing</p>
+                    <div className="bg-purple-100 p-1.5 rounded-lg"><BarChart2 className="w-3.5 h-3.5 text-purple-600" /></div>
+                  </div>
+                  <p className="text-lg sm:text-2xl font-bold text-slate-900 mt-1">{formatCurrency(marketingConsuntivo)}</p>
+                  <p className="text-xs text-slate-400 mt-1">Totale voci pianificate</p>
+                </div>
+
+                {/* Differenza */}
+                <div className={`rounded-lg border p-3 sm:p-4 ${marketingBudgetSaved > 0 ? (marketingBudgetSaved - marketingConsuntivo >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200') : 'bg-purple-50 border-purple-200'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Differenza</p>
+                    <div className={`p-1.5 rounded-lg ${marketingBudgetSaved > 0 ? (marketingBudgetSaved - marketingConsuntivo >= 0 ? 'bg-green-100' : 'bg-red-100') : 'bg-purple-100'}`}>
+                      <TrendingUp className={`w-3.5 h-3.5 ${marketingBudgetSaved > 0 ? (marketingBudgetSaved - marketingConsuntivo >= 0 ? 'text-green-600' : 'text-red-600') : 'text-purple-600'}`} />
+                    </div>
+                  </div>
+                  <p className={`text-lg sm:text-2xl font-bold mt-1 ${marketingBudgetSaved > 0 ? (marketingBudgetSaved - marketingConsuntivo >= 0 ? 'text-green-700' : 'text-red-700') : 'text-slate-400'}`}>
+                    {marketingBudgetSaved > 0 ? formatCurrency(marketingBudgetSaved - marketingConsuntivo) : '–'}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">{marketingBudgetSaved > 0 ? (marketingBudgetSaved - marketingConsuntivo >= 0 ? 'Risparmio rispetto al piano' : 'Sforamento rispetto al budget') : 'Inserisci un budget'}</p>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Bottom cards - Responsive Grid */}
