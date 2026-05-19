@@ -287,14 +287,14 @@ export default function Layout({ children, currentPageName }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full bg-white border-r border-slate-200 z-50 w-64 overflow-hidden transition-transform duration-200 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+      <aside className={`fixed top-0 left-0 h-full bg-[#0a1628] border-r border-slate-700 z-50 w-64 overflow-hidden transition-transform duration-200 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-slate-200">
+          <div className="p-6 border-b border-slate-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
-                <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
+                <span className="font-bold text-lg text-white">Mall Pilot</span>
               </div>
               {(user?.tipo_account === 'vigilanza' || user?.tipo_account === 'direttore') && (
                 <NotificaBell user={user} />
@@ -304,7 +304,7 @@ export default function Layout({ children, currentPageName }) {
 
           {/* Centro Selector */}
           {centroSelezionato && centri.length > 0 && (
-            <div className="p-4 border-b border-slate-200">
+            <div className="p-4 border-b border-slate-700">
               <div className="relative">
                 <select
                   value={centroSelezionato.id || 'tutti'}
@@ -316,7 +316,7 @@ export default function Layout({ children, currentPageName }) {
                       handleCentroChange(centro);
                     }
                   }}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 appearance-none cursor-pointer hover:bg-slate-100 transition-colors"
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm font-medium text-white appearance-none cursor-pointer hover:bg-slate-700 transition-colors"
                 >
                   {centri.length > 1 && (
                     <option value="tutti">Tutti i Centri</option>
@@ -342,7 +342,7 @@ export default function Layout({ children, currentPageName }) {
                 if (visibleItems.length === 0) return null;
                 return (
                   <div key={group.label}>
-                    <p className="text-xs font-bold text-blue-600 uppercase tracking-widest px-3 mb-1">{group.label}</p>
+                    <p className="text-xs font-bold text-blue-400 uppercase tracking-widest px-3 mb-1">{group.label}</p>
                     <div className="space-y-0.5">
                       {visibleItems.map((item) => {
                         const Icon = item.icon;
@@ -354,11 +354,11 @@ export default function Layout({ children, currentPageName }) {
                             onClick={() => setMobileMenuOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                               isActive
-                                ? 'bg-blue-50 text-blue-700 font-medium'
-                                : 'text-slate-600 hover:bg-slate-50'
+                                ? 'bg-blue-600 text-white font-medium'
+                                : 'text-slate-300 hover:bg-slate-800'
                             }`}
                           >
-                            <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                            <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                             <span>{item.name}</span>
                           </Link>
                         );
@@ -371,7 +371,7 @@ export default function Layout({ children, currentPageName }) {
           </nav>
 
           {/* User Info */}
-          <div className="p-4 border-t border-slate-200">
+          <div className="p-4 border-t border-slate-700">
             {sidebarOpen ? (
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -379,15 +379,15 @@ export default function Layout({ children, currentPageName }) {
                     {user?.full_name?.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-800 truncate">{displayName || user?.full_name}</p>
-                    <p className="text-xs text-slate-500 capitalize">{user?.tipo_account}</p>
+                    <p className="text-sm font-medium text-white truncate">{displayName || user?.full_name}</p>
+                    <p className="text-xs text-slate-400 capitalize">{user?.tipo_account}</p>
                   </div>
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full justify-start gap-2 text-slate-600 hover:text-red-600 hover:border-red-200"
+                  className="w-full justify-start gap-2 text-slate-300 hover:text-red-400 hover:border-red-800 hover:bg-slate-800 border-slate-600"
                 >
                   <LogOut className="w-4 h-4" />
                   Esci
@@ -398,7 +398,7 @@ export default function Layout({ children, currentPageName }) {
                 variant="ghost"
                 size="icon"
                 onClick={handleLogout}
-                className="w-full text-slate-600 hover:text-red-600"
+                className="w-full text-slate-300 hover:text-red-400"
               >
                 <LogOut className="w-5 h-5" />
               </Button>
