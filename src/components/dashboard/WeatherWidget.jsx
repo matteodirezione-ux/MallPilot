@@ -81,7 +81,12 @@ export default function WeatherWidget({ citta, provincia, inline }) {
   // Modalità inline: 7 giorni che riempiono tutta la riga
   if (inline) {
     return (
-      <div className="flex gap-2 w-full">
+      <div className="flex gap-3 w-full items-center">
+        {/* Informazioni centro */}
+        <div className="shrink-0 flex flex-col justify-center">
+          <span className="text-sm font-bold text-slate-700 leading-tight">{weather.place.name}</span>
+          <span className="text-xs text-slate-400 leading-tight">{weather.place.country}</span>
+        </div>
         {daily.time.map((dateStr, i) => {
           const d = new Date(dateStr);
           const isToday = d.getTime() === today.getTime();
