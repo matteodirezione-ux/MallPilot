@@ -540,9 +540,9 @@ export default function Dashboard({ centroSelezionato, user }) {
             <span className="text-sm sm:text-base font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full capitalize">
               {new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
+            <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} inline />
           </div>
           <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
-          <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} />
         </div>
         {centroSelezionato?.logo_url && (
           <img

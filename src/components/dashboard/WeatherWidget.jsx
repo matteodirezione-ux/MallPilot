@@ -28,7 +28,7 @@ const WMO_ICONS = {
 
 const getWmo = (code) => WMO_ICONS[code] || { label: '?', emoji: '🌡️' };
 
-export default function WeatherWidget({ citta, provincia }) {
+export default function WeatherWidget({ citta, provincia, inline }) {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -69,18 +69,29 @@ export default function WeatherWidget({ citta, provincia }) {
 
   if (loading) return (
     <div className="flex items-center gap-2 text-xs text-slate-400 animate-pulse">
-      <span>🌤️</span><span>Caricamento meteo...</span>
+      <span>🌤️</span><span>Caricamento...</span>
     </div>
   );
 
-  if (error) return (
-    <div className="text-xs text-slate-400">{error}</div>
-  );
-
-  if (!weather) return null;
+  if (error || !weather) return null;
 
   const { daily } = weather;
   const today = new Date(); today.setHours(0,0,0,0);
+
+  // Modalità inline: solo oggi nella stessa riga
+  if (inline) {
+    const todayIdx = daily.time.findIndex(dateStr => new Date(dateStr).getTime() === today.getTime());
+    const idx = todayIdx >= 0 ? todayIdx : 0;
+    const wmo = getWmo(daily.weathercode[idx]);
+    return (
+      <span className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+        <span>{wmo.emoji}</span>
+        <span>{Math.round(daily.temperature_2m_max[idx])}°</span>
+        <span className="text-slate-400">/</span>
+        <span className="text-slate-400">{Math.round(daily.temperature_2m_min[idx])}°</span>
+      </span>
+    );
+  }
 
   return (
     <div className="mt-2">
