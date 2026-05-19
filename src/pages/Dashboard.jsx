@@ -538,11 +538,11 @@ export default function Dashboard({ centroSelezionato, user }) {
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 mb-0.5">Dashboard</h1>
             <span className="text-sm sm:text-base font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full capitalize">
-              {new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {format(new Date(), 'EEE d MMM', { locale: it })}
             </span>
+            <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} />
           </div>
           <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
-          <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} />
         </div>
         {centroSelezionato?.logo_url && (
           <img
