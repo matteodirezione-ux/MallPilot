@@ -8,12 +8,23 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building2, Edit, Trash2, Upload } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown } from 'lucide-react';
 import { compressImage } from '@/lib/compressImage';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 export default function TenantPage({ centroSelezionato, user }) {
   const [openForm, setOpenForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState('numero_negozio');
+  const [sortDirection, setSortDirection] = useState('asc');
   const queryClient = useQueryClient();
 
   const { data: tenants = [], isLoading } = useQuery({
@@ -55,6 +66,31 @@ export default function TenantPage({ centroSelezionato, user }) {
     }
   };
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const filteredAndSortedTenants = tenants
+    .filter(tenant => {
+      const search = searchTerm.toLowerCase();
+      return (
+        (tenant.insegna && tenant.insegna.toLowerCase().includes(search)) ||
+        (tenant.ragione_sociale && tenant.ragione_sociale.toLowerCase().includes(search)) ||
+        (tenant.numero_negozio && tenant.numero_negozio.toLowerCase().includes(search))
+      );
+    })
+    .sort((a, b) => {
+      const aVal = a[sortField] || '';
+      const bVal = b[sortField] || '';
+      const comparison = aVal.localeCompare(bVal, 'it', { numeric: true });
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
   if (!centroSelezionato) {
     return (
       <div className="p-8 text-center text-slate-500">
@@ -91,59 +127,114 @@ export default function TenantPage({ centroSelezionato, user }) {
         </Dialog>
       </div>
 
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Cerca per insegna, ragione sociale o n. negozio..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="text-center py-8 text-slate-500">Caricamento...</div>
-      ) : tenants.length === 0 ? (
+      ) : filteredAndSortedTenants.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-slate-500">
-            Nessun tenant presente. Clicca su "Nuovo Tenant" per aggiungere il primo.
+            {tenants.length === 0 
+              ? 'Nessun tenant presente. Clicca su "Nuovo Tenant" per aggiungere il primo.'
+              : 'Nessun risultato trovato per la ricerca.'}
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {tenants.map((tenant) => (
-            <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    {tenant.logo_url ? (
-                      <img src={tenant.logo_url} alt={tenant.insegna || tenant.ragione_sociale} className="w-12 h-12 rounded-lg object-cover" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                        <Building2 className="w-6 h-6 text-blue-600" />
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50">
+                    <TableHead className="w-16"></TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-100"
+                      onClick={() => handleSort('numero_negozio')}
+                    >
+                      <div className="flex items-center gap-1">
+                        N. Negozio
+                        {sortField === 'numero_negozio' && (
+                          sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                        )}
                       </div>
-                    )}
-                    <div>
-                      <CardTitle className="text-lg">{tenant.insegna || tenant.ragione_sociale}</CardTitle>
-                      <p className="text-sm text-slate-500">Negozio {tenant.numero_negozio}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(tenant.id)}>
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <p><span className="font-medium">Ragione Sociale:</span> {tenant.ragione_sociale}</p>
-                {tenant.telefono && <p><span className="font-medium">Telefono:</span> {tenant.telefono}</p>}
-                {tenant.reperibile && <p><span className="font-medium">Reperibile:</span> {tenant.reperibile}</p>}
-                {tenant.data_scadenza_contratto && (
-                  <p className="text-orange-600 font-medium">
-                    Scadenza: {new Date(tenant.data_scadenza_contratto).toLocaleDateString('it-IT')}
-                  </p>
-                )}
-                {tenant.canone && (
-                  <p><span className="font-medium">Canone:</span> € {tenant.canone.toLocaleString('it-IT')}</p>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-100"
+                      onClick={() => handleSort('insegna')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Insegna
+                        {sortField === 'insegna' && (
+                          sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-slate-100"
+                      onClick={() => handleSort('ragione_sociale')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Ragione Sociale
+                        {sortField === 'ragione_sociale' && (
+                          sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                        )}
+                      </div>
+                    </TableHead>
+                    <TableHead>Telefono</TableHead>
+                    <TableHead>Reperibile</TableHead>
+                    <TableHead>PEC</TableHead>
+                    <TableHead className="text-right">Azioni</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAndSortedTenants.map((tenant) => (
+                    <TableRow key={tenant.id} className="hover:bg-slate-50">
+                      <TableCell>
+                        {tenant.logo_url ? (
+                          <img src={tenant.logo_url} alt={tenant.insegna || tenant.ragione_sociale} className="w-10 h-10 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <Building2 className="w-5 h-5 text-blue-600" />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{tenant.numero_negozio}</TableCell>
+                      <TableCell>{tenant.insegna || '-'}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={tenant.ragione_sociale}>
+                        {tenant.ragione_sociale}
+                      </TableCell>
+                      <TableCell>{tenant.telefono || '-'}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={tenant.reperibile}>
+                        {tenant.reperibile || '-'}
+                      </TableCell>
+                      <TableCell>{tenant.pec || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(tenant.id)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
