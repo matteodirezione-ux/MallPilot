@@ -26,6 +26,8 @@ export default function TenantPage({ centroSelezionato, user }) {
   const [sortField, setSortField] = useState('numero_negozio');
   const [sortDirection, setSortDirection] = useState('asc');
   const queryClient = useQueryClient();
+  
+  const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
 
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ['tenants', centroSelezionato?.id],
@@ -122,6 +124,7 @@ export default function TenantPage({ centroSelezionato, user }) {
               centroId={centroSelezionato.id}
               onSave={saveMutation.mutate}
               onCancel={() => { setOpenForm(false); setEditingTenant(null); }}
+              isAdmin={isAdmin}
             />
           </DialogContent>
         </Dialog>
@@ -194,6 +197,8 @@ export default function TenantPage({ centroSelezionato, user }) {
                     <TableHead>Reperibile</TableHead>
                     <TableHead>PEC</TableHead>
                     <TableHead>Email Urgenze</TableHead>
+                    {isAdmin && <TableHead>Data Scadenza</TableHead>}
+                    {isAdmin && <TableHead>Canone</TableHead>}
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -222,6 +227,16 @@ export default function TenantPage({ centroSelezionato, user }) {
                       <TableCell className="max-w-xs truncate" title={tenant.mail_urgenze_pv_chiuso}>
                         {tenant.mail_urgenze_pv_chiuso || '-'}
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell>
+                          {tenant.data_scadenza_contratto ? new Date(tenant.data_scadenza_contratto).toLocaleDateString('it-IT') : '-'}
+                        </TableCell>
+                      )}
+                      {isAdmin && (
+                        <TableCell className="text-right">
+                          {tenant.canone ? `€ ${tenant.canone.toLocaleString('it-IT')}` : '-'}
+                        </TableCell>
+                      )}
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
@@ -244,7 +259,7 @@ export default function TenantPage({ centroSelezionato, user }) {
   );
 }
 
-function TenantForm({ tenant, centroId, onSave, onCancel }) {
+function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin }) {
   const [formData, setFormData] = useState({
     centro_id: centroId,
     numero_negozio: tenant?.numero_negozio || '',
@@ -428,52 +443,56 @@ function TenantForm({ tenant, centroId, onSave, onCancel }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Data Inizio Contratto</Label>
-          <Input
-            type="date"
-            value={formData.data_inizio_contratto}
-            onChange={(e) => setFormData({ ...formData, data_inizio_contratto: e.target.value })}
-          />
-        </div>
-        <div>
-          <Label>Data Scadenza Contratto</Label>
-          <Input
-            type="date"
-            value={formData.data_scadenza_contratto}
-            onChange={(e) => setFormData({ ...formData, data_scadenza_contratto: e.target.value })}
-          />
-        </div>
-      </div>
+      {isAdmin && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Data Inizio Contratto</Label>
+              <Input
+                type="date"
+                value={formData.data_inizio_contratto}
+                onChange={(e) => setFormData({ ...formData, data_inizio_contratto: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Data Scadenza Contratto</Label>
+              <Input
+                type="date"
+                value={formData.data_scadenza_contratto}
+                onChange={(e) => setFormData({ ...formData, data_scadenza_contratto: e.target.value })}
+              />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label>Canone Fisso (€)</Label>
-          <Input
-            type="number"
-            value={formData.canone}
-            onChange={(e) => setFormData({ ...formData, canone: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
-        <div>
-          <Label>Canone Variabile (€)</Label>
-          <Input
-            type="number"
-            value={formData.canone_variabile}
-            onChange={(e) => setFormData({ ...formData, canone_variabile: parseFloat(e.target.value) || 0 })}
-          />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Canone Fisso (€)</Label>
+              <Input
+                type="number"
+                value={formData.canone}
+                onChange={(e) => setFormData({ ...formData, canone: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+            <div>
+              <Label>Canone Variabile (€)</Label>
+              <Input
+                type="number"
+                value={formData.canone_variabile}
+                onChange={(e) => setFormData({ ...formData, canone_variabile: parseFloat(e.target.value) || 0 })}
+              />
+            </div>
+          </div>
 
-      <div>
-        <Label>Note Contratto</Label>
-        <Textarea
-          value={formData.note_contratto}
-          onChange={(e) => setFormData({ ...formData, note_contratto: e.target.value })}
-          rows={2}
-        />
-      </div>
+          <div>
+            <Label>Note Contratto</Label>
+            <Textarea
+              value={formData.note_contratto}
+              onChange={(e) => setFormData({ ...formData, note_contratto: e.target.value })}
+              rows={2}
+            />
+          </div>
+        </>
+      )}
 
       <div className="flex justify-end gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>Annulla</Button>
