@@ -193,6 +193,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                     <TableHead>Telefono</TableHead>
                     <TableHead>Reperibile</TableHead>
                     <TableHead>PEC</TableHead>
+                    <TableHead>Email Urgenze</TableHead>
                     <TableHead className="text-right">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -218,6 +219,9 @@ export default function TenantPage({ centroSelezionato, user }) {
                         {tenant.reperibile || '-'}
                       </TableCell>
                       <TableCell>{tenant.pec || '-'}</TableCell>
+                      <TableCell className="max-w-xs truncate" title={tenant.mail_urgenze_pv_chiuso}>
+                        {tenant.mail_urgenze_pv_chiuso || '-'}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
