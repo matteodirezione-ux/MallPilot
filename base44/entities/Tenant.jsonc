@@ -50,19 +50,17 @@
       "type": "string",
       "description": "Indirizzo ufficio marketing"
     },
+    "macchina_condizionamento_esterna": {
+      "type": "string",
+      "description": "Descrizione macchina di condizionamento esterna"
+    },
+    "macchina_condizionamento_interna": {
+      "type": "string",
+      "description": "Descrizione macchina di condizionamento interna"
+    },
     "pec": {
       "type": "string",
       "description": "PEC aziendale"
-    },
-    "macchina_condizionamento_esterna": {
-      "type": "boolean",
-      "default": false,
-      "description": "Presenza macchina di condizionamento esterna"
-    },
-    "macchina_condizionamento_interna": {
-      "type": "boolean",
-      "default": false,
-      "description": "Presenza macchina di condizionamento interna"
     },
     "data_inizio_contratto": {
       "type": "string",

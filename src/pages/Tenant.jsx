@@ -163,9 +163,9 @@ function TenantForm({ tenant, centroId, onSave, onCancel }) {
     mail_urgenze_pv_chiuso: tenant?.mail_urgenze_pv_chiuso || '',
     referente_tecnico: tenant?.referente_tecnico || '',
     indirizzo_ufficio_marketing: tenant?.indirizzo_ufficio_marketing || '',
+    macchina_condizionamento_esterna: tenant?.macchina_condizionamento_esterna || '',
+    macchina_condizionamento_interna: tenant?.macchina_condizionamento_interna || '',
     pec: tenant?.pec || '',
-    macchina_condizionamento_esterna: tenant?.macchina_condizionamento_esterna || false,
-    macchina_condizionamento_interna: tenant?.macchina_condizionamento_interna || false,
     data_inizio_contratto: tenant?.data_inizio_contratto || '',
     data_scadenza_contratto: tenant?.data_scadenza_contratto || '',
     canone: tenant?.canone || 0,
@@ -296,6 +296,23 @@ function TenantForm({ tenant, centroId, onSave, onCancel }) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Macchina Condizionamento Esterna</Label>
+          <Input
+            value={formData.macchina_condizionamento_esterna}
+            onChange={(e) => setFormData({ ...formData, macchina_condizionamento_esterna: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label>Macchina Condizionamento Interna</Label>
+          <Input
+            value={formData.macchina_condizionamento_interna}
+            onChange={(e) => setFormData({ ...formData, macchina_condizionamento_interna: e.target.value })}
+          />
+        </div>
+      </div>
+
       <div>
         <Label>PEC</Label>
         <Input
@@ -361,23 +378,6 @@ function TenantForm({ tenant, centroId, onSave, onCancel }) {
           onChange={(e) => setFormData({ ...formData, note_contratto: e.target.value })}
           rows={2}
         />
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={formData.macchina_condizionamento_esterna}
-            onCheckedChange={(checked) => setFormData({ ...formData, macchina_condizionamento_esterna: checked })}
-          />
-          <Label>Macchina di condizionamento esterna</Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={formData.macchina_condizionamento_interna}
-            onCheckedChange={(checked) => setFormData({ ...formData, macchina_condizionamento_interna: checked })}
-          />
-          <Label>Macchina di condizionamento interna</Label>
-        </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-4">
