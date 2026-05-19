@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     for (const tenant of tenantsData) {
       try {
         const tenantData = {
-          centro_id: "fano",
+          centro_id: "698df1f54776cbd5c4ae1d41",
           numero_negozio: tenant.numero_negozio,
           ragione_sociale: tenant.ragione_sociale,
           insegna: tenant.insegna,
