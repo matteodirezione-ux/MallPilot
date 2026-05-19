@@ -220,7 +220,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                         {tenant.ragione_sociale}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{tenant.telefono || '-'}</TableCell>
-                      <TableCell className="max-w-[150px] truncate" title={tenant.reperibile}>
+                      <TableCell className="whitespace-nowrap">
                         {tenant.reperibile || '-'}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{tenant.pec || '-'}</TableCell>
