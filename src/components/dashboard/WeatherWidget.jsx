@@ -78,10 +78,10 @@ export default function WeatherWidget({ citta, provincia, inline }) {
   const { daily } = weather;
   const today = new Date(); today.setHours(0,0,0,0);
 
-  // Modalità inline: 7 giorni compatti nella stessa riga
+  // Modalità inline: 7 giorni che riempiono tutta la riga
   if (inline) {
     return (
-      <div className="flex gap-1 overflow-x-auto">
+      <div className="flex gap-1.5 w-full">
         {daily.time.map((dateStr, i) => {
           const d = new Date(dateStr);
           const isToday = d.getTime() === today.getTime();
@@ -90,14 +90,14 @@ export default function WeatherWidget({ citta, provincia, inline }) {
           return (
             <div
               key={dateStr}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-xs shrink-0 ${
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl border text-center ${
                 isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
               }`}
             >
-              <span className={`font-semibold capitalize ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>{dayLabel}</span>
-              <span>{wmo.emoji}</span>
-              <span className="font-bold text-slate-800">{Math.round(daily.temperature_2m_max[i])}°</span>
-              <span className="text-slate-400">{Math.round(daily.temperature_2m_min[i])}°</span>
+              <span className={`text-xs font-semibold capitalize ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>{dayLabel}</span>
+              <span className="text-xl leading-none">{wmo.emoji}</span>
+              <span className="text-sm font-bold text-slate-800">{Math.round(daily.temperature_2m_max[i])}°</span>
+              <span className="text-xs text-slate-400">{Math.round(daily.temperature_2m_min[i])}°</span>
             </div>
           );
         })}
