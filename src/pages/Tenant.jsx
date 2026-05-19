@@ -161,7 +161,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                   <TableRow className="bg-slate-50">
                     <TableHead className="w-16"></TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-slate-100"
+                      className="cursor-pointer hover:bg-slate-100 whitespace-nowrap"
                       onClick={() => handleSort('numero_negozio')}
                     >
                       <div className="flex items-center gap-1">
@@ -172,7 +172,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-slate-100"
+                      className="cursor-pointer hover:bg-slate-100 whitespace-nowrap"
                       onClick={() => handleSort('insegna')}
                     >
                       <div className="flex items-center gap-1">
@@ -183,7 +183,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                       </div>
                     </TableHead>
                     <TableHead 
-                      className="cursor-pointer hover:bg-slate-100"
+                      className="cursor-pointer hover:bg-slate-100 whitespace-nowrap"
                       onClick={() => handleSort('ragione_sociale')}
                     >
                       <div className="flex items-center gap-1">
@@ -193,13 +193,13 @@ export default function TenantPage({ centroSelezionato, user }) {
                         )}
                       </div>
                     </TableHead>
-                    <TableHead>Telefono</TableHead>
-                    <TableHead>Reperibile</TableHead>
-                    <TableHead>PEC</TableHead>
-                    <TableHead>Email Urgenze</TableHead>
-                    {isAdmin && <TableHead>Data Scadenza</TableHead>}
-                    {isAdmin && <TableHead>Canone</TableHead>}
-                    <TableHead className="text-right">Azioni</TableHead>
+                    <TableHead className="whitespace-nowrap">Telefono</TableHead>
+                    <TableHead className="whitespace-nowrap">Reperibile</TableHead>
+                    <TableHead className="whitespace-nowrap">PEC</TableHead>
+                    <TableHead className="whitespace-nowrap">Email Urgenze</TableHead>
+                    {isAdmin && <TableHead className="whitespace-nowrap">Data Scadenza</TableHead>}
+                    {isAdmin && <TableHead className="whitespace-nowrap text-right">Canone</TableHead>}
+                    <TableHead className="text-right whitespace-nowrap">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -214,30 +214,30 @@ export default function TenantPage({ centroSelezionato, user }) {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">{tenant.numero_negozio}</TableCell>
-                      <TableCell>{tenant.insegna || '-'}</TableCell>
-                      <TableCell className="max-w-xs truncate" title={tenant.ragione_sociale}>
+                      <TableCell className="font-medium whitespace-nowrap">{tenant.numero_negozio}</TableCell>
+                      <TableCell className="whitespace-nowrap">{tenant.insegna || '-'}</TableCell>
+                      <TableCell className="max-w-[200px] truncate" title={tenant.ragione_sociale}>
                         {tenant.ragione_sociale}
                       </TableCell>
-                      <TableCell>{tenant.telefono || '-'}</TableCell>
-                      <TableCell className="max-w-xs truncate" title={tenant.reperibile}>
+                      <TableCell className="whitespace-nowrap">{tenant.telefono || '-'}</TableCell>
+                      <TableCell className="max-w-[150px] truncate" title={tenant.reperibile}>
                         {tenant.reperibile || '-'}
                       </TableCell>
-                      <TableCell>{tenant.pec || '-'}</TableCell>
-                      <TableCell className="max-w-xs truncate" title={tenant.mail_urgenze_pv_chiuso}>
+                      <TableCell className="whitespace-nowrap">{tenant.pec || '-'}</TableCell>
+                      <TableCell className="max-w-[150px] truncate" title={tenant.mail_urgenze_pv_chiuso}>
                         {tenant.mail_urgenze_pv_chiuso || '-'}
                       </TableCell>
                       {isAdmin && (
-                        <TableCell>
+                        <TableCell className="whitespace-nowrap">
                           {tenant.data_scadenza_contratto ? new Date(tenant.data_scadenza_contratto).toLocaleDateString('it-IT') : '-'}
                         </TableCell>
                       )}
                       {isAdmin && (
-                        <TableCell className="text-right">
+                        <TableCell className="text-right whitespace-nowrap">
                           {tenant.canone ? `€ ${tenant.canone.toLocaleString('it-IT')}` : '-'}
                         </TableCell>
                       )}
-                      <TableCell className="text-right">
+                      <TableCell className="text-right whitespace-nowrap">
                         <div className="flex justify-end gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
                             <Edit className="w-4 h-4" />
