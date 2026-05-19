@@ -81,23 +81,27 @@ export default function WeatherWidget({ citta, provincia, inline }) {
   // Modalità inline: 7 giorni che riempiono tutta la riga
   if (inline) {
     return (
-      <div className="flex gap-1.5 w-full">
+      <div className="flex gap-2 w-full">
         {daily.time.map((dateStr, i) => {
           const d = new Date(dateStr);
           const isToday = d.getTime() === today.getTime();
           const wmo = getWmo(daily.weathercode[i]);
           const dayLabel = isToday ? 'Oggi' : format(d, 'EEE', { locale: it });
+          const maxTemp = Math.round(daily.temperature_2m_max[i]);
+          const minTemp = Math.round(daily.temperature_2m_min[i]);
           return (
             <div
               key={dateStr}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl border text-center ${
-                isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border text-center ${
+                isToday ? 'bg-gradient-to-b from-blue-50 to-blue-100/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 shadow-sm'
               }`}
             >
-              <span className={`text-xs font-semibold capitalize ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>{dayLabel}</span>
-              <span className="text-xl leading-none">{wmo.emoji}</span>
-              <span className="text-sm font-bold text-slate-800">{Math.round(daily.temperature_2m_max[i])}°</span>
-              <span className="text-xs text-slate-400">{Math.round(daily.temperature_2m_min[i])}°</span>
+              <span className={`text-xs font-bold uppercase tracking-tight ${isToday ? 'text-blue-700' : 'text-slate-600'}`}>{dayLabel}</span>
+              <span className="text-2xl leading-none my-0.5">{wmo.emoji}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-slate-800">{maxTemp}°</span>
+                <span className="text-xs font-medium text-slate-400">{minTemp}°</span>
+              </div>
             </div>
           );
         })}
