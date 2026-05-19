@@ -92,15 +92,17 @@ export default function WeatherWidget({ citta, provincia, inline }) {
           return (
             <div
               key={dateStr}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border text-center ${
+              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border ${
                 isToday ? 'bg-gradient-to-b from-blue-50 to-blue-100/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 shadow-sm'
               }`}
             >
               <span className={`text-xs font-bold uppercase tracking-tight ${isToday ? 'text-blue-700' : 'text-slate-600'}`}>{dayLabel}</span>
-              <span className="text-2xl leading-none my-0.5">{wmo.emoji}</span>
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold text-slate-800">{maxTemp}°</span>
-                <span className="text-xs font-medium text-slate-400">{minTemp}°</span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl leading-none">{wmo.emoji}</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-800 leading-tight">{maxTemp}°</span>
+                  <span className="text-xs font-medium text-slate-400 leading-tight">{minTemp}°</span>
+                </div>
               </div>
             </div>
           );
