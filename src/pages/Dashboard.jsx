@@ -533,40 +533,28 @@ export default function Dashboard({ centroSelezionato, user }) {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-      <div className="mb-4 sm:mb-6 bg-white rounded-lg border border-slate-200 shadow-sm p-3 sm:p-4">
-        <div className="flex items-center justify-between gap-3 sm:gap-4">
-          {/* Titolo e data sinistra */}
+      <div className="mb-4 sm:mb-6">
+        <div className="flex items-center gap-4">
+          {/* Titolo + data */}
           <div className="shrink-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-bold text-slate-800">Dashboard</h1>
-              <span className="text-xs sm:text-sm text-slate-500">
-                {new Date().toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
+              <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full capitalize">
+                {new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </span>
             </div>
+            <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
           </div>
-          
-          {/* Centro + Meteo */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-            {/* Centro */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              </svg>
-              <span className="text-xs sm:text-sm font-medium text-slate-700 whitespace-nowrap">{centroSelezionato?.nome}</span>
-            </div>
-            
-            {/* Meteo - flex-1 per prendere spazio disponibile */}
-            <div className="flex-1 min-w-0">
-              <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} inline />
-            </div>
+          {/* Meteo - occupa tutto lo spazio rimanente */}
+          <div className="flex-1 min-w-0">
+            <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} inline />
           </div>
-          
-          {/* Logo - sempre a destra */}
+          {/* Logo */}
           {centroSelezionato?.logo_url && (
             <img
               src={centroSelezionato.logo_url}
               alt={centroSelezionato.nome}
-              className="h-10 sm:h-12 max-w-[100px] sm:max-w-[120px] object-contain shrink-0"
+              className="h-12 sm:h-16 max-w-[120px] sm:max-w-[180px] object-contain shrink-0"
             />
           )}
         </div>
