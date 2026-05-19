@@ -31,13 +31,13 @@ export default function TasksDashboard({ tasks = [], onComplete, onSelect }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const domani = new Date(today); domani.setDate(today.getDate() + 1);
+  const oggi = new Date(today);
 
   const activeTasks = tasks.filter(t => {
     if (t.stato === 'completato' || t.stato === 'annullato') return false;
     if (!t.data_scadenza) return false;
     const d = new Date(t.data_scadenza); d.setHours(0,0,0,0);
-    return d <= domani; // solo scaduti, oggi e domani
+    return d <= oggi; // solo scaduti e oggi
   });
 
   activeTasks.forEach(task => {
@@ -47,7 +47,6 @@ export default function TasksDashboard({ tasks = [], onComplete, onSelect }) {
       const dueDate = new Date(task.data_scadenza);
       dueDate.setHours(0, 0, 0, 0);
       if (dueDate.getTime() === today.getTime()) groupKey = 'oggi';
-      else if (dueDate.getTime() === domani.getTime()) groupKey = 'domani';
       else if (dueDate < today) groupKey = 'scaduti';
       else groupKey = format(dueDate, 'yyyy-MM-dd');
     }
@@ -56,9 +55,9 @@ export default function TasksDashboard({ tasks = [], onComplete, onSelect }) {
     groupedTasks[groupKey].push(task);
   });
 
-  // Ordina i gruppi: scaduti prima, poi oggi, poi domani, poi futuri
+  // Ordina i gruppi: scaduti prima, poi oggi, poi futuri
   const sortedGroups = Object.keys(groupedTasks).sort((a, b) => {
-    const order = ['scaduti', 'oggi', 'domani'];
+    const order = ['scaduti', 'oggi'];
     const aIndex = order.indexOf(a);
     const bIndex = order.indexOf(b);
 
@@ -82,10 +81,9 @@ export default function TasksDashboard({ tasks = [], onComplete, onSelect }) {
         <div key={groupKey}>
           <h4 className="text-sm font-semibold text-slate-700 mb-2 capitalize">
             {groupKey === 'oggi' ? '📅 Oggi' : 
-             groupKey === 'domani' ? '📅 Domani' : 
-             groupKey === 'scaduti' ? '⚠️ Scaduti' : 
-             groupKey === 'senza_data' ? '📌 Senza Data' : 
-             format(new Date(groupKey), 'eee d MMM', { locale: it })}
+              groupKey === 'scaduti' ? '⚠️ Scaduti' : 
+              groupKey === 'senza_data' ? '📌 Senza Data' : 
+              format(new Date(groupKey), 'eee d MMM', { locale: it })}
           </h4>
           <div className="space-y-2">
             {groupedTasks[groupKey].map(task => (

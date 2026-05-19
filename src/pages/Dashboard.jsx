@@ -793,20 +793,19 @@ export default function Dashboard({ centroSelezionato, user }) {
               const filtrati = stats.controlliList.filter(c => {
                 if (c.stato === 'completato' || c.stato === 'annullato') return false;
                 const ds = getDs(c);
-                return ds <= domani;
+                return ds <= oggi;
               });
 
               if (filtrati.length === 0) return <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo in scadenza</p>;
 
-              const groups = { scaduti: [], oggi: [], domani: [] };
+              const groups = { scaduti: [], oggi: [] };
               filtrati.forEach(c => {
                 const ds = getDs(c);
                 if (ds < oggi) groups.scaduti.push(c);
-                else if (ds.getTime() === oggi.getTime()) groups.oggi.push(c);
-                else groups.domani.push(c);
+                else groups.oggi.push(c);
               });
 
-              const groupLabels = { scaduti: '⚠️ Scaduti', oggi: '📅 Oggi', domani: '📅 Domani' };
+              const groupLabels = { scaduti: '⚠️ Scaduti', oggi: '📅 Oggi' };
               const groupStyles = {
                 scaduti: 'bg-red-50 border-red-200',
                 oggi: 'bg-yellow-50 border-yellow-200',
@@ -815,7 +814,7 @@ export default function Dashboard({ centroSelezionato, user }) {
 
               return (
                 <div className="space-y-4">
-                  {['scaduti', 'oggi', 'domani'].map(key => groups[key].length > 0 && (
+                  {['scaduti', 'oggi'].map(key => groups[key].length > 0 && (
                     <div key={key}>
                       <h4 className="text-sm font-semibold text-slate-700 mb-2">{groupLabels[key]}</h4>
                       <div className="space-y-1.5 sm:space-y-2">
