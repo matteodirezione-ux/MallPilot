@@ -5,36 +5,15 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
+import { Image as ImageIcon, X as XIcon, Loader2, Camera } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { compressImages } from '@/lib/compressImage';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const defaultForm = {
-  titolo: '',
-  descrizione: '',
-  priorita: 'media',
-  stato: 'da_fare',
-  data_scadenza: '',
-  ricorrente: false,
-  ricorrenza_tipo: 'settimanale',
-  ricorrenza_ogni: 1,
-  ricorrenza_unita: 'settimane',
-  ricorrenza_fine: '',
-  foto_urls: [],
-  note: '',
+  titolo: '', descrizione: '', priorita: 'media', stato: 'da_fare', data_scadenza: '',
+  ricorrente: false, ricorrenza_tipo: 'settimanale', ricorrenza_ogni: 1, ricorrenza_unita: 'settimane', ricorrenza_fine: '', foto_urls: [], note: '',
 };
 
 export default function FormTask({ open, onClose, onSave, task, user, centri, direttori, vigilanze, centroDefault }) {
@@ -43,7 +22,6 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
   const [assegnatiSelezionati, setAssegnatiSelezionati] = useState([]);
   const [modalitaAssegnazione, setModalitaAssegnazione] = useState('singola');
   const [uploadingFoto, setUploadingFoto] = useState(false);
-
   const isProprieta = user?.tipo_account === 'proprieta';
 
   useEffect(() => {
@@ -77,10 +55,6 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
     e.target.value = '';
   };
 
-  const handleRemoveFoto = (url) => {
-    set('foto_urls', (form.foto_urls || []).filter(u => u !== url));
-  };
-
   const assegnatari = React.useMemo(() => {
     const list = [];
     if (isProprieta) {
@@ -95,114 +69,45 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
     return list;
   }, [user, direttori, vigilanze]);
 
-  const toggleCentro = (centroId) => {
-    setCentriSelezionati(prev =>
-      prev.includes(centroId) ? prev.filter(id => id !== centroId) : [...prev, centroId]
-    );
-  };
-
-  const toggleAssegnato = (persona) => {
-    setAssegnatiSelezionati(prev =>
-      prev.find(a => a.email === persona.email)
-        ? prev.filter(a => a.email !== persona.email)
-        : [...prev, persona]
-    );
-  };
+  const toggleCentro = (id) => setCentriSelezionati(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const toggleAssegnato = (persona) => setAssegnatiSelezionati(prev => prev.find(a => a.email === persona.email) ? prev.filter(a => a.email !== persona.email) : [...prev, persona]);
+  const isMultipla = isProprieta && modalitaAssegnazione === 'multipla' && !task;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Validazione obbligatoria: Centro
-    if ((isProprieta || user?.tipo_account === 'direttore') && centri?.length > 0) {
-      if (!isMultipla && centriSelezionati.length === 0) {
-        alert('Seleziona un centro commerciale');
-        return;
-      }
-    }
-
-    // Validazione obbligatoria: Assegna a
-    if (assegnatari.length > 0 && assegnatiSelezionati.length === 0) {
-      alert('Seleziona a chi assegnare il task');
-      return;
-    }
-
-    // Se stiamo modificando un task esistente, non sovrascrivere chi l'ha assegnato
-    const base = {
-      ...form,
-      assegnato_da_email: task?.assegnato_da_email || user?.email,
-      assegnato_da_nome: task?.assegnato_da_nome || user?.full_name,
-    };
-    if (!base.ricorrente) {
-      delete base.ricorrenza_tipo;
-      delete base.ricorrenza_ogni;
-      delete base.ricorrenza_unita;
-      delete base.ricorrenza_fine;
-    }
-
+    if (assegnatari.length > 0 && assegnatiSelezionati.length === 0) { alert('Seleziona a chi assegnare il task'); return; }
+    const base = { ...form, assegnato_da_email: task?.assegnato_da_email || user?.email, assegnato_da_nome: task?.assegnato_da_nome || user?.full_name };
+    if (!base.ricorrente) { delete base.ricorrenza_tipo; delete base.ricorrenza_ogni; delete base.ricorrenza_unita; delete base.ricorrenza_fine; }
     if (isProprieta && modalitaAssegnazione === 'multipla' && !task) {
       const centriDaSalvare = centriSelezionati.length > 0 ? centriSelezionati : [''];
       const assegnatiDaSalvare = assegnatiSelezionati.length > 0 ? assegnatiSelezionati : [null];
       const combinazioni = [];
       for (const centroId of centriDaSalvare) {
         for (const persona of assegnatiDaSalvare) {
-          const centroNome = centri?.find(c => c.id === centroId)?.nome || '';
-          combinazioni.push({
-            ...base,
-            centro_id: centroId || '',
-            centro_nome: centroNome,
-            assegnato_a_email: persona?.email || '',
-            assegnato_a_nome: persona?.nome || '',
-          });
+          combinazioni.push({ ...base, centro_id: centroId || '', assegnato_a_email: persona?.email || '', assegnato_a_nome: persona?.nome || '' });
         }
       }
       onSave(combinazioni);
       return;
     }
-
-    const singolo = {
-      ...base,
-      centro_id: centriSelezionati[0] || form.centro_id || '',
-    };
-    if (assegnatiSelezionati.length > 0) {
-      singolo.assegnato_a_email = assegnatiSelezionati[0].email;
-      singolo.assegnato_a_nome = assegnatiSelezionati[0].nome;
-    }
+    const singolo = { ...base, centro_id: centriSelezionati[0] || form.centro_id || '' };
+    if (assegnatiSelezionati.length > 0) { singolo.assegnato_a_email = assegnatiSelezionati[0].email; singolo.assegnato_a_nome = assegnatiSelezionati[0].nome; }
     onSave(singolo);
   };
-
-  const isMultipla = isProprieta && modalitaAssegnazione === 'multipla' && !task;
-
-  const rowClass = "flex items-start gap-3";
-  const labelClass = "w-36 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
-  const fieldClass = "flex-1 min-w-0";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{task ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <DialogHeader><DialogTitle>{task ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle></DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div><Label>Titolo *</Label><Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="mt-1 h-8 text-sm" /></div>
+          <div><Label>Descrizione</Label><Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="mt-1 text-sm" /></div>
 
-          <div className={rowClass}>
-            <label className={labelClass}>Titolo *</label>
-            <div className={fieldClass}>
-              <Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="h-8 text-sm" />
-            </div>
-          </div>
-
-          <div className={rowClass}>
-            <label className={labelClass}>Descrizione</label>
-            <div className={fieldClass}>
-              <Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="text-sm" />
-            </div>
-          </div>
-
-          <div className={rowClass}>
-            <label className={labelClass}>Priorità</label>
-            <div className={fieldClass}>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Priorità</Label>
               <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
-                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bassa">Bassa</SelectItem>
                   <SelectItem value="media">Media</SelectItem>
@@ -211,224 +116,124 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className={rowClass}>
-            <label className={labelClass}>Data scadenza *</label>
-            <div className={fieldClass}>
-              <DatePicker value={form.data_scadenza} onChange={v => set('data_scadenza', v)} placeholder="Seleziona data scadenza" />
+            <div>
+              <Label>Stato</Label>
+              <Select value={form.stato} onValueChange={v => set('stato', v)}>
+                <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="da_fare">Da fare</SelectItem>
+                  <SelectItem value="in_corso">In corso</SelectItem>
+                  <SelectItem value="completato">Completato</SelectItem>
+                  <SelectItem value="annullato">Annullato</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {isProprieta && !task && (
-            <div className={rowClass}>
-              <span className={labelClass}>Multi-assegnazione</span>
-              <div className={`${fieldClass} flex items-center pt-1.5 gap-2`}>
-                <Switch
-                  checked={modalitaAssegnazione === 'multipla'}
-                  onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')}
-                  id="multi"
-                />
-                <Label htmlFor="multi" className="text-sm text-slate-500">Più centri / persone</Label>
-              </div>
-            </div>
-          )}
+          <div><Label>Data scadenza</Label><div className="mt-1"><DatePicker value={form.data_scadenza} onChange={v => set('data_scadenza', v)} placeholder="Seleziona data" /></div></div>
 
-          {(isProprieta || user?.tipo_account === 'direttore' || user?.tipo_account === 'vigilanza') && centri?.length > 0 && (
-            <div className={rowClass}>
-              <label className={labelClass}>{isMultipla ? 'Centri' : 'Centro *'}</label>
-              <div className={fieldClass}>
-                {isMultipla ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setCentriSelezionati([])}
-                      className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.length === 0 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-                    >
-                      Tutti
-                    </button>
-                    {centri.map(c => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => toggleCentro(c.id)}
-                        className={`px-3 py-1 rounded-full text-sm border transition-colors ${centriSelezionati.includes(c.id) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-                      >
-                        {c.nome}
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <Select value={centriSelezionati[0] || ''} onValueChange={v => setCentriSelezionati(v ? [v] : [])}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Tutti i centri" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={null}>Tutti i centri</SelectItem>
-                      {centri.map(c => (
-                        <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+          {centri && centri.length > 0 && (
+            <div>
+              <Label>Centro</Label>
+              {isMultipla ? (
+                <div className="mt-1 space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
+                  {centri.map(c => (
+                    <label key={c.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
+                      <input type="checkbox" checked={centriSelezionati.includes(c.id)} onChange={() => toggleCentro(c.id)} className="rounded" />{c.nome}
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <select value={centriSelezionati[0] || ''} onChange={e => setCentriSelezionati([e.target.value])} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-8">
+                  <option value="">Seleziona centro</option>
+                  {centri.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                </select>
+              )}
             </div>
           )}
 
           {assegnatari.length > 0 && (
-            <div className={rowClass}>
-              <label className={labelClass}>Assegna a *</label>
-              <div className={fieldClass}>
-                {isMultipla ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {assegnatari.map(a => (
-                      <button
-                        key={a.email}
-                        type="button"
-                        onClick={() => toggleAssegnato(a)}
-                        className={`px-2.5 py-1 rounded-full text-sm border transition-colors ${assegnatiSelezionati.find(x => x.email === a.email) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'}`}
-                      >
-                        {a.nome} <span className="opacity-70 text-xs">({a.ruolo})</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <Select
-                    value={assegnatiSelezionati[0]?.email || ''}
-                    onValueChange={v => {
-                      const trovato = assegnatari.find(a => a.email === v);
-                      setAssegnatiSelezionati(trovato ? [trovato] : []);
-                    }}
-                  >
-                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Seleziona persona..." /></SelectTrigger>
-                    <SelectContent>
-                      {assegnatari.map(a => (
-                        <SelectItem key={a.email} value={a.email}>
-                          {a.nome} <span className="text-slate-400 text-xs">({a.ruolo})</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+            <div>
+              <Label>Assegna a</Label>
+              {isMultipla ? (
+                <div className="mt-1 space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
+                  {assegnatari.map(p => (
+                    <label key={p.email} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
+                      <input type="checkbox" checked={!!assegnatiSelezionati.find(a => a.email === p.email)} onChange={() => toggleAssegnato(p)} className="rounded" />
+                      {p.nome} <span className="text-xs text-slate-400">({p.ruolo})</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <select value={assegnatiSelezionati[0]?.email || ''} onChange={e => { const p = assegnatari.find(a => a.email === e.target.value); setAssegnatiSelezionati(p ? [p] : []); }} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-8">
+                  <option value="">Seleziona persona</option>
+                  {assegnatari.map(p => <option key={p.email} value={p.email}>{p.nome} ({p.ruolo})</option>)}
+                </select>
+              )}
             </div>
           )}
 
-          {isMultipla && (
-            <div className="bg-blue-50 rounded-lg p-2.5 text-sm text-blue-800 ml-[144px]">
-              Verranno creati <strong>
-                {Math.max(centriSelezionati.length, 1) * Math.max(assegnatiSelezionati.length, 1)}
-              </strong> task separati per ogni combinazione centro/persona.
+          {isProprieta && !task && (
+            <div className="flex items-center gap-2">
+              <Switch checked={modalitaAssegnazione === 'multipla'} onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')} />
+              <Label className="text-sm">Assegnazione multipla (più centri/persone)</Label>
             </div>
           )}
 
-          <div className={rowClass}>
-            <span className={labelClass}>Ricorrente</span>
-            <div className={`${fieldClass} flex items-center pt-1.5`}>
-              <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} id="ricorrente" />
-            </div>
+          <div className="flex items-center gap-2">
+            <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} />
+            <Label className="text-sm">Ricorrente</Label>
           </div>
 
           {form.ricorrente && (
-            <div className="bg-slate-50 rounded-lg p-3 space-y-3 ml-[144px]">
-              <div className={rowClass}>
-                <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Tipo</label>
-                <div className="flex-1">
-                  <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
-                    <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+            <div className="pl-4 border-l-2 border-slate-200 space-y-2">
+              <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {['giornaliero','settimanale','mensile','annuale','personalizzato'].map(v => <SelectItem key={v} value={v}>{v.charAt(0).toUpperCase() + v.slice(1)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              {form.ricorrenza_tipo === 'personalizzato' && (
+                <div className="flex gap-2">
+                  <Input type="number" value={form.ricorrenza_ogni} onChange={e => set('ricorrenza_ogni', parseInt(e.target.value))} className="w-20 h-8" min={1} />
+                  <Select value={form.ricorrenza_unita} onValueChange={v => set('ricorrenza_unita', v)}>
+                    <SelectTrigger className="flex-1 h-8"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="giornaliero">Giornaliero</SelectItem>
-                      <SelectItem value="settimanale">Settimanale</SelectItem>
-                      <SelectItem value="mensile">Mensile</SelectItem>
-                      <SelectItem value="annuale">Annuale</SelectItem>
-                      <SelectItem value="personalizzato">Personalizzato</SelectItem>
+                      <SelectItem value="giorni">Giorni</SelectItem>
+                      <SelectItem value="settimane">Settimane</SelectItem>
+                      <SelectItem value="mesi">Mesi</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              {form.ricorrenza_tipo === 'personalizzato' && (
-                <div className={rowClass}>
-                  <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Ogni</label>
-                  <div className="flex-1 flex gap-2">
-                    <Input
-                      type="number" min="1" className="h-8 text-sm w-20"
-                      value={form.ricorrenza_ogni}
-                      onChange={e => set('ricorrenza_ogni', parseInt(e.target.value) || 1)}
-                    />
-                    <Select value={form.ricorrenza_unita} onValueChange={v => set('ricorrenza_unita', v)}>
-                      <SelectTrigger className="h-8 text-sm flex-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="giorni">Giorni</SelectItem>
-                        <SelectItem value="settimane">Settimane</SelectItem>
-                        <SelectItem value="mesi">Mesi</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
               )}
-
-              <div className={rowClass}>
-                <label className="w-24 flex-shrink-0 text-sm font-medium text-slate-700 pt-2">Fine</label>
-                <div className="flex-1">
-                  <DatePicker value={form.ricorrenza_fine} onChange={v => set('ricorrenza_fine', v)} placeholder="Data fine ricorrenza" />
-                </div>
-              </div>
+              <div><Label className="text-xs">Fine ricorrenza</Label><div className="mt-1"><DatePicker value={form.ricorrenza_fine} onChange={v => set('ricorrenza_fine', v)} placeholder="Data fine" /></div></div>
             </div>
           )}
 
-          {/* Foto */}
-          <div className={rowClass}>
-            <label className={labelClass}>Foto</label>
-            <div className={fieldClass}>
-              <div className="flex gap-2 flex-wrap mb-2">
-                {uploadingFoto ? (
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Caricamento...
+          <div><Label>Note</Label><Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="mt-1 text-sm" /></div>
+
+          <div>
+            <Label>Foto</Label>
+            <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-slate-300 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm text-slate-600">
+              {uploadingFoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+              {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
+              <input type="file" multiple accept="image/*" className="hidden" onChange={handleFotoUpload} />
+            </label>
+            {(form.foto_urls || []).length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {form.foto_urls.map((url, i) => (
+                  <div key={i} className="relative">
+                    <img src={url} alt="" className="w-14 h-14 rounded object-cover" />
+                    <button type="button" onClick={() => set('foto_urls', form.foto_urls.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-white rounded-full shadow p-0.5"><XIcon className="w-3 h-3" /></button>
                   </div>
-                ) : (
-                  <>
-                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-lg cursor-pointer transition-colors">
-                      <ImageIcon className="w-4 h-4" />
-                      Galleria
-                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} />
-                    </label>
-                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
-                      <Camera className="w-4 h-4" />
-                      Fotocamera
-                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFotoUpload} />
-                    </label>
-                  </>
-                )}
+                ))}
               </div>
-              {(form.foto_urls || []).length > 0 && (
-                <div className="grid grid-cols-4 gap-1">
-                  {(form.foto_urls || []).map((url, i) => (
-                    <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full h-16 object-cover rounded" />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveFoto(url)}
-                        className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          <div className={rowClass}>
-            <label className={labelClass}>Note</label>
-            <div className={fieldClass}>
-              <Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="text-sm" />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button type="button" variant="outline" size="sm" onClick={onClose}>Annulla</Button>
-            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">Annulla</Button>
+            <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
         </form>
       </DialogContent>

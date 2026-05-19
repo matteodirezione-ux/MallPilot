@@ -1,31 +1,33 @@
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import NavigationTracker from '@/lib/NavigationTracker'
-import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ReportPage from './pages/Report';
+import Layout from './Layout';
+
+// Page imports
+import Calendario from './pages/Calendario';
+import CalendarioVigilanza from './pages/CalendarioVigilanza';
+import Dashboard from './pages/Dashboard';
+import Clienti from './pages/Clienti';
 import CapexPage from './pages/Capex';
-import PuliziePage from './pages/Pulizie';
-import StorageReport from './pages/StorageReport';
-import Fornitori from './pages/Fornitori';
+import Documenti from './pages/Documenti';
+import Gestione from './pages/Gestione';
 import Marketing from './pages/Marketing';
-
-const { Pages, Layout, mainPage } = pagesConfig;
-const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
-
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+import Fornitori from './pages/Fornitori';
+import Pulizie from './pages/Pulizie';
+import SpaziExpo from './pages/SpaziExpo';
+import Report from './pages/Report';
+import Ticket from './pages/Ticket';
+import TaskPage from './pages/Task';
+import CalendarioManutenzioni from './pages/CalendarioManutenzioni';
+import StorageReport from './pages/StorageReport';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -34,55 +36,44 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
-      } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
-      <Route path="/Report" element={<LayoutWrapper currentPageName="Report"><ReportPage /></LayoutWrapper>} />
-      <Route path="/Capex" element={<LayoutWrapper currentPageName="Capex"><CapexPage /></LayoutWrapper>} />
-      <Route path="/Pulizie" element={<LayoutWrapper currentPageName="Pulizie"><PuliziePage /></LayoutWrapper>} />
-      <Route path="/StorageReport" element={<LayoutWrapper currentPageName="StorageReport"><StorageReport /></LayoutWrapper>} />
-      <Route path="/Fornitori" element={<LayoutWrapper currentPageName="Fornitori"><Fornitori /></LayoutWrapper>} />
-      <Route path="/Marketing" element={<LayoutWrapper currentPageName="Marketing"><Marketing /></LayoutWrapper>} />
+      <Route path="/Calendario" element={<Layout currentPageName="Calendario"><Calendario /></Layout>} />
+      <Route path="/CalendarioVigilanza" element={<Layout currentPageName="CalendarioVigilanza"><CalendarioVigilanza /></Layout>} />
+      <Route path="/" element={<Layout currentPageName="Dashboard"><Dashboard /></Layout>} />
+      <Route path="/Dashboard" element={<Layout currentPageName="Dashboard"><Dashboard /></Layout>} />
+      <Route path="/Clienti" element={<Layout currentPageName="Clienti"><Clienti /></Layout>} />
+      <Route path="/Capex" element={<Layout currentPageName="Capex"><CapexPage /></Layout>} />
+      <Route path="/Documenti" element={<Layout currentPageName="Documenti"><Documenti /></Layout>} />
+      <Route path="/Gestione" element={<Layout currentPageName="Gestione"><Gestione /></Layout>} />
+      <Route path="/Marketing" element={<Layout currentPageName="Marketing"><Marketing /></Layout>} />
+      <Route path="/Fornitori" element={<Layout currentPageName="Fornitori"><Fornitori /></Layout>} />
+      <Route path="/Pulizie" element={<Layout currentPageName="Pulizie"><Pulizie /></Layout>} />
+      <Route path="/SpaziExpo" element={<Layout currentPageName="SpaziExpo"><SpaziExpo /></Layout>} />
+      <Route path="/Report" element={<Layout currentPageName="Report"><Report /></Layout>} />
+      <Route path="/Ticket" element={<Layout currentPageName="Ticket"><Ticket /></Layout>} />
+      <Route path="/Task" element={<Layout currentPageName="Task"><TaskPage /></Layout>} />
+      <Route path="/CalendarioManutenzioni" element={<Layout currentPageName="CalendarioManutenzioni"><CalendarioManutenzioni /></Layout>} />
+      <Route path="/StorageReport" element={<Layout currentPageName="StorageReport"><StorageReport /></Layout>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <NavigationTracker />
           <AuthenticatedApp />
         </Router>
         <Toaster />

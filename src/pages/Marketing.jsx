@@ -1,20 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, BarChart2, Megaphone } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import FormMarketing from '@/components/marketing/FormMarketing';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const MESI_LABEL = ['GEN','FEB','MAR','APR','MAG','GIU','LUG','AGO','SET','OTT','NOV','DIC'];
-
-const TIPOLOGIA_COLORS = {
-  COMMERCIAL: 'bg-blue-100 text-blue-800',
-  ENTERTAINMENT: 'bg-purple-100 text-purple-800',
-  COMMUNITY: 'bg-green-100 text-green-800',
-  CULTURAL: 'bg-orange-100 text-orange-800',
-  altro: 'bg-slate-100 text-slate-700',
-};
 
 const fmt = (v) => v ? v.toLocaleString('it-IT') : '–';
 const fmtEuro = (v) => v ? `€ ${v.toLocaleString('it-IT')}` : '–';
@@ -30,6 +24,7 @@ export default function Marketing({ centroSelezionato, user }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   const [budgetSaved, setBudgetSaved] = useState(0);
+  const [collapsed, setCollapsed] = useState({ iniziativa: false, comunicazione_online: false, comunicazione_offline: false, costo_fisso: false });
 
   const centroId = centroSelezionato?.id;
 
@@ -72,171 +67,88 @@ export default function Marketing({ centroSelezionato, user }) {
   const offline = rows.filter(r => r.sezione === 'comunicazione_offline');
   const fissi = rows.filter(r => r.sezione === 'costo_fisso');
 
-  const totaleIniziativeMese = (m) => sum(iniziative, m);
-  const totaleOnlineMese = (m) => sum(online, m);
-  const totaleOfflineMese = (m) => sum(offline, m);
-  const totaleComunicazioneMese = (m) => totaleOnlineMese(m) + totaleOfflineMese(m);
-  const totalePianoMese = (m) => totaleIniziativeMese(m) + totaleComunicazioneMese(m);
-  const totaleFissiMese = (m) => sum(fissi, m);
-  const totaleBudgetMese = (m) => totalePianoMese(m) + totaleFissiMese(m);
-
-  const grandTotal = totaleBudget(rows);
+  const totaleComunicazioneMese = (m) => sum(online, m) + sum(offline, m);
+  const totaleBudgetMese = (m) => sum(iniziative, m) + totaleComunicazioneMese(m) + sum(fissi, m);
 
   const openEdit = (row) => { setEditRow(row); setFormOpen(true); };
   const openNew = (sezione) => { setEditRow({ sezione }); setFormOpen(true); };
-
+  const toggleCollapse = (key) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
   const isVigilanza = user?.tipo_account === 'vigilanza';
 
-  const [collapsed, setCollapsed] = useState({
-    iniziativa: false,
-    comunicazione_online: false,
-    comunicazione_offline: false,
-    costo_fisso: false,
-  });
-  const toggleCollapse = (key) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
+  if (!centroId || centroId === 'tutti') {
+    return <div className="p-8 text-center text-slate-500">Seleziona un centro per visualizzare il piano marketing</div>;
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex-shrink-0">
-          <h1 className="text-2xl font-bold text-slate-800">Piano Marketing</h1>
-          <p className="text-sm text-slate-500 mt-1">{centroSelezionato?.nome} · Budget operativo {anno}</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Megaphone className="w-6 h-6" /> Piano Marketing</h1>
+          <p className="text-slate-500 text-sm">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
-
-        {/* 3 card KPI + anno selector */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 lg:justify-end">
-          {centroId && centroId !== 'tutti' && (() => {
-            const consuntivo = totaleBudget(rows);
-            const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
-            const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
-            return (
-              <>
-                {/* Budget */}
-                <div className="bg-purple-50 rounded-xl border border-purple-200 px-3 py-2.5 min-w-[160px]">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <Megaphone className="w-3.5 h-3.5 text-purple-500" />
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Budget</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-slate-400 text-sm">€</span>
-                    <input
-                      type="number"
-                      value={budgetInput}
-                      onChange={e => setBudgetInput(e.target.value)}
-                      onBlur={() => {
-                        const val = parseFloat(budgetInput) || 0;
-                        setBudgetSaved(val);
-                        localStorage.setItem(`mkt_budget_${centroId}_${anno}`, String(val));
-                      }}
-                      placeholder="–"
-                      className="flex-1 text-base font-bold text-slate-900 bg-transparent border-b border-purple-300 focus:border-purple-600 outline-none w-28"
-                    />
-                  </div>
-                </div>
-
-                {/* Consuntivo */}
-                <div className="bg-purple-50 rounded-xl border border-purple-200 px-3 py-2.5 min-w-[160px]">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <BarChart2 className="w-3.5 h-3.5 text-purple-500" />
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Consuntivo</p>
-                  </div>
-                  <p className="text-base font-bold text-slate-900">{fmtC(consuntivo)}</p>
-                </div>
-
-                {/* Differenza */}
-                <div className={`rounded-xl border px-3 py-2.5 min-w-[140px] ${diff === null ? 'bg-slate-50 border-slate-200' : diff >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <TrendingUp className={`w-3.5 h-3.5 ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-500' : 'text-red-500'}`} />
-                    <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Differenza</p>
-                  </div>
-                  <p className={`text-base font-bold ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                    {diff !== null ? fmtC(diff) : '–'}
-                  </p>
-                </div>
-              </>
-            );
-          })()}
-
-          {/* Anno selector */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-              <ChevronDown className="w-4 h-4 text-slate-600 rotate-90" />
-            </button>
-            <span className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 bg-white min-w-[70px] text-center">{anno}</span>
-            <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors">
-              <ChevronDown className="w-4 h-4 text-slate-600 -rotate-90" />
-            </button>
-          </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100">◀</button>
+          <span className="font-semibold px-3">{anno}</span>
+          <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100">▶</button>
         </div>
       </div>
 
+      {/* KPI */}
+      {(() => {
+        const consuntivo = totaleBudget(rows);
+        const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
+        const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
+              <p className="text-xs text-purple-600 font-medium mb-2">Budget</p>
+              <input type="number" value={budgetInput} onChange={e => setBudgetInput(e.target.value)}
+                onBlur={() => { const val = parseFloat(budgetInput) || 0; setBudgetSaved(val); localStorage.setItem(`mkt_budget_${centroId}_${anno}`, String(val)); }}
+                placeholder="–" className="text-xl font-bold text-slate-900 bg-transparent border-b border-purple-300 focus:border-purple-600 outline-none w-full" />
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+              <p className="text-xs text-slate-500 font-medium mb-2">Consuntivo</p>
+              <p className="text-xl font-bold text-slate-800">{fmtC(consuntivo)}</p>
+            </div>
+            <div className={`rounded-xl p-4 border ${diff === null ? 'bg-slate-50 border-slate-200' : diff >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+              <p className="text-xs font-medium mb-2 text-slate-500">Differenza</p>
+              <p className={`text-xl font-bold ${diff === null ? 'text-slate-400' : diff >= 0 ? 'text-green-700' : 'text-red-700'}`}>{diff !== null ? fmtC(diff) : '–'}</p>
+            </div>
+          </div>
+        );
+      })()}
+
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <div className="text-center py-8 text-slate-400">Caricamento...</div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm bg-white">
-          <table className="w-full text-xs min-w-[1200px]">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table className="w-full text-xs min-w-[900px]">
             <thead>
-              <tr className="bg-slate-800 text-white">
-                <th className="text-left px-3 py-3 w-64 font-semibold">VOCE</th>
-                <th className="text-right px-2 py-3 font-semibold">TOTALE</th>
-                {MESI_LABEL.map(m => (
-                  <th key={m} className="text-right px-2 py-3 font-semibold w-20">{m}</th>
-                ))}
-                {!isVigilanza && <th className="px-2 py-3 w-16"></th>}
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="text-left px-3 py-2 font-semibold text-slate-600 w-48">VOCE</th>
+                <th className="px-2 py-2 font-semibold text-slate-600 w-20">TOTALE</th>
+                {MESI_LABEL.map(m => <th key={m} className="px-2 py-2 font-semibold text-slate-500 w-16">{m}</th>)}
+                {!isVigilanza && <th className="w-16"></th>}
               </tr>
             </thead>
             <tbody>
-
-              {/* ── INIZIATIVE ── */}
               <SectionHeader label="INIZIATIVE" onAdd={!isVigilanza ? () => openNew('iniziativa') : null} colSpan={15} color="bg-blue-700" collapsed={collapsed.iniziativa} onToggle={() => toggleCollapse('iniziativa')} />
-              {!collapsed.iniziativa && iniziative.map(row => (
-                <InitiativeRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
-              ))}
-              <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />
-              {!collapsed.iniziativa && <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleIniziativeMese} total={totaleBudget(iniziative)} mesi={MESI} />}
+              {!collapsed.iniziativa && iniziative.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.iniziativa && <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />}
 
-              {/* ── COMUNICAZIONE ONLINE ── */}
-              <SectionHeader label="ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" collapsed={collapsed.comunicazione_online} onToggle={() => toggleCollapse('comunicazione_online')} />
-              {!collapsed.comunicazione_online && online.map(row => (
-                <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
-              ))}
-              <TotaleRow label="TOTALE ONLINE" rows={online} mesi={MESI} bold isVigilanza={isVigilanza} />
+              <SectionHeader label="COMUNICAZIONE ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" collapsed={collapsed.comunicazione_online} onToggle={() => toggleCollapse('comunicazione_online')} />
+              {!collapsed.comunicazione_online && online.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
 
-              {/* ── COMUNICAZIONE OFFLINE ── */}
-              <SectionHeader label="OFFLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_offline') : null} colSpan={15} color="bg-amber-700" collapsed={collapsed.comunicazione_offline} onToggle={() => toggleCollapse('comunicazione_offline')} />
-              {!collapsed.comunicazione_offline && offline.map(row => (
-                <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
-              ))}
-              <TotaleRow label="TOTALE OFFLINE" rows={offline} mesi={MESI} bold isVigilanza={isVigilanza} />
+              <SectionHeader label="COMUNICAZIONE OFFLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_offline') : null} colSpan={15} color="bg-amber-700" collapsed={collapsed.comunicazione_offline} onToggle={() => toggleCollapse('comunicazione_offline')} />
+              {!collapsed.comunicazione_offline && offline.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
 
-              {/* Totale comunicazione */}
-              <tr className="bg-emerald-50 font-semibold border-t-2 border-emerald-300">
-                <td className="px-3 py-2 text-emerald-800">TOTALE COMUNICAZIONE</td>
-                <td className="text-right px-2 py-2 text-emerald-800">{fmtEuro(totaleBudget(online) + totaleBudget(offline))}</td>
-                {MESI.map(m => <td key={m} className="text-right px-2 py-2 text-emerald-800">{fmt(totaleComunicazioneMese(m)) !== '–' ? fmt(totaleComunicazioneMese(m)) : ''}</td>)}
-                {!isVigilanza && <td />}
-              </tr>
-              <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleComunicazioneMese} total={totaleBudget(online) + totaleBudget(offline)} mesi={MESI} />
+              <TotaleRow label="TOTALE COMUNICAZIONE" rows={[...online, ...offline]} mesi={MESI} isVigilanza={isVigilanza} />
 
-              {/* ── COSTI FISSI ── */}
               <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" collapsed={collapsed.costo_fisso} onToggle={() => toggleCollapse('costo_fisso')} />
-              {!collapsed.costo_fisso && fissi.map(row => (
-                <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />
-              ))}
-              <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} bold isVigilanza={isVigilanza} />
-              {!collapsed.costo_fisso && <PercRow label="DISTRIBUZIONE MENSILE" totFn={totaleFissiMese} total={totaleBudget(fissi)} mesi={MESI} />}
+              {!collapsed.costo_fisso && fissi.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.costo_fisso && <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} isVigilanza={isVigilanza} />}
 
-              {/* Grand Total */}
-              <tr className="bg-slate-800 text-white font-bold border-t-2 border-slate-600 text-sm">
-                <td className="px-3 py-3">TOTALE BUDGET</td>
-                <td className="text-right px-2 py-3">{fmtEuro(totaleBudget([...iniziative, ...online, ...offline, ...fissi]))}</td>
-                {MESI.map(m => <td key={m} className="text-right px-2 py-3">{totaleBudgetMese(m) ? fmt(totaleBudgetMese(m)) : ''}</td>)}
-                {!isVigilanza && <td />}
-              </tr>
-
+              <TotaleRow label="TOTALE BUDGET" rows={rows} mesi={MESI} bold isVigilanza={isVigilanza} />
             </tbody>
           </table>
         </div>
@@ -244,104 +156,54 @@ export default function Marketing({ centroSelezionato, user }) {
 
       {/* Form modal */}
       {formOpen && (
-        <FormMarketing
-          row={editRow}
-          onSave={handleSave}
-          onCancel={() => { setFormOpen(false); setEditRow(null); }}
-        />
+        <MarketingForm row={editRow} onSave={handleSave} onClose={() => { setFormOpen(false); setEditRow(null); }} />
       )}
 
       {/* Delete confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full">
-            <h3 className="font-semibold text-slate-800 mb-2">Elimina voce</h3>
-            <p className="text-sm text-slate-600 mb-4">Sei sicuro di voler eliminare questa voce?</p>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(null)}>Annulla</Button>
-              <Button variant="destructive" size="sm" onClick={() => handleDelete(deleteConfirm)}>Elimina</Button>
+        <Dialog open onOpenChange={() => setDeleteConfirm(null)}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Elimina voce</DialogTitle></DialogHeader>
+            <p className="text-sm text-slate-600">Sei sicuro di voler eliminare questa voce?</p>
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" onClick={() => setDeleteConfirm(null)} className="flex-1">Annulla</Button>
+              <Button onClick={() => handleDelete(deleteConfirm)} className="flex-1 bg-red-600 hover:bg-red-700">Elimina</Button>
             </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
 }
 
-/* ── Sub-components ── */
-
 function SectionHeader({ label, onAdd, colSpan, color, collapsed, onToggle }) {
   return (
-    <tr className={`${color} text-white text-xs font-bold`}>
-      <td className="px-3 py-2 uppercase tracking-wide">
-        <button onClick={onToggle} className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity">
-          {collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
-          {label}
-        </button>
+    <tr className={`${color} text-white cursor-pointer`} onClick={onToggle}>
+      <td className="px-3 py-1.5 font-bold text-xs flex items-center gap-2">
+        {collapsed ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+        {label}
       </td>
-      <td colSpan={colSpan - 1} className="px-2 py-2 text-right">
+      <td colSpan={13}></td>
+      <td className="px-2 py-1.5 text-right">
         {onAdd && (
-          <button onClick={onAdd} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/20 hover:bg-white/30 transition-colors text-white text-xs">
-            <Plus className="w-3 h-3" /> Aggiungi
-          </button>
+          <button onClick={e => { e.stopPropagation(); onAdd(); }} className="text-xs bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded">+ Aggiungi</button>
         )}
       </td>
     </tr>
   );
 }
 
-function InitiativeRow({ row, onEdit, onDelete, isVigilanza }) {
-  const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
-  const perc = row.budget_totale && totaleBudget([row]) > 0
-    ? Math.round((row.budget_totale / row.budget_totale) * 100)
-    : 0;
-
-  return (
-    <>
-      {/* Riga costo */}
-      <tr className="border-b border-slate-100 hover:bg-slate-50">
-        <td className="px-3 py-1.5 font-medium text-slate-800">
-          <div className="flex items-center gap-1.5">
-            <span>{row.nome}</span>
-            {row.tipologia && <span className={`text-[9px] px-1 py-0.5 rounded font-semibold ${TIPOLOGIA_COLORS[row.tipologia] || 'bg-slate-100 text-slate-600'}`}>{row.tipologia}</span>}
-          </div>
-        </td>
-        <td className="text-right px-2 py-1.5 font-semibold text-slate-800">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
-        {mesi.map(m => (
-          <td key={m} className="text-right px-2 py-1.5 text-slate-700">
-            <div>{row[m] ? row[m].toLocaleString('it-IT') : ''}</div>
-            {row[`nome_iniziativa_${m}`] && <div className="text-[9px] text-slate-500">{row[`nome_iniziativa_${m}`]}</div>}
-          </td>
-        ))}
-        {!isVigilanza && (
-          <td className="px-2 py-1.5">
-            <div className="flex gap-1 justify-end">
-              <button onClick={onEdit} className="p-1 rounded hover:bg-slate-100 text-slate-500"><Pencil className="w-3 h-3" /></button>
-              <button onClick={onDelete} className="p-1 rounded hover:bg-red-100 text-red-500"><Trash2 className="w-3 h-3" /></button>
-            </div>
-          </td>
-        )}
-      </tr>
-    </>
-  );
-}
-
 function SimpleRow({ row, onEdit, onDelete, isVigilanza }) {
-  const mesi = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50">
-      <td className="px-3 py-2 text-slate-700">{row.nome}</td>
-      <td className="text-right px-2 py-2 font-medium text-slate-800">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
-      {mesi.map(m => (
-        <td key={m} className="text-right px-2 py-2 text-slate-700">
-          {row[m] ? row[m].toLocaleString('it-IT') : ''}
-        </td>
-      ))}
+      <td className="px-3 py-1.5 text-slate-700">{row.nome}</td>
+      <td className="px-2 py-1.5 text-right text-slate-600">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
+      {MESI.map(m => <td key={m} className="px-2 py-1.5 text-right text-slate-500">{row[m] ? row[m].toLocaleString('it-IT') : ''}</td>)}
       {!isVigilanza && (
-        <td className="px-2 py-2">
+        <td className="px-2 py-1.5">
           <div className="flex gap-1 justify-end">
-            <button onClick={onEdit} className="p-1 rounded hover:bg-slate-100 text-slate-500"><Pencil className="w-3 h-3" /></button>
-            <button onClick={onDelete} className="p-1 rounded hover:bg-red-100 text-red-500"><Trash2 className="w-3 h-3" /></button>
+            <button onClick={onEdit} className="p-1 hover:bg-slate-100 rounded"><Pencil className="w-3 h-3 text-slate-400" /></button>
+            <button onClick={onDelete} className="p-1 hover:bg-red-50 rounded"><Trash2 className="w-3 h-3 text-red-400" /></button>
           </div>
         </td>
       )}
@@ -350,30 +212,68 @@ function SimpleRow({ row, onEdit, onDelete, isVigilanza }) {
 }
 
 function TotaleRow({ label, rows, mesi, bold, isVigilanza }) {
+  const cls = bold ? 'font-bold bg-slate-100' : 'font-medium bg-slate-50';
   return (
-    <tr className={`bg-slate-100 border-t-2 border-slate-300 ${bold ? 'font-bold' : 'font-semibold'}`}>
-      <td className="px-3 py-2 text-slate-800 text-xs">{label}</td>
-      <td className="text-right px-2 py-2 text-slate-800 text-xs">{totaleBudget(rows) ? totaleBudget(rows).toLocaleString('it-IT') : '–'}</td>
-      {mesi.map(m => {
-        const v = sum(rows, m);
-        return <td key={m} className="text-right px-2 py-2 text-slate-800 text-xs">{v ? v.toLocaleString('it-IT') : ''}</td>;
-      })}
-      {!isVigilanza && <td />}
+    <tr className={`border-b border-slate-200 ${cls}`}>
+      <td className="px-3 py-1.5 text-slate-700">{label}</td>
+      <td className="px-2 py-1.5 text-right">{totaleBudget(rows) ? totaleBudget(rows).toLocaleString('it-IT') : '–'}</td>
+      {mesi.map(m => { const v = sum(rows, m); return <td key={m} className="px-2 py-1.5 text-right">{v ? v.toLocaleString('it-IT') : ''}</td>; })}
+      {!isVigilanza && <td></td>}
     </tr>
   );
 }
 
-function PercRow({ label, totFn, total, mesi }) {
+function MarketingForm({ row, onSave, onClose }) {
+  const [form, setForm] = useState({
+    sezione: row?.sezione || 'iniziativa',
+    nome: row?.nome || '',
+    tipologia: row?.tipologia || '',
+    budget_totale: row?.budget_totale || '',
+    ...MESI.reduce((acc, m) => ({ ...acc, [m]: row?.[m] || '' }), {})
+  });
+
   return (
-    <tr className="bg-slate-50 text-[10px] text-slate-500 border-b border-slate-200">
-      <td className="px-3 py-1">{label}</td>
-      <td className="text-right px-2 py-1">100%</td>
-      {mesi.map(m => {
-        const v = totFn(m);
-        const p = total > 0 && v > 0 ? Math.round((v / total) * 100) : 0;
-        return <td key={m} className="text-right px-2 py-1">{p > 0 ? `${p}%` : ''}</td>;
-      })}
-      <td />
-    </tr>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>{row?.id ? 'Modifica voce' : 'Nuova voce'}</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>Sezione</Label>
+            <select value={form.sezione} onChange={e => setForm(p => ({ ...p, sezione: e.target.value }))} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+              <option value="iniziativa">Iniziativa</option>
+              <option value="comunicazione_online">Comunicazione Online</option>
+              <option value="comunicazione_offline">Comunicazione Offline</option>
+              <option value="costo_fisso">Costo Fisso</option>
+            </select>
+          </div>
+          <div><Label>Nome</Label><Input value={form.nome} onChange={e => setForm(p => ({ ...p, nome: e.target.value }))} className="mt-1" /></div>
+          {form.sezione === 'iniziativa' && (
+            <div>
+              <Label>Tipologia</Label>
+              <select value={form.tipologia} onChange={e => setForm(p => ({ ...p, tipologia: e.target.value }))} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">–</option>
+                {['COMMERCIAL','ENTERTAINMENT','COMMUNITY','CULTURAL','altro'].map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          )}
+          <div><Label>Budget Totale (€)</Label><Input type="number" value={form.budget_totale} onChange={e => setForm(p => ({ ...p, budget_totale: e.target.value }))} className="mt-1" /></div>
+          <div>
+            <Label>Importi mensili (€)</Label>
+            <div className="grid grid-cols-4 gap-2 mt-1">
+              {MESI.map((m, i) => (
+                <div key={m}>
+                  <p className="text-xs text-slate-500 mb-0.5">{MESI_LABEL[i]}</p>
+                  <Input type="number" value={form[m]} onChange={e => setForm(p => ({ ...p, [m]: e.target.value }))} className="h-8 text-xs" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" onClick={onClose} className="flex-1">Annulla</Button>
+            <Button onClick={() => onSave(form)} className="flex-1 bg-blue-600 hover:bg-blue-700">Salva</Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -18,48 +18,21 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   const isScaduto = isPast(dataScad) && !isToday(dataScad) && manutenzione.stato !== 'completato' && manutenzione.stato !== 'annullato';
 
   return (
-    <div className={`border rounded-lg px-3 py-2.5 ${sConf.bg} ${sConf.border} transition-colors`}>
-      {/* Layout mobile: due righe */}
-      <div className="flex items-start gap-2.5">
-        <Checkbox
-          checked={manutenzione.stato === 'completato'}
-          onCheckedChange={() => onToggleStatus(manutenzione)}
-          className="mt-0.5 flex-shrink-0"
-        />
-
-        <div className="flex-1 min-w-0">
-          {/* Riga 1: titolo + bottoni */}
-          <div className="flex items-start justify-between gap-2">
-            <p className={`font-medium text-sm leading-snug ${sConf.color}`}>{manutenzione.titolo}</p>
-            <div className="flex gap-0.5 flex-shrink-0 -mt-0.5">
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-blue-600" onClick={() => onEdit(manutenzione)}>
-                <Pencil className="w-3.5 h-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-red-600" onClick={() => onDelete(manutenzione)}>
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            </div>
+    <div className={`rounded-xl border p-3 flex gap-3 items-start ${sConf.bg} ${sConf.border} ${isScaduto ? 'border-red-400' : ''}`}>
+      <Checkbox checked={manutenzione.stato === 'completato'} onCheckedChange={() => onToggleStatus(manutenzione)} className="mt-0.5 flex-shrink-0" />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <p className={`font-medium text-sm ${manutenzione.stato === 'completato' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{manutenzione.titolo}</p>
+          <div className="flex gap-1 shrink-0">
+            <button onClick={() => onEdit(manutenzione)} className="p-1 rounded hover:bg-white/50"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
+            <button onClick={() => onDelete(manutenzione)} className="p-1 rounded hover:bg-red-50"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
           </div>
-
-          {/* Riga 2: descrizione */}
-          {manutenzione.descrizione && (
-            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{manutenzione.descrizione}</p>
-          )}
-
-          {/* Riga 3: data + assegnato */}
-          <div className="flex flex-wrap items-center gap-2 mt-1.5">
-            <span className={`text-xs font-semibold flex items-center gap-1 ${isScaduto ? 'text-red-600' : 'text-slate-600'}`}>
-              📅 {format(dataScad, 'd MMM yyyy', { locale: it })}
-              {isScaduto && (
-                <span className="inline-flex items-center gap-0.5 bg-red-100 text-red-700 text-xs font-bold px-1.5 py-0.5 rounded-full">
-                  <AlertTriangle className="w-3 h-3" /> Scaduto
-                </span>
-              )}
-            </span>
-            {manutenzione.assegnato_a_nome && (
-              <span className="text-xs text-slate-500">→ {manutenzione.assegnato_a_nome}</span>
-            )}
-          </div>
+        </div>
+        {manutenzione.descrizione && <p className="text-xs text-slate-500 mt-0.5 truncate">{manutenzione.descrizione}</p>}
+        <div className="flex flex-wrap gap-2 mt-1 text-xs text-slate-500">
+          <span>📅 {format(dataScad, 'd MMM yyyy', { locale: it })}</span>
+          {isScaduto && <span className="flex items-center gap-1 text-red-600 font-medium"><AlertTriangle className="w-3 h-3" />Scaduto</span>}
+          {manutenzione.assegnato_a_nome && <span>→ {manutenzione.assegnato_a_nome}</span>}
         </div>
       </div>
     </div>
@@ -83,14 +56,12 @@ function GruppoPerGiorno({ lista, onEdit, onDelete, onToggleStatus, ordinamentoD
         const isScaduto = isPast(data) && !oggi;
         return (
           <div key={giorno}>
-            <h4 className={`text-xs font-bold mb-2 uppercase tracking-wide flex items-center gap-1.5 ${oggi ? 'text-blue-600' : isScaduto ? 'text-red-600' : 'text-slate-500'}`}>
+            <p className={`text-xs font-bold mb-2 ${isScaduto ? 'text-red-600' : oggi ? 'text-orange-600' : 'text-slate-500'}`}>
               {oggi ? '📌 Oggi — ' : ''}{format(data, 'EEEE d MMMM yyyy', { locale: it })}
-              {isScaduto && <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
-            </h4>
+              {isScaduto && <AlertTriangle className="inline w-3 h-3 ml-1 text-red-500" />}
+            </p>
             <div className="space-y-2">
-              {perGiorno[giorno].map(m => (
-                <ManutenzioneRow key={m.id} manutenzione={m} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
-              ))}
+              {perGiorno[giorno].map(m => <ManutenzioneRow key={m.id} manutenzione={m} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />)}
             </div>
           </div>
         );
@@ -105,26 +76,19 @@ export default function ListaManutenzioni({ manutenzioni, onEdit, onDelete, onTo
     .sort((a, b) => a.data_scadenza.localeCompare(b.data_scadenza));
 
   const attivi = lista.filter(m => m.stato !== 'completato' && m.stato !== 'annullato');
-  const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato')
-    .sort((a, b) => b.data_scadenza.localeCompare(a.data_scadenza));
-
+  const completati = lista.filter(m => m.stato === 'completato' || m.stato === 'annullato').sort((a, b) => b.data_scadenza.localeCompare(a.data_scadenza));
   const damostrare = vistaApertiChiusi === 'chiusi' ? completati : attivi;
 
   return (
     <div>
       {damostrare.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <p>Nessuna attività per il {annoSelezionato}</p>
-        </div>
+        <p className="text-center text-slate-400 py-8">Nessuna attività per il {annoSelezionato}</p>
       ) : (
-        <div className="space-y-8">
-          <div>
-            <h3 className={`text-sm font-bold mb-3 flex items-center gap-2 ${vistaApertiChiusi === 'chiusi' ? 'text-slate-500' : 'text-slate-700'}`}>
-              {vistaApertiChiusi === 'chiusi' ? '✅ Completati' : '🔴 Aperti'}
-              <span className="text-xs font-normal text-slate-400">({damostrare.length})</span>
-            </h3>
-            <GruppoPerGiorno lista={damostrare} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} ordinamentoDecrescente={vistaApertiChiusi === 'chiusi'} />
-          </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-600 mb-3">
+            {vistaApertiChiusi === 'chiusi' ? '✅ Completati' : '🔴 Aperti'} ({damostrare.length})
+          </p>
+          <GruppoPerGiorno lista={damostrare} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} ordinamentoDecrescente={vistaApertiChiusi === 'chiusi'} />
         </div>
       )}
     </div>

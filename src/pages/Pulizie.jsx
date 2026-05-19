@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, X, Sparkles, RefreshCw } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Sparkles } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormPulizia from '@/components/pulizie/FormPulizia';
@@ -14,16 +14,8 @@ import ImageLightbox from '@/components/ui/ImageLightbox';
 const parseLocalDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
-const STATO_CONFIG = {
-  da_programmare: { label: 'Da programmare', color: 'bg-red-100 text-red-700 border-red-200' },
-  programmato: { label: 'Programmato', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
-};
-
 export default function PuliziePage({ centroSelezionato, user }) {
   const [tab, setTab] = useState('segnalazioni');
-
-  // Segnalazioni
   const [lista, setLista] = useState([]);
   const [loadingSeg, setLoadingSeg] = useState(true);
   const [search, setSearch] = useState('');
@@ -32,34 +24,25 @@ export default function PuliziePage({ centroSelezionato, user }) {
   const [editing, setEditing] = useState(null);
   const [dettaglio, setDettaglio] = useState(null);
   const [lightbox, setLightbox] = useState(null);
-
-  // Periodiche
   const [listaPeriodiche, setListaPeriodiche] = useState([]);
   const [loadingPer, setLoadingPer] = useState(true);
   const [annoPeriodiche, setAnnoPeriodiche] = useState(new Date().getFullYear());
   const [showFormPeriodica, setShowFormPeriodica] = useState(false);
 
   useEffect(() => {
-    if (centroSelezionato?.id) {
-      loadSegnalazioni();
-      loadPeriodiche();
-    }
+    if (centroSelezionato?.id) { loadSegnalazioni(); loadPeriodiche(); }
   }, [centroSelezionato]);
 
   const loadSegnalazioni = async () => {
     setLoadingSeg(true);
-    const data = centroSelezionato.id === 'tutti'
-      ? await base44.entities.Pulizia.list()
-      : await base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id });
+    const data = centroSelezionato.id === 'tutti' ? await base44.entities.Pulizia.list() : await base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id });
     setLista(data.sort((a, b) => new Date(b.data) - new Date(a.data)));
     setLoadingSeg(false);
   };
 
   const loadPeriodiche = async () => {
     setLoadingPer(true);
-    const data = centroSelezionato.id === 'tutti'
-      ? await base44.entities.PuliziaPeriodica.list()
-      : await base44.entities.PuliziaPeriodica.filter({ centro_id: centroSelezionato.id });
+    const data = centroSelezionato.id === 'tutti' ? await base44.entities.PuliziaPeriodica.list() : await base44.entities.PuliziaPeriodica.filter({ centro_id: centroSelezionato.id });
     setListaPeriodiche(data);
     setLoadingPer(false);
   };
@@ -71,18 +54,8 @@ export default function PuliziePage({ centroSelezionato, user }) {
     loadSegnalazioni();
   };
 
-  const handleSave = () => {
-    setShowForm(false);
-    setEditing(null);
-    loadSegnalazioni();
-  };
-
   const isDirettore = user?.tipo_account === 'direttore';
-
-  const isLetta = (p) => {
-    if (!isDirettore) return true;
-    return (p.letto_da || []).includes(user.email);
-  };
+  const isLetta = (p) => !isDirettore || (p.letto_da || []).includes(user.email);
 
   const handleClickSegnalazione = async (p) => {
     setDettaglio(p);
@@ -107,220 +80,138 @@ export default function PuliziePage({ centroSelezionato, user }) {
   });
   const mesiConDati = Object.keys(perMese).map(Number).sort((a, b) => b - a);
 
-  if (!centroSelezionato?.id) {
-    return <div className="p-8 text-center text-slate-500">Seleziona un centro commerciale</div>;
-  }
+  if (!centroSelezionato?.id) return <div className="p-8 text-center text-slate-500">Seleziona un centro commerciale</div>;
 
   return (
-    <div className="p-3 sm:p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div className="p-4 md:p-6 space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-blue-500" />
-            Pulizie
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Sparkles className="w-6 h-6" /> Pulizie</h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
-        {/* Anno navigator + bottone nuovo */}
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+        <div className="flex items-center gap-3">
           {tab === 'segnalazioni' && (
             <>
-              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a - 1)}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoSelezionato}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoSelezionato(a => a + 1)}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+              <div className="flex items-center gap-1 border border-slate-200 rounded-lg px-2 py-1 bg-white">
+                <button onClick={() => setAnnoSelezionato(a => a - 1)} className="p-1 hover:bg-slate-100 rounded">◀</button>
+                <span className="font-semibold px-2 text-sm">{annoSelezionato}</span>
+                <button onClick={() => setAnnoSelezionato(a => a + 1)} className="p-1 hover:bg-slate-100 rounded">▶</button>
               </div>
-              <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-1" /> Nuova Segnalazione
+              <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+                <Plus className="w-4 h-4" /> Nuova Segnalazione
               </Button>
             </>
           )}
           {tab === 'periodiche' && (
             <>
-              <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoPeriodiche(a => a - 1)}>
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-                <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoPeriodiche}</span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoPeriodiche(a => a + 1)}>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+              <div className="flex items-center gap-1 border border-slate-200 rounded-lg px-2 py-1 bg-white">
+                <button onClick={() => setAnnoPeriodiche(a => a - 1)} className="p-1 hover:bg-slate-100 rounded">◀</button>
+                <span className="font-semibold px-2 text-sm">{annoPeriodiche}</span>
+                <button onClick={() => setAnnoPeriodiche(a => a + 1)} className="p-1 hover:bg-slate-100 rounded">▶</button>
               </div>
-              <Button size="sm" onClick={() => setShowFormPeriodica(true)} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-1" /> Nuova pulizia periodica
+              <Button onClick={() => setShowFormPeriodica(true)} className="bg-blue-600 hover:bg-blue-700 gap-2">
+                <Plus className="w-4 h-4" /> Nuova pulizia periodica
               </Button>
             </>
           )}
         </div>
       </div>
 
-      {/* Tab switch */}
-      <div className="flex items-center justify-between gap-3 mb-6">
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
-          <button
-            onClick={() => setTab('segnalazioni')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'segnalazioni' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Segnalazioni
-          </button>
-          <button
-            onClick={() => setTab('periodiche')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'periodiche' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <RefreshCw className="w-3.5 h-3.5 inline mr-1" />
-            Periodiche
-          </button>
-        </div>
-        
-        {tab === 'segnalazioni' && (
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input className="pl-8" placeholder="Cerca..." value={search} onChange={e => setSearch(e.target.value)} />
-          </div>
-        )}
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+        <button onClick={() => setTab('segnalazioni')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'segnalazioni' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Segnalazioni</button>
+        <button onClick={() => setTab('periodiche')} className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === 'periodiche' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}><Sparkles className="w-3 h-3 inline mr-1" />Periodiche</button>
       </div>
 
-      {/* SEGNALAZIONI */}
+      {tab === 'segnalazioni' && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input placeholder="Cerca segnalazione..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+        </div>
+      )}
+
       {tab === 'segnalazioni' && (
         <>
           {loadingSeg ? (
-            <div className="text-center py-12 text-slate-400">Caricamento...</div>
+            <div className="text-center py-8 text-slate-400">Caricamento...</div>
           ) : mesiConDati.length === 0 ? (
-            <div className="text-center py-16 text-slate-400">
-              <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>Nessuna segnalazione per il {annoSelezionato}</p>
-            </div>
+            <div className="text-center py-8 text-slate-400">Nessuna segnalazione per il {annoSelezionato}</div>
           ) : (
             <div className="space-y-6">
               {mesiConDati.map(mese => (
                 <div key={mese}>
-                  <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-400 rounded-full inline-block"></span>
-                    {MESI[mese]} {annoSelezionato}
-                    <span className="text-xs font-normal text-slate-400">({perMese[mese].length})</span>
-                  </h2>
+                  <h2 className="font-semibold text-slate-600 mb-2 flex items-center gap-2">{MESI[mese]} {annoSelezionato} <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">({perMese[mese].length})</span></h2>
                   <div className="space-y-2">
                     {perMese[mese].map(p => {
-                       const nonLetta = !isLetta(p);
-                       const stato = p.stato || 'da_programmare';
-                       const cardBg = nonLetta ? 'bg-blue-50 border-blue-200' : stato === 'completato' ? 'bg-green-50 border-green-200' : stato === 'programmato' ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-slate-200';
-                       return (
-                       <div
-                         key={p.id}
-                         className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`}
-                        onClick={() => handleClickSegnalazione(p)}
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <h3 className={`font-semibold text-sm ${nonLetta ? 'text-blue-700' : 'text-slate-800'}`}>{p.titolo}</h3>
-                              {nonLetta && <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />}
-                              <span className="text-xs text-slate-400">{format(parseLocalDate(p.data), 'dd MMM yyyy', { locale: it })}</span>
-                            </div>
-                            {p.descrizione && <p className="text-xs text-slate-500 truncate">{p.descrizione}</p>}
-                            {p.foto_urls?.length > 0 && (
-                              <div className="flex gap-1 mt-2">
-                                {p.foto_urls.slice(0, 4).map((url, i) => (
-                                  <img key={i} src={url} className="w-10 h-10 object-cover rounded border" />
-                                ))}
-                                {p.foto_urls.length > 4 && (
-                                  <div className="w-10 h-10 bg-slate-100 rounded border flex items-center justify-center text-xs text-slate-500">+{p.foto_urls.length - 4}</div>
-                                )}
+                      const nonLetta = !isLetta(p);
+                      return (
+                        <div key={p.id} className={`rounded-xl border p-4 cursor-pointer hover:shadow-sm transition-shadow ${nonLetta ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-200'}`} onClick={() => handleClickSegnalazione(p)}>
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-slate-800">{p.titolo}</p>
+                                {nonLetta && <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />}
                               </div>
-                            )}
-                            {p.creato_da_nome && <p className="text-[11px] text-slate-400 mt-1">Creato da {p.creato_da_nome}</p>}
-                          </div>
-                          <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(p); setShowForm(true); }}>
-                              <Pencil className="w-3.5 h-3.5" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700" onClick={() => handleDelete(p.id)}>
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </Button>
+                              <p className="text-xs text-slate-500 mt-0.5">{format(parseLocalDate(p.data), 'dd MMM yyyy', { locale: it })}</p>
+                              {p.descrizione && <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.descrizione}</p>}
+                              {p.foto_urls?.length > 0 && (
+                                <div className="flex gap-1 mt-2">
+                                  {p.foto_urls.slice(0, 4).map((url, i) => <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
+                                  {p.foto_urls.length > 4 && <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center text-xs text-slate-500">+{p.foto_urls.length - 4}</div>}
+                                </div>
+                              )}
+                              {p.creato_da_nome && <p className="text-xs text-slate-400 mt-1">Creato da {p.creato_da_nome}</p>}
+                            </div>
+                            <div className="flex gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                              <button onClick={() => { setEditing(p); setShowForm(true); }} className="p-1.5 rounded-lg hover:bg-slate-100"><Pencil className="w-4 h-4 text-slate-400" /></button>
+                              <button onClick={() => handleDelete(p.id)} className="p-1.5 rounded-lg hover:bg-red-50"><Trash2 className="w-4 h-4 text-red-400" /></button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );})}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Dialog Dettaglio segnalazione */}
           {dettaglio && (
-            <Dialog open={!!dettaglio} onOpenChange={() => setDettaglio(null)}>
-              <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>{dettaglio.titolo}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-3 pt-1">
-                  <p className="text-xs text-slate-400">{format(parseLocalDate(dettaglio.data), 'dd MMMM yyyy', { locale: it })}</p>
-                  {dettaglio.descrizione && <p className="text-sm text-slate-600 bg-slate-50 rounded p-3">{dettaglio.descrizione}</p>}
+            <Dialog open onOpenChange={() => setDettaglio(null)}>
+              <DialogContent className="max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>{dettaglio.titolo}</DialogTitle></DialogHeader>
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-500">{format(parseLocalDate(dettaglio.data), 'dd MMMM yyyy', { locale: it })}</p>
+                  {dettaglio.descrizione && <p className="text-sm text-slate-600">{dettaglio.descrizione}</p>}
                   {dettaglio.creato_da_nome && <p className="text-xs text-slate-400">Creato da {dettaglio.creato_da_nome}</p>}
                   {dettaglio.foto_urls?.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-slate-500 mb-2">Foto ({dettaglio.foto_urls.length})</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {dettaglio.foto_urls.map((url, i) => (
-                          <img key={i} src={url} className="w-full aspect-square object-cover rounded-lg border cursor-pointer hover:opacity-90" onClick={() => setLightbox(i)} />
-                        ))}
+                      <p className="text-xs font-medium text-slate-500 mb-1">Foto ({dettaglio.foto_urls.length})</p>
+                      <div className="flex flex-wrap gap-1">
+                        {dettaglio.foto_urls.map((url, i) => <img key={i} src={url} alt="" className="w-16 h-16 rounded object-cover cursor-pointer hover:opacity-80" onClick={() => setLightbox(i)} />)}
                       </div>
                     </div>
                   )}
-                  <div className="flex justify-end gap-2 pt-2 border-t">
-                    <Button variant="outline" size="sm" onClick={() => { setDettaglio(null); setEditing(dettaglio); setShowForm(true); }}>
-                      <Pencil className="w-3.5 h-3.5 mr-1" /> Modifica
-                    </Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(dettaglio.id)}>
-                      <Trash2 className="w-3.5 h-3.5 mr-1" /> Elimina
-                    </Button>
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="outline" onClick={() => { setDettaglio(null); setEditing(dettaglio); setShowForm(true); }} className="flex-1">Modifica</Button>
+                    <Button onClick={() => handleDelete(dettaglio.id)} className="flex-1 bg-red-600 hover:bg-red-700">Elimina</Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
           )}
-
-          <FormPulizia
-            open={showForm}
-            onClose={() => { setShowForm(false); setEditing(null); }}
-            pulizia={editing}
-            centroId={centroSelezionato?.id}
-            user={user}
-            onSave={handleSave}
-          />
         </>
       )}
 
-      {/* PERIODICHE */}
       {tab === 'periodiche' && (
         <>
-          <ListaPuliziePeriodiche
-            lista={listaPeriodiche}
-            loading={loadingPer}
-            centroId={centroSelezionato?.id}
-            onReload={loadPeriodiche}
-            anno={annoPeriodiche}
-          />
-          <FormPuliziaPeriodica
-            open={showFormPeriodica}
-            onClose={() => setShowFormPeriodica(false)}
-            pulizia={null}
-            centroId={centroSelezionato?.id}
-            onSave={() => { setShowFormPeriodica(false); loadPeriodiche(); }}
-          />
+          <FormPuliziaPeriodica open={showFormPeriodica} onClose={() => setShowFormPeriodica(false)} pulizia={null} centroId={centroSelezionato?.id} onSave={() => { setShowFormPeriodica(false); loadPeriodiche(); }} />
+          <ListaPuliziePeriodiche lista={listaPeriodiche} loading={loadingPer} centroId={centroSelezionato?.id} onReload={loadPeriodiche} anno={annoPeriodiche} />
         </>
       )}
 
-      {/* Lightbox */}
-      {lightbox !== null && dettaglio?.foto_urls?.length > 0 && (
-        <ImageLightbox urls={dettaglio.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
-      )}
+      {lightbox !== null && dettaglio?.foto_urls?.length > 0 && <ImageLightbox urls={dettaglio.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />}
+
+      <FormPulizia open={showForm} onClose={() => { setShowForm(false); setEditing(null); }} pulizia={editing} centroId={centroSelezionato?.id} user={user} onSave={() => { setShowForm(false); setEditing(null); loadSegnalazioni(); }} />
     </div>
   );
 }
