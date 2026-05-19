@@ -78,18 +78,30 @@ export default function WeatherWidget({ citta, provincia, inline }) {
   const { daily } = weather;
   const today = new Date(); today.setHours(0,0,0,0);
 
-  // Modalità inline: solo oggi nella stessa riga
+  // Modalità inline: 7 giorni compatti nella stessa riga
   if (inline) {
-    const todayIdx = daily.time.findIndex(dateStr => new Date(dateStr).getTime() === today.getTime());
-    const idx = todayIdx >= 0 ? todayIdx : 0;
-    const wmo = getWmo(daily.weathercode[idx]);
     return (
-      <span className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
-        <span>{wmo.emoji}</span>
-        <span>{Math.round(daily.temperature_2m_max[idx])}°</span>
-        <span className="text-slate-400">/</span>
-        <span className="text-slate-400">{Math.round(daily.temperature_2m_min[idx])}°</span>
-      </span>
+      <div className="flex gap-1 overflow-x-auto">
+        {daily.time.map((dateStr, i) => {
+          const d = new Date(dateStr);
+          const isToday = d.getTime() === today.getTime();
+          const wmo = getWmo(daily.weathercode[i]);
+          const dayLabel = isToday ? 'Oggi' : format(d, 'EEE', { locale: it });
+          return (
+            <div
+              key={dateStr}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-xs shrink-0 ${
+                isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+              }`}
+            >
+              <span className={`font-semibold capitalize ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>{dayLabel}</span>
+              <span>{wmo.emoji}</span>
+              <span className="font-bold text-slate-800">{Math.round(daily.temperature_2m_max[i])}°</span>
+              <span className="text-slate-400">{Math.round(daily.temperature_2m_min[i])}°</span>
+            </div>
+          );
+        })}
+      </div>
     );
   }
 
