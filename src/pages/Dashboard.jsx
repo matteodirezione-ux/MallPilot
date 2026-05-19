@@ -32,6 +32,7 @@ import {
 import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfYear, endOfYear, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
 import TasksDashboard from '@/components/dashboard/TasksDashboard';
+import AgendaCards from '@/components/dashboard/AgendaCards';
 import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
 import { useNavigate } from 'react-router-dom';
 
@@ -729,6 +730,9 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
           </div>
           )}
+
+          {/* Agenda Cards */}
+          <AgendaCards stats={stats} />
 
           {/* Bottom cards - Responsive Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
