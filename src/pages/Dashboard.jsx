@@ -534,18 +534,17 @@ export default function Dashboard({ centroSelezionato, user }) {
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="mb-4 sm:mb-6">
-        <div className="bg-gradient-to-r from-[#0a1628] to-[#1e3a5f] rounded-xl p-4 sm:p-6 shadow-lg">
-          <div className="flex items-center gap-4">
-            {/* Titolo + data */}
-            <div className="shrink-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white">Dashboard</h1>
-                <span className="text-sm font-medium text-blue-100 bg-white/10 px-3 py-1 rounded-full capitalize backdrop-blur-sm">
-                  {new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                </span>
-              </div>
-              <p className="text-blue-100 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
+        <div className="flex items-center gap-4">
+          {/* Titolo + data */}
+          <div className="shrink-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
+              <span className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full capitalize">
+                {new Date().toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </span>
             </div>
+            <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
+          </div>
           {/* Meteo - occupa tutto lo spazio rimanente */}
           <div className="flex-1 min-w-0">
             <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} inline />
@@ -555,12 +554,11 @@ export default function Dashboard({ centroSelezionato, user }) {
             <img
               src={centroSelezionato.logo_url}
               alt={centroSelezionato.nome}
-              className="h-12 sm:h-16 max-w-[120px] sm:max-w-[180px] object-contain shrink-0 bg-white rounded-lg p-1"
+              className="h-12 sm:h-16 max-w-[120px] sm:max-w-[180px] object-contain shrink-0"
             />
           )}
-            </div>
-          </div>
         </div>
+      </div>
 
       {/* Pulsanti rapidi - direttore */}
       {user?.tipo_account === 'direttore' && (
