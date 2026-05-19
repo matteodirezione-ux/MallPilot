@@ -28,7 +28,7 @@ const WMO_ICONS = {
 
 const getWmo = (code) => WMO_ICONS[code] || { label: '?', emoji: '🌡️' };
 
-export default function WeatherWidget({ citta, provincia, inline }) {
+export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -83,9 +83,18 @@ export default function WeatherWidget({ citta, provincia, inline }) {
     return (
       <div className="flex gap-3 w-full items-center">
         {/* Informazioni centro */}
-        <div className="shrink-0 flex flex-col justify-center">
-          <span className="text-sm font-bold text-slate-700 leading-tight">{weather.place.name}</span>
-          <span className="text-xs text-slate-400 leading-tight">{weather.place.country}</span>
+        <div className="shrink-0 flex flex-col justify-center gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold text-slate-700 leading-tight">{weather.place.name}</span>
+              {indirizzo && <span className="text-xs text-slate-500 leading-tight">{indirizzo}</span>}
+            </div>
+          </div>
         </div>
         {daily.time.map((dateStr, i) => {
           const d = new Date(dateStr);

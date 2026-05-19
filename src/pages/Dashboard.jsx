@@ -547,7 +547,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
           {/* Meteo - occupa tutto lo spazio rimanente */}
           <div className="flex-1 min-w-0">
-            <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} inline />
+            <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           </div>
           {/* Logo */}
           {centroSelezionato?.logo_url && (
