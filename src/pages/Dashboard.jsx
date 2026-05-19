@@ -732,7 +732,13 @@ export default function Dashboard({ centroSelezionato, user }) {
           )}
 
           {/* Agenda Cards */}
-          <AgendaCards stats={stats} />
+          <AgendaCards
+            stats={stats}
+            onSelect={openDetail}
+            onCompleteTask={handleCompleteTask}
+            onCompleteControllo={handleCompleteControllo}
+            completingIds={completingIds}
+          />
 
           {/* Bottom cards - Responsive Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">

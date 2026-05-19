@@ -1,144 +1,250 @@
 import React from 'react';
-import { format, addDays, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
+import { format, addDays, startOfDay, endOfDay } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Calendar, ListTodo, ClipboardList, HardHat, Sparkles } from 'lucide-react';
+import { Calendar, ListTodo, ClipboardList, HardHat, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { base44 } from '@/api/base44Client';
 
-// Helpers
-const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
-const sameDay = (d1, d2) => d1.getTime() === d2.getTime();
 const fmtDate = (d) => format(new Date(d), 'dd MMM', { locale: it });
-
-function AgendaSection({ icon: Icon, color, label, items, emptyMsg }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mb-2">
-      <div className={`flex items-center gap-1 mb-1`}>
-        <Icon className={`w-3 h-3 ${color}`} />
-        <span className={`text-xs font-semibold uppercase tracking-wide ${color}`}>{label}</span>
-      </div>
-      <div className="space-y-1">
-        {items.map((item, idx) => (
-          <div key={item.id || idx} className="text-xs text-slate-700 bg-white/70 rounded px-2 py-1 border border-slate-100 truncate">
-            {item.label}
-            {item.sub && <span className="text-slate-400 ml-1">{item.sub}</span>}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function buildAgendaData({ stats, fromDate, toDate }) {
   const from = startOfDay(fromDate);
   const to = endOfDay(toDate);
+  const inRange = (d) => { const dt = startOfDay(new Date(d)); return dt >= from && dt <= to; };
 
-  const inRange = (d) => {
-    const dt = startOfDay(new Date(d));
-    return dt >= from && dt <= to;
-  };
-
-  // Tasks: scadenza in range, non completati/annullati
   const tasks = (stats.tasksList || []).filter(t =>
     t.stato !== 'completato' && t.stato !== 'annullato' &&
     t.data_scadenza && inRange(t.data_scadenza)
-  ).map(t => ({ id: t.id, label: t.titolo, sub: `· ${fmtDate(t.data_scadenza)}` }));
+  );
 
-  // Controlli: scadenza in range, non completati/annullati
   const controlli = (stats.controlliList || []).filter(c =>
     c.stato !== 'completato' && c.stato !== 'annullato' &&
     c.data_scadenza && inRange(c.data_scadenza)
-  ).map(c => ({ id: c.id, label: c.titolo, sub: `· ${fmtDate(c.data_scadenza)}` }));
+  );
 
-  // Affitti: data_inizio in range, non evento, non cancellato
-  const affitti = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []).filter((p, i, arr) =>
-    arr.findIndex(x => x.id === p.id) === i &&
-    !p.is_event && p.stato !== 'cancellata' &&
-    p.data_inizio && inRange(p.data_inizio)
-  ).map(p => ({
-    id: p.id,
-    label: p.cliente?.ragione_sociale || p.cliente_id || 'N.D.',
-    sub: `· spazio ${p.spazio?.numero_spazio || '-'}`
-  }));
+  const allPrenotazioni = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []);
+  const seen = new Set();
+  const affitti = allPrenotazioni.filter(p => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio && inRange(p.data_inizio);
+  });
 
-  // Capex: data_inizio in range
-  const capex = (stats.capexList || []).filter(c =>
-    c.data_inizio && inRange(c.data_inizio)
-  ).map(c => ({ id: c.id, label: c.titolo }));
-
-  // Pulizie periodiche: prossima_scadenza in range
-  const pulizie = (stats.puliziePeriodiche || []).filter(p =>
-    p.prossima_scadenza && inRange(p.prossima_scadenza)
-  ).map(p => ({ id: p.id, label: p.titolo, sub: `· ${p.frequenza}` }));
+  const capex = (stats.capexList || []).filter(c => c.data_inizio && inRange(c.data_inizio));
+  const pulizie = (stats.puliziePeriodiche || []).filter(p => p.prossima_scadenza && inRange(p.prossima_scadenza));
 
   return { tasks, controlli, affitti, capex, pulizie };
 }
 
-function AgendaCard({ title, bgColor, borderColor, headerColor, dateLabel, stats, fromDate, toDate }) {
-  const { tasks, controlli, affitti, capex, pulizie } = buildAgendaData({ stats, fromDate, toDate });
-  const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length === 0;
-
+function SectionLabel({ icon: Icon, color, label }) {
   return (
-    <div className={`rounded-xl border ${borderColor} ${bgColor} p-3 sm:p-4 shadow-md`}>
-      <div className="mb-3">
-        <div className="flex items-center gap-2 mb-0.5">
-          <Calendar className={`w-4 h-4 ${headerColor}`} />
-          <h3 className={`font-bold text-sm ${headerColor}`}>{title}</h3>
-        </div>
-        <p className="text-xs text-slate-500">{dateLabel}</p>
-      </div>
-
-      {isEmpty ? (
-        <p className="text-xs text-slate-400 italic">Niente in programma</p>
-      ) : (
-        <div>
-          <AgendaSection icon={ListTodo} color="text-blue-600" label="Task" items={tasks} />
-          <AgendaSection icon={ClipboardList} color="text-indigo-600" label="Controlli" items={controlli} />
-          <AgendaSection icon={Calendar} color="text-green-600" label="Affitti (inizio)" items={affitti} />
-          <AgendaSection icon={HardHat} color="text-yellow-600" label="Capex" items={capex} />
-          <AgendaSection icon={Sparkles} color="text-purple-600" label="Pulizie" items={pulizie} />
-        </div>
-      )}
+    <div className="flex items-center gap-1.5 mb-1.5 mt-3 first:mt-0">
+      <Icon className={`w-3.5 h-3.5 ${color}`} />
+      <span className={`text-xs font-bold uppercase tracking-wider ${color}`}>{label}</span>
     </div>
   );
 }
 
-export default function AgendaCards({ stats }) {
-  const oggi = today();
+function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, stats, fromDate, toDate, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
+  const { tasks, controlli, affitti, capex, pulizie } = buildAgendaData({ stats, fromDate, toDate });
+  const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length === 0;
+
+  const prioritaColor = { urgente: 'bg-red-100 text-red-700', alta: 'bg-orange-100 text-orange-700', media: 'bg-yellow-100 text-yellow-700', bassa: 'bg-slate-100 text-slate-600' };
+
+  return (
+    <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-shadow flex flex-col">
+      <CardHeader className={`pb-2 sm:pb-3 rounded-t-lg ${bgHeader}`}>
+        <div className="flex items-center gap-2">
+          <Calendar className={`w-4 sm:w-5 h-4 sm:h-5 ${headerTextColor}`} />
+          <div>
+            <CardTitle className={`text-sm sm:text-base font-semibold ${headerTextColor}`}>{title}</CardTitle>
+            <p className={`text-xs opacity-75 ${headerTextColor}`}>{dateLabel}</p>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 max-h-80 overflow-y-auto pt-3">
+        {isEmpty ? (
+          <p className="text-slate-400 text-center py-4 text-xs sm:text-sm italic">Niente in programma</p>
+        ) : (
+          <div>
+            {/* Tasks */}
+            {tasks.length > 0 && (
+              <>
+                <SectionLabel icon={ListTodo} color="text-blue-600" label="Task" />
+                <div className="space-y-1.5">
+                  {tasks.map(t => (
+                    <div
+                      key={t.id}
+                      className="flex items-center gap-2 p-2 sm:p-2.5 bg-blue-50 rounded-lg border border-blue-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('task', t)}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onCompleteTask(t.id); }}
+                        disabled={completingIds.has(t.id)}
+                        className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
+                        title="Segna come completato"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-800 truncate">{t.titolo}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {t.priorita && <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${prioritaColor[t.priorita] || 'bg-slate-100 text-slate-600'}`}>{t.priorita}</span>}
+                        <span className="text-xs text-slate-500 whitespace-nowrap">{fmtDate(t.data_scadenza)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Controlli */}
+            {controlli.length > 0 && (
+              <>
+                <SectionLabel icon={ClipboardList} color="text-indigo-600" label="Controlli" />
+                <div className="space-y-1.5">
+                  {controlli.map(c => (
+                    <div
+                      key={c.id}
+                      className="flex items-center gap-2 p-2 sm:p-2.5 bg-indigo-50 rounded-lg border border-indigo-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('manutenzione', c)}
+                    >
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onCompleteControllo(c.id); }}
+                        disabled={completingIds.has(c.id)}
+                        className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
+                        title="Segna come completato"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                      </div>
+                      <span className="text-xs text-slate-500 whitespace-nowrap shrink-0">{fmtDate(c.data_scadenza)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Affitti */}
+            {affitti.length > 0 && (
+              <>
+                <SectionLabel icon={Calendar} color="text-green-600" label="Affitti (inizio)" />
+                <div className="space-y-1.5">
+                  {affitti.map(p => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-2 sm:p-2.5 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('prenotazione', p)}
+                    >
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
+                        <p className="text-xs text-slate-500">Spazio {p.spazio?.numero_spazio || '-'}</p>
+                      </div>
+                      <span className="text-xs text-green-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.data_inizio)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Capex */}
+            {capex.length > 0 && (
+              <>
+                <SectionLabel icon={HardHat} color="text-yellow-600" label="Capex" />
+                <div className="space-y-1.5">
+                  {capex.map(c => (
+                    <div
+                      key={c.id}
+                      className="flex items-center justify-between p-2 sm:p-2.5 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('capex', c)}
+                    >
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                        {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
+                      </div>
+                      <span className="text-xs text-yellow-700 font-medium whitespace-nowrap shrink-0">{fmtDate(c.data_inizio)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Pulizie */}
+            {pulizie.length > 0 && (
+              <>
+                <SectionLabel icon={Sparkles} color="text-purple-600" label="Pulizie Programmate" />
+                <div className="space-y-1.5">
+                  {pulizie.map(p => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-2 sm:p-2.5 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('pulizia_periodica', p)}
+                    >
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
+                        <p className="text-xs text-slate-500">{p.frequenza}</p>
+                      </div>
+                      <span className="text-xs text-purple-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.prossima_scadenza)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AgendaCards({ stats, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
   const domani = addDays(oggi, 1);
   const fra3 = addDays(oggi, 3);
   const fra7 = addDays(oggi, 7);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
       <AgendaCard
         title="Oggi"
-        bgColor="bg-amber-50"
+        bgHeader="bg-amber-50"
         borderColor="border-amber-200"
-        headerColor="text-amber-700"
+        headerTextColor="text-amber-700"
         dateLabel={format(oggi, "EEEE d MMMM", { locale: it })}
         stats={stats}
         fromDate={oggi}
         toDate={oggi}
+        onSelect={onSelect}
+        onCompleteTask={onCompleteTask}
+        onCompleteControllo={onCompleteControllo}
+        completingIds={completingIds}
       />
       <AgendaCard
         title="Domani"
-        bgColor="bg-sky-50"
+        bgHeader="bg-sky-50"
         borderColor="border-sky-200"
-        headerColor="text-sky-700"
+        headerTextColor="text-sky-700"
         dateLabel={format(domani, "EEEE d MMMM", { locale: it })}
         stats={stats}
         fromDate={domani}
         toDate={domani}
+        onSelect={onSelect}
+        onCompleteTask={onCompleteTask}
+        onCompleteControllo={onCompleteControllo}
+        completingIds={completingIds}
       />
       <AgendaCard
         title="Prossimi 7 giorni"
-        bgColor="bg-violet-50"
+        bgHeader="bg-violet-50"
         borderColor="border-violet-200"
-        headerColor="text-violet-700"
+        headerTextColor="text-violet-700"
         dateLabel={`${format(fra3, "d MMM", { locale: it })} – ${format(fra7, "d MMM", { locale: it })}`}
         stats={stats}
         fromDate={fra3}
         toDate={fra7}
+        onSelect={onSelect}
+        onCompleteTask={onCompleteTask}
+        onCompleteControllo={onCompleteControllo}
+        completingIds={completingIds}
       />
     </div>
   );
