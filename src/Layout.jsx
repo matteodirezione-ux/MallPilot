@@ -248,6 +248,7 @@ export default function Layout({ children, currentPageName }) {
       label: 'AMMINISTRAZIONE',
       items: [
         { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
+        { name: 'Tenant', page: 'Tenant', icon: Building2, roles: ['proprieta', 'direttore'] },
         { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
         { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
       ]

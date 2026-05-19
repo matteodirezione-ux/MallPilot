@@ -24,6 +24,7 @@ import Ticket from './pages/Ticket';
 import TaskPage from './pages/Task';
 import CalendarioManutenzioni from './pages/CalendarioManutenzioni';
 import StorageReport from './pages/StorageReport';
+import TenantPage from './pages/Tenant';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +65,7 @@ const AuthenticatedApp = () => {
       <Route path="/Task" element={<Layout currentPageName="Task"><TaskPage /></Layout>} />
       <Route path="/CalendarioManutenzioni" element={<Layout currentPageName="CalendarioManutenzioni"><CalendarioManutenzioni /></Layout>} />
       <Route path="/StorageReport" element={<Layout currentPageName="StorageReport"><StorageReport /></Layout>} />
+      <Route path="/Tenant" element={<Layout currentPageName="Tenant"><TenantPage /></Layout>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

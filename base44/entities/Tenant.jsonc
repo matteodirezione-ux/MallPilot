@@ -1,0 +1,99 @@
+{
+  "name": "Tenant",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "numero_negozio": {
+      "type": "string",
+      "description": "Numero del negozio"
+    },
+    "ragione_sociale": {
+      "type": "string",
+      "description": "Ragione sociale dell'azienda"
+    },
+    "insegna": {
+      "type": "string",
+      "description": "Insegna del punto vendita"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note generali"
+    },
+    "telefono": {
+      "type": "string",
+      "description": "Telefono del punto vendita"
+    },
+    "indirizzo_punto_vendita": {
+      "type": "string",
+      "description": "Indirizzo del punto vendita"
+    },
+    "reperibile": {
+      "type": "string",
+      "description": "Contatto reperibile"
+    },
+    "capoarea_resp_commerciale": {
+      "type": "string",
+      "description": "Capoarea o responsabile commerciale"
+    },
+    "mail_urgenze_pv_chiuso": {
+      "type": "string",
+      "description": "Email per urgenze punto vendita chiuso"
+    },
+    "referente_tecnico": {
+      "type": "string",
+      "description": "Referente tecnico"
+    },
+    "indirizzo_ufficio_marketing": {
+      "type": "string",
+      "description": "Indirizzo ufficio marketing"
+    },
+    "pec": {
+      "type": "string",
+      "description": "PEC aziendale"
+    },
+    "macchina_condizionamento_esterna": {
+      "type": "boolean",
+      "default": false,
+      "description": "Presenza macchina di condizionamento esterna"
+    },
+    "macchina_condizionamento_interna": {
+      "type": "boolean",
+      "default": false,
+      "description": "Presenza macchina di condizionamento interna"
+    },
+    "data_inizio_contratto": {
+      "type": "string",
+      "format": "date",
+      "description": "Data inizio contratto"
+    },
+    "data_scadenza_contratto": {
+      "type": "string",
+      "format": "date",
+      "description": "Data scadenza contratto"
+    },
+    "canone": {
+      "type": "number",
+      "description": "Canone fisso"
+    },
+    "canone_variabile": {
+      "type": "number",
+      "description": "Canone variabile"
+    },
+    "note_contratto": {
+      "type": "string",
+      "description": "Note sul contratto"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL del logo/foto del tenant"
+    }
+  },
+  "required": [
+    "centro_id",
+    "numero_negozio",
+    "ragione_sociale"
+  ]
+}
