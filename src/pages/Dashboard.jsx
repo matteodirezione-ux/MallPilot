@@ -33,6 +33,7 @@ import { format, addMonths, isWithinInterval, startOfMonth, endOfMonth, startOfY
 import { it } from 'date-fns/locale';
 import TasksDashboard from '@/components/dashboard/TasksDashboard';
 import AgendaCards from '@/components/dashboard/AgendaCards';
+import WeatherWidget from '@/components/dashboard/WeatherWidget';
 import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
 import { useNavigate } from 'react-router-dom';
 
@@ -541,6 +542,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             </span>
           </div>
           <p className="text-slate-600 text-xs sm:text-sm">{centroSelezionato?.nome}</p>
+          <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} />
         </div>
         {centroSelezionato?.logo_url && (
           <img
