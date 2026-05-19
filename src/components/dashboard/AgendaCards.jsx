@@ -11,11 +11,6 @@ function buildAgendaData({ stats, fromDate, toDate }) {
   const from = startOfDay(fromDate);
   const to = endOfDay(toDate);
   const inRange = (d) => { const dt = startOfDay(new Date(d)); return dt >= from && dt <= to; };
-  const overlapsRange = (start, end) => {
-    const s = startOfDay(new Date(start));
-    const e = startOfDay(new Date(end));
-    return s <= to && e >= from;
-  };
 
   const tasks = (stats.tasksList || []).filter(t =>
     t.stato !== 'completato' && t.stato !== 'annullato' &&
@@ -27,28 +22,18 @@ function buildAgendaData({ stats, fromDate, toDate }) {
     c.data_scadenza && inRange(c.data_scadenza)
   );
 
-  // Eventi (is_event = true)
-  const eventiCorrenti = (stats.eventStats?.eventiCorrentiList || []).filter(e =>
-    e.stato !== 'cancellata' && overlapsRange(e.data_inizio, e.data_fine)
-  );
-  const prossimiEventi = (stats.eventStats?.prossimiEventi || []).filter(e =>
-    e.stato !== 'cancellata' && inRange(e.data_inizio)
-  );
-  const eventi = [...eventiCorrenti, ...prossimiEventi];
-
-  // Affitti non permanenti (non is_event, ma temporanei)
   const allPrenotazioni = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []);
   const seen = new Set();
   const affitti = allPrenotazioni.filter(p => {
     if (seen.has(p.id)) return false;
     seen.add(p.id);
-    return !p.is_event && p.stato !== 'cancellata' && overlapsRange(p.data_inizio, p.data_fine);
+    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio && inRange(p.data_inizio);
   });
 
   const capex = (stats.capexList || []).filter(c => c.data_inizio && inRange(c.data_inizio));
   const pulizie = (stats.puliziePeriodiche || []).filter(p => p.prossima_scadenza && inRange(p.prossima_scadenza));
 
-  return { tasks, controlli, eventi, affitti, capex, pulizie };
+  return { tasks, controlli, affitti, capex, pulizie };
 }
 
 function SectionLabel({ icon: Icon, color, label }) {
@@ -60,17 +45,9 @@ function SectionLabel({ icon: Icon, color, label }) {
   );
 }
 
-function isEmptyAgenda(data) {
-  return data.tasks.length + data.controlli.length + data.eventi.length + data.affitti.length + data.capex.length + data.pulizie.length === 0;
-}
-
 function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, stats, fromDate, toDate, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
-  const { tasks, controlli, eventi, affitti, capex, pulizie } = buildAgendaData({ stats, fromDate, toDate });
-  const isEmpty = isEmptyAgenda({ tasks, controlli, eventi, affitti, capex, pulizie });
-
-  const from = startOfDay(fromDate);
-  const to = endOfDay(toDate);
-  const inRange = (d) => { const dt = startOfDay(new Date(d)); return dt >= from && dt <= to; };
+  const { tasks, controlli, affitti, capex, pulizie } = buildAgendaData({ stats, fromDate, toDate });
+  const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length === 0;
 
   const prioritaColor = { urgente: 'bg-red-100 text-red-700', alta: 'bg-orange-100 text-orange-700', media: 'bg-yellow-100 text-yellow-700', bassa: 'bg-slate-100 text-slate-600' };
 
@@ -147,75 +124,24 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
               </>
             )}
 
-            {/* Eventi */}
-            {eventi.length > 0 && (
-              <>
-                <SectionLabel icon={Sparkles} color="text-purple-600" label="Eventi" />
-                <div className="space-y-1.5">
-                  {eventi.map(e => {
-                    const isInizioInRange = inRange(e.data_inizio);
-                    const isFineInRange = inRange(e.data_fine);
-                    let label = '';
-                    if (isInizioInRange && isFineInRange) label = 'Inizio e fine';
-                    else if (isInizioInRange) label = 'Inizio';
-                    else if (isFineInRange) label = 'Fine';
-                    else label = 'In corso';
-                    
-                    return (
-                      <div
-                        key={e.id}
-                        className="flex items-center justify-between p-2 sm:p-2.5 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
-                        onClick={() => onSelect('prenotazione', e)}
-                      >
-                        <div className="flex-1 min-w-0 mr-2">
-                          <p className="font-medium text-slate-800 truncate">{e.nome_evento || e.cliente?.ragione_sociale || 'N.D.'}</p>
-                          <p className="text-xs text-purple-600 font-medium">{label}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-xs text-purple-700 font-medium whitespace-nowrap">
-                            {fmtDate(e.data_inizio)} {e.data_fine && e.data_fine !== e.data_inizio ? `→ ${fmtDate(e.data_fine)}` : ''}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
-            {/* Affitti (non permanenti) */}
+            {/* Affitti */}
             {affitti.length > 0 && (
               <>
-                <SectionLabel icon={Calendar} color="text-green-600" label="Affitti" />
+                <SectionLabel icon={Calendar} color="text-green-600" label="Affitti (inizio)" />
                 <div className="space-y-1.5">
-                  {affitti.map(p => {
-                    const isInizioInRange = inRange(p.data_inizio);
-                    const isFineInRange = inRange(p.data_fine);
-                    let label = '';
-                    if (isInizioInRange && isFineInRange) label = 'Inizio e fine';
-                    else if (isInizioInRange) label = 'Inizio';
-                    else if (isFineInRange) label = 'Fine';
-                    else label = 'In corso';
-                    
-                    return (
-                      <div
-                        key={p.id}
-                        className="flex items-center justify-between p-2 sm:p-2.5 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
-                        onClick={() => onSelect('prenotazione', p)}
-                      >
-                        <div className="flex-1 min-w-0 mr-2">
-                          <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
-                          <p className="text-xs text-slate-500">Spazio {p.spazio?.numero_spazio || '-'}</p>
-                          <p className="text-xs text-green-600 font-medium">{label}</p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-xs text-green-700 font-medium whitespace-nowrap">
-                            {fmtDate(p.data_inizio)} {p.data_fine && p.data_fine !== p.data_inizio ? `→ ${fmtDate(p.data_fine)}` : ''}
-                          </p>
-                        </div>
+                  {affitti.map(p => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-2 sm:p-2.5 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('prenotazione', p)}
+                    >
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
+                        <p className="text-xs text-slate-500">Spazio {p.spazio?.numero_spazio || '-'}</p>
                       </div>
-                    );
-                  })}
+                      <span className="text-xs text-green-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.data_inizio)}</span>
+                    </div>
+                  ))}
                 </div>
               </>
             )}
