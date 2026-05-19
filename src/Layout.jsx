@@ -354,7 +354,7 @@ export default function Layout({ children, currentPageName }) {
                             onClick={() => setMobileMenuOpen(false)}
                             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                               isActive
-                                ? 'bg-blue-600 text-white font-medium'
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium'
                                 : 'text-slate-300 hover:bg-slate-800'
                             }`}
                           >
