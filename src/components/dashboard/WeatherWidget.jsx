@@ -86,7 +86,7 @@ export default function WeatherWidget({ citta, provincia, inline }) {
           const d = new Date(dateStr);
           const isToday = d.getTime() === today.getTime();
           const wmo = getWmo(daily.weathercode[i]);
-          const dayLabel = isToday ? 'Oggi' : format(d, 'EEE', { locale: it });
+          const dayLabel = isToday ? 'Oggi' : format(d, 'EEE d', { locale: it });
           const maxTemp = Math.round(daily.temperature_2m_max[i]);
           const minTemp = Math.round(daily.temperature_2m_min[i]);
           return (
