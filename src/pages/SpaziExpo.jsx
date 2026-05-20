@@ -149,28 +149,31 @@ export default function SpaziExpo({ centroSelezionato, user }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {spazi.map(spazio => (
             <Card key={spazio.id} className={`border ${!spazio.attivo ? 'opacity-50' : ''}`}>
-              <CardContent className="p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: spazio.colore || '#3b82f6' }} />
-                    <span className="font-bold text-base text-slate-800">{spazio.numero_spazio}</span>
-                  </div>
-                  {user?.tipo_account !== 'vigilanza' && (
-                    <div className="flex gap-1">
-                      <button onClick={() => handleEdit(spazio)} className="p-1 rounded-lg hover:bg-slate-100"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
-                      <button onClick={() => handleDelete(spazio.id)} className="p-1 rounded-lg hover:bg-red-50"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
+              <CardContent className="p-0 overflow-hidden">
+                <div className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: spazio.colore || '#3b82f6' }} />
+                      <span className="font-bold text-base text-slate-800">{spazio.numero_spazio}</span>
+                      {spazio.nome && <span className="text-sm text-slate-600 truncate">{spazio.nome}</span>}
                     </div>
-                  )}
+                    {user?.tipo_account !== 'vigilanza' && (
+                      <div className="flex gap-1 flex-shrink-0">
+                        <button onClick={() => handleEdit(spazio)} className="p-1 rounded-lg hover:bg-slate-100"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
+                        <button onClick={() => handleDelete(spazio.id)} className="p-1 rounded-lg hover:bg-red-50"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    {spazio.superficie_mq && <p className="text-xs text-slate-500">{spazio.superficie_mq} m²</p>}
+                    {spazio.solo_eventi && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">Solo eventi</span>}
+                  </div>
                 </div>
-                {spazio.nome && <p className="text-xs font-medium text-slate-700 mt-1 truncate">{spazio.nome}</p>}
-                {spazio.superficie_mq && <p className="text-xs text-slate-500">{spazio.superficie_mq} m²</p>}
-                {spazio.descrizione && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{spazio.descrizione}</p>}
-                {spazio.solo_eventi && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full mt-1 inline-block">Solo eventi</span>}
-                {spazio.foto_urls?.length > 0 && (
-                  <div className="grid grid-cols-2 gap-1 mt-2">
-                    {spazio.foto_urls.slice(0, 4).map((url, i) => (
-                      <img key={i} src={url} alt="" className="w-full h-20 rounded object-cover hover:scale-110 transition-transform cursor-pointer" />
-                    ))}
+                {spazio.foto_urls?.length > 0 ? (
+                  <img src={spazio.foto_urls[0]} alt="" className="w-full h-32 object-cover" />
+                ) : (
+                  <div className="w-full h-20 bg-slate-100 flex items-center justify-center">
+                    <Building2 className="w-6 h-6 text-slate-300" />
                   </div>
                 )}
               </CardContent>
