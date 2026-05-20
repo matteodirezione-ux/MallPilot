@@ -439,26 +439,25 @@ export default function Dashboard({ centroSelezionato, user }) {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-4">
-          {/* Titolo + data */}
+          {/* Titolo */}
           <div className="shrink-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
-              <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-1.5 rounded-full border border-blue-200 self-center">
-                <svg className="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm font-semibold text-blue-700">
-                  {new Date().toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              </div>
-            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
             <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
           </div>
           {/* Meteo - occupa tutto lo spazio rimanente */}
           <div className="flex-1 min-w-0">
             <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           </div>
-
+          {/* Data - a destra */}
+          <div className="shrink-0 text-right hidden sm:block">
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">
+              {new Date().toLocaleDateString('it-IT', { weekday: 'long' })}
+            </p>
+            <p className="text-2xl font-bold text-slate-800 leading-tight">
+              {new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+            </p>
+            <p className="text-xs text-slate-500">{new Date().getFullYear()}</p>
+          </div>
         </div>
       </div>
 
