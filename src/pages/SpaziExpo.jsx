@@ -165,15 +165,19 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                       </div>
                     )}
                   </div>
-                  {spazio.solo_eventi && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full mt-1 inline-block">Solo eventi</span>}
                 </div>
-                {spazio.foto_urls?.length > 0 ? (
-                  <img src={spazio.foto_urls[0]} alt="" className="w-full h-32 object-cover" />
-                ) : (
-                  <div className="w-full h-20 bg-slate-100 flex items-center justify-center">
-                    <Building2 className="w-6 h-6 text-slate-300" />
-                  </div>
-                )}
+                <div className="relative">
+                  {spazio.foto_urls?.length > 0 ? (
+                    <img src={spazio.foto_urls[0]} alt="" className="w-full h-32 object-cover" />
+                  ) : (
+                    <div className="w-full h-20 bg-slate-100 flex items-center justify-center">
+                      <Building2 className="w-6 h-6 text-slate-300" />
+                    </div>
+                  )}
+                  {spazio.solo_eventi && (
+                    <span className="absolute top-1.5 left-1.5 text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded-full shadow">Solo eventi</span>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
