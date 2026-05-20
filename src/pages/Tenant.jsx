@@ -139,11 +139,11 @@ export default function TenantPage({ centroSelezionato, user }) {
 
         {/* Dialog Mappa */}
         <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
-          <DialogContent className="w-[95vw] max-w-5xl">
+          <DialogContent className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-screen-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg md:max-w-[90vw]">
             <DialogHeader><DialogTitle>Mappa centro - {centroSelezionato?.nome}</DialogTitle></DialogHeader>
             <div className="space-y-4">
               {mappaUrl ? (
-                <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[75vh]" />
+                <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[80vh]" />
               ) : (
                 <div className="flex items-center justify-center h-40 bg-slate-100 rounded-lg text-slate-400 text-sm">Nessuna mappa caricata</div>
               )}
