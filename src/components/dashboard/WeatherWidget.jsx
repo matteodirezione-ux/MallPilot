@@ -109,13 +109,15 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
             return (
               <div
                 key={dateStr}
-                className="flex-1 flex flex-col items-center justify-between gap-1 py-3 px-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+                className="flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
               >
                 <span className="text-xs font-semibold text-slate-600 capitalize">{dayLabel}</span>
-                <span className="text-3xl leading-none">{wmo.emoji}</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-lg font-bold text-slate-800">{maxTemp}°</span>
-                  <span className="text-xs text-slate-400">{minTemp}°</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-3xl leading-none">{wmo.emoji}</span>
+                  <div className="flex flex-col">
+                    <span className="text-lg font-bold text-slate-800">{maxTemp}°</span>
+                    <span className="text-xs text-slate-400">{minTemp}°</span>
+                  </div>
                 </div>
               </div>
             );
@@ -141,17 +143,19 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
           return (
             <div
               key={dateStr}
-              className={`flex flex-col items-center min-w-[70px] px-2 py-3 rounded-xl border text-center shrink-0 transition-shadow ${
+              className={`flex flex-col items-center min-w-[80px] px-2 py-3 rounded-xl border shrink-0 transition-shadow ${
                 isToday 
                   ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-300 shadow-md' 
                   : 'bg-gradient-to-br from-slate-50 to-white border-slate-200 shadow-sm hover:shadow-md'
               }`}
             >
-              <p className={`text-xs font-semibold capitalize mb-1 ${isToday ? 'text-blue-100' : 'text-slate-600'}`}>{dayLabel}</p>
-              <span className="text-3xl leading-tight mb-2">{wmo.emoji}</span>
-              <div className="flex flex-col items-center">
-                <p className={`text-base font-bold ${isToday ? 'text-white' : 'text-slate-800'}`}>{maxTemp}°</p>
-                <p className={`text-xs ${isToday ? 'text-blue-200' : 'text-slate-400'}`}>{minTemp}°</p>
+              <p className={`text-xs font-semibold capitalize mb-2 ${isToday ? 'text-blue-100' : 'text-slate-600'}`}>{dayLabel}</p>
+              <div className="flex items-center gap-2">
+                <span className="text-3xl leading-tight">{wmo.emoji}</span>
+                <div className="flex flex-col">
+                  <p className={`text-base font-bold ${isToday ? 'text-white' : 'text-slate-800'}`}>{maxTemp}°</p>
+                  <p className={`text-xs ${isToday ? 'text-blue-200' : 'text-slate-400'}`}>{minTemp}°</p>
+                </div>
               </div>
             </div>
           );
