@@ -296,15 +296,12 @@ export default function Layout({ children, currentPageName }) {
               {centroSelezionato && centri.length > 0 ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
                   {centroSelezionato.logo_url ? (
-                    <img src={centroSelezionato.logo_url} alt={centroSelezionato.nome} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                    <img src={centroSelezionato.logo_url} alt={centroSelezionato.nome} className="h-10 w-full object-contain flex-shrink-0" style={{maxWidth: '160px'}} />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-sm">{(centroSelezionato.nome || 'M').charAt(0).toUpperCase()}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
                     </div>
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
-                  </div>
                   {centri.length > 1 && <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
                   {centri.length > 1 && (
                     <select
