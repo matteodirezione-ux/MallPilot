@@ -653,92 +653,90 @@ export default function Dashboard({ centroSelezionato, user }) {
 
           {/* Bottom cards - Responsive Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-          {/* Task */}
+
+          {/* Capex */}
           <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Task')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ListTodo className="w-4 sm:w-5 h-4 sm:h-5 text-slate-600" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Task</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Capex')}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <HardHat className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
+                  <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Capex Programmati</CardTitle>
+                </div>
+                <span className="text-xs text-blue-600 font-medium">Vai →</span>
               </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
-            <TasksDashboard tasks={stats.tasksList} onComplete={handleCompleteTask} onSelect={(t) => openDetail('task', t)} />
-          </CardContent>
-          </Card>
-
-          {/* Controlli */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow flex flex-col">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/CalendarioManutenzioni')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 sm:w-5 h-4 sm:h-5 text-indigo-600" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Controlli</CardTitle>
-              </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="flex-1 overflow-y-auto">
-            {(() => {
-              const oggi = new Date(); oggi.setHours(0,0,0,0);
-              const domani = new Date(oggi); domani.setDate(oggi.getDate() + 1);
-
-              const getDs = (c) => { const d = new Date(c.data_scadenza); d.setHours(0,0,0,0); return d; };
-
-              const filtrati = stats.controlliList.filter(c => {
-                if (c.stato === 'completato' || c.stato === 'annullato') return false;
-                const ds = getDs(c);
-                return ds <= oggi;
-              });
-
-              if (filtrati.length === 0) return <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun controllo in scadenza</p>;
-
-              const groups = { scaduti: [], oggi: [] };
-              filtrati.forEach(c => {
-                const ds = getDs(c);
-                if (ds < oggi) groups.scaduti.push(c);
-                else groups.oggi.push(c);
-              });
-
-              const groupLabels = { scaduti: '⚠️ Scaduti', oggi: '📅 Oggi' };
-              const groupStyles = {
-                scaduti: 'bg-red-50 border-red-200',
-                oggi: 'bg-yellow-50 border-yellow-200',
-                domani: 'bg-indigo-50 border-indigo-100'
-              };
-
-              return (
-                <div className="space-y-4">
-                  {['scaduti', 'oggi'].map(key => groups[key].length > 0 && (
-                    <div key={key}>
-                      <h4 className="text-sm font-semibold text-slate-700 mb-2">{groupLabels[key]}</h4>
-                      <div className="space-y-1.5 sm:space-y-2">
-                        {groups[key].map(c => (
-                          <div
-                            key={c.id}
-                            className={`flex items-center gap-2 p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${groupStyles[key]}`}
-                            onClick={() => openDetail('manutenzione', c)}
-                          >
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleCompleteControllo(c.id); }}
-                              disabled={completingIds.has(c.id)}
-                              className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
-                              title="Segna come completato"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
-                            </div>
-                          </div>
-                        ))}
+            </CardHeader>
+            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+              {stats.capexList.length === 0 ? (
+                <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun Capex in programma</p>
+              ) : (
+                <div className="space-y-1.5 sm:space-y-2">
+                  {stats.capexList.map(c => (
+                    <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('capex', c)}>
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                        {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
+                      </div>
+                      <div className="shrink-0 text-right">
+                        {c.data_inizio && (
+                          <p className="text-xs whitespace-nowrap">
+                            <span className="font-bold text-red-600">{giorniMancanti(c.data_inizio)}</span>
+                            {' · '}
+                            <span className="font-medium text-yellow-700">
+                              {format(new Date(c.data_inizio), 'dd MMM', { locale: it })}
+                              {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              );
-            })()}
-          </CardContent>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pulizie Periodiche */}
+          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+            <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Pulizie')}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
+                  <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Pulizie Periodiche</CardTitle>
+                </div>
+                <span className="text-xs text-blue-600 font-medium">Vai →</span>
+              </div>
+            </CardHeader>
+            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+              {stats.puliziePeriodiche.length === 0 ? (
+                <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessuna pulizia da programmare</p>
+              ) : (
+                <div className="space-y-1.5 sm:space-y-2">
+                  {stats.puliziePeriodiche.map(p => {
+                    const isProgrammato = p.stato === 'programmato';
+                    return (
+                      <div key={p.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${isProgrammato ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`} onClick={() => openDetail('pulizia_periodica', p)}>
+                        <div className="flex-1 min-w-0 mr-2">
+                          <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
+                          <p className="text-xs text-slate-500">{p.frequenza}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isProgrammato ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {isProgrammato ? 'Programmato' : 'Da programmare'}
+                          </span>
+                          {p.prossima_scadenza && (
+                            <p className="text-xs whitespace-nowrap mt-0.5">
+                              <span className="font-bold text-red-600">{giorniMancanti(p.prossima_scadenza)}</span>
+                              {' · '}
+                              <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
           </Card>
 
           {/* Ticket */}
@@ -939,126 +937,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                        </Card>
                        </div>
 
-      {/* Seconda riga card: Capex, Pulizie Periodiche, Report */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-3 sm:mt-4 lg:mt-6">
-        {/* Capex */}
-        <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Capex')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <HardHat className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-600" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Capex Programmati</CardTitle>
-              </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
-            {stats.capexList.length === 0 ? (
-              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun Capex in programma</p>
-            ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {stats.capexList.map(c => (
-                  <div key={c.id} className="flex items-center justify-between p-2 sm:p-3 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('capex', c)}>
-                  <div className="flex-1 min-w-0 mr-2">
-                    <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
-                    {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
-                  </div>
-                  <div className="shrink-0 text-right">
-                    {c.data_inizio && (
-                      <p className="text-xs whitespace-nowrap">
-                        <span className="font-bold text-red-600">{giorniMancanti(c.data_inizio)}</span>
-                        {' · '}
-                        <span className="font-medium text-yellow-700">
-                          {format(new Date(c.data_inizio), 'dd MMM', { locale: it })}
-                          {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
-                        </span>
-                      </p>
-                    )}
-                    {!c.data_inizio && <p className="text-xs text-slate-400">-</p>}
-                  </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Pulizie Periodiche */}
-        <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Pulizie')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <RefreshCw className="w-4 sm:w-5 h-4 sm:h-5 text-blue-500" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Pulizie Periodiche</CardTitle>
-              </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
-            {stats.puliziePeriodiche.length === 0 ? (
-              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessuna pulizia da programmare</p>
-            ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {stats.puliziePeriodiche.map(p => {
-                  const isProgrammato = p.stato === 'programmato';
-                  return (
-                    <div key={p.id} className={`flex items-center justify-between p-2 sm:p-3 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${isProgrammato ? 'bg-blue-50 border-blue-100' : 'bg-orange-50 border-orange-100'}`} onClick={() => openDetail('pulizia_periodica', p)}>
-                      <div className="flex-1 min-w-0 mr-2">
-                        <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
-                        <p className="text-xs text-slate-500">{p.frequenza}</p>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isProgrammato ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                          {isProgrammato ? 'Programmato' : 'Da programmare'}
-                        </span>
-                        {p.prossima_scadenza && (
-                          <p className="text-xs whitespace-nowrap mt-0.5">
-                            <span className="font-bold text-red-600">{giorniMancanti(p.prossima_scadenza)}</span>
-                            {' · '}
-                            <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Report Recenti */}
-        <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
-          <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Report')}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 sm:w-5 h-4 sm:h-5 text-emerald-600" />
-                <CardTitle className="text-sm sm:text-base md:text-lg font-semibold text-slate-800">Report Recenti</CardTitle>
-              </div>
-              <span className="text-xs text-blue-600 font-medium">Vai →</span>
-            </div>
-          </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-72 overflow-y-auto">
-            {stats.reportList.length === 0 ? (
-              <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun report disponibile</p>
-            ) : (
-              <div className="space-y-1.5 sm:space-y-2">
-                {stats.reportList.map(r => (
-                  <div key={r.id} className="flex items-center justify-between p-2 sm:p-3 bg-emerald-50 rounded-lg border border-emerald-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all" onClick={() => openDetail('report', r)}>
-                    <div className="flex-1 min-w-0 mr-2">
-                      <p className="font-medium text-slate-800 truncate">{r.operatore}</p>
-                      <p className="text-xs text-slate-500 truncate line-clamp-1">{r.contenuto || ''}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-medium text-emerald-700 whitespace-nowrap">{r.data ? format(new Date(r.data), 'dd MMM', { locale: it }) : '-'}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       <DashboardDetailModal
         open={detailModal.open}
