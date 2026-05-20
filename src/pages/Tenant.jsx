@@ -135,6 +135,7 @@ export default function TenantPage({ centroSelezionato, user }) {
               />
             </DialogContent>
           </Dialog>
+        </div>
 
         {/* Dialog Mappa */}
         <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
