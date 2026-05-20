@@ -66,7 +66,7 @@ export default function CalendarioManutenzioniMensile({ tasks, onTaskClick, onTo
                 {taskGiorno.slice(0, 4).map(t => (
                   <div key={t.id} className="flex items-start gap-1">
                     <Checkbox checked={t.stato === 'completato'} onCheckedChange={() => onToggleStatus(t)} className="mt-0.5 w-3 h-3" />
-                    <span onClick={() => onTaskClick(t)} className={`flex-1 text-xs truncate cursor-pointer font-medium ${t.stato === 'completato' ? 'text-green-700 line-through' : 'text-red-700'}`} title={t.titolo}>{t.titolo}</span>
+                    <span onClick={() => onTaskClick(t)} className={`flex-1 text-xs truncate cursor-pointer font-medium px-1 rounded ${t.stato === 'completato' ? 'bg-green-100 text-green-800 line-through' : 'bg-red-100 text-red-800'}`} title={t.titolo}>{t.titolo}</span>
                   </div>
                 ))}
                 {taskGiorno.length > 4 && <p className="text-xs text-slate-400">+{taskGiorno.length - 4}</p>}
