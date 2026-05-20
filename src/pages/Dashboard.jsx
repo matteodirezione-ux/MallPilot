@@ -438,8 +438,8 @@ export default function Dashboard({ centroSelezionato, user }) {
   return (
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="mb-4 sm:mb-6">
-        <div className="flex items-center gap-4">
-          {/* Titolo + Pulsanti rapidi direttore */}
+        {/* Desktop: titolo + pulsanti a sinistra, meteo + data a destra */}
+        <div className="hidden sm:flex items-center gap-4">
           <div className="shrink-0 flex items-center gap-3">
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
@@ -464,11 +464,9 @@ export default function Dashboard({ centroSelezionato, user }) {
               </div>
             )}
           </div>
-          {/* Meteo - occupa tutto lo spazio rimanente */}
           <div className="flex-1 min-w-0">
             <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           </div>
-          {/* Data - a destra */}
           <div className="shrink-0 hidden sm:flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl px-5 py-2.5 shadow-md min-w-[110px]">
             <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
               {new Date().toLocaleDateString('it-IT', { weekday: 'long' })}
@@ -481,6 +479,42 @@ export default function Dashboard({ centroSelezionato, user }) {
             </p>
             <p className="text-xs text-slate-500">{new Date().getFullYear()}</p>
           </div>
+        </div>
+        {/* Mobile: titolo + data in alto, meteo sotto, pulsanti sotto al titolo */}
+        <div className="sm:hidden space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
+              <p className="text-slate-600 text-xs mt-0.5">{centroSelezionato?.nome}</p>
+            </div>
+            <div className="shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl px-3 py-1.5 shadow-md min-w-[80px]">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                {new Date().toLocaleDateString('it-IT', { weekday: 'short' })}
+              </p>
+              <p className="text-xl font-bold text-white leading-tight">
+                {new Date().toLocaleDateString('it-IT', { day: 'numeric' })}
+              </p>
+            </div>
+          </div>
+          <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
+          {user?.tipo_account === 'direttore' && (
+            <div className="flex flex-wrap gap-2">
+              {[
+                { label: 'Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
+                { label: 'Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
+                { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
+              ].map(({ label, tipo, color }) => (
+                <button
+                  key={label}
+                  onClick={() => openQuickForm(tipo)}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
