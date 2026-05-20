@@ -702,7 +702,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                 <span className="text-xs text-blue-600 font-medium">Vai →</span>
               </div>
             </CardHeader>
-            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
               {stats.capexList.length === 0 ? (
                 <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun Capex in programma</p>
               ) : (
@@ -743,7 +743,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                 <span className="text-xs text-blue-600 font-medium">Vai →</span>
               </div>
             </CardHeader>
-            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+            <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
               {stats.puliziePeriodiche.length === 0 ? (
                 <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessuna pulizia da programmare</p>
               ) : (
@@ -787,7 +787,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
             {(() => {
               const oggi = new Date(); oggi.setHours(0,0,0,0);
               const aperti = stats.ticketsList.filter(t => t.stato !== 'chiuso');
@@ -839,7 +839,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
             {stats.eventStats.eventiCorrentiList?.length === 0 && stats.eventStats.prossimiEventi.length === 0 ? (
               <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                 Nessun evento in corso o in programma
@@ -900,7 +900,7 @@ export default function Dashboard({ centroSelezionato, user }) {
               <span className="text-xs text-blue-600 font-medium">Vai →</span>
             </div>
           </CardHeader>
-          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+          <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
             {stats.affittiCorrenti?.length === 0 ? (
               <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                 Nessun affitto attivo al momento
@@ -942,7 +942,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                     <span className="text-xs text-blue-600 font-medium">Vai →</span>
                     </div>
                     </CardHeader>
-                    <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto">
+                    <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
                     {stats.prossimiAffitti.length === 0 ? (
                     <p className="text-slate-500 text-center py-3 sm:py-4 text-xs sm:text-sm">
                     Nessun affitto nei prossimi 30 giorni
