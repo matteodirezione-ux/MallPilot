@@ -35,6 +35,7 @@ import TasksDashboard from '@/components/dashboard/TasksDashboard';
 import AgendaCards from '@/components/dashboard/AgendaCards';
 import WeatherWidget from '@/components/dashboard/WeatherWidget';
 import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
+import ProgressRing from '@/components/dashboard/ProgressRing';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ centroSelezionato, user }) {
@@ -573,50 +574,50 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Incassi Anno */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><TrendingUp className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiAnno)}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Budget</p>
-                <p className="text-xs font-medium text-blue-600">{percentualeBudget}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiAnno)}</p>
+            <div className="flex items-center justify-between mt-1 sm:mt-2">
+              <div className="text-xs text-slate-600">
+                <p className="text-[10px]">Budget</p>
+                <p className="font-semibold text-blue-600">{percentualeBudget}%</p>
               </div>
-              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-1.5 sm:h-2" />
+              <ProgressRing percentage={Math.min(parseFloat(percentualeBudget), 100)} size={48} strokeWidth={4} color="blue" />
             </div>
           </div>
 
           {/* Spazi Occupati */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Building2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Occupazione</p>
-                <p className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
+            <div className="flex items-center justify-between mt-1 sm:mt-2">
+              <div className="text-xs text-slate-600">
+                <p className="text-[10px]">Occupazione</p>
+                <p className="font-semibold text-blue-600">{percentualeOccupazione}%</p>
               </div>
-              <Progress value={parseInt(percentualeOccupazione)} className="h-1.5 sm:h-2" />
+              <ProgressRing percentage={parseInt(percentualeOccupazione)} size={48} strokeWidth={4} color="blue" />
             </div>
           </div>
 
           {/* Affitto Medio Giornaliero */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BarChart2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1 sm:mb-2">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><BarChart2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Occupazione</p>
-                <p className="text-xs font-medium text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
+            <div className="flex items-center justify-between mt-1 sm:mt-2">
+              <div className="text-xs text-slate-600">
+                <p className="text-[10px]">Occupazione</p>
+                <p className="font-semibold text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
               </div>
-              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
+              <ProgressRing percentage={Math.min(stats.tassoOccupazioneAnnuale, 100)} size={48} strokeWidth={4} color="blue" />
             </div>
           </div>
 
