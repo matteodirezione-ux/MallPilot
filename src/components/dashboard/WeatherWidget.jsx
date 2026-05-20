@@ -81,7 +81,7 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
   // Modalità inline: 7 giorni che riempiono tutta la riga
   if (inline) {
     return (
-      <div className="flex gap-3 w-full items-center">
+      <div className="hidden md:flex gap-3 w-full items-center">
         {/* Informazioni centro */}
         <div className="shrink-0 flex flex-col justify-center gap-0.5">
           <div className="flex items-center gap-1.5">
