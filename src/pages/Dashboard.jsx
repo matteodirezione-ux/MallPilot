@@ -446,11 +446,11 @@ export default function Dashboard({ centroSelezionato, user }) {
               <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
             </div>
             {user?.tipo_account === 'direttore' && (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1.5 p-3 rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-green-50 border border-slate-200 shadow-lg">
                 {[
-                  { label: 'Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
-                  { label: 'Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
-                  { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
+                  { label: 'Task', tipo: 'task', color: 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600' },
+                  { label: 'Controllo', tipo: 'controllo', color: 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600' },
+                  { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' },
                 ].map(({ label, tipo, color }) => (
                   <button
                     key={label}
@@ -498,11 +498,11 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
           <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           {user?.tipo_account === 'direttore' && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-3 rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-green-50 border border-slate-200 shadow-lg">
               {[
-                { label: 'Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
-                { label: 'Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
-                { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
+                { label: 'Task', tipo: 'task', color: 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600' },
+                { label: 'Controllo', tipo: 'controllo', color: 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600' },
+                { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' },
               ].map(({ label, tipo, color }) => (
                 <button
                   key={label}
@@ -520,13 +520,13 @@ export default function Dashboard({ centroSelezionato, user }) {
 
       {/* Pulsanti rapidi - solo vigilanza */}
       {user?.tipo_account === 'vigilanza' && (
-        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
+        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-slate-200 shadow-lg">
           {[
-            { label: 'Nuovo Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
-            { label: 'Nuovo Ticket', tipo: 'ticket', color: 'bg-orange-500 hover:bg-orange-600' },
-            { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Nuovo Report', tipo: 'report', color: 'bg-emerald-600 hover:bg-emerald-700' },
-            { label: 'Segnalazione Pulizie', tipo: 'pulizia', color: 'bg-purple-600 hover:bg-purple-700' },
+            { label: 'Nuovo Task', tipo: 'task', color: 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600' },
+            { label: 'Nuovo Ticket', tipo: 'ticket', color: 'bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500' },
+            { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600' },
+            { label: 'Nuovo Report', tipo: 'report', color: 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600' },
+            { label: 'Segnalazione Pulizie', tipo: 'pulizia', color: 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600' },
           ].map(({ label, tipo, color }) => (
             <button
               key={label}
