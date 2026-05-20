@@ -80,47 +80,45 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
 
   // Modalità inline: 7 giorni che riempiono tutta la riga
   if (inline) {
+    const todayWmo = getWmo(daily.weathercode[0]);
+    const todayMax = Math.round(daily.temperature_2m_max[0]);
+    const todayMin = Math.round(daily.temperature_2m_min[0]);
     return (
-      <div className="hidden md:flex gap-3 w-full items-center">
-        {/* Informazioni centro */}
-        <div className="shrink-0 flex flex-col justify-center gap-0.5">
-          <div className="flex items-center gap-1.5">
-            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-              </svg>
+      <div className="hidden md:flex gap-2 w-full items-stretch">
+        {/* Card oggi - più grande e colorata */}
+        <div className="shrink-0 flex items-center gap-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl px-4 py-2.5 shadow-md min-w-[160px]">
+          <span className="text-4xl leading-none">{todayWmo.emoji}</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-blue-100 uppercase tracking-wide">Oggi · {weather.place.name}</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-white leading-tight">{todayMax}°</span>
+              <span className="text-sm font-medium text-blue-200">{todayMin}°</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-700 leading-tight">{weather.place.name}</span>
-              {indirizzo && <span className="text-xs text-slate-500 leading-tight">{indirizzo}</span>}
-            </div>
+            <span className="text-xs text-blue-100 leading-tight">{todayWmo.label}</span>
           </div>
         </div>
-        {daily.time.map((dateStr, i) => {
-          const d = new Date(dateStr);
-          const isToday = d.getTime() === today.getTime();
-          const wmo = getWmo(daily.weathercode[i]);
-          const dayLabel = isToday ? 'Oggi' : format(d, 'EEE d', { locale: it });
-          const maxTemp = Math.round(daily.temperature_2m_max[i]);
-          const minTemp = Math.round(daily.temperature_2m_min[i]);
-          return (
-            <div
-              key={dateStr}
-              className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-1.5 rounded-xl border ${
-                isToday ? 'bg-gradient-to-b from-blue-50 to-blue-100/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 shadow-sm'
-              }`}
-            >
-              <span className={`text-xs font-bold uppercase tracking-tight ${isToday ? 'text-blue-700' : 'text-slate-600'}`}>{dayLabel}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl leading-none">{wmo.emoji}</span>
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-800 leading-tight">{maxTemp}°</span>
-                  <span className="text-xs font-medium text-slate-400 leading-tight">{minTemp}°</span>
-                </div>
+        {/* Giorni successivi */}
+        <div className="flex gap-1.5 flex-1">
+          {daily.time.slice(1).map((dateStr, i) => {
+            const idx = i + 1;
+            const d = new Date(dateStr);
+            const wmo = getWmo(daily.weathercode[idx]);
+            const dayLabel = format(d, 'EEE d', { locale: it });
+            const maxTemp = Math.round(daily.temperature_2m_max[idx]);
+            const minTemp = Math.round(daily.temperature_2m_min[idx]);
+            return (
+              <div
+                key={dateStr}
+                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl bg-white border border-slate-200 shadow-sm"
+              >
+                <span className="text-xs font-semibold text-slate-500 capitalize">{dayLabel}</span>
+                <span className="text-xl leading-none">{wmo.emoji}</span>
+                <span className="text-sm font-bold text-slate-800">{maxTemp}°</span>
+                <span className="text-xs text-slate-400">{minTemp}°</span>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
   }
