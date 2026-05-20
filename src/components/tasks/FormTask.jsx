@@ -31,9 +31,15 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
       setAssegnatiSelezionati(task.assegnato_a_email ? [{ email: task.assegnato_a_email, nome: task.assegnato_a_nome }] : []);
       setModalitaAssegnazione('singola');
     } else {
-      setForm(defaultForm);
+      const oggi = new Date().toISOString().split('T')[0];
+      setForm({ ...defaultForm, data_scadenza: oggi });
       setCentriSelezionati(centroDefault ? [centroDefault] : []);
-      setAssegnatiSelezionati([]);
+      // Pre-seleziona l'utente corrente come assegnatario
+      if (user) {
+        setAssegnatiSelezionati([{ email: user.email, nome: user.full_name }]);
+      } else {
+        setAssegnatiSelezionati([]);
+      }
       setModalitaAssegnazione('singola');
     }
   }, [task, open]);
