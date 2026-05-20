@@ -28,6 +28,8 @@ export default function TenantPage({ centroSelezionato, user }) {
   const queryClient = useQueryClient();
   
   const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
+  const isVigilanza = user?.tipo_account === 'vigilanza';
+  const canViewContractDetails = isAdmin; // Solo proprietà e direttore vedono date e canoni
 
   const { data: tenants = [], isLoading } = useQuery({
     queryKey: ['tenants', centroSelezionato?.id],
@@ -125,6 +127,7 @@ export default function TenantPage({ centroSelezionato, user }) {
               onSave={saveMutation.mutate}
               onCancel={() => { setOpenForm(false); setEditingTenant(null); }}
               isAdmin={isAdmin}
+              canViewContractDetails={canViewContractDetails}
             />
           </DialogContent>
         </Dialog>
@@ -197,8 +200,8 @@ export default function TenantPage({ centroSelezionato, user }) {
                     <TableHead className="whitespace-nowrap">Reperibile</TableHead>
                     <TableHead className="whitespace-nowrap">PEC</TableHead>
                     <TableHead className="whitespace-nowrap">Email Urgenze</TableHead>
-                    {isAdmin && <TableHead className="whitespace-nowrap">Data Scadenza</TableHead>}
-                    {isAdmin && <TableHead className="whitespace-nowrap text-right">Canone</TableHead>}
+                    {canViewContractDetails && <TableHead className="whitespace-nowrap">Data Scadenza</TableHead>}
+                    {canViewContractDetails && <TableHead className="whitespace-nowrap text-right">Canone</TableHead>}
                     <TableHead className="text-right whitespace-nowrap">Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -227,12 +230,12 @@ export default function TenantPage({ centroSelezionato, user }) {
                       <TableCell className="max-w-[150px] truncate" title={tenant.mail_urgenze_pv_chiuso}>
                         {tenant.mail_urgenze_pv_chiuso || '-'}
                       </TableCell>
-                      {isAdmin && (
+                      {canViewContractDetails && (
                         <TableCell className="whitespace-nowrap">
                           {tenant.data_scadenza_contratto ? new Date(tenant.data_scadenza_contratto).toLocaleDateString('it-IT') : '-'}
                         </TableCell>
                       )}
-                      {isAdmin && (
+                      {canViewContractDetails && (
                         <TableCell className="text-right whitespace-nowrap">
                           {tenant.canone ? `€ ${tenant.canone.toLocaleString('it-IT')}` : '-'}
                         </TableCell>
@@ -259,7 +262,7 @@ export default function TenantPage({ centroSelezionato, user }) {
   );
 }
 
-function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin }) {
+function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin, canViewContractDetails }) {
   const [formData, setFormData] = useState({
     centro_id: centroId,
     numero_negozio: tenant?.numero_negozio || '',
@@ -443,7 +446,7 @@ function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin }) {
         </div>
       </div>
 
-      {isAdmin && (
+      {canViewContractDetails && (
         <>
           <div className="grid grid-cols-2 gap-4">
             <div>
