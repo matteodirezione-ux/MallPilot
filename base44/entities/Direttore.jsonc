@@ -1,24 +1,20 @@
 {
-  "name": "Manutentore",
+  "name": "Direttore",
   "type": "object",
   "properties": {
     "full_name": {
       "type": "string",
-      "description": "Nome e cognome del manutentore"
+      "description": "Nome e cognome del direttore"
     },
     "email": {
       "type": "string",
       "format": "email",
-      "description": "Email dell'account manutentore"
-    },
-    "azienda": {
-      "type": "string",
-      "description": "Nome dell'azienda di manutenzione"
+      "description": "Email del direttore"
     },
     "invito_accettato": {
       "type": "boolean",
       "default": false,
-      "description": "Se ha accettato l'invito e completato la registrazione"
+      "description": "Se il direttore ha accettato l'invito e completato la registrazione"
     },
     "centro_preferito_id": {
       "type": "string",

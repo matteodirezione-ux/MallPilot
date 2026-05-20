@@ -106,7 +106,8 @@ export default function Gestione({ user }) {
         // Modifica direttore esistente
         await base44.entities.Direttore.update(direttoreDialog.data.id, {
           full_name: formData.full_name,
-          email: formData.email
+          email: formData.email,
+          centro_preferito_id: formData.centro_preferito_id || null
         });
         
         // Aggiorna assegnazioni
@@ -132,7 +133,8 @@ export default function Gestione({ user }) {
         await base44.entities.Direttore.create({
           full_name: formData.full_name,
           email: formData.email,
-          invito_accettato: false
+          invito_accettato: false,
+          centro_preferito_id: formData.centro_preferito_id || null
         });
         
         // Crea assegnazioni
@@ -187,7 +189,8 @@ export default function Gestione({ user }) {
       if (vigilanzaDialog.data) {
         await base44.entities.Vigilanza.update(vigilanzaDialog.data.id, {
           full_name: formData.full_name,
-          email: formData.email
+          email: formData.email,
+          centro_preferito_id: formData.centro_preferito_id || null
         });
         
         const assegnazioniAttuali = assegnazioni.filter(a => a.user_email === vigilanzaDialog.data.email);
@@ -202,7 +205,7 @@ export default function Gestione({ user }) {
         
         toast.success('Vigilanza aggiornata');
       } else {
-        await base44.entities.Vigilanza.create({ full_name: formData.full_name, email: formData.email, invito_accettato: false });
+        await base44.entities.Vigilanza.create({ full_name: formData.full_name, email: formData.email, invito_accettato: false, centro_preferito_id: formData.centro_preferito_id || null });
         await Promise.all(
           formData.centri_ids.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
         );
@@ -240,7 +243,8 @@ export default function Gestione({ user }) {
         await base44.entities.Manutentore.update(manutentoreDialog.data.id, {
           full_name: formData.full_name,
           email: formData.email,
-          azienda: formData.azienda
+          azienda: formData.azienda,
+          centro_preferito_id: formData.centro_preferito_id || null
         });
         // Aggiorna assegnazioni centri
         const vecchieAssegnazioni = assegnazioni.filter(a => a.user_email === formData.email);
@@ -253,7 +257,7 @@ export default function Gestione({ user }) {
         ]);
         toast.success('Manutentore aggiornato');
       } else {
-        const nuovoMan = await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false });
+        const nuovoMan = await base44.entities.Manutentore.create({ full_name: formData.full_name, email: formData.email, azienda: formData.azienda, invito_accettato: false, centro_preferito_id: formData.centro_preferito_id || null });
         await Promise.all(
           formData.centri_ids.map(centro_id => base44.entities.Assegnazione.create({ user_email: formData.email, centro_id }))
         );
@@ -886,14 +890,14 @@ function CentroDialog({ open, data, onClose, onSave }) {
 }
 
 function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
-  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [] });
+  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [], centro_preferito_id: '' });
 
   useEffect(() => {
     if (data) {
       const centriIds = assegnazioni.filter(a => a.user_email === data.email).map(a => a.centro_id);
-      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds });
+      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds, centro_preferito_id: data.centro_preferito_id || centriIds[0] || '' });
     } else {
-      setForm({ full_name: '', email: '', centri_ids: [] });
+      setForm({ full_name: '', email: '', centri_ids: [], centro_preferito_id: '' });
     }
   }, [data, open, assegnazioni]);
 
@@ -907,12 +911,14 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
   };
 
   const toggleCentro = (centroId) => {
-    setForm(prev => ({
-      ...prev,
-      centri_ids: prev.centri_ids.includes(centroId)
+    setForm(prev => {
+      const newIds = prev.centri_ids.includes(centroId)
         ? prev.centri_ids.filter(id => id !== centroId)
-        : [...prev.centri_ids, centroId]
-    }));
+        : [...prev.centri_ids, centroId];
+      // Se si deseleziona il preferito, resetta
+      const newPreferito = newIds.includes(prev.centro_preferito_id) ? prev.centro_preferito_id : (newIds[0] || '');
+      return { ...prev, centri_ids: newIds, centro_preferito_id: newPreferito };
+    });
   };
 
   return (
@@ -934,16 +940,34 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
             <Label>Centri Assegnati *</Label>
             <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
               {centri.filter(c => c.attivo).map(centro => (
-                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                <div key={centro.id} className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={form.centri_ids.includes(centro.id)}
                     onChange={() => toggleCentro(centro.id)}
+                    className="cursor-pointer"
                   />
-                  <span className="text-sm">{centro.nome}</span>
-                </label>
+                  <span className="text-sm flex-1 cursor-pointer" onClick={() => toggleCentro(centro.id)}>{centro.nome}</span>
+                  {form.centri_ids.includes(centro.id) && (
+                    <button
+                      type="button"
+                      title="Imposta come preferito"
+                      onClick={() => setForm(prev => ({ ...prev, centro_preferito_id: centro.id }))}
+                      className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                        form.centro_preferito_id === centro.id
+                          ? 'bg-yellow-400 border-yellow-400 text-white font-semibold'
+                          : 'border-slate-300 text-slate-400 hover:border-yellow-400 hover:text-yellow-500'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
+            {form.centri_ids.length > 1 && (
+              <p className="text-xs text-slate-500 mt-1">★ = centro preferito (aperto di default all'accesso)</p>
+            )}
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
@@ -956,24 +980,25 @@ function DirettoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
 }
 
 function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
-  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [] });
+  const [form, setForm] = useState({ full_name: '', email: '', centri_ids: [], centro_preferito_id: '' });
 
   useEffect(() => {
     if (data) {
       const centriIds = assegnazioni.filter(a => a.user_email === data.email).map(a => a.centro_id);
-      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds });
+      setForm({ full_name: data.full_name, email: data.email, centri_ids: centriIds, centro_preferito_id: data.centro_preferito_id || centriIds[0] || '' });
     } else {
-      setForm({ full_name: '', email: '', centri_ids: [] });
+      setForm({ full_name: '', email: '', centri_ids: [], centro_preferito_id: '' });
     }
   }, [data, open, assegnazioni]);
 
   const toggleCentro = (centroId) => {
-    setForm(prev => ({
-      ...prev,
-      centri_ids: prev.centri_ids.includes(centroId)
+    setForm(prev => {
+      const newIds = prev.centri_ids.includes(centroId)
         ? prev.centri_ids.filter(id => id !== centroId)
-        : [...prev.centri_ids, centroId]
-    }));
+        : [...prev.centri_ids, centroId];
+      const newPreferito = newIds.includes(prev.centro_preferito_id) ? prev.centro_preferito_id : (newIds[0] || '');
+      return { ...prev, centri_ids: newIds, centro_preferito_id: newPreferito };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -1004,16 +1029,34 @@ function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
             <Label>Centri da visualizzare *</Label>
             <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
               {centri.filter(c => c.attivo).map(centro => (
-                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                <div key={centro.id} className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={form.centri_ids.includes(centro.id)}
                     onChange={() => toggleCentro(centro.id)}
+                    className="cursor-pointer"
                   />
-                  <span className="text-sm">{centro.nome}</span>
-                </label>
+                  <span className="text-sm flex-1 cursor-pointer" onClick={() => toggleCentro(centro.id)}>{centro.nome}</span>
+                  {form.centri_ids.includes(centro.id) && (
+                    <button
+                      type="button"
+                      title="Imposta come preferito"
+                      onClick={() => setForm(prev => ({ ...prev, centro_preferito_id: centro.id }))}
+                      className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                        form.centro_preferito_id === centro.id
+                          ? 'bg-yellow-400 border-yellow-400 text-white font-semibold'
+                          : 'border-slate-300 text-slate-400 hover:border-yellow-400 hover:text-yellow-500'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
+            {form.centri_ids.length > 1 && (
+              <p className="text-xs text-slate-500 mt-1">★ = centro preferito (aperto di default all'accesso)</p>
+            )}
           </div>
           {!data && (
             <p className="text-xs text-slate-500 bg-blue-50 p-3 rounded-lg">
@@ -1031,24 +1074,25 @@ function VigilanzaDialog({ open, data, centri, assegnazioni, onClose, onSave }) 
 }
 
 function ManutentoreDialog({ open, data, centri, assegnazioni, onClose, onSave }) {
-  const [form, setForm] = useState({ full_name: '', email: '', azienda: '', centri_ids: [] });
+  const [form, setForm] = useState({ full_name: '', email: '', azienda: '', centri_ids: [], centro_preferito_id: '' });
 
   useEffect(() => {
     if (data) {
       const centriIds = (assegnazioni || []).filter(a => a.user_email === data.email).map(a => a.centro_id);
-      setForm({ full_name: data.full_name, email: data.email, azienda: data.azienda || '', centri_ids: centriIds });
+      setForm({ full_name: data.full_name, email: data.email, azienda: data.azienda || '', centri_ids: centriIds, centro_preferito_id: data.centro_preferito_id || centriIds[0] || '' });
     } else {
-      setForm({ full_name: '', email: '', azienda: '', centri_ids: [] });
+      setForm({ full_name: '', email: '', azienda: '', centri_ids: [], centro_preferito_id: '' });
     }
   }, [data, open, assegnazioni]);
 
   const toggleCentro = (centroId) => {
-    setForm(prev => ({
-      ...prev,
-      centri_ids: prev.centri_ids.includes(centroId)
+    setForm(prev => {
+      const newIds = prev.centri_ids.includes(centroId)
         ? prev.centri_ids.filter(id => id !== centroId)
-        : [...prev.centri_ids, centroId]
-    }));
+        : [...prev.centri_ids, centroId];
+      const newPreferito = newIds.includes(prev.centro_preferito_id) ? prev.centro_preferito_id : (newIds[0] || '');
+      return { ...prev, centri_ids: newIds, centro_preferito_id: newPreferito };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -1079,16 +1123,34 @@ function ManutentoreDialog({ open, data, centri, assegnazioni, onClose, onSave }
             <Label>Centri da abbinare</Label>
             <div className="border rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 mt-2">
               {(centri || []).filter(c => c.attivo).map(centro => (
-                <label key={centro.id} className="flex items-center gap-2 cursor-pointer">
+                <div key={centro.id} className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={form.centri_ids.includes(centro.id)}
                     onChange={() => toggleCentro(centro.id)}
+                    className="cursor-pointer"
                   />
-                  <span className="text-sm">{centro.nome}</span>
-                </label>
+                  <span className="text-sm flex-1 cursor-pointer" onClick={() => toggleCentro(centro.id)}>{centro.nome}</span>
+                  {form.centri_ids.includes(centro.id) && (
+                    <button
+                      type="button"
+                      title="Imposta come preferito"
+                      onClick={() => setForm(prev => ({ ...prev, centro_preferito_id: centro.id }))}
+                      className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                        form.centro_preferito_id === centro.id
+                          ? 'bg-yellow-400 border-yellow-400 text-white font-semibold'
+                          : 'border-slate-300 text-slate-400 hover:border-yellow-400 hover:text-yellow-500'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
+            {form.centri_ids.length > 1 && (
+              <p className="text-xs text-slate-500 mt-1">★ = centro preferito (aperto di default all'accesso)</p>
+            )}
           </div>
           {!data && (
             <p className="text-xs text-slate-500 bg-yellow-50 p-3 rounded-lg">

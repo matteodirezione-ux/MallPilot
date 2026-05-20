@@ -1,19 +1,15 @@
 {
-  "name": "Manutentore",
+  "name": "Vigilanza",
   "type": "object",
   "properties": {
     "full_name": {
       "type": "string",
-      "description": "Nome e cognome del manutentore"
+      "description": "Nome e cognome del referente vigilanza"
     },
     "email": {
       "type": "string",
       "format": "email",
-      "description": "Email dell'account manutentore"
-    },
-    "azienda": {
-      "type": "string",
-      "description": "Nome dell'azienda di manutenzione"
+      "description": "Email dell'account vigilanza"
     },
     "invito_accettato": {
       "type": "boolean",

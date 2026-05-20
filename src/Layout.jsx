@@ -122,7 +122,8 @@ export default function Layout({ children, currentPageName }) {
           setCentri(centriAssegnati);
           if (centriAssegnati.length > 0) {
             const savedCentroId = localStorage.getItem('centroSelezionatoId');
-            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati[0];
+            const preferito = manutentori[0]?.centro_preferito_id;
+            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati.find(c => c.id === preferito) || centriAssegnati[0];
             setCentroSelezionato(centroIniziale);
           }
         }
@@ -165,7 +166,8 @@ export default function Layout({ children, currentPageName }) {
           setCentri(centriAssegnati);
           if (centriAssegnati.length > 0) {
             const savedCentroId = localStorage.getItem('centroSelezionatoId');
-            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati[0];
+            const preferito = vigilanze[0]?.centro_preferito_id;
+            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati.find(c => c.id === preferito) || centriAssegnati[0];
             setCentroSelezionato(centroIniziale);
           }
         }
@@ -173,29 +175,21 @@ export default function Layout({ children, currentPageName }) {
         const assegnazioni = await base44.entities.Assegnazione.filter({ user_email: userData.email });
         const centriIds = [...new Set(assegnazioni.map(a => a.centro_id))];
         
-        console.log('Direttore assegnazioni:', assegnazioni);
-        console.log('Centri IDs:', centriIds);
-        
         if (centriIds.length > 0) {
           const allCentri = await base44.entities.CentroCommerciale.list();
           const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id) && c.attivo);
-          
-          console.log('Centri assegnati:', centriAssegnati);
-          
           setCentri(centriAssegnati);
           
           if (centriAssegnati.length > 0) {
             const savedCentroId = localStorage.getItem('centroSelezionatoId');
-            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati[0];
-            console.log('Centro selezionato:', centroIniziale);
+            const preferito = direttori[0]?.centro_preferito_id;
+            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati.find(c => c.id === preferito) || centriAssegnati[0];
             setCentroSelezionato(centroIniziale);
           } else {
-            console.log('Nessun centro attivo assegnato');
             setCentri([]);
             setCentroSelezionato(null);
           }
         } else {
-          console.log('Nessuna assegnazione trovata');
           setCentri([]);
           setCentroSelezionato(null);
         }
