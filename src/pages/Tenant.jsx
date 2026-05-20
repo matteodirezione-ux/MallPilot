@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map } from 'lucide-react';
 import { compressImage } from '@/lib/compressImage';
 import {
   Table,
@@ -25,6 +25,8 @@ export default function TenantPage({ centroSelezionato, user }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('numero_negozio');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [mappaOpen, setMappaOpen] = useState(false);
+  const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
   const queryClient = useQueryClient();
   
   const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
@@ -110,25 +112,41 @@ export default function TenantPage({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Tenant - Amministrazione</h1>
           <p className="text-slate-500">Gestione anagrafiche e contratti di affitto</p>
         </div>
-        <Dialog open={openForm} onOpenChange={(open) => { setOpenForm(open); if (!open) setEditingTenant(null); }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Nuovo Tenant
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{editingTenant ? 'Modifica Tenant' : 'Nuovo Tenant'}</DialogTitle>
-            </DialogHeader>
-            <TenantForm
-              tenant={editingTenant}
-              centroId={centroSelezionato.id}
-              onSave={saveMutation.mutate}
-              onCancel={() => { setOpenForm(false); setEditingTenant(null); }}
-              isAdmin={isAdmin}
-              canViewContractDetails={canViewContractDetails}
-            />
+        <div className="flex gap-2">
+          <Button onClick={() => setMappaOpen(true)} className="bg-orange-500 hover:bg-orange-600 gap-2"><Map className="w-4 h-4" /> Mappa</Button>
+          <Dialog open={openForm} onOpenChange={(open) => { setOpenForm(open); if (!open) setEditingTenant(null); }}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Nuovo Tenant
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingTenant ? 'Modifica Tenant' : 'Nuovo Tenant'}</DialogTitle>
+              </DialogHeader>
+              <TenantForm
+                tenant={editingTenant}
+                centroId={centroSelezionato.id}
+                onSave={saveMutation.mutate}
+                onCancel={() => { setOpenForm(false); setEditingTenant(null); }}
+                isAdmin={isAdmin}
+                canViewContractDetails={canViewContractDetails}
+              />
+            </DialogContent>
+          </Dialog>
+
+        {/* Dialog Mappa */}
+        <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
+          <DialogContent className="w-[95vw] max-w-5xl">
+            <DialogHeader><DialogTitle>Mappa centro - {centroSelezionato?.nome}</DialogTitle></DialogHeader>
+            <div className="space-y-4">
+              {mappaUrl ? (
+                <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[75vh]" />
+              ) : (
+                <div className="flex items-center justify-center h-40 bg-slate-100 rounded-lg text-slate-400 text-sm">Nessuna mappa caricata</div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
