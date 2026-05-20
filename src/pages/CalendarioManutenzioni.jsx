@@ -206,7 +206,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
         </div>
       </div>
 
-      <Tabs defaultValue="lista">
+      <Tabs defaultValue={user?.tipo_account === 'direttore' ? 'calendario' : 'lista'}>
         <TabsList>
           <TabsTrigger value="lista"><ListTodo className="w-4 h-4 mr-1" /> Lista</TabsTrigger>
           <TabsTrigger value="calendario"><Calendar className="w-4 h-4 mr-1" /> Calendario</TabsTrigger>
