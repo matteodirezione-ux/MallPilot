@@ -86,7 +86,7 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
     return (
       <div className="hidden md:flex gap-2 w-full items-stretch">
         {/* Card oggi - più grande e colorata */}
-        <div className="shrink-0 flex items-center gap-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl px-4 py-2.5 shadow-lg min-w-[160px]">
+        <div className="shrink-0 flex items-center gap-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl px-4 py-2.5 shadow-xl min-w-[160px]">
           <span className="text-4xl leading-none">{todayWmo.emoji}</span>
           <div className="flex flex-col">
             <span className="text-xs font-semibold text-blue-100 uppercase tracking-wide">Oggi · {weather.place.name}</span>
