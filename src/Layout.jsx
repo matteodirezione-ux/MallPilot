@@ -329,9 +329,7 @@ export default function Layout({ children, currentPageName }) {
                   <span className="font-bold text-lg text-white">Mall Pilot</span>
                 </div>
               )}
-              {(user?.tipo_account === 'vigilanza' || user?.tipo_account === 'direttore') && (
-                <NotificaBell user={user} />
-              )}
+              <NotificaBell user={user} />
             </div>
           </div>
 
