@@ -27,9 +27,13 @@ export default function Report({ centroSelezionato, user }) {
   const fileInputRef = useRef();
   const cameraInputRef = useRef();
 
+  const lastCentroId = useRef(null);
   useEffect(() => {
-    if (centroSelezionato?.id) loadReports();
-  }, [centroSelezionato]);
+    if (centroSelezionato?.id && centroSelezionato.id !== lastCentroId.current) {
+      lastCentroId.current = centroSelezionato.id;
+      loadReports();
+    }
+  }, [centroSelezionato?.id]);
 
   const loadReports = async () => {
     setLoading(true);
