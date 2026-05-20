@@ -242,11 +242,11 @@ export default function SpaziExpo({ centroSelezionato, user }) {
 
       {/* Dialog Mappa */}
       <Dialog open={mappaOpen} onOpenChange={setMappaOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-[95vw] max-w-5xl">
           <DialogHeader><DialogTitle>Mappa centro - {centroSelezionato?.nome}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {mappaUrl ? (
-              <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-96" />
+              <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[75vh]" />
             ) : (
               <div className="flex items-center justify-center h-40 bg-slate-100 rounded-lg text-slate-400 text-sm">Nessuna mappa caricata</div>
             )}
