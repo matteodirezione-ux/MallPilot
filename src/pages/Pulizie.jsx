@@ -186,8 +186,16 @@ export default function PuliziePage({ centroSelezionato, user }) {
                   {dettaglio.foto_urls?.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-slate-500 mb-1">Foto ({dettaglio.foto_urls.length})</p>
-                      <div className="flex flex-wrap gap-1">
-                        {dettaglio.foto_urls.map((url, i) => <img key={i} src={url} alt="" className="w-16 h-16 rounded object-cover cursor-pointer hover:opacity-80" onClick={() => setLightbox(i)} />)}
+                      <div className="flex flex-wrap gap-2">
+                        {dettaglio.foto_urls.map((url, i) => (
+                          <img 
+                            key={i} 
+                            src={url} 
+                            alt="" 
+                            className="w-20 h-20 rounded object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+                            onClick={(e) => { e.stopPropagation(); setLightbox(i); }} 
+                          />
+                        ))}
                       </div>
                     </div>
                   )}
