@@ -152,10 +152,11 @@ export default function SpaziExpo({ centroSelezionato, user }) {
               <CardContent className="p-0 overflow-hidden">
                 <div className="p-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: spazio.colore || '#3b82f6' }} />
-                      <span className="font-bold text-base text-slate-800">{spazio.numero_spazio}</span>
-                      {spazio.nome && <span className="text-sm text-slate-600 truncate">{spazio.nome}</span>}
+                      <span className="font-bold text-base text-slate-800 flex-shrink-0">{spazio.numero_spazio}</span>
+                      {spazio.nome && <span className="font-semibold text-sm text-slate-700 truncate">{spazio.nome}</span>}
+                      {spazio.superficie_mq && <span className="text-xs text-slate-400 flex-shrink-0">{spazio.superficie_mq} m²</span>}
                     </div>
                     {user?.tipo_account !== 'vigilanza' && (
                       <div className="flex gap-1 flex-shrink-0">
@@ -164,10 +165,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    {spazio.superficie_mq && <p className="text-xs text-slate-500">{spazio.superficie_mq} m²</p>}
-                    {spazio.solo_eventi && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">Solo eventi</span>}
-                  </div>
+                  {spazio.solo_eventi && <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full mt-1 inline-block">Solo eventi</span>}
                 </div>
                 {spazio.foto_urls?.length > 0 ? (
                   <img src={spazio.foto_urls[0]} alt="" className="w-full h-32 object-cover" />
