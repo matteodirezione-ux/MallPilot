@@ -223,8 +223,10 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                       onClick={() => onSelect('prenotazione', e)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
-                        <p className="font-medium text-slate-800 truncate">{e.nome_evento || 'Evento'}</p>
-                        <p className="text-xs text-pink-600 font-medium">✦ {fmtDate(e.data_inizio)} → {fmtDate(e.data_fine)}</p>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <p className="font-medium text-slate-800 truncate">{e.nome_evento || 'Evento'}</p>
+                          <p className="text-xs text-pink-600 font-medium whitespace-nowrap shrink-0">✦ {fmtDate(e.data_inizio)} → {fmtDate(e.data_fine)}</p>
+                        </div>
                       </div>
                     </div>
                   ))}
