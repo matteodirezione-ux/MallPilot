@@ -56,7 +56,8 @@ function buildAgendaData({ stats, fromDate, toDate }) {
 
 function SectionLabel({ icon: Icon, color, label }) {
   return (
-    <div className="flex items-center gap-1.5 mb-1.5 mt-3 first:mt-0">
+    <div className="flex items-center gap-1.5 mb-2 mt-3 first:mt-0">
+      <div className={`w-0.5 h-3 rounded-full ${color.replace('text-', 'bg-')}`}></div>
       <Icon className={`w-3.5 h-3.5 ${color}`} />
       <span className={`text-xs font-bold uppercase tracking-wider ${color}`}>{label}</span>
     </div>
@@ -70,13 +71,13 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
   const prioritaColor = { urgente: 'bg-red-100 text-red-700', alta: 'bg-orange-100 text-orange-700', media: 'bg-yellow-100 text-yellow-700', bassa: 'bg-slate-100 text-slate-600' };
 
   return (
-    <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-shadow flex flex-col">
-      <CardHeader className={`pb-2 sm:pb-3 rounded-t-lg ${bgHeader}`}>
+    <Card className="bg-white border-slate-200 shadow-md hover:shadow-lg transition-all flex flex-col overflow-hidden">
+      <CardHeader className={`pb-2 sm:pb-3 rounded-t-lg border-b ${bgHeader} ${borderColor}`}>
         <div className="flex items-center gap-2">
-          <Calendar className={`w-4 sm:w-5 h-4 sm:h-5 ${headerTextColor}`} />
-          <div>
-            <CardTitle className={`text-sm sm:text-base font-semibold ${headerTextColor}`}>{title}</CardTitle>
-            <p className={`text-xs opacity-75 ${headerTextColor}`}>{dateLabel}</p>
+          <div className={`w-1 h-8 rounded-full ${bgHeader.replace('bg-', 'bg-').replace('50', '500')}`}></div>
+          <div className="flex-1">
+            <CardTitle className={`text-sm sm:text-base font-bold ${headerTextColor}`}>{title}</CardTitle>
+            <p className={`text-xs font-medium ${headerTextColor} opacity-80`}>{dateLabel}</p>
           </div>
         </div>
       </CardHeader>
@@ -93,21 +94,21 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {tasks.map(t => (
                     <div
                       key={t.id}
-                      className="flex items-center gap-2 p-2 sm:p-2.5 bg-blue-50 rounded-lg border border-blue-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-blue-300 transition-all"
                       onClick={() => onSelect('task', t)}
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); onCompleteTask(t.id); }}
                         disabled={completingIds.has(t.id)}
-                        className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
+                        className="shrink-0 w-5 h-5 rounded-full border-2 border-slate-300 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
                         title="Segna come completato"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-slate-800 truncate">{t.titolo}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {t.priorita && <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${prioritaColor[t.priorita] || 'bg-slate-100 text-slate-600'}`}>{t.priorita}</span>}
-                        <span className="text-xs text-slate-500 whitespace-nowrap">{fmtDate(t.data_scadenza)}</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {t.priorita && <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${prioritaColor[t.priorita] || 'bg-slate-100 text-slate-600'}`}>{t.priorita}</span>}
+                          <span className="text-xs text-slate-500 whitespace-nowrap">{fmtDate(t.data_scadenza)}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -123,19 +124,19 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {controlli.map(c => (
                     <div
                       key={c.id}
-                      className="flex items-center gap-2 p-2 sm:p-2.5 bg-indigo-50 rounded-lg border border-indigo-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className="flex items-center gap-2 p-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-indigo-300 transition-all"
                       onClick={() => onSelect('manutenzione', c)}
                     >
                       <button
                         onClick={(e) => { e.stopPropagation(); onCompleteControllo(c.id); }}
                         disabled={completingIds.has(c.id)}
-                        className="shrink-0 w-4 h-4 rounded-full border-2 border-slate-400 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
+                        className="shrink-0 w-5 h-5 rounded-full border-2 border-slate-300 hover:border-green-500 hover:bg-green-50 transition-colors flex items-center justify-center disabled:opacity-50"
                         title="Segna come completato"
                       />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{fmtDate(c.data_scadenza)}</p>
                       </div>
-                      <span className="text-xs text-slate-500 whitespace-nowrap shrink-0">{fmtDate(c.data_scadenza)}</span>
                     </div>
                   ))}
                 </div>
@@ -150,17 +151,17 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {affitti.map(p => (
                     <div
                       key={p.id}
-                      className={`flex items-center justify-between p-2 sm:p-2.5 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${p.is_gratuito ? 'bg-teal-50 border-teal-100' : 'bg-green-50 border-green-100'}`}
+                      className={`flex items-center justify-between p-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-green-300 transition-all ${p.is_gratuito ? 'bg-white' : 'bg-white'}`}
                       onClick={() => onSelect('prenotazione', p)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
-                          {p.is_gratuito && <span className="shrink-0 text-xs px-1 py-0.5 rounded bg-teal-100 text-teal-700 font-medium">Gratuito</span>}
+                          {p.is_gratuito && <span className="shrink-0 text-[10px] px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 font-medium">Gratuito</span>}
                         </div>
-                        <p className="text-xs text-slate-500">Spazio {p.spazio?.numero_spazio || '-'}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Spazio {p.spazio?.numero_spazio || '-'}</p>
                       </div>
-                      <span className={`text-xs font-medium whitespace-nowrap shrink-0 ${p.is_gratuito ? 'text-teal-700' : 'text-green-700'}`}>{fmtDate(p.data_inizio)}</span>
+                      <span className={`text-xs font-semibold whitespace-nowrap shrink-0 ${p.is_gratuito ? 'text-teal-700' : 'text-green-700'}`}>{fmtDate(p.data_inizio)}</span>
                     </div>
                   ))}
                 </div>
@@ -175,14 +176,14 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {capex.map(c => (
                     <div
                       key={c.id}
-                      className="flex items-center justify-between p-2 sm:p-2.5 bg-yellow-50 rounded-lg border border-yellow-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-yellow-300 transition-all"
                       onClick={() => onSelect('capex', c)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
                         <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
-                        {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
+                        {c.fornitore && <p className="text-xs text-slate-500 truncate mt-0.5">{c.fornitore}</p>}
                       </div>
-                      <span className="text-xs text-yellow-700 font-medium whitespace-nowrap shrink-0">{fmtDate(c.data_inizio)}</span>
+                      <span className="text-xs text-yellow-700 font-semibold whitespace-nowrap shrink-0">{fmtDate(c.data_inizio)}</span>
                     </div>
                   ))}
                 </div>
@@ -197,14 +198,14 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {pulizie.map(p => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between p-2 sm:p-2.5 bg-purple-50 rounded-lg border border-purple-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-purple-300 transition-all"
                       onClick={() => onSelect('pulizia_periodica', p)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
                         <p className="font-medium text-slate-800 truncate">{p.titolo}</p>
-                        <p className="text-xs text-slate-500">{p.frequenza}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{p.frequenza}</p>
                       </div>
-                      <span className="text-xs text-purple-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.prossima_scadenza)}</span>
+                      <span className="text-xs text-purple-700 font-semibold whitespace-nowrap shrink-0">{fmtDate(p.prossima_scadenza)}</span>
                     </div>
                   ))}
                 </div>
@@ -219,14 +220,12 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {eventi.map(e => (
                     <div
                       key={e.id}
-                      className="flex items-center justify-between p-2 sm:p-2.5 bg-pink-50 rounded-lg border border-pink-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm cursor-pointer hover:shadow-md hover:border-pink-300 transition-all"
                       onClick={() => onSelect('prenotazione', e)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <p className="font-medium text-slate-800 truncate">{e.nome_evento || 'Evento'}</p>
-                          <p className="text-xs text-pink-600 font-medium whitespace-nowrap shrink-0">✦ {fmtDate(e.data_inizio)} → {fmtDate(e.data_fine)}</p>
-                        </div>
+                        <p className="font-medium text-slate-800 truncate">{e.nome_evento || 'Evento'}</p>
+                        <p className="text-xs text-pink-600 font-medium mt-0.5 whitespace-nowrap">✦ {fmtDate(e.data_inizio)} → {fmtDate(e.data_fine)}</p>
                       </div>
                     </div>
                   ))}
