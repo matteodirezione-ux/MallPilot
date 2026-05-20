@@ -86,7 +86,7 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
     return (
       <div className="hidden md:flex gap-2 w-full items-stretch">
         {/* Card oggi - più grande e colorata */}
-        <div className="shrink-0 flex items-center gap-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl px-4 py-2.5 shadow-md min-w-[160px]">
+        <div className="shrink-0 flex items-center gap-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl px-4 py-2.5 shadow-lg min-w-[160px]">
           <span className="text-4xl leading-none">{todayWmo.emoji}</span>
           <div className="flex flex-col">
             <span className="text-xs font-semibold text-blue-100 uppercase tracking-wide">Oggi · {weather.place.name}</span>
@@ -108,8 +108,8 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
             const minTemp = Math.round(daily.temperature_2m_min[idx]);
             return (
               <div
-                key={dateStr}
-                className="flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              key={dateStr}
+              className="flex-1 flex flex-col items-center gap-1 py-3 px-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 shadow-md hover:shadow-lg transition-shadow"
               >
                 <span className="text-xs font-semibold text-slate-600 capitalize">{dayLabel}</span>
                 <div className="flex items-center gap-2">
@@ -145,8 +145,8 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
               key={dateStr}
               className={`flex flex-col items-center min-w-[80px] px-2 py-3 rounded-xl border shrink-0 transition-shadow ${
                 isToday 
-                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-300 shadow-md' 
-                  : 'bg-gradient-to-br from-slate-50 to-white border-slate-200 shadow-sm hover:shadow-md'
+                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-300 shadow-lg' 
+                  : 'bg-gradient-to-br from-slate-50 to-white border-slate-200 shadow-md hover:shadow-lg'
               }`}
             >
               <p className={`text-xs font-semibold capitalize mb-2 ${isToday ? 'text-blue-100' : 'text-slate-600'}`}>{dayLabel}</p>
