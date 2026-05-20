@@ -458,14 +458,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           <div className="flex-1 min-w-0">
             <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           </div>
-          {/* Logo */}
-          {centroSelezionato?.logo_url && (
-            <img
-              src={centroSelezionato.logo_url}
-              alt={centroSelezionato.nome}
-              className="h-12 sm:h-16 max-w-[120px] sm:max-w-[180px] object-contain shrink-0"
-            />
-          )}
+
         </div>
       </div>
 
