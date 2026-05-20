@@ -8,7 +8,7 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Wrench, Calendar, ListTodo, Search, Camera, X } from 'lucide-react';
+import { Plus, Wrench, Calendar, ListTodo, Search, Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import CalendarioManutenzioniMensile from '../components/calendario/CalendarioManutenzioniMensile';
 import ListaManutenzioni from '../components/calendario/ListaManutenzioni';
@@ -183,10 +183,14 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 border border-slate-200 rounded-lg px-2 py-1 bg-white">
-            <button onClick={() => setAnnoSelezionato(a => a - 1)} className="p-1 hover:bg-slate-100 rounded text-sm">◀</button>
-            <span className="font-semibold px-2 text-sm">{annoSelezionato}</span>
-            <button onClick={() => setAnnoSelezionato(a => a + 1)} className="p-1 hover:bg-slate-100 rounded text-sm">▶</button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setAnnoSelezionato(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="font-semibold px-2 text-sm text-slate-700">{annoSelezionato}</span>
+            <button onClick={() => setAnnoSelezionato(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </button>
           </div>
           <Button onClick={() => handleNewManutenzione(new Date())} className="bg-blue-600 hover:bg-blue-700 gap-2"><Plus className="w-4 h-4" /> Nuovo</Button>
         </div>

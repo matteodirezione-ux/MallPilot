@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Search, Pencil, Trash2, Sparkles } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormPulizia from '@/components/pulizie/FormPulizia';
@@ -92,10 +92,14 @@ export default function PuliziePage({ centroSelezionato, user }) {
         <div className="flex items-center gap-3">
           {tab === 'segnalazioni' && (
             <>
-              <div className="flex items-center gap-1 border border-slate-200 rounded-lg px-2 py-1 bg-white">
-                <button onClick={() => setAnnoSelezionato(a => a - 1)} className="p-1 hover:bg-slate-100 rounded">◀</button>
-                <span className="font-semibold px-2 text-sm">{annoSelezionato}</span>
-                <button onClick={() => setAnnoSelezionato(a => a + 1)} className="p-1 hover:bg-slate-100 rounded">▶</button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setAnnoSelezionato(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="font-semibold px-2 text-sm text-slate-700">{annoSelezionato}</span>
+                <button onClick={() => setAnnoSelezionato(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
               <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
                 <Plus className="w-4 h-4" /> Nuova Segnalazione
@@ -104,10 +108,14 @@ export default function PuliziePage({ centroSelezionato, user }) {
           )}
           {tab === 'periodiche' && (
             <>
-              <div className="flex items-center gap-1 border border-slate-200 rounded-lg px-2 py-1 bg-white">
-                <button onClick={() => setAnnoPeriodiche(a => a - 1)} className="p-1 hover:bg-slate-100 rounded">◀</button>
-                <span className="font-semibold px-2 text-sm">{annoPeriodiche}</span>
-                <button onClick={() => setAnnoPeriodiche(a => a + 1)} className="p-1 hover:bg-slate-100 rounded">▶</button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setAnnoPeriodiche(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="font-semibold px-2 text-sm text-slate-700">{annoPeriodiche}</span>
+                <button onClick={() => setAnnoPeriodiche(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+                  <ChevronRight className="w-5 h-5" />
+                </button>
               </div>
               <Button onClick={() => setShowFormPeriodica(true)} className="bg-blue-600 hover:bg-blue-700 gap-2">
                 <Plus className="w-4 h-4" /> Nuova pulizia periodica
