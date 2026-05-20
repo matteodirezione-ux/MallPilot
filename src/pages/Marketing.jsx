@@ -134,7 +134,7 @@ export default function Marketing({ centroSelezionato, user }) {
             <tbody>
               <SectionHeader label="INIZIATIVE" onAdd={!isVigilanza ? () => openNew('iniziativa') : null} colSpan={15} color="bg-blue-700" collapsed={collapsed.iniziativa} onToggle={() => toggleCollapse('iniziativa')} />
               {!collapsed.iniziativa && iniziative.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
-              {!collapsed.iniziativa && <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />}
+              <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />
 
               <SectionHeader label="COMUNICAZIONE ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" collapsed={collapsed.comunicazione_online} onToggle={() => toggleCollapse('comunicazione_online')} />
               {!collapsed.comunicazione_online && online.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
@@ -146,7 +146,7 @@ export default function Marketing({ centroSelezionato, user }) {
 
               <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" collapsed={collapsed.costo_fisso} onToggle={() => toggleCollapse('costo_fisso')} />
               {!collapsed.costo_fisso && fissi.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
-              {!collapsed.costo_fisso && <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} isVigilanza={isVigilanza} />}
+              <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} isVigilanza={isVigilanza} />
 
               <TotaleRow label="TOTALE BUDGET" rows={rows} mesi={MESI} bold isVigilanza={isVigilanza} />
             </tbody>
