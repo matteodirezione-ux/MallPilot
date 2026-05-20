@@ -45,6 +45,7 @@ export default function Dashboard({ centroSelezionato, user }) {
   capexAlertCount: 0,
   prossimiAffitti: [],
   affittiCorrenti: [],
+  gratuitiList: [],
   spaziOccupati: 0,
   spaziTotali: 0,
   incassiMese: 0,
@@ -259,6 +260,11 @@ export default function Dashboard({ centroSelezionato, user }) {
       const prossimiConDettagli = prossimiAffittiList.map(enrichPrenotazione);
       const affittiCorrentiConDettagli = affittiCorrentiList.map(enrichPrenotazione);
 
+      // Spazi gratuiti attivi o futuri (prossimo mese)
+      const gratuitiList = prenotazioni
+        .filter(p => p.is_gratuito && p.stato !== 'cancellata' && p.data_fine && new Date(p.data_fine) >= oggi2)
+        .map(enrichPrenotazione);
+
       // Statistiche spazi e incassi
       const spaziOccupatiOggi = affittiCorrentiList.length;
 
@@ -348,6 +354,7 @@ export default function Dashboard({ centroSelezionato, user }) {
       setStats({
         prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
         affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
+        gratuitiList: gratuitiList.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
         spaziOccupati: spaziOccupatiOggi,
         spaziTotali: spazi.length,
         incassiMese,

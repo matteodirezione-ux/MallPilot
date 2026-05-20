@@ -24,12 +24,14 @@ function buildAgendaData({ stats, fromDate, toDate }) {
     c.data_scadenza && inRange(c.data_scadenza)
   );
 
-  const allPrenotazioni = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []);
+  const allPrenotazioni = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []).concat(stats.gratuitiList || []);
   const seen = new Set();
+  // Affitti (normali + gratuiti): mostra quelli che iniziano nel range O sono in corso
   const affitti = allPrenotazioni.filter(p => {
     if (seen.has(p.id)) return false;
     seen.add(p.id);
-    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio && inRange(p.data_inizio);
+    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio &&
+      (p.data_fine ? overlaps(p.data_inizio, p.data_fine) : inRange(p.data_inizio));
   });
 
   // Capex in corso o che iniziano nel range
@@ -149,14 +151,17 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                   {affitti.map(p => (
                     <div
                       key={p.id}
-                      className="flex items-center justify-between p-2 sm:p-2.5 bg-green-50 rounded-lg border border-green-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      className={`flex items-center justify-between p-2 sm:p-2.5 rounded-lg border text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all ${p.is_gratuito ? 'bg-teal-50 border-teal-100' : 'bg-green-50 border-green-100'}`}
                       onClick={() => onSelect('prenotazione', p)}
                     >
                       <div className="flex-1 min-w-0 mr-2">
-                        <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <p className="font-medium text-slate-800 truncate">{p.cliente?.ragione_sociale || 'N.D.'}</p>
+                          {p.is_gratuito && <span className="shrink-0 text-xs px-1 py-0.5 rounded bg-teal-100 text-teal-700 font-medium">Gratuito</span>}
+                        </div>
                         <p className="text-xs text-slate-500">Spazio {p.spazio?.numero_spazio || '-'}</p>
                       </div>
-                      <span className="text-xs text-green-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.data_inizio)}</span>
+                      <span className={`text-xs font-medium whitespace-nowrap shrink-0 ${p.is_gratuito ? 'text-teal-700' : 'text-green-700'}`}>{fmtDate(p.data_inizio)}</span>
                     </div>
                   ))}
                 </div>
