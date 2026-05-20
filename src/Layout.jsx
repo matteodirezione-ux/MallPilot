@@ -388,7 +388,7 @@ export default function Layout({ children, currentPageName }) {
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="w-full justify-start gap-2 text-slate-300 hover:text-red-400 hover:border-red-800 hover:bg-slate-800 border-slate-600"
+                  className="w-full justify-start gap-2 bg-black text-white hover:bg-gray-900 hover:text-red-400 border-black"
                 >
                   <LogOut className="w-4 h-4" />
                   Esci
