@@ -101,19 +101,31 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
     onSave(singolo);
   };
 
+  const rowClass = "flex items-start gap-3";
+  const labelClass = "w-32 flex-shrink-0 text-sm font-medium text-slate-700 pt-2";
+  const fieldClass = "flex-1 min-w-0";
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{task ? 'Modifica Task' : 'Nuovo Task'}</DialogTitle></DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div><Label>Titolo *</Label><Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="mt-1 h-8 text-sm" /></div>
-          <div><Label>Descrizione</Label><Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="mt-1 text-sm" /></div>
+        <form onSubmit={handleSubmit} className="space-y-3">
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Priorità</Label>
+          <div className={rowClass}>
+            <label className={labelClass}>Titolo *</label>
+            <div className={fieldClass}><Input value={form.titolo} onChange={e => set('titolo', e.target.value)} required className="h-8 text-sm" /></div>
+          </div>
+
+          <div className={rowClass}>
+            <label className={labelClass}>Descrizione</label>
+            <div className={fieldClass}><Textarea value={form.descrizione} onChange={e => set('descrizione', e.target.value)} rows={2} className="text-sm" /></div>
+          </div>
+
+          <div className={rowClass}>
+            <label className={labelClass}>Priorità</label>
+            <div className={fieldClass}>
               <Select value={form.priorita} onValueChange={v => set('priorita', v)}>
-                <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bassa">Bassa</SelectItem>
                   <SelectItem value="media">Media</SelectItem>
@@ -122,10 +134,13 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Stato</Label>
+          </div>
+
+          <div className={rowClass}>
+            <label className={labelClass}>Stato</label>
+            <div className={fieldClass}>
               <Select value={form.stato} onValueChange={v => set('stato', v)}>
-                <SelectTrigger className="mt-1 h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="da_fare">Da fare</SelectItem>
                   <SelectItem value="in_corso">In corso</SelectItem>
@@ -136,63 +151,75 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
             </div>
           </div>
 
-          <div><Label>Data scadenza</Label><div className="mt-1"><DatePicker value={form.data_scadenza} onChange={v => set('data_scadenza', v)} placeholder="Seleziona data" /></div></div>
+          <div className={rowClass}>
+            <label className={labelClass}>Data scadenza</label>
+            <div className={fieldClass}><DatePicker value={form.data_scadenza} onChange={v => set('data_scadenza', v)} placeholder="Seleziona data" /></div>
+          </div>
 
           {centri && centri.length > 0 && (
-            <div>
-              <Label>Centro</Label>
-              {isMultipla ? (
-                <div className="mt-1 space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
-                  {centri.map(c => (
-                    <label key={c.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
-                      <input type="checkbox" checked={centriSelezionati.includes(c.id)} onChange={() => toggleCentro(c.id)} className="rounded" />{c.nome}
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <select value={centriSelezionati[0] || ''} onChange={e => setCentriSelezionati([e.target.value])} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-8">
-                  <option value="">Seleziona centro</option>
-                  {centri.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
-                </select>
-              )}
+            <div className={rowClass}>
+              <label className={labelClass}>Centro</label>
+              <div className={fieldClass}>
+                {isMultipla ? (
+                  <div className="space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
+                    {centri.map(c => (
+                      <label key={c.id} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
+                        <input type="checkbox" checked={centriSelezionati.includes(c.id)} onChange={() => toggleCentro(c.id)} className="rounded" />{c.nome}
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <select value={centriSelezionati[0] || ''} onChange={e => setCentriSelezionati([e.target.value])} className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm h-8">
+                    <option value="">Seleziona centro</option>
+                    {centri.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+                  </select>
+                )}
+              </div>
             </div>
           )}
 
           {assegnatari.length > 0 && (
-            <div>
-              <Label>Assegna a</Label>
-              {isMultipla ? (
-                <div className="mt-1 space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
-                  {assegnatari.map(p => (
-                    <label key={p.email} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
-                      <input type="checkbox" checked={!!assegnatiSelezionati.find(a => a.email === p.email)} onChange={() => toggleAssegnato(p)} className="rounded" />
-                      {p.nome} <span className="text-xs text-slate-400">({p.ruolo})</span>
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <select value={assegnatiSelezionati[0]?.email || ''} onChange={e => { const p = assegnatari.find(a => a.email === e.target.value); setAssegnatiSelezionati(p ? [p] : []); }} className="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm h-8">
-                  <option value="">Seleziona persona</option>
-                  {assegnatari.map(p => <option key={p.email} value={p.email}>{p.nome} ({p.ruolo})</option>)}
-                </select>
-              )}
+            <div className={rowClass}>
+              <label className={labelClass}>Assegna a</label>
+              <div className={fieldClass}>
+                {isMultipla ? (
+                  <div className="space-y-1 max-h-32 overflow-y-auto border rounded-lg p-2">
+                    {assegnatari.map(p => (
+                      <label key={p.email} className="flex items-center gap-2 cursor-pointer text-sm hover:bg-slate-50 px-1 py-0.5 rounded">
+                        <input type="checkbox" checked={!!assegnatiSelezionati.find(a => a.email === p.email)} onChange={() => toggleAssegnato(p)} className="rounded" />
+                        {p.nome} <span className="text-xs text-slate-400">({p.ruolo})</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <select value={assegnatiSelezionati[0]?.email || ''} onChange={e => { const p = assegnatari.find(a => a.email === e.target.value); setAssegnatiSelezionati(p ? [p] : []); }} className="w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm h-8">
+                    <option value="">Seleziona persona</option>
+                    {assegnatari.map(p => <option key={p.email} value={p.email}>{p.nome} ({p.ruolo})</option>)}
+                  </select>
+                )}
+              </div>
             </div>
           )}
 
           {isProprieta && !task && (
-            <div className="flex items-center gap-2">
-              <Switch checked={modalitaAssegnazione === 'multipla'} onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')} />
-              <Label className="text-sm">Assegnazione multipla (più centri/persone)</Label>
+            <div className={rowClass}>
+              <label className={labelClass}></label>
+              <div className={`${fieldClass} flex items-center gap-2`}>
+                <Switch checked={modalitaAssegnazione === 'multipla'} onCheckedChange={v => setModalitaAssegnazione(v ? 'multipla' : 'singola')} />
+                <span className="text-sm text-slate-600">Assegnazione multipla</span>
+              </div>
             </div>
           )}
 
-          <div className="flex items-center gap-2">
-            <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} />
-            <Label className="text-sm">Ricorrente</Label>
+          <div className={rowClass}>
+            <label className={labelClass}>Ricorrente</label>
+            <div className={`${fieldClass} flex items-center pt-2`}>
+              <Switch checked={form.ricorrente} onCheckedChange={v => set('ricorrente', v)} />
+            </div>
           </div>
 
           {form.ricorrente && (
-            <div className="pl-4 border-l-2 border-slate-200 space-y-2">
+            <div className="ml-[140px] border-l-2 border-slate-200 pl-3 space-y-2">
               <Select value={form.ricorrenza_tipo} onValueChange={v => set('ricorrenza_tipo', v)}>
                 <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -212,34 +239,52 @@ export default function FormTask({ open, onClose, onSave, task, user, centri, di
                   </Select>
                 </div>
               )}
-              <div><Label className="text-xs">Fine ricorrenza</Label><div className="mt-1"><DatePicker value={form.ricorrenza_fine} onChange={v => set('ricorrenza_fine', v)} placeholder="Data fine" /></div></div>
+              <DatePicker value={form.ricorrenza_fine} onChange={v => set('ricorrenza_fine', v)} placeholder="Data fine ricorrenza" />
             </div>
           )}
 
-          <div><Label>Note</Label><Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="mt-1 text-sm" /></div>
-
-          <div>
-            <Label>Foto</Label>
-            <label className="mt-1 flex items-center gap-2 cursor-pointer border border-dashed border-slate-300 rounded-lg px-3 py-2 hover:bg-slate-50 text-sm text-slate-600">
-              {uploadingFoto ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
-              {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
-              <input type="file" multiple accept="image/*" className="hidden" onChange={handleFotoUpload} />
-            </label>
-            {(form.foto_urls || []).length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {form.foto_urls.map((url, i) => (
-                  <div key={i} className="relative">
-                    <img src={url} alt="" className="w-14 h-14 rounded object-cover" />
-                    <button type="button" onClick={() => set('foto_urls', form.foto_urls.filter((_, idx) => idx !== i))} className="absolute -top-1 -right-1 bg-white rounded-full shadow p-0.5"><XIcon className="w-3 h-3" /></button>
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className={rowClass}>
+            <label className={labelClass}>Note</label>
+            <div className={fieldClass}><Textarea value={form.note} onChange={e => set('note', e.target.value)} rows={2} className="text-sm" /></div>
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">Annulla</Button>
-            <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">Salva</Button>
+          <div className={rowClass}>
+            <label className={labelClass}>Foto</label>
+            <div className={fieldClass}>
+              <div className="flex gap-2 flex-wrap mb-2">
+                {uploadingFoto ? (
+                  <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 className="w-4 h-4 animate-spin" />Caricamento...</div>
+                ) : (
+                  <>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <ImageIcon className="w-4 h-4" />Galleria
+                      <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} />
+                    </label>
+                    <label className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-sm rounded-lg cursor-pointer transition-colors">
+                      <Camera className="w-4 h-4" />Fotocamera
+                      <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFotoUpload} />
+                    </label>
+                  </>
+                )}
+              </div>
+              {(form.foto_urls || []).length > 0 && (
+                <div className="grid grid-cols-4 gap-1">
+                  {form.foto_urls.map((url, i) => (
+                    <div key={i} className="relative group">
+                      <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                      <button type="button" onClick={() => set('foto_urls', form.foto_urls.filter((_, idx) => idx !== i))} className="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <XIcon className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>Annulla</Button>
+            <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
         </form>
       </DialogContent>
