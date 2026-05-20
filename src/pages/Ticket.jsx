@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -150,9 +150,16 @@ export default function Ticket({ centroSelezionato, user }) {
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, stato: nuovoStato } : t));
   };
 
-  const handleFieldChange = async (ticket, field, value) => {
-    await base44.entities.Ticket.update(ticket.id, { [field]: value });
+  const fieldChangeTimers = useRef({});
+  const handleFieldChange = (ticket, field, value) => {
+    // Aggiorna subito lo stato locale per reattività UI
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, [field]: value } : t));
+    // Debounce la chiamata API per evitare rate limit
+    const key = `${ticket.id}_${field}`;
+    clearTimeout(fieldChangeTimers.current[key]);
+    fieldChangeTimers.current[key] = setTimeout(async () => {
+      await base44.entities.Ticket.update(ticket.id, { [field]: value });
+    }, 600);
   };
 
   const handleNuovo = () => {
