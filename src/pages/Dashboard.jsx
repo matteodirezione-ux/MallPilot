@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -150,11 +150,15 @@ export default function Dashboard({ centroSelezionato, user }) {
     setCompletingIds(prev => { const s = new Set(prev); s.delete(controlloId); return s; });
   };
 
+  const lastLoadKey = React.useRef(null);
+
   useEffect(() => {
-    if (centroSelezionato && centroSelezionato.id && user) {
+    const key = `${centroSelezionato?.id}_${user?.email}`;
+    if (centroSelezionato && centroSelezionato.id && user && key !== lastLoadKey.current) {
+      lastLoadKey.current = key;
       loadStats();
     }
-  }, [centroSelezionato, user]);
+  }, [centroSelezionato?.id, user?.email]);
 
   const loadStats = async () => {
     try {
@@ -171,72 +175,100 @@ export default function Dashboard({ centroSelezionato, user }) {
       const fineMese = endOfMonth(now);
       const inizioAnno = startOfYear(now);
       const anno = now.getFullYear();
+      const oggi2 = new Date(); oggi2.setHours(0, 0, 0, 0);
+      const annoCorrente = now.getFullYear();
+      const isAll = centroSelezionato?.id === 'tutti';
 
-      // Carica tutte le prenotazioni del centro (o tutti i centri se selezionato "Tutti")
-      const prenotazioni = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Prenotazione.list()
-        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
+      // === CARICA TUTTO IN PARALLELO ===
+      const [
+        prenotazioni,
+        spazi,
+        budgets,
+        clienti,
+        controlliList,
+        ticketsList,
+        allCapex,
+        allPulizie,
+        allReport,
+        allPulizieSegnalazioni,
+        allFornitori,
+      ] = await Promise.all([
+        isAll ? base44.entities.Prenotazione.list() : base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.SpazioExpo.filter({ attivo: true }) : base44.entities.SpazioExpo.filter({ centro_id: centroSelezionato.id, attivo: true }),
+        isAll ? base44.entities.Budget.filter({ anno }) : base44.entities.Budget.filter({ centro_id: centroSelezionato.id, anno }),
+        base44.entities.Cliente.filter(isAll ? {} : { centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.Manutenzione.list() : base44.entities.Manutenzione.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.Ticket.list() : base44.entities.Ticket.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.Capex.list() : base44.entities.Capex.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.PuliziaPeriodica.list() : base44.entities.PuliziaPeriodica.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.Report.list('-data') : base44.entities.Report.filter({ centro_id: centroSelezionato.id }, '-data'),
+        isAll ? base44.entities.Pulizia.list() : base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id }),
+        isAll ? base44.entities.Fornitore.list() : base44.entities.Fornitore.filter({ centro_id: centroSelezionato.id }),
+      ]);
 
-      // Affitti correnti (in corso oggi) - escludi eventi
+      // === TASK (dipende dal ruolo, caricata separatamente ma dopo) ===
+      let tasksList;
+      if (user?.tipo_account === 'vigilanza') {
+        tasksList = await base44.entities.Task.filter({ assegnato_a_email: user.email });
+      } else if (user?.tipo_account === 'direttore') {
+        if (isAll) {
+          tasksList = await base44.entities.Task.list();
+        } else {
+          const [assegnazioniCentro, allTasks] = await Promise.all([
+            base44.entities.Assegnazione.filter({ centro_id: centroSelezionato.id }),
+            base44.entities.Task.list()
+          ]);
+          const emailsAssegnati = assegnazioniCentro.map(a => a.user_email);
+          const allIds = new Set();
+          tasksList = allTasks.filter(t => {
+            if (allIds.has(t.id)) return false;
+            if (t.centro_id === centroSelezionato.id) { allIds.add(t.id); return true; }
+            if (t.assegnato_a_email && emailsAssegnati.includes(t.assegnato_a_email)) { allIds.add(t.id); return true; }
+            if (t.assegnato_da_email && emailsAssegnati.includes(t.assegnato_da_email)) { allIds.add(t.id); return true; }
+            return false;
+          });
+        }
+      } else {
+        tasksList = isAll ? await base44.entities.Task.list() : await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
+      }
+
+      // === CALCOLI (no più API calls) ===
+
+      // Prenotazioni affitti e eventi
       const affittiCorrentiList = prenotazioni.filter(p => {
         const dataInizio = new Date(p.data_inizio);
         const dataFine = new Date(p.data_fine);
-        return !p.is_event && isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
-               p.stato !== 'cancellata';
+        return !p.is_event && !p.is_gratuito && isWithinInterval(now, { start: dataInizio, end: dataFine }) && p.stato !== 'cancellata';
+      });
+      const prossimiAffittiList = prenotazioni.filter(p => {
+        const dataInizio = new Date(p.data_inizio);
+        return !p.is_event && !p.is_gratuito && dataInizio > now &&
+               isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && p.stato !== 'cancellata';
       });
 
-      // Prossimi affitti (prossimo mese, esclusi quelli già in corso e gli eventi)
-      const prossimiAffitti = prenotazioni.filter(p => {
-        const dataInizio = new Date(p.data_inizio);
-        return !p.is_event && dataInizio > now &&
-               isWithinInterval(dataInizio, { start: now, end: unMeseDopo }) && 
-               p.stato !== 'cancellata';
+      // Carica clienti e spazi in batch usando le liste già caricate (no API calls aggiuntive)
+      const clientiMap = Object.fromEntries(clienti.map(c => [c.id, c]));
+      const spaziMap = Object.fromEntries(spazi.map(s => [s.id, s]));
+
+      const enrichPrenotazione = (p) => ({
+        ...p,
+        cliente: clientiMap[p.cliente_id] || null,
+        spazio: spaziMap[p.spazio_id] || null,
       });
 
-      // Arricchisci con dati cliente e spazio
-      const [prossimiConDettagli, affittiCorrentiConDettagli] = await Promise.all([
-        Promise.all(prossimiAffitti.map(async (p) => {
-          const [cliente, spazio] = await Promise.all([
-            base44.entities.Cliente.filter({ id: p.cliente_id }).then(r => r[0]),
-            base44.entities.SpazioExpo.filter({ id: p.spazio_id }).then(r => r[0])
-          ]);
-          return { ...p, cliente, spazio };
-        })),
-        Promise.all(affittiCorrentiList.map(async (p) => {
-          const [cliente, spazio] = await Promise.all([
-            base44.entities.Cliente.filter({ id: p.cliente_id }).then(r => r[0]),
-            base44.entities.SpazioExpo.filter({ id: p.spazio_id }).then(r => r[0])
-          ]);
-          return { ...p, cliente, spazio };
-        }))
-      ]);
+      const prossimiConDettagli = prossimiAffittiList.map(enrichPrenotazione);
+      const affittiCorrentiConDettagli = affittiCorrentiList.map(enrichPrenotazione);
 
-      // Spazi occupati (prenotazioni attive oggi) - escludi eventi
-      const spaziOccupatiOggi = prenotazioni.filter(p => {
-        const dataInizio = new Date(p.data_inizio);
-        const dataFine = new Date(p.data_fine);
-        return !p.is_event && isWithinInterval(now, { start: dataInizio, end: dataFine }) && 
-               p.stato !== 'cancellata';
-      }).length;
+      // Statistiche spazi e incassi
+      const spaziOccupatiOggi = affittiCorrentiList.length;
 
-      // Spazi totali
-      const spazi = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.SpazioExpo.filter({ attivo: true })
-        : await base44.entities.SpazioExpo.filter({ 
-            centro_id: centroSelezionato.id,
-            attivo: true 
-          });
-
-      // Incassi mese - escludi eventi
       const incassiMese = prenotazioni
         .filter(p => {
           const dataInizio = new Date(p.data_inizio);
-          return !p.is_event && isWithinInterval(dataInizio, { start: inizioMese, end: fineMese }) && 
-                 p.stato !== 'cancellata';
+          return !p.is_event && isWithinInterval(dataInizio, { start: inizioMese, end: fineMese }) && p.stato !== 'cancellata';
         })
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
-      // Incassi anno - escludi eventi
       const incassiAnno = prenotazioni
         .filter(p => {
           const dataInizio = new Date(p.data_inizio);
@@ -244,56 +276,11 @@ export default function Dashboard({ centroSelezionato, user }) {
         })
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
-      // Budget anno
-      const budgets = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Budget.filter({ anno: anno })
-        : await base44.entities.Budget.filter({ 
-            centro_id: centroSelezionato.id,
-            anno: anno
-          });
-      const budgetAnno = centroSelezionato?.id === 'tutti'
+      const budgetAnno = isAll
         ? budgets.reduce((sum, b) => sum + (b.importo_budget || 0), 0)
         : budgets[0]?.importo_budget || 0;
 
-      // Clienti totali
-      const clienti = await base44.entities.Cliente.list();
-
-      // Task statistics
-      let tasksList;
-      if (user?.tipo_account === 'vigilanza') {
-        tasksList = await base44.entities.Task.filter({ assegnato_a_email: user.email });
-      } else if (user?.tipo_account === 'direttore') {
-        // Il direttore vede tutti i task degli utenti assegnati al suo centro
-        if (centroSelezionato?.id === 'tutti') {
-          tasksList = await base44.entities.Task.list();
-        } else {
-          // Trova le email di tutti gli utenti assegnati al centro
-          const assegnazioniCentro = await base44.entities.Assegnazione.filter({ centro_id: centroSelezionato.id });
-          const emailsAssegnati = assegnazioniCentro.map(a => a.user_email);
-          
-          // Carica task per centro_id + task assegnati a qualsiasi utente del centro (anche senza centro_id)
-          const allTasks = await base44.entities.Task.list();
-          const allIds = new Set();
-          tasksList = allTasks.filter(t => {
-            if (allIds.has(t.id)) return false;
-            // Includi se ha il centro_id corretto
-            if (t.centro_id === centroSelezionato.id) { allIds.add(t.id); return true; }
-            // Includi se assegnato_a_email è uno degli utenti del centro
-            if (t.assegnato_a_email && emailsAssegnati.includes(t.assegnato_a_email)) { allIds.add(t.id); return true; }
-            // Includi se assegnato_da_email è uno degli utenti del centro
-            if (t.assegnato_da_email && emailsAssegnati.includes(t.assegnato_da_email)) { allIds.add(t.id); return true; }
-            return false;
-          });
-        }
-      } else {
-        // proprietà
-        if (centroSelezionato?.id === 'tutti') {
-          tasksList = await base44.entities.Task.list();
-        } else {
-          tasksList = await base44.entities.Task.filter({ centro_id: centroSelezionato.id });
-        }
-      }
-      
+      // Task stats
       const taskStats = {
         urgenti: tasksList.filter(t => t.priorita === 'urgente' && t.stato !== 'completato' && t.stato !== 'annullato').length,
         inCorso: tasksList.filter(t => t.stato === 'in_corso').length,
@@ -301,177 +288,87 @@ export default function Dashboard({ centroSelezionato, user }) {
         totali: tasksList.length
       };
 
-      // Event statistics
-      const allPrenotazioni = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Prenotazione.list()
-        : await base44.entities.Prenotazione.filter({ centro_id: centroSelezionato.id });
-      
-      const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
-      
-      const eventiCorrentiList = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
-      const prossimiEventi = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
-      
-      let giorniEvento = 0;
-      allPrenotazioni.forEach(p => {
-        if (p.is_event && (p.stato === 'confermata' || p.stato === 'in_corso')) {
-          const inizio = new Date(p.data_inizio);
-          const fine = new Date(p.data_fine);
-          const giorni = Math.ceil((fine - inizio) / (1000 * 60 * 60 * 24)) + 1;
-          giorniEvento += giorni;
-        }
-      });
+      // Event stats (riuso prenotazioni già caricate)
+      const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+      const eventiCorrentiList = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
+      const prossimiEventi = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
 
-      // Costo eventi anno e costo medio giorno evento
+      let giorniEvento = 0;
       let costoEventiAnno = 0;
-      let costoMedioGiornoEvento = 0;
-      const annoCorrente = now.getFullYear();
-      allPrenotazioni.forEach(p => {
+      prenotazioni.forEach(p => {
         if (p.is_event && p.stato !== 'cancellata') {
           const inizio = new Date(p.data_inizio);
+          const fine = new Date(p.data_fine);
+          if (p.stato === 'confermata' || p.stato === 'in_corso') {
+            giorniEvento += Math.ceil((fine - inizio) / (1000 * 60 * 60 * 24)) + 1;
+          }
           if (inizio.getFullYear() === annoCorrente) {
             costoEventiAnno += p.prezzo_totale || 0;
           }
         }
       });
-      if (giorniEvento > 0) {
-        costoMedioGiornoEvento = costoEventiAnno / giorniEvento;
-      }
+      const costoMedioGiornoEvento = giorniEvento > 0 ? costoEventiAnno / giorniEvento : 0;
+      const numeroEventiAnno = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio).getFullYear() === annoCorrente).length;
 
-      const numeroEventiAnno = allPrenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio).getFullYear() === annoCorrente).length;
+      const eventStats = { giorniEvento, eventiCorrenti: eventiCorrentiList.length, eventiCorrentiList, prossimiEventi, costoEventiAnno, costoMedioGiornoEvento, numeroEventiAnno };
 
-      const eventStats = {
-        giorniEvento,
-        eventiCorrenti: eventiCorrentiList.length,
-        eventiCorrentiList,
-        prossimiEventi,
-        costoEventiAnno,
-        costoMedioGiornoEvento,
-        numeroEventiAnno
-      };
-
-      // Affitto medio giornaliero (solo prenotazioni non cancellate con durata > 0)
-      const prenotazioniValide = prenotazioni.filter(p => p.stato !== 'cancellata' && p.prezzo_totale > 0);
+      // Affitto medio e tasso occupazione
+      const prenotazioniValide = prenotazioni.filter(p => !p.is_event && p.stato !== 'cancellata' && p.prezzo_totale > 0);
       let affittoMedioGiornaliero = 0;
       if (prenotazioniValide.length > 0) {
-        const totaleGiorni = prenotazioniValide.reduce((sum, p) => {
-          const giorni = differenceInDays(new Date(p.data_fine), new Date(p.data_inizio)) + 1;
-          return sum + Math.max(giorni, 1);
-        }, 0);
+        const totaleGiorni = prenotazioniValide.reduce((sum, p) => sum + Math.max(differenceInDays(new Date(p.data_fine), new Date(p.data_inizio)) + 1, 1), 0);
         const totalePrezzi = prenotazioniValide.reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
         affittoMedioGiornaliero = totalePrezzi / totaleGiorni;
       }
 
-      // Tasso di occupazione annuale (giorni occupati / (spazi * giorni anno) * 100)
       const inizioAnnoDate = startOfYear(now);
       const fineAnnoDate = endOfYear(now);
       const giorniAnno = differenceInDays(fineAnnoDate, inizioAnnoDate) + 1;
       const totaleGiorniDisponibili = spazi.length * giorniAnno;
       let tassoOccupazioneAnnuale = 0;
       if (totaleGiorniDisponibili > 0) {
-        const giorniOccupati = prenotazioni
-          .filter(p => p.stato !== 'cancellata')
-          .reduce((sum, p) => {
-            const inizio = new Date(Math.max(new Date(p.data_inizio), inizioAnnoDate));
-            const fine = new Date(Math.min(new Date(p.data_fine), fineAnnoDate));
-            const giorni = differenceInDays(fine, inizio) + 1;
-            return sum + Math.max(giorni, 0);
-          }, 0);
+        const giorniOccupati = prenotazioni.filter(p => p.stato !== 'cancellata').reduce((sum, p) => {
+          const inizio = new Date(Math.max(new Date(p.data_inizio), inizioAnnoDate));
+          const fine = new Date(Math.min(new Date(p.data_fine), fineAnnoDate));
+          return sum + Math.max(differenceInDays(fine, inizio) + 1, 0);
+        }, 0);
         tassoOccupazioneAnnuale = (giorniOccupati / totaleGiorniDisponibili) * 100;
       }
 
-      // Controlli (Manutenzioni)
-      const controlliList = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Manutenzione.list()
-        : await base44.entities.Manutenzione.filter({ centro_id: centroSelezionato.id });
+      // Capex, pulizie, alert
+      const capexList = allCapex.filter(c => c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) >= oggi2).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 5);
+      const puliziePeriodiche = allPulizie.filter(p => p.stato !== 'completato').sort((a, b) => new Date(a.prossima_scadenza || a.ultima_esecuzione || 0) - new Date(b.prossima_scadenza || b.ultima_esecuzione || 0)).slice(0, 5);
 
-      // Ticket
-      const ticketsList = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Ticket.list()
-        : await base44.entities.Ticket.filter({ centro_id: centroSelezionato.id });
-
-      // Capex prossimi (pianificati, ordinati per data_inizio)
-      const oggi2 = new Date(); oggi2.setHours(0,0,0,0);
-      const allCapex = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Capex.list()
-        : await base44.entities.Capex.filter({ centro_id: centroSelezionato.id });
-      const capexList = allCapex
-        .filter(c => c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) >= oggi2)
-        .sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio))
-        .slice(0, 5);
-
-      // Pulizie Periodiche (da programmare o programmate)
-      const allPulizie = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.PuliziaPeriodica.list()
-        : await base44.entities.PuliziaPeriodica.filter({ centro_id: centroSelezionato.id });
-      const puliziePeriodiche = allPulizie
-        .filter(p => p.stato !== 'completato')
-        .sort((a, b) => new Date(a.prossima_scadenza || a.ultima_esecuzione || 0) - new Date(b.prossima_scadenza || b.ultima_esecuzione || 0))
-        .slice(0, 5);
-
-      // Report recenti (tutti per conteggio non letti)
-      const allReport = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Report.list('-data')
-        : await base44.entities.Report.filter({ centro_id: centroSelezionato.id }, '-data');
-
-      // Segnalazioni pulizie (per conteggio non lette)
-      const allPulizieSegnalazioni = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Pulizia.list()
-        : await base44.entities.Pulizia.filter({ centro_id: centroSelezionato.id });
-
-      // Fornitori con DUVRI mancante
-      const allFornitori = centroSelezionato?.id === 'tutti'
-        ? await base44.entities.Fornitore.list()
-        : await base44.entities.Fornitore.filter({ centro_id: centroSelezionato.id });
       const fornitoriAlertCount = allFornitori.reduce((count, f) => {
-        // Alert se DUVRI principale mancante o subornitori senza DUVRI
         if (!f.duvri_urls || f.duvri_urls.length === 0) return count + 1;
-        const subAlerts = (f.subornitori || []).filter(s => !s.duvri_urls || s.duvri_urls.length === 0).length;
-        return count + subAlerts;
+        return count + (f.subornitori || []).filter(s => !s.duvri_urls || s.duvri_urls.length === 0).length;
       }, 0);
-
-      // Capex pianificati senza DUVRI e senza CSE
-      const capexAlertCount = allCapex.filter(c => 
-        c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse
-      ).length;
-
-      // Enrich tasks with additional data if needed
-      const tasksConDettagli = await Promise.all(
-        tasksList.map(async (t) => {
-          if (t.assegnato_a_email && !t.assegnato_a_nome) {
-            const [utente] = await Promise.all([
-              base44.entities.User.filter({ email: t.assegnato_a_email })
-            ]);
-            return { ...t, assegnato_a_nome: utente?.[0]?.full_name };
-          }
-          return t;
-        })
-      );
+      const capexAlertCount = allCapex.filter(c => c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse).length;
 
       setStats({
-         prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
-         affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
-         spaziOccupati: spaziOccupatiOggi,
-         spaziTotali: spazi.length,
-         incassiMese,
-         incassiAnno,
-         budgetAnno,
-         clientiTotali: clienti.length,
-         affittoMedioGiornaliero,
-         tassoOccupazioneAnnuale,
-         taskStats,
-         eventStats,
-         tasksList: tasksConDettagli,
-         controlliList: controlliList || [],
-         ticketsList: ticketsList || [],
-         capexList: capexList || [],
-         puliziePeriodiche: puliziePeriodiche || [],
-         reportList: allReport?.slice(0, 5) || [],
-         reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
-         pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0,
-         fornitoriAlertCount,
-         capexAlertCount
-       });
+        prossimiAffitti: prossimiConDettagli.sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)),
+        affittiCorrenti: affittiCorrentiConDettagli.sort((a, b) => new Date(a.data_fine) - new Date(b.data_fine)),
+        spaziOccupati: spaziOccupatiOggi,
+        spaziTotali: spazi.length,
+        incassiMese,
+        incassiAnno,
+        budgetAnno,
+        clientiTotali: clienti.length,
+        affittoMedioGiornaliero,
+        tassoOccupazioneAnnuale,
+        taskStats,
+        eventStats,
+        tasksList,
+        controlliList: controlliList || [],
+        ticketsList: ticketsList || [],
+        capexList: capexList || [],
+        puliziePeriodiche: puliziePeriodiche || [],
+        reportList: allReport?.slice(0, 5) || [],
+        reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
+        pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0,
+        fornitoriAlertCount,
+        capexAlertCount
+      });
     } catch (error) {
       console.error('Errore caricamento statistiche:', error);
     } finally {
