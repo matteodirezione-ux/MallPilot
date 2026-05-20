@@ -97,8 +97,8 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
             <span className="text-xs text-blue-100 leading-tight">{todayWmo.label}</span>
           </div>
         </div>
-        {/* Giorni successivi */}
-        <div className="flex gap-1.5 flex-1">
+        {/* Giorni successivi - stile migliorato */}
+        <div className="flex gap-2 flex-1">
           {daily.time.slice(1).map((dateStr, i) => {
             const idx = i + 1;
             const d = new Date(dateStr);
@@ -109,12 +109,14 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
             return (
               <div
                 key={dateStr}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-xl bg-white border border-slate-200 shadow-sm"
+                className="flex-1 flex flex-col items-center justify-between gap-1 py-3 px-2 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <span className="text-xs font-semibold text-slate-500 capitalize">{dayLabel}</span>
-                <span className="text-xl leading-none">{wmo.emoji}</span>
-                <span className="text-sm font-bold text-slate-800">{maxTemp}°</span>
-                <span className="text-xs text-slate-400">{minTemp}°</span>
+                <span className="text-xs font-semibold text-slate-600 capitalize">{dayLabel}</span>
+                <span className="text-3xl leading-none">{wmo.emoji}</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-lg font-bold text-slate-800">{maxTemp}°</span>
+                  <span className="text-xs text-slate-400">{minTemp}°</span>
+                </div>
               </div>
             );
           })}
@@ -124,25 +126,33 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
   }
 
   return (
-    <div className="mt-2">
-      <p className="text-xs text-slate-400 mb-1.5">📍 {weather.place.name}</p>
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
+    <div className="mt-3">
+      <p className="text-xs text-slate-500 mb-2 flex items-center gap-1">
+        <span>📍</span> {weather.place.name}
+      </p>
+      <div className="flex gap-2 overflow-x-auto pb-2">
         {daily.time.map((dateStr, i) => {
           const d = new Date(dateStr);
           const isToday = d.getTime() === today.getTime();
           const wmo = getWmo(daily.weathercode[i]);
           const dayLabel = isToday ? 'Oggi' : format(d, 'EEE', { locale: it });
+          const maxTemp = Math.round(daily.temperature_2m_max[i]);
+          const minTemp = Math.round(daily.temperature_2m_min[i]);
           return (
             <div
               key={dateStr}
-              className={`flex flex-col items-center min-w-[46px] px-1.5 py-1.5 rounded-lg border text-center shrink-0 ${
-                isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+              className={`flex flex-col items-center min-w-[70px] px-2 py-3 rounded-xl border text-center shrink-0 transition-shadow ${
+                isToday 
+                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 border-blue-300 shadow-md' 
+                  : 'bg-gradient-to-br from-slate-50 to-white border-slate-200 shadow-sm hover:shadow-md'
               }`}
             >
-              <p className={`text-xs font-semibold capitalize ${isToday ? 'text-blue-600' : 'text-slate-600'}`}>{dayLabel}</p>
-              <span className="text-lg leading-tight">{wmo.emoji}</span>
-              <p className="text-xs font-bold text-slate-800">{Math.round(daily.temperature_2m_max[i])}°</p>
-              <p className="text-xs text-slate-400">{Math.round(daily.temperature_2m_min[i])}°</p>
+              <p className={`text-xs font-semibold capitalize mb-1 ${isToday ? 'text-blue-100' : 'text-slate-600'}`}>{dayLabel}</p>
+              <span className="text-3xl leading-tight mb-2">{wmo.emoji}</span>
+              <div className="flex flex-col items-center">
+                <p className={`text-base font-bold ${isToday ? 'text-white' : 'text-slate-800'}`}>{maxTemp}°</p>
+                <p className={`text-xs ${isToday ? 'text-blue-200' : 'text-slate-400'}`}>{minTemp}°</p>
+              </div>
             </div>
           );
         })}
