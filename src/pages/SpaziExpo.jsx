@@ -168,9 +168,11 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                 </div>
                 <div className="relative">
                   {spazio.foto_urls?.length > 0 ? (
-                    <img src={spazio.foto_urls[0]} alt="" className="w-full h-32 object-cover" />
+                    <div className="w-full aspect-square">
+                      <img src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" />
+                    </div>
                   ) : (
-                    <div className="w-full h-20 bg-slate-100 flex items-center justify-center">
+                    <div className="w-full aspect-square bg-slate-100 flex items-center justify-center">
                       <Building2 className="w-6 h-6 text-slate-300" />
                     </div>
                   )}
