@@ -86,10 +86,14 @@ export default function Marketing({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Megaphone className="w-6 h-6" /> Piano Marketing</h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setAnno(a => a - 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100">◀</button>
-          <span className="font-semibold px-3">{anno}</span>
-          <button onClick={() => setAnno(a => a + 1)} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100">▶</button>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setAnno(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          <span className="font-semibold px-3 text-slate-700">{anno}</span>
+          <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+          </button>
         </div>
       </div>
 
