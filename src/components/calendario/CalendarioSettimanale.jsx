@@ -2,12 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail, Trash2 } from 'lucide-react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
 
-export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, isVigilanza, mostraDisponibili }) {
+export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, onDelete, isVigilanza, mostraDisponibili }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
 
   const giorni = useMemo(() => {
@@ -297,6 +297,24 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                   </div>
                 </div>
               )}
+            {!isVigilanza && onDelete && (
+              <div className="pt-2 border-t border-slate-100">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+                      onDelete(selectedPrenotazione.prenotazione.id);
+                      setSelectedPrenotazione(null);
+                    }
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Elimina prenotazione
+                </Button>
+              </div>
+            )}
             </div>
           </DialogContent>
         </Dialog>

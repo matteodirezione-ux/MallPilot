@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, Phone, Mail, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWithinInterval, addMonths, subMonths, isSameDay, subDays, addDays } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
@@ -378,6 +378,24 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                     <p className="text-xs text-slate-500 font-medium">Note</p>
                     <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
                   </div>
+                </div>
+              )}
+              {!isVigilanza && onDelete && (
+                <div className="pt-2 border-t border-slate-100">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+                        onDelete(selectedPrenotazione.prenotazione.id);
+                        setSelectedPrenotazione(null);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Elimina prenotazione
+                  </Button>
                 </div>
               )}
             </div>

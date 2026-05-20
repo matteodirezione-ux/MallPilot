@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { format, startOfDay, endOfDay, addDays, subDays } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
 
-export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, onEdit, isVigilanza }) {
+export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, onEdit, onDelete, isVigilanza }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
 
@@ -236,6 +236,24 @@ export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, on
                     <p className="text-xs text-slate-500 font-medium">Note</p>
                     <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
                   </div>
+                </div>
+              )}
+              {!isVigilanza && onDelete && (
+                <div className="pt-2 border-t border-slate-100">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+                        onDelete(selectedPrenotazione.prenotazione.id);
+                        setSelectedPrenotazione(null);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Elimina prenotazione
+                  </Button>
                 </div>
               )}
             </div>

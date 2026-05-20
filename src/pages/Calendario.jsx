@@ -392,6 +392,7 @@ export default function Calendario({ centroSelezionato, user }) {
             currentWeek={currentWeek}
             setCurrentWeek={setCurrentWeek}
             onEdit={isVigilanza ? null : handleEdit}
+            onDelete={isVigilanza ? null : handleDelete}
             isVigilanza={isVigilanza}
             mostraDisponibili={mostraDisponibili}
           />
@@ -403,6 +404,7 @@ export default function Calendario({ centroSelezionato, user }) {
             spazi={spazi}
             clienti={clienti}
             onEdit={isVigilanza ? null : handleEdit}
+            onDelete={isVigilanza ? null : handleDelete}
             isVigilanza={isVigilanza}
           />
         </TabsContent>
