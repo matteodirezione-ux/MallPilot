@@ -26,12 +26,11 @@ function buildAgendaData({ stats, fromDate, toDate }) {
 
   const allPrenotazioni = (stats.prossimiAffitti || []).concat(stats.affittiCorrenti || []).concat(stats.gratuitiList || []);
   const seen = new Set();
-  // Affitti (normali + gratuiti): mostra quelli che iniziano nel range O sono in corso
+  // Affitti (normali + gratuiti): mostra solo quelli che INIZIANO nel range (non quelli già in corso da prima)
   const affitti = allPrenotazioni.filter(p => {
     if (seen.has(p.id)) return false;
     seen.add(p.id);
-    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio &&
-      (p.data_fine ? overlaps(p.data_inizio, p.data_fine) : inRange(p.data_inizio));
+    return !p.is_event && p.stato !== 'cancellata' && p.data_inizio && inRange(p.data_inizio);
   });
 
   // Capex in corso o che iniziano nel range
