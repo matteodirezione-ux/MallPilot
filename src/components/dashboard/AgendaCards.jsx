@@ -63,7 +63,7 @@ function SectionLabel({ icon: Icon, color, label }) {
   );
 }
 
-function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, stats, fromDate, toDate, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
+function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, stats, fromDate, toDate, onSelect, onCompleteTask, onCompleteControllo, completingIds, fullHeight }) {
   const { tasks, controlli, affitti, capex, pulizie, eventi } = buildAgendaData({ stats, fromDate, toDate });
   const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length + eventi.length === 0;
 
@@ -80,7 +80,7 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 max-h-80 overflow-y-auto pt-3">
+      <CardContent className={`flex-1 overflow-y-auto pt-3 ${fullHeight ? 'max-h-[calc(100vh-220px)]' : 'max-h-80'}`}>
         {isEmpty ? (
           <p className="text-slate-400 text-center py-4 text-xs sm:text-sm italic">Niente in programma</p>
         ) : (
@@ -240,7 +240,7 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
   );
 }
 
-export default function AgendaCards({ stats, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
+export default function AgendaCards({ stats, onSelect, onCompleteTask, onCompleteControllo, completingIds, fullHeight }) {
   const oggi = new Date(); oggi.setHours(0,0,0,0);
   const domani = addDays(oggi, 1);
   const fra3 = addDays(oggi, 3);
@@ -261,6 +261,7 @@ export default function AgendaCards({ stats, onSelect, onCompleteTask, onComplet
         onCompleteTask={onCompleteTask}
         onCompleteControllo={onCompleteControllo}
         completingIds={completingIds}
+        fullHeight={fullHeight}
       />
       <AgendaCard
         title="Domani"
@@ -275,6 +276,7 @@ export default function AgendaCards({ stats, onSelect, onCompleteTask, onComplet
         onCompleteTask={onCompleteTask}
         onCompleteControllo={onCompleteControllo}
         completingIds={completingIds}
+        fullHeight={fullHeight}
       />
       <AgendaCard
         title="Prossimi 7 giorni"
@@ -289,6 +291,7 @@ export default function AgendaCards({ stats, onSelect, onCompleteTask, onComplet
         onCompleteTask={onCompleteTask}
         onCompleteControllo={onCompleteControllo}
         completingIds={completingIds}
+        fullHeight={fullHeight}
       />
     </div>
   );
