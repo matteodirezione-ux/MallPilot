@@ -439,10 +439,30 @@ export default function Dashboard({ centroSelezionato, user }) {
     <div className="p-3 sm:p-4 md:p-6 lg:p-8">
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-4">
-          {/* Titolo */}
-          <div className="shrink-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
-            <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
+          {/* Titolo + Pulsanti rapidi direttore */}
+          <div className="shrink-0 flex items-center gap-3">
+            <div>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
+              <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
+            </div>
+            {user?.tipo_account === 'direttore' && (
+              <div className="flex flex-col gap-1.5">
+                {[
+                  { label: 'Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
+                  { label: 'Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
+                  { label: 'Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
+                ].map(({ label, tipo, color }) => (
+                  <button
+                    key={label}
+                    onClick={() => openQuickForm(tipo)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-white text-xs font-medium transition-colors ${color}`}
+                  >
+                    <Plus className="w-3 h-3" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           {/* Meteo - occupa tutto lo spazio rimanente */}
           <div className="flex-1 min-w-0">
@@ -463,26 +483,6 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
         </div>
       </div>
-
-      {/* Pulsanti rapidi - direttore */}
-      {user?.tipo_account === 'direttore' && (
-        <div className="flex flex-wrap gap-2 mb-4 sm:mb-6">
-          {[
-            { label: 'Nuovo Task', tipo: 'task', color: 'bg-blue-600 hover:bg-blue-700' },
-            { label: 'Nuovo Controllo', tipo: 'controllo', color: 'bg-indigo-600 hover:bg-indigo-700' },
-            { label: 'Nuova Prenotazione', tipo: 'prenotazione', color: 'bg-green-600 hover:bg-green-700' },
-          ].map(({ label, tipo, path, color }) => (
-            <button
-              key={label}
-              onClick={() => tipo ? openQuickForm(tipo) : navigate(path)}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Pulsanti rapidi - solo vigilanza */}
       {user?.tipo_account === 'vigilanza' && (
