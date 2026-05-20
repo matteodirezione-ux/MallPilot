@@ -449,12 +449,15 @@ export default function Dashboard({ centroSelezionato, user }) {
             <WeatherWidget citta={centroSelezionato?.citta} provincia={centroSelezionato?.provincia} indirizzo={centroSelezionato?.indirizzo} inline />
           </div>
           {/* Data - a destra */}
-          <div className="shrink-0 text-right hidden sm:block">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">
+          <div className="shrink-0 hidden sm:flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl px-5 py-2.5 shadow-md min-w-[110px]">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
               {new Date().toLocaleDateString('it-IT', { weekday: 'long' })}
             </p>
-            <p className="text-2xl font-bold text-slate-800 leading-tight">
-              {new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
+            <p className="text-3xl font-bold text-white leading-tight">
+              {new Date().toLocaleDateString('it-IT', { day: 'numeric' })}
+            </p>
+            <p className="text-sm font-medium text-slate-300 capitalize">
+              {new Date().toLocaleDateString('it-IT', { month: 'long' })}
             </p>
             <p className="text-xs text-slate-500">{new Date().getFullYear()}</p>
           </div>
