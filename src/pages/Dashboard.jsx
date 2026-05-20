@@ -544,136 +544,136 @@ export default function Dashboard({ centroSelezionato, user }) {
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Allert Fornitori DUVRI */}
-          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
-              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
+          <div className="bg-red-50 rounded-lg border border-red-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
+              <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><AlertCircle className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
             </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.fornitoriAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.fornitoriAlertCount}</p>
-            {stats.fornitoriAlertCount > 0 && <p className="text-xs text-red-500 mt-1">DUVRI Mancanti</p>}
+            <p className={`text-base sm:text-lg font-bold ${stats.fornitoriAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.fornitoriAlertCount}</p>
+            {stats.fornitoriAlertCount > 0 && <p className="text-[10px] sm:text-xs text-red-500 mt-0.5">DUVRI Mancanti</p>}
           </div>
 
           {/* Report da leggere */}
-          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Report da Leggere</p>
-              <div className="bg-emerald-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BookOpen className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-emerald-600" /></div>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Report da Leggere</p>
+              <div className="bg-emerald-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><BookOpen className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-600" /></div>
             </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.reportDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.reportDaLeggere}</p>
-            {stats.reportDaLeggere > 0 && <p className="text-xs text-blue-500 mt-1">non letti</p>}
+            <p className={`text-base sm:text-lg font-bold ${stats.reportDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.reportDaLeggere}</p>
+            {stats.reportDaLeggere > 0 && <p className="text-[10px] sm:text-xs text-blue-500 mt-0.5">non letti</p>}
           </div>
 
           {/* Incassi Mese */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><DollarSign className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiMese)}</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiMese)}</p>
           </div>
 
           {/* Incassi Anno */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><TrendingUp className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiAnno)}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Budget</p>
-                <p className="text-xs font-medium text-blue-600">{percentualeBudget}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiAnno)}</p>
+            <div className="mt-1.5 sm:mt-2">
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[10px] text-slate-600">Budget</p>
+                <p className="text-[10px] font-medium text-blue-600">{percentualeBudget}%</p>
               </div>
-              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-1.5 sm:h-2" />
+              <Progress value={Math.min(parseFloat(percentualeBudget), 100)} className="h-1.5" />
             </div>
           </div>
 
           {/* Spazi Occupati */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Building2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Building2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Occupazione</p>
-                <p className="text-xs font-medium text-blue-600">{percentualeOccupazione}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900">{stats.spaziOccupati}/{stats.spaziTotali}</p>
+            <div className="mt-1.5 sm:mt-2">
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[10px] text-slate-600">Occupazione</p>
+                <p className="text-[10px] font-medium text-blue-600">{percentualeOccupazione}%</p>
               </div>
-              <Progress value={parseInt(percentualeOccupazione)} className="h-1.5 sm:h-2" />
+              <Progress value={parseInt(percentualeOccupazione)} className="h-1.5" />
             </div>
           </div>
 
           {/* Affitto Medio Giornaliero */}
-          <div className="bg-blue-50 rounded-lg border border-blue-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><BarChart2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-600" /></div>
+          <div className="bg-blue-50 rounded-lg border border-blue-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><BarChart2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
-            <div className="mt-2 sm:mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs text-slate-600">Occupazione</p>
-                <p className="text-xs font-medium text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.affittoMedioGiornaliero)}</p>
+            <div className="mt-1.5 sm:mt-2">
+              <div className="flex items-center justify-between mb-0.5">
+                <p className="text-[10px] text-slate-600">Occupazione</p>
+                <p className="text-[10px] font-medium text-blue-600">{stats.tassoOccupazioneAnnuale.toFixed(1)}%</p>
               </div>
-              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5 sm:h-2" />
+              <Progress value={Math.min(stats.tassoOccupazioneAnnuale, 100)} className="h-1.5" />
             </div>
           </div>
 
           {/* Allert Capex Scaduti */}
-          <div className="bg-red-50 rounded-lg border border-red-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Capex</p>
-              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><AlertCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
+          <div className="bg-red-50 rounded-lg border border-red-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Capex</p>
+              <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><AlertCircle className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
             </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.capexAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
-            {stats.capexAlertCount > 0 && <p className="text-xs text-red-500 mt-1">Duvri mancanti</p>}
+            <p className={`text-base sm:text-lg font-bold ${stats.capexAlertCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.capexAlertCount}</p>
+            {stats.capexAlertCount > 0 && <p className="text-[10px] sm:text-xs text-red-500 mt-0.5">Duvri mancanti</p>}
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
-          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
-              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-blue-500" /></div>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
+              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-500" /></div>
             </div>
-            <p className={`text-lg sm:text-2xl font-bold ${stats.pulizieDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.pulizieDaLeggere}</p>
-            {stats.pulizieDaLeggere > 0 && <p className="text-xs text-blue-500 mt-1">non lette</p>}
+            <p className={`text-base sm:text-lg font-bold ${stats.pulizieDaLeggere > 0 ? 'text-blue-600' : 'text-slate-900'}`}>{stats.pulizieDaLeggere}</p>
+            {stats.pulizieDaLeggere > 0 && <p className="text-[10px] sm:text-xs text-blue-500 mt-0.5">non lette</p>}
           </div>
 
           {/* Numero Eventi */}
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">N. Eventi</p>
-              <div className="bg-purple-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-purple-600" /></div>
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">N. Eventi</p>
+              <div className="bg-purple-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-purple-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.eventStats.numeroEventiAnno}</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900">{stats.eventStats.numeroEventiAnno}</p>
           </div>
 
           {/* Giorni Evento */}
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Giorni Evento</p>
-              <div className="bg-orange-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Calendar className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-orange-600" /></div>
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Giorni Evento</p>
+              <div className="bg-orange-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-orange-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900">{stats.eventStats.giorniEvento}</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900">{stats.eventStats.giorniEvento}</p>
           </div>
 
           {/* Costo Eventi */}
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Eventi</p>
-              <div className="bg-red-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><DollarSign className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-red-600" /></div>
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Eventi</p>
+              <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><DollarSign className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoEventiAnno)}</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoEventiAnno)}</p>
           </div>
 
           {/* Costo Medio Giorno Evento */}
-          <div className="bg-purple-50 rounded-lg border border-purple-200 p-3 sm:p-4 shadow-xl hover:shadow-2xl transition-shadow">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Med/Gg Ev</p>
-              <div className="bg-green-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0"><Target className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-green-600" /></div>
+          <div className="bg-purple-50 rounded-lg border border-purple-200 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Med/Gg Ev</p>
+              <div className="bg-green-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Target className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-green-600" /></div>
             </div>
-            <p className="text-lg sm:text-2xl font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
+            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.eventStats.costoMedioGiornoEvento)}</p>
           </div>
           </div>
           )}
