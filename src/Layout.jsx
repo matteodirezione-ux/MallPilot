@@ -291,47 +291,52 @@ export default function Layout({ children, currentPageName }) {
       <aside className={`fixed top-0 left-0 h-full bg-[#0a1628] border-r border-slate-700 z-50 w-64 overflow-hidden transition-transform duration-200 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-slate-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
-                <span className="font-bold text-lg text-white">Mall Pilot</span>
-              </div>
+          <div className="p-4 border-b border-slate-700">
+            <div className="flex items-center justify-between gap-2">
+              {centroSelezionato && centri.length > 0 ? (
+                <div className="relative flex items-center gap-2 flex-1 min-w-0">
+                  {centroSelezionato.logo_url ? (
+                    <img src={centroSelezionato.logo_url} alt={centroSelezionato.nome} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">{(centroSelezionato.nome || 'M').charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
+                  </div>
+                  {centri.length > 1 && <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
+                  {centri.length > 1 && (
+                    <select
+                      value={centroSelezionato.id || 'tutti'}
+                      onChange={(e) => {
+                        if (e.target.value === 'tutti') {
+                          handleCentroChange({ id: 'tutti', nome: 'Tutti i Centri' });
+                        } else {
+                          const centro = centri.find(c => c.id === e.target.value);
+                          handleCentroChange(centro);
+                        }
+                      }}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                    >
+                      <option value="tutti">Tutti i Centri</option>
+                      {centri.map(centro => (
+                        <option key={centro.id} value={centro.id}>{centro.nome}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
+                  <span className="font-bold text-lg text-white">Mall Pilot</span>
+                </div>
+              )}
               {(user?.tipo_account === 'vigilanza' || user?.tipo_account === 'direttore') && (
                 <NotificaBell user={user} />
               )}
             </div>
           </div>
-
-          {/* Centro Selector */}
-          {centroSelezionato && centri.length > 0 && (
-            <div className="p-4 border-b border-slate-700">
-              <div className="relative">
-                <select
-                  value={centroSelezionato.id || 'tutti'}
-                  onChange={(e) => {
-                    if (e.target.value === 'tutti') {
-                      handleCentroChange({ id: 'tutti', nome: 'Tutti i Centri' });
-                    } else {
-                      const centro = centri.find(c => c.id === e.target.value);
-                      handleCentroChange(centro);
-                    }
-                  }}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm font-medium text-white appearance-none cursor-pointer hover:bg-slate-700 transition-colors"
-                >
-                  {centri.length > 1 && (
-                    <option value="tutti">Tutti i Centri</option>
-                  )}
-                  {centri.map(centro => (
-                    <option key={centro.id} value={centro.id}>
-                      {centro.nome}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-          )}
 
           {/* Navigation */}
           <nav className="flex-1 p-4 overflow-y-auto">
