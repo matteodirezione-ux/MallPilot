@@ -8,7 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import {
   Table,
@@ -27,6 +28,7 @@ export default function TenantPage({ centroSelezionato, user }) {
   const [sortDirection, setSortDirection] = useState('asc');
   const [mappaOpen, setMappaOpen] = useState(false);
   const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
+  const [uploadingMappa, setUploadingMappa] = useState(false);
   const queryClient = useQueryClient();
   
   const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
@@ -69,6 +71,23 @@ export default function TenantPage({ centroSelezionato, user }) {
   const handleDelete = (id) => {
     if (confirm('Sei sicuro di voler eliminare questo tenant?')) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const handleUploadMappa = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingMappa(true);
+    try {
+      // Carica la mappa SENZA compressione per mantenere la qualità originale
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.entities.CentroCommerciale.update(centroSelezionato.id, { piantina_url: file_url });
+      setMappaUrl(file_url);
+      toast.success('Mappa caricata');
+    } catch {
+      toast.error('Errore caricamento mappa');
+    } finally {
+      setUploadingMappa(false);
     }
   };
 
@@ -146,6 +165,13 @@ export default function TenantPage({ centroSelezionato, user }) {
                 <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[80vh]" />
               ) : (
                 <div className="flex items-center justify-center h-40 bg-slate-100 rounded-lg text-slate-400 text-sm">Nessuna mappa caricata</div>
+              )}
+              {user?.tipo_account !== 'vigilanza' && (
+                <label className="flex items-center gap-2 cursor-pointer border border-dashed border-slate-300 rounded-lg px-4 py-3 hover:bg-slate-50 text-sm text-slate-600">
+                  {uploadingMappa ? <Loader2 className="w-4 h-4 animate-spin" /> : <Map className="w-4 h-4" />}
+                  {uploadingMappa ? 'Caricamento...' : 'Carica nuova mappa'}
+                  <input type="file" accept="image/*" className="hidden" onChange={handleUploadMappa} />
+                </label>
               )}
             </div>
           </DialogContent>
