@@ -147,7 +147,7 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                       return (
                         <div
                            key={p.id}
-                           onClick={() => isVigilanza ? setSelectedPrenotazione({ prenotazione: p, spazio, cliente }) : (onEdit && onEdit(p))}
+                           onClick={() => setSelectedPrenotazione({ prenotazione: p, spazio, cliente })}
                            style={{
                              backgroundColor: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
                              borderColor: color,
@@ -297,22 +297,34 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                   </div>
                 </div>
               )}
-            {!isVigilanza && onDelete && (
-              <div className="pt-2 border-t border-slate-100">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => {
-                    if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
-                      onDelete(selectedPrenotazione.prenotazione.id);
-                      setSelectedPrenotazione(null);
-                    }
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Elimina prenotazione
-                </Button>
+            {!isVigilanza && (
+              <div className="pt-2 border-t border-slate-100 flex gap-2">
+                {onEdit && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => { onEdit(selectedPrenotazione.prenotazione); setSelectedPrenotazione(null); }}
+                  >
+                    Modifica
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => {
+                      if (confirm('Sei sicuro di voler eliminare questa prenotazione?')) {
+                        onDelete(selectedPrenotazione.prenotazione.id);
+                        setSelectedPrenotazione(null);
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Elimina
+                  </Button>
+                )}
               </div>
             )}
             </div>
