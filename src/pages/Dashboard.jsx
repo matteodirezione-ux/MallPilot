@@ -688,8 +688,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             fullHeight={user?.tipo_account === 'vigilanza'}
           />
 
-          {/* Bottom cards - solo per non-vigilanza */}
-          {user?.tipo_account !== 'vigilanza' && (
+          {/* Bottom cards - per tutti i ruoli */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
 
           {/* Capex */}
@@ -974,7 +973,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                        </CardContent>
                        </Card>
                        </div>
-          )}
+                       )
 
       <DashboardDetailModal
         open={detailModal.open}
