@@ -6,6 +6,10 @@ export default function ImageLightbox({ urls, startIndex = 0, onClose }) {
   const [current, setCurrent] = React.useState(startIndex);
 
   useEffect(() => {
+    setCurrent(startIndex);
+  }, [startIndex]);
+
+  useEffect(() => {
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') setCurrent(c => (c + 1) % urls.length);
