@@ -336,7 +336,7 @@ export default function Dashboard({ centroSelezionato, user }) {
       }
 
       // Capex, pulizie, alert
-      const capexList = allCapex.filter(c => c.stato !== 'completato' && c.data_inizio && new Date(c.data_inizio) >= oggi2).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 5);
+      const capexList = allCapex.filter(c => c.stato !== 'completato' && c.data_inizio && (c.data_fine ? new Date(c.data_fine) >= oggi2 : new Date(c.data_inizio) >= oggi2)).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 10);
       const puliziePeriodiche = allPulizie.filter(p => p.stato !== 'completato').sort((a, b) => new Date(a.prossima_scadenza || a.ultima_esecuzione || 0) - new Date(b.prossima_scadenza || b.ultima_esecuzione || 0)).slice(0, 5);
 
       const fornitoriAlertCount = allFornitori.reduce((count, f) => {

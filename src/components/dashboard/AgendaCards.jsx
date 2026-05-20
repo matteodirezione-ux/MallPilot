@@ -11,6 +11,8 @@ function buildAgendaData({ stats, fromDate, toDate }) {
   const from = startOfDay(fromDate);
   const to = endOfDay(toDate);
   const inRange = (d) => { const dt = startOfDay(new Date(d)); return dt >= from && dt <= to; };
+  // Overlap: l'intervallo [start, end] si sovrappone a [from, to]
+  const overlaps = (start, end) => startOfDay(new Date(start)) <= to && endOfDay(new Date(end)) >= from;
 
   const tasks = (stats.tasksList || []).filter(t =>
     t.stato !== 'completato' && t.stato !== 'annullato' &&
@@ -30,10 +32,25 @@ function buildAgendaData({ stats, fromDate, toDate }) {
     return !p.is_event && p.stato !== 'cancellata' && p.data_inizio && inRange(p.data_inizio);
   });
 
-  const capex = (stats.capexList || []).filter(c => c.data_inizio && inRange(c.data_inizio));
+  // Capex in corso o che iniziano nel range
+  const capex = (stats.capexList || []).filter(c =>
+    c.stato !== 'completato' && c.data_inizio &&
+    (c.data_fine ? overlaps(c.data_inizio, c.data_fine) : inRange(c.data_inizio))
+  );
+
+  // Pulizie con scadenza nel range
   const pulizie = (stats.puliziePeriodiche || []).filter(p => p.prossima_scadenza && inRange(p.prossima_scadenza));
 
-  return { tasks, controlli, affitti, capex, pulizie };
+  // Eventi in corso o che iniziano nel range
+  const allEventSources = (stats.eventStats?.eventiCorrentiList || []).concat(stats.eventStats?.prossimiEventi || []);
+  const seenEv = new Set();
+  const eventi = allEventSources.filter(e => {
+    if (seenEv.has(e.id)) return false;
+    seenEv.add(e.id);
+    return e.stato !== 'cancellata' && e.data_inizio && e.data_fine && overlaps(e.data_inizio, e.data_fine);
+  });
+
+  return { tasks, controlli, affitti, capex, pulizie, eventi };
 }
 
 function SectionLabel({ icon: Icon, color, label }) {
@@ -46,8 +63,8 @@ function SectionLabel({ icon: Icon, color, label }) {
 }
 
 function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, stats, fromDate, toDate, onSelect, onCompleteTask, onCompleteControllo, completingIds }) {
-  const { tasks, controlli, affitti, capex, pulizie } = buildAgendaData({ stats, fromDate, toDate });
-  const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length === 0;
+  const { tasks, controlli, affitti, capex, pulizie, eventi } = buildAgendaData({ stats, fromDate, toDate });
+  const isEmpty = tasks.length + controlli.length + affitti.length + capex.length + pulizie.length + eventi.length === 0;
 
   const prioritaColor = { urgente: 'bg-red-100 text-red-700', alta: 'bg-orange-100 text-orange-700', media: 'bg-yellow-100 text-yellow-700', bassa: 'bg-slate-100 text-slate-600' };
 
@@ -184,6 +201,27 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                         <p className="text-xs text-slate-500">{p.frequenza}</p>
                       </div>
                       <span className="text-xs text-purple-700 font-medium whitespace-nowrap shrink-0">{fmtDate(p.prossima_scadenza)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Eventi */}
+            {eventi.length > 0 && (
+              <>
+                <SectionLabel icon={Sparkles} color="text-pink-600" label="Eventi" />
+                <div className="space-y-1.5">
+                  {eventi.map(e => (
+                    <div
+                      key={e.id}
+                      className="flex items-center justify-between p-2 sm:p-2.5 bg-pink-50 rounded-lg border border-pink-100 text-xs sm:text-sm cursor-pointer hover:brightness-95 transition-all"
+                      onClick={() => onSelect('prenotazione', e)}
+                    >
+                      <div className="flex-1 min-w-0 mr-2">
+                        <p className="font-medium text-slate-800 truncate">{e.nome_evento || 'Evento'}</p>
+                        <p className="text-xs text-pink-600 font-medium">✦ {fmtDate(e.data_inizio)} → {fmtDate(e.data_fine)}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
