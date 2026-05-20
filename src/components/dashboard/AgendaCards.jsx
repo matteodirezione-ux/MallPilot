@@ -80,7 +80,7 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
           </div>
         </div>
       </CardHeader>
-      <CardContent className={`flex-1 overflow-y-auto pt-3 ${fullHeight ? 'max-h-[calc(100vh-220px)]' : 'max-h-80'}`}>
+      <CardContent className={`flex-1 overflow-y-auto pt-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full ${fullHeight ? 'max-h-[calc(100vh-220px)]' : 'max-h-80'}`}>
         {isEmpty ? (
           <p className="text-slate-400 text-center py-4 text-xs sm:text-sm italic">Niente in programma</p>
         ) : (
