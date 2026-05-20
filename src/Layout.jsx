@@ -20,7 +20,8 @@ import {
   TrendingUp,
   Sparkles,
   HardDrive,
-  Megaphone
+  Megaphone,
+  ChevronRight
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export default function Layout({ children, currentPageName }) {
   const [centri, setCentri] = useState([]);
   const [centroSelezionato, setCentroSelezionato] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   useEffect(() => {
     loadUserAndCentri();
@@ -368,25 +370,33 @@ export default function Layout({ children, currentPageName }) {
           {/* User Info */}
           <div className="p-4 border-t border-slate-700">
             {sidebarOpen ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium">
+              <div className="space-y-2">
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors"
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-medium flex-shrink-0">
                     {user?.full_name?.charAt(0).toUpperCase()}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 text-left">
                     <p className="text-sm font-medium text-white truncate">{displayName || user?.full_name}</p>
                     <p className="text-xs text-slate-400 capitalize">{user?.tipo_account}</p>
                   </div>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="w-full justify-start gap-2 bg-black text-white hover:bg-gray-900 hover:text-red-400 border-black"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Esci
-                </Button>
+                  <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-90' : ''}`} />
+                </button>
+                {userMenuOpen && (
+                  <div className="pl-14 pr-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="w-full justify-start gap-2 bg-black/50 text-white hover:bg-red-600 hover:text-white border-slate-600"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Esci
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <Button
