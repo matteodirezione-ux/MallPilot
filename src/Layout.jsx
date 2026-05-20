@@ -291,7 +291,7 @@ export default function Layout({ children, currentPageName }) {
       <aside className={`fixed top-0 left-0 h-full bg-[#0a1628] border-r border-slate-700 z-50 w-64 overflow-hidden transition-transform duration-200 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-slate-700">
+          <div className="p-4 border-b border-slate-700 bg-white">
             <div className="flex items-center justify-between gap-2">
               {centroSelezionato && centri.length > 0 ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
