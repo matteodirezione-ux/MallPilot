@@ -455,7 +455,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                   <button
                     key={label}
                     onClick={() => openQuickForm(tipo)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-white text-xs font-medium transition-colors ${color}`}
+                    className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-white text-xs font-medium transition-all shadow-lg hover:shadow-xl active:shadow-md ${color}`}
                   >
                     <Plus className="w-3 h-3" />
                     {label}
@@ -507,7 +507,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                 <button
                   key={label}
                   onClick={() => openQuickForm(tipo)}
-                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-white text-sm font-medium transition-all shadow-lg hover:shadow-xl active:shadow-md ${color}`}
                 >
                   <Plus className="w-3.5 h-3.5" />
                   {label}
@@ -531,7 +531,7 @@ export default function Dashboard({ centroSelezionato, user }) {
             <button
               key={label}
               onClick={() => openQuickForm(tipo)}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-colors ${color}`}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all shadow-lg hover:shadow-xl active:shadow-md ${color}`}
             >
               <Plus className="w-3.5 h-3.5" />
               {label}
