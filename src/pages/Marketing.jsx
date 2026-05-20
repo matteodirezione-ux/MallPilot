@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -88,11 +88,11 @@ export default function Marketing({ centroSelezionato, user }) {
         </div>
         <div className="flex items-center gap-1">
           <button onClick={() => setAnno(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <span className="font-semibold px-3 text-slate-700">{anno}</span>
           <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
