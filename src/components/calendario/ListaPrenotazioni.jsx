@@ -135,8 +135,11 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
           const cliente = getClienteById(prenotazione.cliente_id);
 
           return (
-            <Card key={prenotazione.id} className={`hover:shadow-md transition-shadow ${prenotazione.is_event ? 'bg-purple-50 border-purple-200' : 'bg-white border-slate-200'}`}>
-              <CardContent className="p-5">
+            <div key={prenotazione.id} className={`rounded-xl border overflow-hidden transition-all duration-200
+              shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+              hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+              ${prenotazione.is_event ? 'bg-purple-50/80 backdrop-blur-sm border-purple-200' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
+              <div className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-3">
@@ -148,14 +151,9 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatoColor(prenotazione.stato)}`}>
                         {prenotazione.stato.charAt(0).toUpperCase() + prenotazione.stato.slice(1).replace('_', ' ')}
                       </span>
-                      <h3 className="text-lg font-bold text-slate-800">
-                        {formatCurrency(prenotazione.prezzo_totale)}
-                      </h3>
-                      {prenotazione.prezzo_mensile && (
-                        <span className="text-xs text-slate-500">{formatCurrency(prenotazione.prezzo_mensile)}/mese</span>
-                      )}
+                      <h3 className="text-lg font-bold text-slate-800">{formatCurrency(prenotazione.prezzo_totale)}</h3>
+                      {prenotazione.prezzo_mensile && <span className="text-xs text-slate-500">{formatCurrency(prenotazione.prezzo_mensile)}/mese</span>}
                     </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="flex items-center gap-2 text-slate-600">
                         <Building2 className="w-4 h-4 shrink-0" />
@@ -164,42 +162,28 @@ export default function ListaPrenotazioni({ prenotazioni, spazi, clienti, onEdit
                           {spazio?.nome && <p className="text-xs text-slate-500">{spazio.nome}</p>}
                         </div>
                       </div>
-
                       <div className="flex items-center gap-2 text-slate-600">
                         <User className="w-4 h-4 shrink-0" />
                         <div>
-                          <p className="text-sm font-medium">
-                            {prenotazione.is_event ? (prenotazione.nome_evento || 'Evento') : (cliente?.ragione_sociale || '—')}
-                          </p>
+                          <p className="text-sm font-medium">{prenotazione.is_event ? (prenotazione.nome_evento || 'Evento') : (cliente?.ragione_sociale || '—')}</p>
                           {!prenotazione.is_event && cliente?.email && <p className="text-xs text-slate-500">{cliente.email}</p>}
                         </div>
                       </div>
-
                       <div className="flex items-center gap-2 text-slate-600">
                         <Calendar className="w-4 h-4 shrink-0" />
-                        <p className="text-sm font-medium">
-                          {format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} – {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}
-                        </p>
+                        <p className="text-sm font-medium">{format(new Date(prenotazione.data_inizio), 'dd MMM', { locale: it })} – {format(new Date(prenotazione.data_fine), 'dd MMM yyyy', { locale: it })}</p>
                       </div>
                     </div>
-
-                    {prenotazione.note && (
-                      <p className="text-sm text-slate-500 bg-slate-50 rounded px-3 py-2">{prenotazione.note}</p>
-                    )}
+                    {prenotazione.note && <p className="text-sm text-slate-500 bg-slate-50 rounded px-3 py-2">{prenotazione.note}</p>}
                   </div>
-
                   <div className="flex gap-1 ml-4">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(prenotazione)} className="text-blue-600">
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(prenotazione.id)} className="text-red-600">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => onEdit(prenotazione)} className="text-blue-600"><Pencil className="w-4 h-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(prenotazione.id)} className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
+              </div>
+            </div>
+           );
         })}
       </div>
     </div>

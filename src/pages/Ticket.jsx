@@ -203,42 +203,22 @@ export default function Ticket({ centroSelezionato, user }) {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-            <TicketIcon className="w-5 h-5 text-blue-600" />
+        {[
+          { icon: TicketIcon, color: 'bg-blue-100', iconColor: 'text-blue-600', value: counts.aperto, label: 'Aperti' },
+          { icon: AlertCircle, color: 'bg-red-100', iconColor: 'text-red-600', value: counts.scaduti, label: 'Scaduti' },
+          { icon: AlertCircle, color: 'bg-orange-100', iconColor: 'text-orange-600', value: counts.sollecitati, label: 'Sollecitati' },
+          { icon: CheckCircle2, color: 'bg-green-100', iconColor: 'text-green-600', value: counts.chiuso, label: 'Chiusi' },
+        ].map(({ icon: Icon, color, iconColor, value, label }) => (
+          <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 flex items-center gap-3 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+            <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
+              <Icon className={`w-5 h-5 ${iconColor}`} />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-slate-800">{value}</p>
+              <p className="text-xs text-slate-500">{label}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-800">{counts.aperto}</p>
-            <p className="text-xs text-slate-500">Aperti</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
-            <AlertCircle className="w-5 h-5 text-red-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-800">{counts.scaduti}</p>
-            <p className="text-xs text-slate-500">Scaduti</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-            <AlertCircle className="w-5 h-5 text-orange-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-800">{counts.sollecitati}</p>
-            <p className="text-xs text-slate-500">Sollecitati</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-800">{counts.chiuso}</p>
-            <p className="text-xs text-slate-500">Chiusi</p>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Filtri */}
@@ -288,7 +268,10 @@ export default function Ticket({ centroSelezionato, user }) {
             const isUrgente = ticket.tipologia === 'urgente';
             const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < oggi && ticket.stato !== 'chiuso';
             return (
-              <div key={ticket.id} onClick={() => handleCardClick(ticket)} className={`rounded-xl border p-4 flex gap-4 items-start transition-shadow hover:shadow-sm cursor-pointer ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white border-red-200' : 'bg-white border-slate-200'}`}>
+              <div key={ticket.id} onClick={() => handleCardClick(ticket)} className={`rounded-xl border p-4 flex gap-4 items-start transition-all duration-200 cursor-pointer
+                shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+                hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+                ${isScaduto ? 'bg-red-50 border-red-300' : isUrgente ? 'bg-white/80 backdrop-blur-sm border-red-200' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                    <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>

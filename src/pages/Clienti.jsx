@@ -403,8 +403,10 @@ export default function Clienti({ centroSelezionato }) {
           {filteredClienti.map((cliente) => {
             const stats = clientiStats[cliente.id] || {};
             return (
-              <Card key={cliente.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setDetailCliente(cliente)}>
-                <CardContent className="p-3">
+              <div key={cliente.id} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 cursor-pointer transition-all duration-200
+                shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+                hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5" onClick={() => setDetailCliente(cliente)}>
+                <div className="p-3">
                   {/* Riga 1: nome + cards stats a destra + azioni */}
                   <div className="flex items-center gap-3">
                     {/* Sinistra: nome + referente */}
@@ -453,8 +455,8 @@ export default function Clienti({ centroSelezionato }) {
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>

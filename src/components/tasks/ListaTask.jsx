@@ -74,7 +74,10 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
 
   return (
     <>
-      <div className={`flex items-start gap-3 p-3 rounded-xl border transition-shadow hover:shadow-sm cursor-pointer ${task.stato === 'completato' ? 'bg-green-50/50 border-green-100' : isScaduto ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`} onClick={() => setShowDettaglio(true)}>
+      <div className={`flex items-start gap-3 p-3 rounded-xl border transition-all duration-200 cursor-pointer
+        shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+        hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+        ${task.stato === 'completato' ? 'bg-green-50/60 border-green-100' : isScaduto ? 'bg-red-50 border-red-200' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`} onClick={() => setShowDettaglio(true)}>
         <button onClick={e => { e.stopPropagation(); onToggleStato(task); }} className="mt-0.5 flex-shrink-0">
           {task.stato === 'completato' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Clock className="w-5 h-5 text-slate-300" />}
         </button>

@@ -87,8 +87,10 @@ export default function Fornitori({ centroSelezionato, user }) {
             const espanso = espansi[fornitore.id];
             const hasDuvri = fornitore.duvri_urls?.length > 0;
             return (
-              <Card key={fornitore.id} className={`border ${!hasDuvri ? 'border-orange-300 bg-orange-50' : 'border-slate-200'}`}>
-                <CardContent className="p-0">
+              <div key={fornitore.id} className={`rounded-xl border overflow-hidden transition-all duration-200
+                shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+                hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+                ${!hasDuvri ? 'border-orange-300 bg-orange-50' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
                   <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => toggleEspanso(fornitore.id)}>
                     <div className="flex-1 min-w-0">
                       {!hasDuvri && <span className="text-xs text-orange-600 font-medium mb-1 block">⚠️ DUVRI MANCANTE</span>}
@@ -157,8 +159,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                       {fornitore.note && <p className="text-sm text-slate-600"><strong>Note:</strong> {fornitore.note}</p>}
                     </div>
                   )}
-                </CardContent>
-              </Card>
+              </div>
             );
           })}
         </div>

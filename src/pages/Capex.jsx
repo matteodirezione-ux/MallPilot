@@ -146,24 +146,17 @@ export default function CapexPage({ centroSelezionato, user }) {
       {/* KPI Cards - solo per non vigilanza */}
       {!isVigilanza && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase font-medium mb-1">Totale Capex</p>
-            <p className="text-xl font-bold text-slate-800">{capexAnno.length}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase font-medium mb-1">Costo Previsto</p>
-            <p className="text-xl font-bold text-blue-700">{fmt(totalePrevisto)}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase font-medium mb-1">Costo Effettivo</p>
-            <p className="text-xl font-bold text-green-700">{fmt(totaleEffettivo)}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-slate-200 p-4">
-            <p className="text-xs text-slate-500 uppercase font-medium mb-1">Scostamento</p>
-            <p className={`text-xl font-bold ${totaleEffettivo > totalePrevisto ? 'text-red-600' : 'text-green-600'}`}>
-              {fmt(totaleEffettivo - totalePrevisto)}
-            </p>
-          </div>
+          {[
+            { label: 'Totale Capex', value: capexAnno.length, cls: 'text-slate-800' },
+            { label: 'Costo Previsto', value: fmt(totalePrevisto), cls: 'text-blue-700' },
+            { label: 'Costo Effettivo', value: fmt(totaleEffettivo), cls: 'text-green-700' },
+            { label: 'Scostamento', value: fmt(totaleEffettivo - totalePrevisto), cls: totaleEffettivo > totalePrevisto ? 'text-red-600' : 'text-green-600' },
+          ].map(({ label, value, cls }) => (
+            <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+              <p className="text-xs text-slate-500 uppercase font-medium mb-1">{label}</p>
+              <p className={`text-xl font-bold ${cls}`}>{value}</p>
+            </div>
+          ))}
         </div>
       )}
 
@@ -231,7 +224,10 @@ export default function CapexPage({ centroSelezionato, user }) {
             const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-200' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
             const missingDuvri = c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse;
             return (
-            <div key={c.id} className={`rounded-xl border p-4 hover:shadow-md transition-shadow cursor-pointer ${cardBg}`} onClick={() => setDettaglio(c)}>
+            <div key={c.id} className={`rounded-xl border p-4 cursor-pointer transition-all duration-200
+              shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
+              hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+              ${cardBg}`} onClick={() => setDettaglio(c)}>
               {missingDuvri && (
                 <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
                   ⚠️ DUVRI MANCANTE
