@@ -7,6 +7,7 @@ import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus } from 'lu
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
+import CorrispettiviDetail from '@/components/corrispettivi/CorrispettiviDetail';
 
 export default function CorrispettiviBoard({ centroSelezionato, user }) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -15,6 +16,7 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
   });
   const [showForm, setShowForm] = useState(false);
   const [tenantDaInserire, setTenantDaInserire] = useState(null);
+  const [selectedTenant, setSelectedTenant] = useState(null);
 
   // Carica tutti i tenant del centro
   const { data: allTenants = [] } = useQuery({
@@ -74,6 +76,28 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
     setShowForm(true);
   };
 
+  const handleTenantClick = async (tenant) => {
+    const corrispettivi = await base44.entities.Corrispettivo.filter({ 
+      tenant_id: tenant.id 
+    }, '-mese');
+    setSelectedTenant({ ...tenant, corrispettivi });
+  };
+
+  const handleBack = () => {
+    setSelectedTenant(null);
+  };
+
+  if (selectedTenant) {
+    return (
+      <CorrispettiviDetail 
+        tenant={selectedTenant} 
+        corrispettivi={selectedTenant.corrispettivi} 
+        onBack={handleBack}
+        user={user}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
@@ -109,7 +133,11 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                 {allTenants.map(tenant => {
                   const corris = corrispettiviMap[tenant.id];
                   return (
-                    <tr key={tenant.id} className="border-b hover:bg-slate-50">
+                    <tr 
+                      key={tenant.id} 
+                      className="border-b hover:bg-slate-50 cursor-pointer"
+                      onClick={() => handleTenantClick(tenant)}
+                    >
                       <td className="p-3">
                         <div className="font-medium">{tenant.insegna || tenant.ragione_sociale}</div>
                         <div className="text-xs text-slate-500">Negozio {tenant.numero_negozio}</div>
