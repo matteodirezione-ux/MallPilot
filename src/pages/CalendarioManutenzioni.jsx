@@ -196,25 +196,24 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input placeholder="Cerca..." value={searchText} onChange={e => setSearchText(e.target.value)} className="pl-10 h-9" />
-        </div>
-        <div className="flex gap-2">
-          {['aperti','chiusi'].map(v => (
-            <button key={v} onClick={() => setVistaApertiChiusi(v)} className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${vistaApertiChiusi === v ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
-              {v === 'aperti' ? 'Aperti' : 'Completati'}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <Tabs defaultValue={user?.tipo_account === 'direttore' ? 'calendario' : 'lista'}>
-        <TabsList>
-          <TabsTrigger value="lista"><ListTodo className="w-4 h-4 mr-1" /> Lista</TabsTrigger>
-          <TabsTrigger value="calendario"><Calendar className="w-4 h-4 mr-1" /> Calendario</TabsTrigger>
-        </TabsList>
+        <div className="flex flex-col md:flex-row gap-3 items-center">
+          <TabsList>
+            <TabsTrigger value="lista"><ListTodo className="w-4 h-4 mr-1" /> Lista</TabsTrigger>
+            <TabsTrigger value="calendario"><Calendar className="w-4 h-4 mr-1" /> Calendario</TabsTrigger>
+          </TabsList>
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input placeholder="Cerca..." value={searchText} onChange={e => setSearchText(e.target.value)} className="pl-10 h-9" />
+          </div>
+          <div className="flex gap-2">
+            {['aperti','chiusi'].map(v => (
+              <button key={v} onClick={() => setVistaApertiChiusi(v)} className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${vistaApertiChiusi === v ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                {v === 'aperti' ? 'Aperti' : 'Completati'}
+              </button>
+            ))}
+          </div>
+        </div>
         <TabsContent value="lista" className="mt-4">
           {loading ? <div className="text-center py-8 text-slate-400">Caricamento...</div> : (
             <ListaManutenzioni manutenzioni={manutenioniFiltrate} onEdit={handleManutenzioneClick} onDelete={handleDelete} onToggleStatus={handleToggleStatus} annoSelezionato={annoSelezionato} vistaApertiChiusi={vistaApertiChiusi} />
