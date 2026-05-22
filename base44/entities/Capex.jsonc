@@ -39,6 +39,7 @@
     "stato": {
       "type": "string",
       "enum": [
+        "da_proporre",
         "da_pianificare",
         "pianificato",
         "completato"

@@ -169,7 +169,7 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             <div>
               <Label>Stato</Label>
               <Select value={form.stato} onValueChange={v => {
-                if (v === 'da_pianificare') {
+                if (v === 'da_pianificare' || v === 'da_proporre') {
                   setForm(prev => ({ ...prev, stato: v, data_inizio: '', data_fine: '' }));
                 } else {
                   set('stato', v);
@@ -177,9 +177,10 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
               }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="da_pianificare">Da pianificare</SelectItem>
-                  <SelectItem value="pianificato">Pianificato</SelectItem>
-                  <SelectItem value="completato">Completato</SelectItem>
+                 <SelectItem value="da_proporre">Da proporre</SelectItem>
+                 <SelectItem value="da_pianificare">Da pianificare</SelectItem>
+                 <SelectItem value="pianificato">Pianificato</SelectItem>
+                 <SelectItem value="completato">Completato</SelectItem>
                 </SelectContent>
               </Select>
             </div>

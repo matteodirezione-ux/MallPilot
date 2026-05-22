@@ -16,9 +16,10 @@ import { it } from 'date-fns/locale';
 import FormCapex from '@/components/capex/FormCapex';
 
 const STATO_CONFIG = {
+  da_proporre:    { label: 'Da proporre',   color: 'bg-white text-slate-600 border-slate-300' },
   da_pianificare: { label: 'Da pianificare', color: 'bg-red-100 text-red-700 border-red-200' },
-  pianificato: { label: 'Pianificato', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-  completato: { label: 'Completato', color: 'bg-green-100 text-green-700 border-green-200' },
+  pianificato:    { label: 'Pianificato',    color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  completato:     { label: 'Completato',     color: 'bg-green-100 text-green-700 border-green-200' },
 };
 
 const CATEGORIA_CONFIG = {
@@ -101,6 +102,7 @@ export default function CapexPage({ centroSelezionato, user }) {
 
     // Colori di sfondo per stato (hex senza #)
     const statoBgColor = {
+      da_proporre:    'FFFFFF', // bianco
       da_pianificare: 'FEE2E2', // rosso chiaro
       pianificato:    'FEF9C3', // giallo chiaro
       completato:     'DCFCE7', // verde chiaro
@@ -173,7 +175,7 @@ export default function CapexPage({ centroSelezionato, user }) {
     return anno === annoSelezionato;
   });
 
-  const STATO_ORDER = { da_pianificare: 2, pianificato: 1, completato: 0 };
+  const STATO_ORDER = { da_proporre: 3, da_pianificare: 2, pianificato: 1, completato: 0 };
 
   const filtered = capexAnno.filter(c => {
     const matchSearch = !search || c.titolo?.toLowerCase().includes(search.toLowerCase()) || c.descrizione?.toLowerCase().includes(search.toLowerCase());
@@ -287,6 +289,7 @@ export default function CapexPage({ centroSelezionato, user }) {
           <SelectTrigger className="w-36"><SelectValue placeholder="Stato" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="tutti">Tutti gli stati</SelectItem>
+            <SelectItem value="da_proporre">Da proporre</SelectItem>
             <SelectItem value="da_pianificare">Da pianificare</SelectItem>
             <SelectItem value="pianificato">Pianificato</SelectItem>
             <SelectItem value="completato">Completato</SelectItem>
@@ -314,7 +317,7 @@ export default function CapexPage({ centroSelezionato, user }) {
           ) : filtered.length === 0 ? (
             <div className="text-center py-12 text-slate-400">Nessun Capex trovato</div>
           ) : filtered.map(c => {
-            const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-50' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-50' : 'bg-red-50 border-red-50';
+            const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-50' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-50' : c.stato === 'da_proporre' ? 'bg-white border-slate-200' : 'bg-red-50 border-red-50';
             const missingDuvri = c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse;
             return (
             <div key={c.id} className={`rounded-xl border p-4 cursor-pointer transition-all duration-200
