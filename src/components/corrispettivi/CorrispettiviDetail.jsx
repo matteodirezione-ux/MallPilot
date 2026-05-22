@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, TrendingUp } from 'lucide-react';
+import { ArrowLeft, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
@@ -17,20 +17,48 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
   }, {}) || {};
 
   const anni = Object.keys(corrispettiviPerAnno).sort((a, b) => b - a);
+  const [annoSelezionato, setAnnoSelezionato] = useState(anni.length > 0 ? anni[0] : new Date().getFullYear().toString());
+
+  const handlePrevYear = () => {
+    const currentIndex = anni.indexOf(annoSelezionato);
+    if (currentIndex < anni.length - 1) {
+      setAnnoSelezionato(anni[currentIndex + 1]);
+    }
+  };
+
+  const handleNextYear = () => {
+    const currentIndex = anni.indexOf(annoSelezionato);
+    if (currentIndex > 0) {
+      setAnnoSelezionato(anni[currentIndex - 1]);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Button variant="outline" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            {tenant.insegna || tenant.ragione_sociale}
-          </h2>
-          <p className="text-slate-500 text-sm">Negozio {tenant.numero_negozio}</p>
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="icon" onClick={onBack}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              {tenant.insegna || tenant.ragione_sociale}
+            </h2>
+            <p className="text-slate-500 text-sm">Negozio {tenant.numero_negozio}</p>
+          </div>
         </div>
+        {anni.length > 1 && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={handlePrevYear} disabled={anni.indexOf(annoSelezionato) >= anni.length - 1}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="font-semibold min-w-[80px] text-center">{annoSelezionato}</span>
+            <Button variant="outline" size="icon" onClick={handleNextYear} disabled={anni.indexOf(annoSelezionato) <= 0}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
       {anni.length === 0 ? (
@@ -40,53 +68,49 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
-          {anni.map(anno => (
-            <Card key={anno}>
-              <CardHeader>
-                <CardTitle className="text-lg">{anno}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-slate-50">
-                        <th className="text-left p-3 font-semibold text-sm">Mese</th>
-                        <th className="text-right p-3 font-semibold text-sm">Corrispettivi Ivati</th>
-                        <th className="text-right p-3 font-semibold text-sm">Corrispettivi Netti</th>
-                        <th className="text-right p-3 font-semibold text-sm">Scontrini</th>
-                        <th className="text-left p-3 font-semibold text-sm">Data Inserimento</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {corrispettiviPerAnno[anno]
-                        .sort((a, b) => new Date(b.mese) - new Date(a.mese))
-                        .map(c => (
-                        <tr key={c.id} className="border-b hover:bg-slate-50">
-                          <td className="p-3 font-medium">
-                            {format(new Date(c.mese), 'MMMM yyyy', { locale: it })}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {fmtEur(c.corrispettivi_ivati)}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {fmtEur(c.corrispettivi_netti)}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {c.numero_scontrini.toLocaleString('it-IT')}
-                          </td>
-                          <td className="p-3 text-sm text-slate-500">
-                            {format(new Date(c.data_inserimento), 'dd/MM/yyyy HH:mm')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{annoSelezionato}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-slate-50">
+                    <th className="text-left p-3 font-semibold text-sm">Mese</th>
+                    <th className="text-right p-3 font-semibold text-sm">Corrispettivi Ivati</th>
+                    <th className="text-right p-3 font-semibold text-sm">Corrispettivi Netti</th>
+                    <th className="text-right p-3 font-semibold text-sm">Scontrini</th>
+                    <th className="text-left p-3 font-semibold text-sm">Data Inserimento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {corrispettiviPerAnno[annoSelezionato]
+                    .sort((a, b) => new Date(b.mese) - new Date(a.mese))
+                    .map(c => (
+                    <tr key={c.id} className="border-b hover:bg-slate-50">
+                      <td className="p-3 font-medium">
+                        {format(new Date(c.mese), 'MMMM yyyy', { locale: it })}
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {fmtEur(c.corrispettivi_ivati)}
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {fmtEur(c.corrispettivi_netti)}
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {c.numero_scontrini.toLocaleString('it-IT')}
+                      </td>
+                      <td className="p-3 text-sm text-slate-500">
+                        {format(new Date(c.data_inserimento), 'dd/MM/yyyy HH:mm')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
