@@ -239,12 +239,6 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationGroups = [
     {
-      label: 'CORRISPETTIVI',
-      items: [
-        { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['tenant'] },
-      ]
-    },
-    {
       label: 'OPERATIVITÀ',
       items: [
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
@@ -276,6 +270,7 @@ export default function Layout({ children, currentPageName }) {
       items: [
         { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
         { name: 'Tenant', page: 'Tenant', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['proprieta', 'direttore', 'tenant'] },
         { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
         { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
       ]
