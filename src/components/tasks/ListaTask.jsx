@@ -84,6 +84,11 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
         <div className="flex-1 min-w-0">
           <p className={`font-medium text-sm ${task.stato === 'completato' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{task.titolo}</p>
           {task.descrizione && <p className="text-xs text-slate-500 truncate mt-0.5">{task.descrizione}</p>}
+          {task.foto_urls?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1.5">
+              {task.foto_urls.map((url, i) => <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
+            </div>
+          )}
           <div className="flex flex-wrap gap-2 mt-1 text-xs">
             {task.data_scadenza && <span className={isScaduto ? 'text-red-600 font-semibold' : 'text-slate-500'}>{formatScadenza(task.data_scadenza)}</span>}
             {task.assegnato_a_nome && <span className="text-slate-400">→ {task.assegnato_a_nome}</span>}

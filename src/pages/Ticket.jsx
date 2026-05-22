@@ -324,11 +324,10 @@ export default function Ticket({ centroSelezionato, user }) {
                    </span>
                   </div>
                   {ticket.foto_urls?.length > 0 && (
-                    <div className="flex gap-1 mt-2">
-                      {ticket.foto_urls.slice(0, 4).map((url, i) => (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {ticket.foto_urls.map((url, i) => (
                         <img key={i} src={url} alt="" className="w-10 h-10 rounded-md object-cover border border-slate-200" />
                       ))}
-                      {ticket.foto_urls.length > 4 && <div className="w-10 h-10 rounded-md bg-slate-100 flex items-center justify-center text-xs text-slate-500">+{ticket.foto_urls.length - 4}</div>}
                     </div>
                   )}
                 </div>

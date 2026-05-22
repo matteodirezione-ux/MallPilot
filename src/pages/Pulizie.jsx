@@ -165,9 +165,8 @@ export default function PuliziePage({ centroSelezionato, user }) {
                               <p className="text-xs text-slate-500 mt-0.5">{format(parseLocalDate(p.data), 'dd MMM yyyy', { locale: it })}</p>
                               {p.descrizione && <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.descrizione}</p>}
                               {p.foto_urls?.length > 0 && (
-                                <div className="flex gap-1 mt-2">
-                                  {p.foto_urls.slice(0, 4).map((url, i) => <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
-                                  {p.foto_urls.length > 4 && <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center text-xs text-slate-500">+{p.foto_urls.length - 4}</div>}
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {p.foto_urls.map((url, i) => <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
                                 </div>
                               )}
                               {p.creato_da_nome && <p className="text-xs text-slate-400 mt-1">Creato da {p.creato_da_nome}</p>}
