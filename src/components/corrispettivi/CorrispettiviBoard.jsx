@@ -142,10 +142,12 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                   return (
                     <tr 
                       key={tenant.id} 
-                      className="border-b hover:bg-slate-50 cursor-pointer"
-                      onClick={() => handleTenantClick(tenant)}
+                      className="border-b hover:bg-slate-50"
                     >
-                      <td className="p-3">
+                      <td 
+                        className="p-3 cursor-pointer"
+                        onClick={() => handleTenantClick(tenant)}
+                      >
                         <div className="font-medium">{tenant.insegna || tenant.ragione_sociale}</div>
                         <div className="text-xs text-slate-500">Negozio {tenant.numero_negozio}</div>
                       </td>
@@ -170,7 +172,10 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                                 variant="ghost"
                                 size="icon"
                                 className="w-6 h-6"
-                                onClick={() => handleModifyFromBoard(tenant, corris)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleModifyFromBoard(tenant, corris);
+                                }}
                               >
                                 <Pencil className="w-4 h-4" />
                               </Button>
@@ -183,7 +188,10 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                               variant="ghost"
                               size="icon"
                               className="w-6 h-6"
-                              onClick={() => handleInserisci(tenant)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInserisci(tenant);
+                              }}
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
