@@ -148,8 +148,8 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {spazi.map(spazio => (
-            <Card key={spazio.id} className={`border ${!spazio.attivo ? 'opacity-50' : ''}`}>
-              <CardContent className="p-0 overflow-hidden">
+            <Card key={spazio.id} className={`border rounded-xl overflow-hidden ${!spazio.attivo ? 'opacity-50' : ''}`}>
+              <CardContent className="p-0">
                 <div className="p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
