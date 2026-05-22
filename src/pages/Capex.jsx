@@ -379,7 +379,7 @@ export default function CapexPage({ centroSelezionato, user }) {
              <Download className="w-4 h-4 mr-1" /> Excel
            </Button>
            <Button size="sm" variant="outline" onClick={handleExportPDF} className="border-slate-300">
-             <FileText className="w-4 h-4 mr-1" /> PDF
+             <Download className="w-4 h-4 mr-1" /> PDF
            </Button>
            {canEdit && (
              <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
