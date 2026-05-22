@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus, Pencil } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
@@ -87,6 +87,14 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
     setSelectedTenant(null);
   };
 
+  const [showFormBoard, setShowFormBoard] = useState(false);
+  const [corrispettivoDaModificareBoard, setCorrispettivoDaModificareBoard] = useState(null);
+
+  const handleModifyFromBoard = async (tenant, corrispettivo) => {
+    setCorrispettivoDaModificareBoard(corrispettivo);
+    setShowFormBoard(true);
+  };
+
   if (selectedTenant) {
     return (
       <CorrispettiviDetail 
@@ -156,7 +164,19 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                       </td>
                       <td className="p-3 text-center">
                         {corris ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto" />
+                          <div className="flex items-center justify-center gap-2">
+                            <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto" />
+                            {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-6 h-6"
+                                onClick={() => handleModifyFromBoard(tenant, corris)}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
                         ) : (
                           <div className="flex items-center justify-center gap-2">
                             <XCircle className="w-5 h-5 text-red-600" />
@@ -189,6 +209,17 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
         tenant={tenantDaInserire}
         user={user}
         meseIniziale={monthKey}
+      />
+
+      <FormCorrispettivi
+        open={showFormBoard}
+        onClose={() => {
+          setShowFormBoard(false);
+          setCorrispettivoDaModificareBoard(null);
+        }}
+        tenant={corrispettivoDaModificareBoard ? { id: corrispettivoDaModificareBoard.tenant_id } : null}
+        user={user}
+        corrispettivoDaModificare={corrispettivoDaModificareBoard}
       />
     </div>
   );

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, TrendingUp, ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
+import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
 
 export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, user }) {
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n || 0);
+  const [showForm, setShowForm] = useState(false);
+  const [corrispettivoDaModificare, setCorrispettivoDaModificare] = useState(null);
 
   // Raggruppa per anno
   const corrispettiviPerAnno = corrispettivi?.reduce((acc, c) => {
@@ -18,6 +21,13 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
 
   const anni = Object.keys(corrispettiviPerAnno).sort((a, b) => b - a);
   const [annoSelezionato, setAnnoSelezionato] = useState(anni.length > 0 ? anni[0] : new Date().getFullYear().toString());
+
+  const canModify = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
+
+  const handleModify = (corrispettivo) => {
+    setCorrispettivoDaModificare(corrispettivo);
+    setShowForm(true);
+  };
 
   const handlePrevYear = () => {
     const currentIndex = anni.indexOf(annoSelezionato);
@@ -104,6 +114,18 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
                       <td className="p-3 text-sm text-slate-500">
                         {format(new Date(c.data_inserimento), 'dd/MM/yyyy HH:mm')}
                       </td>
+                      {canModify && (
+                        <td className="p-3 text-center">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8"
+                            onClick={() => handleModify(c)}
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -112,6 +134,17 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
           </CardContent>
         </Card>
       )}
+
+      <FormCorrispettivi
+        open={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setCorrispettivoDaModificare(null);
+        }}
+        tenant={tenant}
+        user={user}
+        corrispettivoDaModificare={corrispettivoDaModificare}
+      />
     </div>
   );
 }
