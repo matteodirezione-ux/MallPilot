@@ -13,41 +13,60 @@ import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
 
 export default function Corrispettivi({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState(null);
   const queryClient = useQueryClient();
 
-  // Recupera il tenant collegato all'utente
-  const { data: tenantData } = useQuery({
+  // Carica tutti i tenant (per proprietà/direttore)
+  const { data: allTenants } = useQuery({
+    queryKey: ['tenants', centroSelezionato?.id],
+    queryFn: async () => {
+      if (!centroSelezionato?.id) return [];
+      const tenants = await base44.entities.Tenant.filter({ 
+        centro_id: centroSelezionato.id 
+      });
+      return tenants.sort((a, b) => a.ragione_sociale.localeCompare(b.ragione_sociale));
+    },
+    enabled: user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore',
+  });
+
+  // Recupera il tenant collegato all'utente (solo per tenant)
+  const { data: userTenant } = useQuery({
     queryKey: ['user-tenant', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      // Se l'utente ha tenant_id salvato, usa quello
       if (user.tenant_id) {
         try {
           const tenant = await base44.entities.Tenant.get(user.tenant_id);
           return tenant;
-        } catch {
-          // Se non esiste più, cerca per email
-        }
+        } catch {}
       }
-      // Cerca per email del referente
       const tenants = await base44.entities.Tenant.filter({ 
         email_referente: user.email 
       });
       return tenants.length > 0 ? tenants[0] : null;
     },
-    enabled: !!user?.email,
+    enabled: user?.tipo_account === 'tenant',
   });
 
-  // Carica i corrispettivi dell'utente
+  // Imposta il tenant selezionato
+  useEffect(() => {
+    if (user?.tipo_account === 'tenant' && userTenant) {
+      setSelectedTenant(userTenant);
+    } else if (allTenants?.length > 0 && !selectedTenant) {
+      setSelectedTenant(allTenants[0]);
+    }
+  }, [userTenant, allTenants, user?.tipo_account]);
+
+  // Carica i corrispettivi del tenant selezionato
   const { data: corrispettivi, isLoading } = useQuery({
-    queryKey: ['corrispettivi', user?.email, tenantData?.id],
+    queryKey: ['corrispettivi', selectedTenant?.id],
     queryFn: async () => {
-      if (!tenantData?.id) return [];
+      if (!selectedTenant?.id) return [];
       return await base44.entities.Corrispettivo.filter({ 
-        tenant_id: tenantData.id 
+        tenant_id: selectedTenant.id 
       }, '-mese');
     },
-    enabled: !!tenantData?.id,
+    enabled: !!selectedTenant?.id,
   });
 
   // Raggruppa per anno
@@ -62,16 +81,16 @@ export default function Corrispettivi({ centroSelezionato, user }) {
 
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n || 0);
 
-  if (!tenantData) {
+  if (!selectedTenant) {
     return (
       <div className="p-8 text-center">
         <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle>Nessun tenant collegato</CardTitle>
+            <CardTitle>Nessun tenant disponibile</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-slate-600 mb-4">
-              Il tuo account non è collegato a nessun negozio. Contatta la proprietà per essere abilitato.
+              Non ci sono tenant disponibili per questo centro commerciale.
             </p>
           </CardContent>
         </Card>
@@ -82,15 +101,26 @@ export default function Corrispettivi({ centroSelezionato, user }) {
   return (
     <div className="p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <TrendingUp className="w-6 h-6" />
             Corrispettivi
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            {tenantData.ragione_sociale} - Negozio {tenantData.numero_negozio}
+            {selectedTenant.ragione_sociale} - Negozio {selectedTenant.numero_negozio}
           </p>
         </div>
+        {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+          <select
+            value={selectedTenant.id}
+            onChange={(e) => setSelectedTenant(allTenants.find(t => t.id === e.target.value))}
+            className="px-3 py-2 border rounded-lg bg-white text-sm"
+          >
+            {allTenants.map(t => (
+              <option key={t.id} value={t.id}>{t.ragione_sociale} - {t.numero_negozio}</option>
+            ))}
+          </select>
+        )}
         <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-1" /> Nuovo Inserimento
         </Button>
@@ -157,7 +187,7 @@ export default function Corrispettivi({ centroSelezionato, user }) {
       <FormCorrispettivi
         open={showForm}
         onClose={() => setShowForm(false)}
-        tenant={tenantData}
+        tenant={selectedTenant}
         user={user}
       />
     </div>
