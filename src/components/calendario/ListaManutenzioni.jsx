@@ -7,7 +7,7 @@ import { Pencil, Trash2, AlertTriangle } from 'lucide-react';
 
 const statoConfig = {
   da_fare: { label: 'Da Fare', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-50' },
-  in_corso: { label: 'In Corso', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-50' },
+  in_corso: { label: 'In Corso', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-50' },
   completato: { label: 'Completato', color: 'text-green-700', bg: 'bg-green-50', border: 'border-green-50' },
   annullato: { label: 'Annullato', color: 'text-slate-400', bg: 'bg-slate-50', border: 'border-slate-50' }
 };
