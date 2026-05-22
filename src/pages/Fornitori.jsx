@@ -85,7 +85,8 @@ export default function Fornitori({ centroSelezionato, user }) {
         <div className="space-y-3">
           {filteredFornitori.sort((a, b) => a.nome_ditta.localeCompare(b.nome_ditta, 'it')).map((fornitore) => {
             const espanso = espansi[fornitore.id];
-            const hasDuvri = fornitore.duvri_urls?.length > 0;
+            const subMissingDuvri = fornitore.subornitori?.some(s => !s.duvri_urls?.length) ?? false;
+            const hasDuvri = fornitore.duvri_urls?.length > 0 && !subMissingDuvri;
             return (
               <div key={fornitore.id} className={`rounded-xl border overflow-hidden transition-all duration-200
                 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
