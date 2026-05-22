@@ -150,6 +150,11 @@ export default function CapexPage({ centroSelezionato, user }) {
     doc.setFont('helvetica', 'normal');
     y += rowH;
 
+    // Calcola totali
+    const totalePrevisto = capexAnno.reduce((s, c) => s + (c.costo_previsto || 0), 0);
+    const totaleEffettivo = capexAnno.reduce((s, c) => s + (c.costo_effettivo || 0), 0);
+    const totaleScostamento = totaleEffettivo - totalePrevisto;
+
     // Data rows
     capexAnno.forEach((c) => {
       const bg = statoColors[c.stato] || { r: 255, g: 255, b: 255 };
@@ -196,6 +201,45 @@ export default function CapexPage({ centroSelezionato, user }) {
       doc.setTextColor(0, 0, 0);
       y += rowH;
     });
+
+    // Riga totali
+    if (y + rowH > doc.internal.pageSize.getHeight() - 10) {
+      doc.addPage();
+      y = 14;
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFillColor(226, 232, 240);
+    doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'F');
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.3);
+    doc.rect(startX, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'S');
+    
+    let tx = startX;
+    // Etichetta TOTALI
+    doc.setTextColor(30, 58, 95);
+    doc.text('TOTALI', tx + 2, y + rowH * 0.65, { align: 'left' });
+    tx += colWidths[0] + colWidths[1];
+    // Celle vuote per stato e date
+    tx += colWidths[2] + colWidths[3];
+    // Totali numerici
+    const totalCells = [
+      fmtEur(totalePrevisto),
+      fmtEur(totaleEffettivo),
+      fmtEur(totaleScostamento)
+    ];
+    const totalColors = [
+      { r: 30, g: 58, b: 95 },
+      { r: 30, g: 58, b: 95 },
+      totaleScostamento > 0 ? { r: 185, g: 28, b: 28 } : totaleScostamento < 0 ? { r: 21, g: 128, b: 61 } : { r: 30, g: 58, b: 95 }
+    ];
+    totalCells.forEach((text, i) => {
+      const w = colWidths[4 + i];
+      doc.setTextColor(totalColors[i].r, totalColors[i].g, totalColors[i].b);
+      doc.text(text, tx + w - 2, y + rowH * 0.65, { align: 'right' });
+      tx += w;
+    });
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
 
     doc.save(`${nomeFile}.pdf`);
   };
@@ -256,6 +300,11 @@ export default function CapexPage({ centroSelezionato, user }) {
       completato:     'DCFCE7', // verde chiaro
     };
 
+    // Calcola totali
+    const totalePrevisto = capexAnno.reduce((s, c) => s + (c.costo_previsto || 0), 0);
+    const totaleEffettivo = capexAnno.reduce((s, c) => s + (c.costo_effettivo || 0), 0);
+    const totaleScostamento = totaleEffettivo - totalePrevisto;
+
     // Righe dati (da riga 4)
     capexAnno.forEach((c, idx) => {
       const row = idx + 4;
@@ -282,7 +331,24 @@ export default function CapexPage({ centroSelezionato, user }) {
       });
     });
 
-    const lastRow = capexAnno.length + 3;
+    // Riga totali
+    const totalRow = capexAnno.length + 4;
+    const totalStyle = {
+      font: { bold: true, sz: 10 },
+      fill: { fgColor: { rgb: 'E2E8F0' } },
+      border: borderStyle,
+      alignment: { horizontal: 'right' },
+    };
+    ws[`A${totalRow}`] = { v: 'TOTALI', t: 's', s: { ...totalStyle, alignment: { horizontal: 'left' } } };
+    ws[`B${totalRow}`] = { v: '', t: 's', s: totalStyle };
+    ws[`C${totalRow}`] = { v: '', t: 's', s: totalStyle };
+    ws[`D${totalRow}`] = { v: '', t: 's', s: totalStyle };
+    ws[`E${totalRow}`] = { v: totalePrevisto, t: 'n', z: '€ #,##0', s: { ...totalStyle, font: { ...totalStyle.font, color: { rgb: '1E3A5F' } } } };
+    ws[`F${totalRow}`] = { v: totaleEffettivo, t: 'n', z: '€ #,##0', s: { ...totalStyle, font: { ...totalStyle.font, color: { rgb: '1E3A5F' } } } };
+    const scostColor = totaleScostamento > 0 ? 'B91C1C' : totaleScostamento < 0 ? '15803D' : '1E3A5F';
+    ws[`G${totalRow}`] = { v: totaleScostamento, t: 'n', z: '€ #,##0', s: { ...totalStyle, font: { ...totalStyle.font, color: { rgb: scostColor } } } };
+
+    const lastRow = totalRow;
     ws['!ref'] = `A1:G${lastRow}`;
 
     const wb = XLSX.utils.book_new();
