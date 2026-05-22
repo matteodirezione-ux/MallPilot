@@ -168,11 +168,11 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                 </div>
                 <div className="relative">
                   {spazio.foto_urls?.length > 0 ? (
-                    <div className="w-full" style={{ aspectRatio: '3/4' }}>
+                    <div className="w-full" style={{ aspectRatio: '4/3' }}>
                       <img src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-full bg-slate-100 flex items-center justify-center" style={{ aspectRatio: '3/4' }}>
+                    <div className="w-full bg-slate-100 flex items-center justify-center" style={{ aspectRatio: '4/3' }}>
                       <Building2 className="w-6 h-6 text-slate-300" />
                     </div>
                   )}
