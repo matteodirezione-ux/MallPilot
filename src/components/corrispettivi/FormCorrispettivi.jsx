@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,10 +6,29 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { startOfMonth, format } from 'date-fns';
+import { startOfMonth, format, addMonths } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 export default function FormCorrispettivi({ open, onClose, tenant, user, meseIniziale, corrispettivoDaModificare }) {
   const [loading, setLoading] = useState(false);
+  
+  // Genera i mesi per la tendina (ultimi 12 mesi + mesi futuri fino a fine anno)
+  const mesiDisponibili = React.useMemo(() => {
+    const mesi = [];
+    const oggi = new Date();
+    // Parte da 12 mesi fa
+    const start = new Date(oggi.getFullYear() - 1, oggi.getMonth(), 1);
+    // Arriva a fine anno corrente
+    const end = new Date(oggi.getFullYear(), 11, 31);
+    
+    for (let d = new Date(start); d <= end; d = addMonths(d, 1)) {
+      const key = format(d, 'yyyy-MM');
+      const label = format(d, 'MMMM yyyy', { locale: it });
+      mesi.push({ key, label });
+    }
+    return mesi;
+  }, []);
+
   const [formData, setFormData] = useState(
     corrispettivoDaModificare ? {
       mese: format(new Date(corrispettivoDaModificare.mese), 'yyyy-MM'),
@@ -89,12 +108,21 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Mese di riferimento</Label>
-            <Input
-              type="month"
+            <Select
               value={formData.mese}
-              onChange={(e) => setFormData({ ...formData, mese: e.target.value })}
-              required
-            />
+              onValueChange={(value) => setFormData({ ...formData, mese: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleziona mese" />
+              </SelectTrigger>
+              <SelectContent>
+                {mesiDisponibili.map(mese => (
+                  <SelectItem key={mese.key} value={mese.key}>
+                    {mese.label.charAt(0).toUpperCase() + mese.label.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
