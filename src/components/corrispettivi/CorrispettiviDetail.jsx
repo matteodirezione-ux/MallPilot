@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, TrendingUp, ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
@@ -20,7 +20,21 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
   }, {}) || {};
 
   const anni = Object.keys(corrispettiviPerAnno).sort((a, b) => b - a);
-  const [annoSelezionato, setAnnoSelezionato] = useState(anni.length > 0 ? anni[0] : new Date().getFullYear().toString());
+  const annoCorrente = new Date().getFullYear();
+  const [annoSelezionato, setAnnoSelezionato] = useState(anni.length > 0 ? anni[0] : annoCorrente.toString());
+  
+  // Genera tutti i 12 mesi per l'anno selezionato
+  const tuttiIMesi = React.useMemo(() => {
+    const mesi = [];
+    for (let i = 0; i < 12; i++) {
+      const mese = new Date(annoSelezionato, i, 1);
+      mesi.push({
+        key: format(mese, 'yyyy-MM'),
+        label: format(mese, 'MMMM yyyy', { locale: it })
+      });
+    }
+    return mesi;
+  }, [annoSelezionato]);
 
   const canModify = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
 
@@ -92,42 +106,79 @@ export default function CorrispettiviDetail({ tenant, corrispettivi, onBack, use
                     <th className="text-right p-3 font-semibold text-sm">Corrispettivi Netti</th>
                     <th className="text-right p-3 font-semibold text-sm">Scontrini</th>
                     <th className="text-left p-3 font-semibold text-sm">Data Inserimento</th>
+                    {canModify && <th className="text-center p-3 font-semibold text-sm">Azioni</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {corrispettiviPerAnno[annoSelezionato]
-                    .sort((a, b) => new Date(b.mese) - new Date(a.mese))
-                    .map(c => (
-                    <tr key={c.id} className="border-b hover:bg-slate-50">
-                      <td className="p-3 font-medium">
-                        {format(new Date(c.mese), 'MMMM yyyy', { locale: it })}
-                      </td>
-                      <td className="p-3 text-right font-mono">
-                        {fmtEur(c.corrispettivi_ivati)}
-                      </td>
-                      <td className="p-3 text-right font-mono">
-                        {fmtEur(c.corrispettivi_netti)}
-                      </td>
-                      <td className="p-3 text-right font-mono">
-                        {c.numero_scontrini.toLocaleString('it-IT')}
-                      </td>
-                      <td className="p-3 text-sm text-slate-500">
-                        {format(new Date(c.data_inserimento), 'dd/MM/yyyy HH:mm')}
-                      </td>
-                      {canModify && (
-                        <td className="p-3 text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-8 h-8"
-                            onClick={() => handleModify(c)}
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
+                  {tuttiIMesi.map(mese => {
+                    const corrispettivo = corrispettiviPerAnno[annoSelezionato]?.find(
+                      c => format(new Date(c.mese), 'yyyy-MM') === mese.key
+                    );
+                    if (!corrispettivo) {
+                      return (
+                        <tr key={mese.key} className="border-b hover:bg-slate-50">
+                          <td className="p-3 font-medium text-slate-400">
+                            {mese.label.charAt(0).toUpperCase() + mese.label.slice(1)}
+                          </td>
+                          <td className="p-3 text-right font-mono text-slate-300">-</td>
+                          <td className="p-3 text-right font-mono text-slate-300">-</td>
+                          <td className="p-3 text-right font-mono text-slate-300">-</td>
+                          <td className="p-3 text-sm text-slate-300">-</td>
+                          {canModify && (
+                            <td className="p-3 text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-8 h-8"
+                                onClick={() => {
+                                  setCorrispettivoDaModificare({
+                                    mese: mese.key + '-01',
+                                    corrispettivi_ivati: 0,
+                                    corrispettivi_netti: 0,
+                                    numero_scontrini: 0
+                                  });
+                                  setShowForm(true);
+                                }}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    }
+                    return (
+                      <tr key={corrispettivo.id} className="border-b hover:bg-slate-50">
+                        <td className="p-3 font-medium">
+                          {corrispettivo ? format(new Date(corrispettivo.mese), 'MMMM yyyy', { locale: it }).charAt(0).toUpperCase() + format(new Date(corrispettivo.mese), 'MMMM yyyy', { locale: it }).slice(1) : mese.label}
                         </td>
-                      )}
-                    </tr>
-                  ))}
+                        <td className="p-3 text-right font-mono">
+                          {fmtEur(corrispettivo.corrispettivi_ivati)}
+                        </td>
+                        <td className="p-3 text-right font-mono">
+                          {fmtEur(corrispettivo.corrispettivi_netti)}
+                        </td>
+                        <td className="p-3 text-right font-mono">
+                          {corrispettivo.numero_scontrini.toLocaleString('it-IT')}
+                        </td>
+                        <td className="p-3 text-sm text-slate-500">
+                          {format(new Date(corrispettivo.data_inserimento), 'dd/MM/yyyy HH:mm')}
+                        </td>
+                        {canModify && (
+                          <td className="p-3 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-8 h-8"
+                              onClick={() => handleModify(corrispettivo)}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
