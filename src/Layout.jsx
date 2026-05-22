@@ -205,6 +205,16 @@ export default function Layout({ children, currentPageName }) {
           setCentri([]);
           setCentroSelezionato(null);
         }
+      } else if (userData.tipo_account === 'tenant') {
+        // Gestione centro commerciale per tenant (già impostato sopra, ma assicuriamo che sia selezionato)
+        if (tenantList.length > 0 && tenantList[0].centro_id) {
+          const allCentri = await base44.entities.CentroCommerciale.list();
+          const centroAssegnato = allCentri.find(c => c.id === tenantList[0].centro_id && c.attivo);
+          if (centroAssegnato) {
+            setCentri([centroAssegnato]);
+            setCentroSelezionato(centroAssegnato);
+          }
+        }
       }
     } catch (error) {
       console.error('Errore caricamento dati:', error);
