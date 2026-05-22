@@ -419,28 +419,28 @@ export default function Clienti({ centroSelezionato }) {
                     </div>
                     {/* Destra: cards stats */}
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                        <DollarSign className="w-4 h-4 text-green-600" />
-                        <div>
-                          <p className="text-[10px] text-slate-500">Incasso {new Date().getFullYear()}</p>
-                          <p className="text-sm font-semibold text-slate-800">{formatCurrency(stats.incassoAnno || 0)}</p>
+                      <div className="flex items-center justify-between gap-4 p-2 bg-green-50 rounded-lg min-w-[160px]">
+                        <div className="flex items-center gap-1.5">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <p className="text-xs text-slate-500">Incasso {new Date().getFullYear()}</p>
                         </div>
+                        <p className="text-sm font-semibold text-slate-800">{formatCurrency(stats.incassoAnno || 0)}</p>
                       </div>
-                      <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                        <div>
-                          <p className="text-[10px] text-slate-500">Affitti totali</p>
-                          <p className="text-sm font-semibold text-slate-800">{stats.numeroAffitti || 0}</p>
+                      <div className="flex items-center justify-between gap-4 p-2 bg-blue-50 rounded-lg min-w-[130px]">
+                        <div className="flex items-center gap-1.5">
+                          <TrendingUp className="w-4 h-4 text-blue-600" />
+                          <p className="text-xs text-slate-500">Affitti totali</p>
                         </div>
+                        <p className="text-sm font-semibold text-slate-800">{stats.numeroAffitti || 0}</p>
                       </div>
-                      <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
-                        <Calendar className="w-4 h-4 text-purple-600" />
-                        <div>
-                          <p className="text-[10px] text-slate-500">Ultimo affitto</p>
-                          <p className="text-sm font-semibold text-slate-800">
-                            {stats.giorniDaUltimoAffitto !== null ? `${stats.giorniDaUltimoAffitto}gg fa` : 'Mai'}
-                          </p>
+                      <div className="flex items-center justify-between gap-4 p-2 bg-purple-50 rounded-lg min-w-[140px]">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-4 h-4 text-purple-600" />
+                          <p className="text-xs text-slate-500">Ultimo affitto</p>
                         </div>
+                        <p className="text-sm font-semibold text-slate-800">
+                          {stats.giorniDaUltimoAffitto !== null ? `${stats.giorniDaUltimoAffitto}gg fa` : 'Mai'}
+                        </p>
                       </div>
                       <div className="flex gap-1">
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(cliente)} className="text-blue-600 h-7 w-7">
