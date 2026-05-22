@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx-js-style';
+import { jsPDF } from 'jspdf';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, List, Calendar, X, Download
+  Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, List, Calendar, X, Download, FileText
 } from 'lucide-react';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay, isWithinInterval, addDays, subDays } from 'date-fns';
@@ -51,6 +52,130 @@ export default function CapexPage({ centroSelezionato, user }) {
 
   const isVigilanza = user?.tipo_account === 'vigilanza';
   const canEdit = !isVigilanza;
+
+  const handleExportPDF = async () => {
+    const nomeCentro = centroSelezionato?.nome || 'Centro';
+    const nomeFile = `${nomeCentro.toUpperCase()}_CAPEX_${annoSelezionato}`;
+    const logoUrl = centroSelezionato?.logo_url;
+    const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth(); // 297
+    const pageH = doc.internal.pageSize.getHeight(); // 210
+    const margin = 12;
+
+    // Logo in alto a destra
+    if (logoUrl) {
+      await new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const maxH = 14;
+          const ratio = img.width / img.height;
+          const imgW = Math.min(maxH * ratio, 48);
+          doc.addImage(img, 'PNG', pageW - imgW - margin, 6, imgW, maxH);
+          resolve();
+        };
+        img.onerror = resolve;
+        img.src = logoUrl;
+      });
+    }
+
+    // Titolo
+    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 58, 95);
+    doc.text(`${nomeCentro.toUpperCase()} — CAPEX ${annoSelezionato}`, margin, 14);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Generato il ${format(new Date(), 'dd/MM/yyyy')}`, margin, 20);
+    doc.setTextColor(0, 0, 0);
+
+    // Tabella
+    const headers = ['Descrizione', 'Stato', 'Inizio', 'Fine', 'Budget', 'Effettivo', 'Scostamento'];
+    const colWidths = [88, 28, 22, 22, 28, 28, 28]; // somma = 244, + 2*margin = 268 < 297
+    const rowH = 7;
+    const headerH = 8;
+    const startX = margin;
+    let startY = 26;
+
+    // Intestazioni
+    doc.setFillColor(30, 58, 95);
+    doc.rect(startX, startY, colWidths.reduce((a, b) => a + b, 0), headerH, 'F');
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(255, 255, 255);
+    let cx = startX;
+    headers.forEach((h, i) => {
+      doc.text(h, cx + colWidths[i] / 2, startY + 5.5, { align: 'center' });
+      cx += colWidths[i];
+    });
+
+    // Colori di sfondo per stato [r,g,b]
+    const statoRgb = {
+      da_proporre:    [255, 255, 255],
+      da_pianificare: [254, 226, 226],
+      pianificato:    [254, 249, 195],
+      completato:     [220, 252, 231],
+    };
+
+    doc.setFont('helvetica', 'normal');
+    startY += headerH;
+
+    capexAnno.forEach((c, idx) => {
+      // Nuova pagina se necessario
+      if (startY + rowH > pageH - margin) {
+        doc.addPage();
+        startY = margin;
+      }
+
+      const bg = statoRgb[c.stato] || [255, 255, 255];
+      doc.setFillColor(...bg);
+      const totalW = colWidths.reduce((a, b) => a + b, 0);
+      doc.rect(startX, startY, totalW, rowH, 'F');
+
+      // Bordo riga
+      doc.setDrawColor(180, 180, 180);
+      doc.rect(startX, startY, totalW, rowH, 'S');
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(30, 30, 30);
+
+      const scost = (c.costo_effettivo || 0) - (c.costo_previsto || 0);
+      const cells = [
+        { text: c.titolo || '', align: 'left', pad: 2 },
+        { text: STATO_CONFIG[c.stato]?.label || '', align: 'center' },
+        { text: c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—', align: 'center' },
+        { text: c.data_fine   ? format(parseLocalDate(c.data_fine),   'dd/MM/yyyy') : '—', align: 'center' },
+        { text: c.costo_previsto  != null ? fmtEur(c.costo_previsto)  : '—', align: 'right', pad: 2 },
+        { text: c.costo_effettivo != null ? fmtEur(c.costo_effettivo) : '—', align: 'right', pad: 2 },
+        { text: (c.costo_effettivo != null || c.costo_previsto != null) ? fmtEur(scost) : '—', align: 'right', pad: 2, color: scost > 0 ? [185, 28, 28] : scost < 0 ? [21, 128, 61] : null },
+      ];
+
+      cx = startX;
+      cells.forEach((cell, i) => {
+        if (cell.color) doc.setTextColor(...cell.color); else doc.setTextColor(30, 30, 30);
+        const pad = cell.pad || 0;
+        const textX = cell.align === 'right'
+          ? cx + colWidths[i] - 1.5
+          : cell.align === 'center'
+            ? cx + colWidths[i] / 2
+            : cx + 2;
+        // Tronca testo lungo
+        const maxW = colWidths[i] - 3;
+        const truncated = doc.getTextWidth(cell.text) > maxW
+          ? cell.text.substring(0, Math.floor(cell.text.length * maxW / doc.getTextWidth(cell.text)) - 1) + '…'
+          : cell.text;
+        doc.text(truncated, textX, startY + 4.8, { align: cell.align });
+        cx += colWidths[i];
+      });
+
+      startY += rowH;
+    });
+
+    doc.save(`${nomeFile}.pdf`);
+  };
 
   const handleExport = () => {
     const nomeCentro = centroSelezionato?.nome?.toUpperCase() || 'CENTRO';
@@ -228,7 +353,10 @@ export default function CapexPage({ centroSelezionato, user }) {
              </Button>
            </div>
            <Button size="sm" variant="outline" onClick={handleExport} className="border-slate-300">
-             <Download className="w-4 h-4 mr-1" /> Esporta
+             <Download className="w-4 h-4 mr-1" /> Excel
+           </Button>
+           <Button size="sm" variant="outline" onClick={handleExportPDF} className="border-slate-300">
+             <FileText className="w-4 h-4 mr-1" /> PDF
            </Button>
            {canEdit && (
              <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
