@@ -60,11 +60,9 @@ export default function CapexPage({ centroSelezionato, user }) {
     const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
 
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const pageW = doc.internal.pageSize.getWidth(); // 297
-    const pageH = doc.internal.pageSize.getHeight(); // 210
-    const margin = 12;
+    const pageW = doc.internal.pageSize.getWidth(); // 297mm
 
-    // Logo in alto a destra
+    // --- Logo in alto a destra ---
     if (logoUrl) {
       await new Promise((resolve) => {
         const img = new Image();
@@ -73,7 +71,7 @@ export default function CapexPage({ centroSelezionato, user }) {
           const maxH = 14;
           const ratio = img.width / img.height;
           const imgW = Math.min(maxH * ratio, 48);
-          doc.addImage(img, 'PNG', pageW - imgW - margin, 6, imgW, maxH);
+          doc.addImage(img, 'PNG', pageW - imgW - 10, 7, imgW, maxH);
           resolve();
         };
         img.onerror = resolve;
@@ -81,97 +79,122 @@ export default function CapexPage({ centroSelezionato, user }) {
       });
     }
 
-    // Titolo
+    // --- Titolo ---
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 58, 95);
-    doc.text(`${nomeCentro.toUpperCase()} — CAPEX ${annoSelezionato}`, margin, 14);
+    doc.text(`${nomeCentro.toUpperCase()} — CAPEX ${annoSelezionato}`, 14, 15);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(120, 120, 120);
-    doc.text(`Generato il ${format(new Date(), 'dd/MM/yyyy')}`, margin, 20);
+    doc.setTextColor(130, 130, 130);
+    doc.text(`Generato il ${format(new Date(), 'dd/MM/yyyy')}`, 14, 21);
     doc.setTextColor(0, 0, 0);
 
-    // Tabella
-    const headers = ['Descrizione', 'Stato', 'Inizio', 'Fine', 'Budget', 'Effettivo', 'Scostamento'];
-    const colWidths = [88, 28, 22, 22, 28, 28, 28]; // somma = 244, + 2*margin = 268 < 297
+    // --- Tabella ---
+    const colWidths = [90, 28, 24, 24, 28, 28, 28]; // totale ~250mm su 270 usabili
+    const headers  = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Effettivo', 'Scostamento'];
     const rowH = 7;
-    const headerH = 8;
-    const startX = margin;
-    let startY = 26;
+    const startX = 14;
+    let y = 27;
 
-    // Intestazioni
-    doc.setFillColor(30, 58, 95);
-    doc.rect(startX, startY, colWidths.reduce((a, b) => a + b, 0), headerH, 'F');
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(255, 255, 255);
-    let cx = startX;
-    headers.forEach((h, i) => {
-      doc.text(h, cx + colWidths[i] / 2, startY + 5.5, { align: 'center' });
-      cx += colWidths[i];
-    });
-
-    // Colori di sfondo per stato [r,g,b]
-    const statoRgb = {
-      da_proporre:    [255, 255, 255],
-      da_pianificare: [254, 226, 226],
-      pianificato:    [254, 249, 195],
-      completato:     [220, 252, 231],
+    const statoColors = {
+      da_proporre:    { r: 255, g: 255, b: 255 },
+      da_pianificare: { r: 254, g: 226, b: 226 },
+      pianificato:    { r: 254, g: 249, b: 195 },
+      completato:     { r: 220, g: 252, b: 231 },
     };
 
-    doc.setFont('helvetica', 'normal');
-    startY += headerH;
+    // Funzione helper per disegnare una riga
+    const drawRow = (cells, rowY, bg, textColor) => {
+      let x = startX;
+      cells.forEach((text, i) => {
+        const w = colWidths[i];
+        // Sfondo cella
+        doc.setFillColor(bg.r, bg.g, bg.b);
+        doc.rect(x, rowY, w, rowH, 'F');
+        // Bordo
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.2);
+        doc.rect(x, rowY, w, rowH, 'S');
+        // Testo
+        if (textColor) doc.setTextColor(textColor.r, textColor.g, textColor.b);
+        doc.setFontSize(7.5);
+        // Allineamento: numeri a destra per colonne 4-6
+        const isNum = i >= 4;
+        const isCenter = i === 1 || i === 2 || i === 3;
+        const padding = 2;
+        const textX = isNum ? x + w - padding : isCenter ? x + w / 2 : x + padding;
+        const align = isNum ? 'right' : isCenter ? 'center' : 'left';
+        const truncated = doc.splitTextToSize(String(text ?? ''), w - padding * 2)[0] || '';
+        doc.text(truncated, textX, rowY + rowH * 0.65, { align });
+        if (textColor) doc.setTextColor(0, 0, 0);
+        x += w;
+      });
+    };
 
-    capexAnno.forEach((c, idx) => {
-      // Nuova pagina se necessario
-      if (startY + rowH > pageH - margin) {
-        doc.addPage();
-        startY = margin;
-      }
-
-      const bg = statoRgb[c.stato] || [255, 255, 255];
-      doc.setFillColor(...bg);
-      const totalW = colWidths.reduce((a, b) => a + b, 0);
-      doc.rect(startX, startY, totalW, rowH, 'F');
-
-      // Bordo riga
-      doc.setDrawColor(180, 180, 180);
-      doc.rect(startX, startY, totalW, rowH, 'S');
-
+    // Header row
+    doc.setFont('helvetica', 'bold');
+    let hx = startX;
+    headers.forEach((h, i) => {
+      const w = colWidths[i];
+      doc.setFillColor(30, 58, 95);
+      doc.rect(hx, y, w, rowH, 'F');
+      doc.setDrawColor(20, 40, 70);
+      doc.setLineWidth(0.2);
+      doc.rect(hx, y, w, rowH, 'S');
+      doc.setTextColor(255, 255, 255);
       doc.setFontSize(7.5);
-      doc.setTextColor(30, 30, 30);
+      doc.text(h, hx + w / 2, y + rowH * 0.65, { align: 'center' });
+      hx += w;
+    });
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    y += rowH;
 
+    // Data rows
+    capexAnno.forEach((c) => {
+      const bg = statoColors[c.stato] || { r: 255, g: 255, b: 255 };
       const scost = (c.costo_effettivo || 0) - (c.costo_previsto || 0);
+      const scostColor = scost > 0 ? { r: 185, g: 28, b: 28 } : scost < 0 ? { r: 21, g: 128, b: 61 } : null;
+
       const cells = [
-        { text: c.titolo || '', align: 'left', pad: 2 },
-        { text: STATO_CONFIG[c.stato]?.label || '', align: 'center' },
-        { text: c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—', align: 'center' },
-        { text: c.data_fine   ? format(parseLocalDate(c.data_fine),   'dd/MM/yyyy') : '—', align: 'center' },
-        { text: c.costo_previsto  != null ? fmtEur(c.costo_previsto)  : '—', align: 'right', pad: 2 },
-        { text: c.costo_effettivo != null ? fmtEur(c.costo_effettivo) : '—', align: 'right', pad: 2 },
-        { text: (c.costo_effettivo != null || c.costo_previsto != null) ? fmtEur(scost) : '—', align: 'right', pad: 2, color: scost > 0 ? [185, 28, 28] : scost < 0 ? [21, 128, 61] : null },
+        c.titolo || '',
+        STATO_CONFIG[c.stato]?.label || c.stato || '',
+        c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—',
+        c.data_fine   ? format(parseLocalDate(c.data_fine),   'dd/MM/yyyy') : '—',
+        c.costo_previsto  != null ? fmtEur(c.costo_previsto)  : '—',
+        c.costo_effettivo != null ? fmtEur(c.costo_effettivo) : '—',
+        (c.costo_effettivo != null || c.costo_previsto != null) ? fmtEur(scost) : '—',
       ];
 
-      cx = startX;
-      cells.forEach((cell, i) => {
-        if (cell.color) doc.setTextColor(...cell.color); else doc.setTextColor(30, 30, 30);
-        const pad = cell.pad || 0;
-        const textX = cell.align === 'right'
-          ? cx + colWidths[i] - 1.5
-          : cell.align === 'center'
-            ? cx + colWidths[i] / 2
-            : cx + 2;
-        // Tronca testo lungo
-        const maxW = colWidths[i] - 3;
-        const truncated = doc.getTextWidth(cell.text) > maxW
-          ? cell.text.substring(0, Math.floor(cell.text.length * maxW / doc.getTextWidth(cell.text)) - 1) + '…'
-          : cell.text;
-        doc.text(truncated, textX, startY + 4.8, { align: cell.align });
-        cx += colWidths[i];
-      });
+      // Nuova pagina se necessario
+      if (y + rowH > doc.internal.pageSize.getHeight() - 10) {
+        doc.addPage();
+        y = 14;
+      }
 
-      startY += rowH;
+      // Disegna le prime 6 celle normalmente, la 7a con colore testo scostamento
+      let cx = startX;
+      cells.forEach((text, i) => {
+        const w = colWidths[i];
+        doc.setFillColor(bg.r, bg.g, bg.b);
+        doc.rect(cx, y, w, rowH, 'F');
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.2);
+        doc.rect(cx, y, w, rowH, 'S');
+        const color = (i === 6 && scostColor) ? scostColor : { r: 40, g: 40, b: 40 };
+        doc.setTextColor(color.r, color.g, color.b);
+        doc.setFontSize(7.5);
+        const isNum = i >= 4;
+        const isCenter = i === 1 || i === 2 || i === 3;
+        const padding = 2;
+        const textX = isNum ? cx + w - padding : isCenter ? cx + w / 2 : cx + padding;
+        const align = isNum ? 'right' : isCenter ? 'center' : 'left';
+        const truncated = doc.splitTextToSize(String(text ?? ''), w - padding * 2)[0] || '';
+        doc.text(truncated, textX, y + rowH * 0.65, { align });
+        cx += w;
+      });
+      doc.setTextColor(0, 0, 0);
+      y += rowH;
     });
 
     doc.save(`${nomeFile}.pdf`);
