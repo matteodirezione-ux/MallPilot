@@ -38,6 +38,7 @@ export default function Clienti({ centroSelezionato }) {
     note: ''
   });
   const [wizardStep, setWizardStep] = useState(0);
+  const [detailCliente, setDetailCliente] = useState(null);
 
   useEffect(() => {
     if (centroSelezionato && centroSelezionato.id) {
@@ -402,7 +403,7 @@ export default function Clienti({ centroSelezionato }) {
           {filteredClienti.map((cliente) => {
             const stats = clientiStats[cliente.id] || {};
             return (
-              <Card key={cliente.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
+              <Card key={cliente.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setDetailCliente(cliente)}>
                 <CardContent className="p-3">
                   {/* Riga 1: nome + cards stats a destra + azioni */}
                   <div className="flex items-center gap-3">
@@ -442,7 +443,7 @@ export default function Clienti({ centroSelezionato }) {
                           {stats.giorniDaUltimoAffitto !== null ? `${stats.giorniDaUltimoAffitto}gg fa` : 'Mai'}
                         </p>
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" onClick={() => handleEdit(cliente)} className="text-blue-600 h-7 w-7">
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
@@ -458,6 +459,94 @@ export default function Clienti({ centroSelezionato }) {
           })}
         </div>
       )}
+
+      {/* Dialog dettaglio cliente */}
+      <Dialog open={!!detailCliente} onOpenChange={(open) => { if (!open) setDetailCliente(null); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{detailCliente?.ragione_sociale}</DialogTitle>
+          </DialogHeader>
+          {detailCliente && (
+            <div className="space-y-4 text-sm">
+              {/* Dati azienda */}
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Dati Azienda</p>
+                <div className="space-y-1.5">
+                  {detailCliente.partita_iva && <Row label="Partita IVA" value={detailCliente.partita_iva} />}
+                  {detailCliente.codice_fiscale && <Row label="Cod. Fiscale" value={detailCliente.codice_fiscale} />}
+                  {detailCliente.email && <Row label="Email" value={detailCliente.email} />}
+                  {detailCliente.pec && <Row label="PEC" value={detailCliente.pec} />}
+                  {detailCliente.telefono && <Row label="Telefono" value={detailCliente.telefono} />}
+                </div>
+              </div>
+              {/* Indirizzo */}
+              {(detailCliente.indirizzo || detailCliente.citta) && (
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Indirizzo</p>
+                  <div className="space-y-1.5">
+                    {detailCliente.indirizzo && <Row label="Indirizzo" value={detailCliente.indirizzo} />}
+                    {detailCliente.citta && <Row label="Città" value={`${detailCliente.citta}${detailCliente.provincia ? ` (${detailCliente.provincia})` : ''}${detailCliente.cap ? ` - ${detailCliente.cap}` : ''}`} />}
+                  </div>
+                </div>
+              )}
+              {/* Referente */}
+              {(detailCliente.referente_nome || detailCliente.referente_email) && (
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Referente</p>
+                  <div className="space-y-1.5">
+                    {detailCliente.referente_nome && <Row label="Nome" value={detailCliente.referente_nome} />}
+                    {detailCliente.referente_telefono && <Row label="Telefono" value={detailCliente.referente_telefono} />}
+                    {detailCliente.referente_email && <Row label="Email" value={detailCliente.referente_email} />}
+                  </div>
+                </div>
+              )}
+              {/* Note */}
+              {detailCliente.note && (
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Note</p>
+                  <p className="text-slate-700 bg-slate-50 rounded-lg p-3">{detailCliente.note}</p>
+                </div>
+              )}
+              {/* Statistiche */}
+              {clientiStats[detailCliente.id] && (
+                <div>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Statistiche</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="p-2 bg-green-50 rounded-lg text-center">
+                      <p className="text-[10px] text-slate-500">Incasso {new Date().getFullYear()}</p>
+                      <p className="text-sm font-semibold text-slate-800">{formatCurrency(clientiStats[detailCliente.id].incassoAnno || 0)}</p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg text-center">
+                      <p className="text-[10px] text-slate-500">Affitti totali</p>
+                      <p className="text-sm font-semibold text-slate-800">{clientiStats[detailCliente.id].numeroAffitti || 0}</p>
+                    </div>
+                    <div className="p-2 bg-purple-50 rounded-lg text-center">
+                      <p className="text-[10px] text-slate-500">Ultimo affitto</p>
+                      <p className="text-sm font-semibold text-slate-800">
+                        {clientiStats[detailCliente.id].giorniDaUltimoAffitto !== null ? `${clientiStats[detailCliente.id].giorniDaUltimoAffitto}gg fa` : 'Mai'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-2 border-t">
+                <Button variant="outline" size="sm" onClick={() => { setDetailCliente(null); handleEdit(detailCliente); }}>
+                  <Pencil className="w-3.5 h-3.5 mr-1" /> Modifica
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Row({ label, value }) {
+  return (
+    <div className="flex gap-2">
+      <span className="w-28 shrink-0 text-slate-500">{label}</span>
+      <span className="text-slate-800 font-medium">{value}</span>
     </div>
   );
 }
