@@ -38,14 +38,8 @@ export default function Corrispettivi({ centroSelezionato, user }) {
     queryKey: ['user-tenant', user?.email],
     queryFn: async () => {
       if (!user?.email) return null;
-      if (user.tenant_id) {
-        try {
-          const tenant = await base44.entities.Tenant.get(user.tenant_id);
-          return tenant;
-        } catch {}
-      }
       const tenants = await base44.entities.Tenant.filter({ 
-        email_referente: user.email 
+        mail_app: user.email 
       });
       return tenants.length > 0 ? tenants[0] : null;
     },
