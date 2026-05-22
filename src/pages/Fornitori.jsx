@@ -91,7 +91,7 @@ export default function Fornitori({ centroSelezionato, user }) {
               <div key={fornitore.id} className={`rounded-xl border overflow-hidden transition-all duration-200
                 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
                 hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
-                ${!hasDuvri ? 'border-orange-300 bg-orange-50' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
+                ${!hasDuvri ? 'border-orange-50 bg-orange-50' : 'bg-white/80 backdrop-blur-sm border-white'}`}>
                   <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => toggleEspanso(fornitore.id)}>
                     <div className="flex-1 min-w-0">
                       {!hasDuvri && (
@@ -143,7 +143,7 @@ export default function Fornitori({ centroSelezionato, user }) {
                           <p className="text-xs font-semibold text-slate-500 mb-2">Subornitori:</p>
                           <div className="space-y-2">
                             {fornitore.subornitori.map((sub, idx) => (
-                              <div key={idx} className={`p-3 rounded-lg border text-sm ${!sub.duvri_urls?.length ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
+                              <div key={idx} className={`p-3 rounded-lg border text-sm ${!sub.duvri_urls?.length ? 'bg-orange-50 border-orange-50' : 'bg-white border-white'}`}>
                                 {!sub.duvri_urls?.length && (
                                   <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
                                     ⚠️ DUVRI MANCANTE

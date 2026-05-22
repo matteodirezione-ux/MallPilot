@@ -152,7 +152,7 @@ export default function CapexPage({ centroSelezionato, user }) {
             { label: 'Costo Effettivo', value: fmt(totaleEffettivo), cls: 'text-green-700' },
             { label: 'Scostamento', value: fmt(totaleEffettivo - totalePrevisto), cls: totaleEffettivo > totalePrevisto ? 'text-red-600' : 'text-green-600' },
           ].map(({ label, value, cls }) => (
-            <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
+            <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
               <p className="text-xs text-slate-500 uppercase font-medium mb-1">{label}</p>
               <p className={`text-xl font-bold ${cls}`}>{value}</p>
             </div>
@@ -221,7 +221,7 @@ export default function CapexPage({ centroSelezionato, user }) {
           ) : filtered.length === 0 ? (
             <div className="text-center py-12 text-slate-400">Nessun Capex trovato</div>
           ) : filtered.map(c => {
-            const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-200' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200';
+            const cardBg = c.stato === 'completato' ? 'bg-green-50 border-green-50' : c.stato === 'pianificato' ? 'bg-yellow-50 border-yellow-50' : 'bg-red-50 border-red-50';
             const missingDuvri = c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse;
             return (
             <div key={c.id} className={`rounded-xl border p-4 cursor-pointer transition-all duration-200
