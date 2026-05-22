@@ -3,14 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Edit } from 'lucide-react';
+import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function CorrispettiviBoard({ centroSelezionato, user }) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();
-    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+    return new Date(today.getFullYear(), today.getMonth(), 1);
   });
 
   // Carica tutti i tenant del centro
@@ -33,15 +33,15 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
       if (!centroSelezionato?.id || !selectedMonth) return [];
       
       const [year, month] = selectedMonth.split('-');
-      const dateStart = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const dateEnd = new Date(parseInt(year), parseInt(month), 0);
+      const dateStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
+      const dateEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
       
       const allCorrispettivi = await base44.entities.Corrispettivo.list();
       
       return allCorrispettivi.filter(c => {
         const corrisDate = parseISO(c.mese);
         return c.centro_id === centroSelezionato.id &&
-               corrisDate >= dateStart && 
+               corrisDate >= dateStart &&
                corrisDate <= dateEnd;
       });
     },
@@ -55,23 +55,27 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
   }, {});
 
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n || 0);
-  const [year, month] = selectedMonth.split('-');
-  const monthName = new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  const monthName = selectedMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+
+  const handlePrevMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1));
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-center">
-        <div>
-          <label className="block text-sm font-medium mb-2">Seleziona Mese</label>
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-3 py-2 border rounded-lg"
-          />
-        </div>
-        <div className="text-sm text-slate-600 mt-auto">
-          Visualizzando: <span className="font-semibold capitalize">{monthName}</span>
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={handlePrevMonth}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="font-semibold capitalize min-w-[200px] text-center">{monthName}</span>
+          <Button variant="outline" size="icon" onClick={handleNextMonth}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
