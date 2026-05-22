@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import * as XLSX from 'xlsx';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,34 +53,90 @@ export default function CapexPage({ centroSelezionato, user }) {
 
   const handleExport = () => {
     const nomeCentro = centroSelezionato?.nome?.toUpperCase() || 'CENTRO';
+    const nomeFile = `${nomeCentro}_CAPEX_${annoSelezionato}`;
     const titolo = `${nomeCentro} - CAPEX ${annoSelezionato}`;
 
-    const headers = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget (€)', 'Costo Effettivo (€)'];
-    const rows = capexAnno.map(c => [
-      c.titolo || '',
-      STATO_CONFIG[c.stato]?.label || c.stato || '',
-      c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—',
-      c.data_fine ? format(parseLocalDate(c.data_fine), 'dd/MM/yyyy') : '—',
-      c.costo_previsto != null ? c.costo_previsto.toFixed(2) : '—',
-      c.costo_effettivo != null ? c.costo_effettivo.toFixed(2) : '—',
-    ]);
+    const wb = XLSX.utils.book_new();
+    const wsData = [];
 
-    // Costruisce CSV
-    const escape = (v) => `"${String(v).replace(/"/g, '""')}"`;
-    const csvContent = [
-      escape(titolo),
-      '',
-      headers.map(escape).join(';'),
-      ...rows.map(r => r.map(escape).join(';')),
-    ].join('\n');
+    // Riga 1: titolo
+    wsData.push([titolo, '', '', '', '', '']);
+    // Riga 2: vuota
+    wsData.push(['', '', '', '', '', '']);
+    // Riga 3: intestazioni
+    wsData.push(['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Costo Effettivo']);
+    // Righe dati
+    capexAnno.forEach(c => {
+      wsData.push([
+        c.titolo || '',
+        STATO_CONFIG[c.stato]?.label || c.stato || '',
+        c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—',
+        c.data_fine ? format(parseLocalDate(c.data_fine), 'dd/MM/yyyy') : '—',
+        c.costo_previsto != null ? c.costo_previsto : '',
+        c.costo_effettivo != null ? c.costo_effettivo : '',
+      ]);
+    });
 
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${nomeCentro}_CAPEX_${annoSelezionato}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Larghezze colonne: Descrizione x4, Stato x2, date x1, importi x1
+    ws['!cols'] = [
+      { wch: 60 },  // Descrizione (4x)
+      { wch: 30 },  // Stato (2x)
+      { wch: 15 },  // Data Inizio
+      { wch: 15 },  // Data Fine
+      { wch: 15 },  // Budget
+      { wch: 15 },  // Costo Effettivo
+    ];
+
+    // Stile titolo (A1): grassetto
+    if (!ws['A1']) ws['A1'] = { v: titolo, t: 's' };
+    ws['A1'].s = {
+      font: { bold: true, sz: 14 },
+      alignment: { horizontal: 'left' },
+    };
+
+    // Stili intestazioni (riga 3 = index 2)
+    const headerCols = ['A', 'B', 'C', 'D', 'E', 'F'];
+    headerCols.forEach(col => {
+      const cell = `${col}3`;
+      if (!ws[cell]) ws[cell] = { v: '', t: 's' };
+      ws[cell].s = {
+        font: { bold: true },
+        fill: { fgColor: { rgb: 'E2E8F0' } },
+        alignment: { horizontal: 'center' },
+        border: {
+          top: { style: 'thin', color: { rgb: '94A3B8' } },
+          bottom: { style: 'thin', color: { rgb: '94A3B8' } },
+          left: { style: 'thin', color: { rgb: '94A3B8' } },
+          right: { style: 'thin', color: { rgb: '94A3B8' } },
+        },
+      };
+    });
+
+    // Stili celle dati con bordi e formato valuta per importi
+    const border = {
+      top: { style: 'thin', color: { rgb: '94A3B8' } },
+      bottom: { style: 'thin', color: { rgb: '94A3B8' } },
+      left: { style: 'thin', color: { rgb: '94A3B8' } },
+      right: { style: 'thin', color: { rgb: '94A3B8' } },
+    };
+
+    for (let r = 3; r < wsData.length; r++) {
+      headerCols.forEach((col, ci) => {
+        const cellRef = `${col}${r + 1}`;
+        if (!ws[cellRef]) ws[cellRef] = { v: '', t: 's' };
+        ws[cellRef].s = { border };
+        // Formato valuta per colonne E e F (indici 4 e 5)
+        if ((ci === 4 || ci === 5) && ws[cellRef].v !== '') {
+          ws[cellRef].t = 'n';
+          ws[cellRef].z = '€ #,##0.00';
+        }
+      });
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, 'CAPEX');
+    XLSX.writeFile(wb, `${nomeFile}.xlsx`);
   };
 
   useEffect(() => {
