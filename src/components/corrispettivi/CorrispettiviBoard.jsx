@@ -3,14 +3,11 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus, Pencil, FileDown, FileSpreadsheet } from 'lucide-react';
+import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus, Pencil } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
 import CorrispettiviDetail from '@/components/corrispettivi/CorrispettiviDetail';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 export default function CorrispettiviBoard({ centroSelezionato, user }) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -97,89 +94,6 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
     setShowFormBoard(true);
   };
 
-  // Calcola i totali per il mese selezionato
-  const totaliMese = {
-    ivati: corrispettiviMese.reduce((sum, c) => sum + (c.corrispettivi_ivati || 0), 0),
-    netti: corrispettiviMese.reduce((sum, c) => sum + (c.corrispettivi_netti || 0), 0),
-    scontrini: corrispettiviMese.reduce((sum, c) => sum + (c.numero_scontrini || 0), 0)
-  };
-
-  // Export Excel
-  const handleExportExcel = () => {
-    const dati = allTenants.map(tenant => {
-      const corris = corrispettiviMap[tenant.id];
-      return {
-        Tenant: tenant.insegna || tenant.ragione_sociale,
-        'Negozio': tenant.numero_negozio,
-        'Corrispettivi Ivati': corris ? corris.corrispettivi_ivati : 0,
-        'Corrispettivi Netti': corris ? corris.corrispettivi_netti : 0,
-        'Numero Scontrini': corris ? corris.numero_scontrini : 0,
-        'Data Inserimento': corris ? format(new Date(corris.data_inserimento), 'dd/MM/yyyy HH:mm') : '-'
-      };
-    });
-
-    // Aggiungi riga totali
-    dati.push({
-      Tenant: 'TOTALI',
-      'Negozio': '',
-      'Corrispettivi Ivati': totaliMese.ivati,
-      'Corrispettivi Netti': totaliMese.netti,
-      'Numero Scontrini': totaliMese.scontrini,
-      'Data Inserimento': ''
-    });
-
-    const ws = XLSX.utils.json_to_sheet(dati);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Corrispettivi');
-    
-    const fileName = `Corrispettivi_${monthKey}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-  };
-
-  // Export PDF
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    
-    // Titolo
-    doc.setFontSize(16);
-    doc.text(`Corrispettivi - ${monthName}`, 14, 20);
-    
-    // Tabella
-    const tableData = allTenants.map(tenant => {
-      const corris = corrispettiviMap[tenant.id];
-      return [
-        tenant.insegna || tenant.ragione_sociale,
-        tenant.numero_negozio,
-        corris ? fmtEur(corris.corrispettivi_ivati) : '-',
-        corris ? fmtEur(corris.corrispettivi_netti) : '-',
-        corris ? corris.numero_scontrini.toLocaleString('it-IT') : '-',
-        corris ? format(new Date(corris.data_inserimento), 'dd/MM/yyyy HH:mm') : '-'
-      ];
-    });
-
-    // Aggiungi riga totali
-    tableData.push([
-      'TOTALI',
-      '',
-      fmtEur(totaliMese.ivati),
-      fmtEur(totaliMese.netti),
-      totaliMese.scontrini.toLocaleString('it-IT'),
-      ''
-    ]);
-
-    doc.autoTable({
-      head: [['Tenant', 'Negozio', 'Corrispettivi Ivati', 'Corrispettivi Netti', 'Scontrini', 'Data Inserimento']],
-      body: tableData,
-      startY: 30,
-      theme: 'striped',
-      headStyles: { fillColor: [59, 130, 246] },
-      footStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' }
-    });
-
-    const fileName = `Corrispettivi_${monthKey}.pdf`;
-    doc.save(fileName);
-  };
-
   if (selectedTenant) {
     return (
       <CorrispettiviDetail 
@@ -203,16 +117,6 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleExportExcel} className="gap-2">
-            <FileSpreadsheet className="w-4 h-4" />
-            Excel
-          </Button>
-          <Button variant="outline" onClick={handleExportPDF} className="gap-2">
-            <FileDown className="w-4 h-4" />
-            PDF
-          </Button>
-        </div>
       </div>
 
       <Card>
@@ -233,79 +137,70 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                 </tr>
               </thead>
               <tbody>
-              {allTenants.map(tenant => {
-                const corris = corrispettiviMap[tenant.id];
-                return (
-                  <tr 
-                    key={tenant.id} 
-                    className="border-b hover:bg-slate-50"
-                  >
-                    <td 
-                      className="p-3 cursor-pointer"
-                      onClick={() => handleTenantClick(tenant)}
+                {allTenants.map(tenant => {
+                  const corris = corrispettiviMap[tenant.id];
+                  return (
+                    <tr 
+                      key={tenant.id} 
+                      className="border-b hover:bg-slate-50"
                     >
-                      <div className="font-medium">{tenant.insegna || tenant.ragione_sociale}</div>
-                      <div className="text-xs text-slate-500">Negozio {tenant.numero_negozio}</div>
-                    </td>
-                    <td className="p-3 text-right font-mono">
-                      {corris ? fmtEur(corris.corrispettivi_ivati) : '-'}
-                    </td>
-                    <td className="p-3 text-right font-mono">
-                      {corris ? fmtEur(corris.corrispettivi_netti) : '-'}
-                    </td>
-                    <td className="p-3 text-right font-mono">
-                      {corris ? corris.numero_scontrini.toLocaleString('it-IT') : '-'}
-                    </td>
-                    <td className="p-3 text-sm text-slate-600">
-                      {corris ? format(new Date(corris.data_inserimento), 'dd/MM/yyyy HH:mm') : '-'}
-                    </td>
-                    <td className="p-3 text-center">
-                      {corris ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto" />
-                          {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+                      <td 
+                        className="p-3 cursor-pointer"
+                        onClick={() => handleTenantClick(tenant)}
+                      >
+                        <div className="font-medium">{tenant.insegna || tenant.ragione_sociale}</div>
+                        <div className="text-xs text-slate-500">Negozio {tenant.numero_negozio}</div>
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {corris ? fmtEur(corris.corrispettivi_ivati) : '-'}
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {corris ? fmtEur(corris.corrispettivi_netti) : '-'}
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        {corris ? corris.numero_scontrini.toLocaleString('it-IT') : '-'}
+                      </td>
+                      <td className="p-3 text-sm text-slate-600">
+                        {corris ? format(new Date(corris.data_inserimento), 'dd/MM/yyyy HH:mm') : '-'}
+                      </td>
+                      <td className="p-3 text-center">
+                        {corris ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto" />
+                            {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="w-6 h-6"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleModifyFromBoard(tenant, corris);
+                                }}
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <XCircle className="w-5 h-5 text-red-600" />
                             <Button
                               variant="ghost"
                               size="icon"
                               className="w-6 h-6"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleModifyFromBoard(tenant, corris);
+                                handleInserisci(tenant);
                               }}
                             >
-                              <Pencil className="w-4 h-4" />
+                              <Plus className="w-4 h-4" />
                             </Button>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <XCircle className="w-5 h-5 text-red-600" />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="w-6 h-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleInserisci(tenant);
-                            }}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-              {/* Riga Totali */}
-              <tr className="border-b-2 border-slate-300 bg-slate-50 font-bold">
-                <td className="p-3">TOTALI</td>
-                <td className="p-3 text-right font-mono">{fmtEur(totaliMese.ivati)}</td>
-                <td className="p-3 text-right font-mono">{fmtEur(totaliMese.netti)}</td>
-                <td className="p-3 text-right font-mono">{totaliMese.scontrini.toLocaleString('it-IT')}</td>
-                <td className="p-3"></td>
-                <td className="p-3"></td>
-              </tr>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
