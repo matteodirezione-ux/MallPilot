@@ -151,9 +151,9 @@ export default function SpaziExpo({ centroSelezionato, user }) {
             <div
               key={spazio.id}
               className={`rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm transition-all duration-300 cursor-default
-                shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.05)]
-                hover:shadow-[0_12px_40px_rgba(0,0,0,0.14),0_4px_12px_rgba(0,0,0,0.08)]
-                hover:-translate-y-1
+                shadow-[0_8px_32px_rgba(0,0,0,0.14),0_2px_8px_rgba(0,0,0,0.08)]
+                hover:shadow-[0_20px_60px_rgba(0,0,0,0.22),0_6px_20px_rgba(0,0,0,0.12)]
+                hover:-translate-y-2
                 ${!spazio.attivo ? 'opacity-50' : ''}`}
             >
               <div className="p-3">
