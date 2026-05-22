@@ -140,14 +140,14 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
             </div>
             <div>
               <Label>Anno Capex *</Label>
-              <Input
-                type="number"
-                min="2000"
-                max="2100"
-                value={form.anno_capex}
-                onChange={e => set('anno_capex', parseInt(e.target.value))}
-                required
-              />
+              <Select value={String(form.anno_capex)} onValueChange={v => set('anno_capex', parseInt(v))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
