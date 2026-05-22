@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
-  Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, List, Calendar, X
+  Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, List, Calendar, X, Download
 } from 'lucide-react';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay, isWithinInterval, addDays, subDays } from 'date-fns';
@@ -49,6 +49,38 @@ export default function CapexPage({ centroSelezionato, user }) {
 
   const isVigilanza = user?.tipo_account === 'vigilanza';
   const canEdit = !isVigilanza;
+
+  const handleExport = () => {
+    const nomeCentro = centroSelezionato?.nome?.toUpperCase() || 'CENTRO';
+    const titolo = `${nomeCentro} - CAPEX ${annoSelezionato}`;
+
+    const headers = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget (€)', 'Costo Effettivo (€)'];
+    const rows = capexAnno.map(c => [
+      c.titolo || '',
+      STATO_CONFIG[c.stato]?.label || c.stato || '',
+      c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—',
+      c.data_fine ? format(parseLocalDate(c.data_fine), 'dd/MM/yyyy') : '—',
+      c.costo_previsto != null ? c.costo_previsto.toFixed(2) : '—',
+      c.costo_effettivo != null ? c.costo_effettivo.toFixed(2) : '—',
+    ]);
+
+    // Costruisce CSV
+    const escape = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const csvContent = [
+      escape(titolo),
+      '',
+      headers.map(escape).join(';'),
+      ...rows.map(r => r.map(escape).join(';')),
+    ].join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${nomeCentro}_CAPEX_${annoSelezionato}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (centroSelezionato?.id) loadCapex();
@@ -135,6 +167,9 @@ export default function CapexPage({ centroSelezionato, user }) {
                <ChevronRight className="w-4 h-4" />
              </Button>
            </div>
+           <Button size="sm" variant="outline" onClick={handleExport} className="border-slate-300">
+             <Download className="w-4 h-4 mr-1" /> Esporta
+           </Button>
            {canEdit && (
              <Button size="sm" onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
                <Plus className="w-4 h-4 mr-1" /> Nuovo Capex
