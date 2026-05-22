@@ -10,6 +10,7 @@ import { Plus, TrendingUp } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
+import CorrispettiviBoard from '@/components/corrispettivi/CorrispettiviBoard';
 
 export default function Corrispettivi({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
@@ -80,6 +81,19 @@ export default function Corrispettivi({ centroSelezionato, user }) {
   const anni = Object.keys(corrispettiviPerAnno).sort((a, b) => b - a);
 
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n || 0);
+
+  // Vista board per proprietà/direttore
+  if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') {
+    return (
+      <div className="p-3 sm:p-6">
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
+          <TrendingUp className="w-6 h-6" />
+          Corrispettivi
+        </h1>
+        <CorrispettiviBoard centroSelezionato={centroSelezionato} user={user} />
+      </div>
+    );
+  }
 
   if (!selectedTenant) {
     return (
