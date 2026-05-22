@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -56,85 +56,72 @@ export default function CapexPage({ centroSelezionato, user }) {
     const nomeFile = `${nomeCentro}_CAPEX_${annoSelezionato}`;
     const titolo = `${nomeCentro} - CAPEX ${annoSelezionato}`;
 
-    const wb = XLSX.utils.book_new();
-    const wsData = [];
-
-    // Riga 1: titolo
-    wsData.push([titolo, '', '', '', '', '']);
-    // Riga 2: vuota
-    wsData.push(['', '', '', '', '', '']);
-    // Riga 3: intestazioni
-    wsData.push(['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Costo Effettivo']);
-    // Righe dati
-    capexAnno.forEach(c => {
-      wsData.push([
-        c.titolo || '',
-        STATO_CONFIG[c.stato]?.label || c.stato || '',
-        c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—',
-        c.data_fine ? format(parseLocalDate(c.data_fine), 'dd/MM/yyyy') : '—',
-        c.costo_previsto != null ? c.costo_previsto : '',
-        c.costo_effettivo != null ? c.costo_effettivo : '',
-      ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Larghezze colonne
-    ws['!cols'] = [
-      { wch: 60 },  // Descrizione
-      { wch: 15 },  // Stato
-      { wch: 10 },  // Data Inizio
-      { wch: 10 },  // Data Fine
-      { wch: 10 },  // Budget
-      { wch: 10 },  // Costo Effettivo
-    ];
-
-    // Stile titolo (A1): grassetto
-    if (!ws['A1']) ws['A1'] = { v: titolo, t: 's' };
-    ws['A1'].s = {
-      font: { bold: true, sz: 14 },
-      alignment: { horizontal: 'left' },
+    const borderStyle = {
+      top:    { style: 'thin', color: { rgb: '94A3B8' } },
+      bottom: { style: 'thin', color: { rgb: '94A3B8' } },
+      left:   { style: 'thin', color: { rgb: '94A3B8' } },
+      right:  { style: 'thin', color: { rgb: '94A3B8' } },
     };
 
-    // Stili intestazioni (riga 3 = index 2)
-    const headerCols = ['A', 'B', 'C', 'D', 'E', 'F'];
-    headerCols.forEach(col => {
-      const cell = `${col}3`;
-      if (!ws[cell]) ws[cell] = { v: '', t: 's' };
-      ws[cell].s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'E2E8F0' } },
-        alignment: { horizontal: 'center' },
-        border: {
-          top: { style: 'thin', color: { rgb: '94A3B8' } },
-          bottom: { style: 'thin', color: { rgb: '94A3B8' } },
-          left: { style: 'thin', color: { rgb: '94A3B8' } },
-          right: { style: 'thin', color: { rgb: '94A3B8' } },
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+    // Costruisci dati come array di celle con stile
+    const ws = {
+      '!ref': '',
+      '!cols': [
+        { wch: 60 }, // Descrizione
+        { wch: 15 }, // Stato
+        { wch: 10 }, // Data Inizio
+        { wch: 10 }, // Data Fine
+        { wch: 10 }, // Budget
+        { wch: 10 }, // Costo Effettivo
+      ],
+    };
+
+    // Riga 1: titolo
+    ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
+
+    // Riga 2: vuota (skip)
+
+    // Riga 3: intestazioni
+    const headers = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Costo Effettivo'];
+    cols.forEach((col, i) => {
+      ws[`${col}3`] = {
+        v: headers[i],
+        t: 's',
+        s: {
+          font: { bold: true },
+          fill: { fgColor: { rgb: 'E2E8F0' } },
+          alignment: { horizontal: 'center' },
+          border: borderStyle,
         },
       };
     });
 
-    // Stili celle dati con bordi e formato valuta per importi
-    const border = {
-      top: { style: 'thin', color: { rgb: '94A3B8' } },
-      bottom: { style: 'thin', color: { rgb: '94A3B8' } },
-      left: { style: 'thin', color: { rgb: '94A3B8' } },
-      right: { style: 'thin', color: { rgb: '94A3B8' } },
-    };
-
-    for (let r = 3; r < wsData.length; r++) {
-      headerCols.forEach((col, ci) => {
-        const cellRef = `${col}${r + 1}`;
-        if (!ws[cellRef]) ws[cellRef] = { v: '', t: 's' };
-        ws[cellRef].s = { border };
-        // Formato valuta per colonne E e F (indici 4 e 5)
-        if ((ci === 4 || ci === 5) && ws[cellRef].v !== '') {
-          ws[cellRef].t = 'n';
-          ws[cellRef].z = '€ #,##0';
-        }
+    // Righe dati (da riga 4)
+    capexAnno.forEach((c, idx) => {
+      const row = idx + 4;
+      const rowData = [
+        { v: c.titolo || '', t: 's' },
+        { v: STATO_CONFIG[c.stato]?.label || c.stato || '', t: 's' },
+        { v: c.data_inizio ? format(parseLocalDate(c.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
+        { v: c.data_fine ? format(parseLocalDate(c.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
+        c.costo_previsto != null
+          ? { v: c.costo_previsto, t: 'n', z: '€ #,##0' }
+          : { v: '', t: 's' },
+        c.costo_effettivo != null
+          ? { v: c.costo_effettivo, t: 'n', z: '€ #,##0' }
+          : { v: '', t: 's' },
+      ];
+      cols.forEach((col, ci) => {
+        ws[`${col}${row}`] = { ...rowData[ci], s: { border: borderStyle } };
       });
-    }
+    });
 
+    const lastRow = capexAnno.length + 3;
+    ws['!ref'] = `A1:F${lastRow}`;
+
+    const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'CAPEX');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
   };
