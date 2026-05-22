@@ -63,7 +63,7 @@ export default function CapexPage({ centroSelezionato, user }) {
       right:  { style: 'thin', color: { rgb: '94A3B8' } },
     };
 
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
     // Costruisci dati come array di celle con stile
     const ws = {
@@ -74,7 +74,8 @@ export default function CapexPage({ centroSelezionato, user }) {
         { wch: 10 }, // Data Inizio
         { wch: 10 }, // Data Fine
         { wch: 10 }, // Budget
-        { wch: 10 }, // Costo Effettivo
+        { wch: 10 }, // Effettivo
+        { wch: 10 }, // Scostamento
       ],
     };
 
@@ -84,7 +85,7 @@ export default function CapexPage({ centroSelezionato, user }) {
     // Riga 2: vuota (skip)
 
     // Riga 3: intestazioni
-    const headers = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Costo Effettivo'];
+    const headers = ['Descrizione', 'Stato', 'Data Inizio', 'Data Fine', 'Budget', 'Effettivo', 'Scostamento'];
     cols.forEach((col, i) => {
       ws[`${col}3`] = {
         v: headers[i],
@@ -122,6 +123,9 @@ export default function CapexPage({ centroSelezionato, user }) {
         c.costo_effettivo != null
           ? { v: c.costo_effettivo, t: 'n', z: '€ #,##0' }
           : { v: '', t: 's' },
+        (c.costo_effettivo != null || c.costo_previsto != null)
+          ? { v: (c.costo_effettivo || 0) - (c.costo_previsto || 0), t: 'n', z: '€ #,##0' }
+          : { v: '', t: 's' },
       ];
       cols.forEach((col, ci) => {
         ws[`${col}${row}`] = { ...rowData[ci], s: rowStyle };
@@ -129,7 +133,7 @@ export default function CapexPage({ centroSelezionato, user }) {
     });
 
     const lastRow = capexAnno.length + 3;
-    ws['!ref'] = `A1:F${lastRow}`;
+    ws['!ref'] = `A1:G${lastRow}`;
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'CAPEX');
