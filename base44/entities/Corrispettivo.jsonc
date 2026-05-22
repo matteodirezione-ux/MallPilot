@@ -1,0 +1,53 @@
+{
+  "name": "Corrispettivo",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "ID del tenant a cui appartiene il corrispettivo"
+    },
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "numero_negozio": {
+      "type": "string",
+      "description": "Numero del negozio"
+    },
+    "mese": {
+      "type": "string",
+      "format": "date",
+      "description": "Mese di riferimento (primo giorno del mese)"
+    },
+    "corrispettivi_ivati": {
+      "type": "number",
+      "description": "Importo dei corrispettivi ivati"
+    },
+    "corrispettivi_netti": {
+      "type": "number",
+      "description": "Importo dei corrispettivi netti"
+    },
+    "numero_scontrini": {
+      "type": "number",
+      "description": "Numero totale di scontrini emessi"
+    },
+    "inserito_da_email": {
+      "type": "string",
+      "description": "Email dell'utente che ha inserito il dato"
+    },
+    "data_inserimento": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e ora di inserimento"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "centro_id",
+    "numero_negozio",
+    "mese",
+    "corrispettivi_ivati",
+    "corrispettivi_netti",
+    "numero_scontrini"
+  ]
+}

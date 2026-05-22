@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2, Wrench } from 'lucide-react';
+import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2, Wrench, Store } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Gestione({ user }) {
@@ -14,6 +14,7 @@ export default function Gestione({ user }) {
   const [direttori, setDirettori] = useState([]);
   const [vigilanze, setVigilanze] = useState([]);
   const [manutentori, setManutentori] = useState([]);
+  const [tenant, setTenant] = useState([]);
   const [assegnazioni, setAssegnazioni] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,7 @@ export default function Gestione({ user }) {
   const [direttoreDialog, setDirettoreDialog] = useState({ open: false, data: null });
   const [vigilanzaDialog, setVigilanzaDialog] = useState({ open: false, data: null });
   const [manutentoreDialog, setManutentoreDialog] = useState({ open: false, data: null });
+  const [tenantDialog, setTenantDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
@@ -35,11 +37,12 @@ export default function Gestione({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [centriData, direttoriData, vigilanzeData, manutentoriData, assegnazioniData, budgetsData] = await Promise.all([
+      const [centriData, direttoriData, vigilanzeData, manutentoriData, tenantData, assegnazioniData, budgetsData] = await Promise.all([
         base44.entities.CentroCommerciale.list(),
         base44.entities.Direttore.list(),
         base44.entities.Vigilanza.list(),
         base44.entities.Manutentore.list(),
+        base44.entities.Tenant.list(),
         base44.entities.Assegnazione.list(),
         base44.entities.Budget.list()
       ]);
@@ -55,6 +58,7 @@ export default function Gestione({ user }) {
       setDirettori(direttoriData);
       setVigilanze(vigilanzeData);
       setManutentori(manutentoriData);
+      setTenant(tenantData);
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
@@ -236,6 +240,40 @@ export default function Gestione({ user }) {
     }
   };
 
+  // === TENANT ===
+  const saveTenant = async (formData) => {
+    try {
+      if (tenantDialog.data) {
+        await base44.entities.Tenant.update(tenantDialog.data.id, formData);
+        toast.success('Tenant aggiornato');
+      } else {
+        const nuovoTenant = await base44.entities.Tenant.create(formData);
+        // Invita l'utente tenant
+        try {
+          await base44.users.inviteUser(formData.email_referente, 'user');
+          toast.success('Tenant creato, invito inviato via email');
+        } catch (inviteErr) {
+          toast.success('Tenant creato. Se l\'utente è già registrato potrà accedere direttamente.');
+        }
+      }
+      setTenantDialog({ open: false, data: null });
+      loadData();
+    } catch (error) {
+      toast.error('Errore: ' + error.message);
+    }
+  };
+
+  const deleteTenant = async (ten) => {
+    if (!confirm(`Eliminare il tenant ${ten.ragione_sociale}?`)) return;
+    try {
+      await base44.entities.Tenant.delete(ten.id);
+      toast.success('Tenant eliminato');
+      loadData();
+    } catch (error) {
+      toast.error('Errore eliminazione');
+    }
+  };
+
   // === MANUTENTORI ===
   const saveManutentore = async (formData) => {
     try {
@@ -379,6 +417,7 @@ export default function Gestione({ user }) {
                 {isPropieta && <TabsTrigger value="centri">Centri</TabsTrigger>}
                 {isPropieta && <TabsTrigger value="direttori">Direttori</TabsTrigger>}
                 <TabsTrigger value="vigilanza">Vigilanza</TabsTrigger>
+                <TabsTrigger value="tenant">Tenant</TabsTrigger>
                 <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
                 {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
               </TabsList>
@@ -402,6 +441,12 @@ export default function Gestione({ user }) {
                 <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Nuovo Account Vigilanza
+                </Button>
+              )}
+              {currentTab === 'tenant' && (
+                <Button onClick={() => setTenantDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700">
+                  <Store className="w-4 h-4 mr-2" />
+                  Nuovo Tenant
                 </Button>
               )}
               {currentTab === 'manutentori' && (
@@ -429,6 +474,7 @@ export default function Gestione({ user }) {
                 {isPropieta && <option value="centri">Centri</option>}
                 {isPropieta && <option value="direttori">Direttori</option>}
                 <option value="vigilanza">Vigilanza</option>
+                <option value="tenant">Tenant</option>
                 <option value="manutentori">Manutentori</option>
                 {isPropieta && <option value="budget">Budget</option>}
               </select>
@@ -452,6 +498,12 @@ export default function Gestione({ user }) {
                 <Button onClick={() => setVigilanzaDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
                   <ShieldCheck className="w-4 h-4 mr-2" />
                   Nuovo Account Vigilanza
+                </Button>
+              )}
+              {currentTab === 'tenant' && (
+                <Button onClick={() => setTenantDialog({ open: true, data: null })} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  <Store className="w-4 h-4 mr-2" />
+                  Nuovo Tenant
                 </Button>
               )}
               {currentTab === 'manutentori' && (
@@ -568,6 +620,49 @@ export default function Gestione({ user }) {
                 </Card>
               );
             })}
+          </div>
+        </TabsContent>
+
+        {/* === TAB TENANT === */}
+        <TabsContent value="tenant">
+          <div className="space-y-4">
+            {tenant.map(ten => (
+              <Card key={ten.id}>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <Store className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-semibold">{ten.ragione_sociale}</h3>
+                          <p className="text-sm text-slate-600 truncate">{ten.insegna || 'Nessuna insegna'}</p>
+                          <p className="text-sm text-slate-500 truncate">Negozio {ten.numero_negozio}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+                        {ten.telefono && <span>📞 {ten.telefono}</span>}
+                        {ten.referente_tecnico && <span>👤 {ten.referente_tecnico}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0 self-start md:self-auto">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setTenantDialog({ open: true, data: ten })}>
+                        <Pencil className="w-4 h-4 text-blue-600" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteTenant(ten)}>
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {tenant.length === 0 && (
+              <Card><CardContent className="py-12 text-center text-slate-500">
+                Nessun tenant configurato
+              </CardContent></Card>
+            )}
           </div>
         </TabsContent>
 
@@ -762,6 +857,14 @@ export default function Gestione({ user }) {
         assegnazioni={assegnazioni}
         onClose={() => setVigilanzaDialog({ open: false, data: null })}
         onSave={saveVigilanza}
+      />
+
+      <TenantDialog
+        open={tenantDialog.open}
+        data={tenantDialog.data}
+        centri={centri}
+        onClose={() => setTenantDialog({ open: false, data: null })}
+        onSave={saveTenant}
       />
 
       <ManutentoreDialog
@@ -1155,6 +1258,120 @@ function ManutentoreDialog({ open, data, centri, assegnazioni, onClose, onSave }
           {!data && (
             <p className="text-xs text-slate-500 bg-yellow-50 p-3 rounded-lg">
               Verrà inviato un invito via email. Il manutentore potrà visualizzare solo i Ticket.
+            </p>
+          )}
+          <div className="flex justify-end gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={onClose}>Annulla</Button>
+            <Button type="submit" className="bg-blue-600">{data ? 'Aggiorna' : 'Crea e Invita'}</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TenantDialog({ open, data, centri, onClose, onSave }) {
+  const [form, setForm] = useState({
+    centro_id: '',
+    numero_negozio: '',
+    ragione_sociale: '',
+    insegna: '',
+    indirizzo_punto_vendita: '',
+    telefono: '',
+    email_referente: '',
+    referente_tecnico: '',
+    pec: '',
+    note: ''
+  });
+
+  useEffect(() => {
+    if (data) {
+      setForm(data);
+    } else {
+      setForm({
+        centro_id: '',
+        numero_negozio: '',
+        ragione_sociale: '',
+        insegna: '',
+        indirizzo_punto_vendita: '',
+        telefono: '',
+        email_referente: '',
+        referente_tecnico: '',
+        pec: '',
+        note: ''
+      });
+    }
+  }, [data, open]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{data ? 'Modifica Tenant' : 'Nuovo Tenant'}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <Label>Centro Commerciale *</Label>
+              <select
+                value={form.centro_id}
+                onChange={(e) => setForm({ ...form, centro_id: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg"
+                required
+              >
+                <option value="">Seleziona centro</option>
+                {centri.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+            </div>
+            <div>
+              <Label>Numero Negozio *</Label>
+              <Input value={form.numero_negozio} onChange={(e) => setForm({ ...form, numero_negozio: e.target.value })} required />
+            </div>
+            <div>
+              <Label>Ragione Sociale *</Label>
+              <Input value={form.ragione_sociale} onChange={(e) => setForm({ ...form, ragione_sociale: e.target.value })} required />
+            </div>
+            <div className="col-span-2">
+              <Label>Insegna</Label>
+              <Input value={form.insegna} onChange={(e) => setForm({ ...form, insegna: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <Label>Indirizzo Punto Vendita</Label>
+              <Input value={form.indirizzo_punto_vendita} onChange={(e) => setForm({ ...form, indirizzo_punto_vendita: e.target.value })} />
+            </div>
+            <div>
+              <Label>Telefono</Label>
+              <Input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+            </div>
+            <div>
+              <Label>Email Referente *</Label>
+              <Input type="email" value={form.email_referente} onChange={(e) => setForm({ ...form, email_referente: e.target.value })} required />
+            </div>
+            <div className="col-span-2">
+              <Label>Referente Tecnico</Label>
+              <Input value={form.referente_tecnico} onChange={(e) => setForm({ ...form, referente_tecnico: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <Label>PEC</Label>
+              <Input type="email" value={form.pec} onChange={(e) => setForm({ ...form, pec: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <Label>Note</Label>
+              <textarea
+                value={form.note}
+                onChange={(e) => setForm({ ...form, note: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg min-h-[80px]"
+              />
+            </div>
+          </div>
+          {!data && (
+            <p className="text-xs text-slate-500 bg-green-50 p-3 rounded-lg">
+              Verrà inviato un invito via email all'indirizzo del referente. Il tenant potrà accedere solo alla sezione Corrispettivi per inserire i dati del proprio negozio.
             </p>
           )}
           <div className="flex justify-end gap-3 pt-4">

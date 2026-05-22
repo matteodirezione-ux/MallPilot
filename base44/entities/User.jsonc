@@ -1,0 +1,10 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "description": "ID del tenant collegato (solo per utenti con ruolo tenant)"
+    }
+  }
+}

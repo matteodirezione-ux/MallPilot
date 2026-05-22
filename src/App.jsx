@@ -25,6 +25,7 @@ import TaskPage from './pages/Task';
 import CalendarioManutenzioni from './pages/CalendarioManutenzioni';
 import StorageReport from './pages/StorageReport';
 import TenantPage from './pages/Tenant';
+import Corrispettivi from './pages/Corrispettivi';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
       <Route path="/CalendarioManutenzioni" element={<Layout currentPageName="CalendarioManutenzioni"><CalendarioManutenzioni /></Layout>} />
       <Route path="/StorageReport" element={<Layout currentPageName="StorageReport"><StorageReport /></Layout>} />
       <Route path="/Tenant" element={<Layout currentPageName="Tenant"><TenantPage /></Layout>} />
+      <Route path="/Corrispettivi" element={<Layout currentPageName="Corrispettivi"><Corrispettivi /></Layout>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

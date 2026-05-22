@@ -58,12 +58,13 @@ export default function Layout({ children, currentPageName }) {
   const loadUserAndCentri = async () => {
     try {
       const userData = await base44.auth.me();
-      
+
       // Verifica sempre se l'utente è un direttore registrato
-      const [direttori, vigilanze, manutentori] = await Promise.all([
+      const [direttori, vigilanze, manutentori, tenantList] = await Promise.all([
         base44.entities.Direttore.filter({ email: userData.email }),
         base44.entities.Vigilanza.filter({ email: userData.email }),
-        base44.entities.Manutentore.filter({ email: userData.email })
+        base44.entities.Manutentore.filter({ email: userData.email }),
+        base44.entities.Tenant.filter({ email_referente: userData.email })
       ]);
       
       if (direttori.length > 0) {
@@ -114,8 +115,18 @@ export default function Layout({ children, currentPageName }) {
         if (!manutentori[0].invito_accettato) {
           await base44.entities.Manutentore.update(manutentori[0].id, { invito_accettato: true });
         }
-
-        // Carica centri assegnati al manutentore
+      } else if (tenantList.length > 0) {
+        // Questo utente è un tenant
+        if (userData.tipo_account !== 'tenant') {
+          await base44.auth.updateMe({ 
+            tipo_account: 'tenant',
+            full_name: tenantList[0].ragione_sociale
+          });
+          userData.tipo_account = 'tenant';
+          userData.full_name = tenantList[0].ragione_sociale;
+        }
+        
+        // Carica centri assegnati al tenant
         const assegnazioniMan = await base44.entities.Assegnazione.filter({ user_email: userData.email });
         const centriIds = [...new Set(assegnazioniMan.map(a => a.centro_id))];
         if (centriIds.length > 0) {
@@ -127,6 +138,17 @@ export default function Layout({ children, currentPageName }) {
             const preferito = manutentori[0]?.centro_preferito_id;
             const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati.find(c => c.id === preferito) || centriAssegnati[0];
             setCentroSelezionato(centroIniziale);
+          }
+        }
+      } else if (tenantList.length > 0) {
+        // Carica centri assegnati al tenant
+        const centroId = tenantList[0].centro_id;
+        if (centroId) {
+          const allCentri = await base44.entities.CentroCommerciale.list();
+          const centroAssegnato = allCentri.find(c => c.id === centroId && c.attivo);
+          if (centroAssegnato) {
+            setCentri([centroAssegnato]);
+            setCentroSelezionato(centroAssegnato);
           }
         }
       } else if (userData.role === 'admin') {
@@ -148,6 +170,9 @@ export default function Layout({ children, currentPageName }) {
       }
       if (userData.tipo_account === 'manutentore' && (location.pathname === '/' || location.pathname === '/Dashboard')) {
         navigate(createPageUrl('Ticket'));
+      }
+      if (userData.tipo_account === 'tenant' && (location.pathname === '/' || location.pathname === '/Dashboard')) {
+        navigate(createPageUrl('Corrispettivi'));
       }
 
       if (userData.tipo_account === 'proprieta') {
@@ -214,6 +239,12 @@ export default function Layout({ children, currentPageName }) {
 
   const navigationGroups = [
     {
+      label: 'CORRISPETTIVI',
+      items: [
+        { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['tenant'] },
+      ]
+    },
+    {
       label: 'OPERATIVITÀ',
       items: [
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
@@ -258,14 +289,20 @@ export default function Layout({ children, currentPageName }) {
   );
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Caricamento...</p>
-        </div>
-      </div>
-    );
+  return (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="text-center">
+      <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+      <p className="text-slate-600">Caricamento...</p>
+    </div>
+  </div>
+  );
+  }
+
+  // Redirect tenant alla pagina Corrispettivi se aprono la root
+  if (user?.tipo_account === 'tenant' && (location.pathname === '/' || location.pathname === '/Dashboard')) {
+  navigate(createPageUrl('Corrispettivi'));
+  return null;
   }
 
   return (
