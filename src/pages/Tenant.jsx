@@ -135,7 +135,7 @@ export default function TenantPage({ centroSelezionato, user }) {
           <Button onClick={() => setMappaOpen(true)} className="bg-orange-500 hover:bg-orange-600 gap-2"><Map className="w-4 h-4" /> Mappa</Button>
           <Dialog open={openForm} onOpenChange={(open) => { setOpenForm(open); if (!open) setEditingTenant(null); }}>
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="bg-blue-600 hover:bg-blue-700 gap-2">
                 <Plus className="w-4 h-4" />
                 Nuovo Tenant
               </Button>
