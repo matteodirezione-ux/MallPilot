@@ -153,8 +153,8 @@ export default function PuliziePage({ centroSelezionato, user }) {
                       const nonLetta = !isLetta(p);
                       return (
                         <div key={p.id} className={`rounded-xl border p-4 cursor-pointer transition-all duration-200
-                          shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
-                          hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+                          shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]
+                          hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
                           ${nonLetta ? 'bg-blue-50 border-blue-50' : 'bg-white/80 backdrop-blur-sm border-white'}`} onClick={() => handleClickSegnalazione(p)}>
                           <div className="flex justify-between items-start gap-3">
                             <div className="flex-1 min-w-0">

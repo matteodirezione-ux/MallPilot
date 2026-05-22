@@ -198,8 +198,8 @@ export default function Report({ centroSelezionato, user }) {
                   const nonLetto = !isLetto(r);
                    return (
                     <div key={r.id} className={`rounded-xl border overflow-hidden transition-all duration-200
-                      shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
-                      hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+                      shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]
+                                             hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
                       ${nonLetto ? 'bg-blue-50 border-blue-50' : 'bg-white/80 backdrop-blur-sm border-white'}`}>
                       <div
                         className={`flex items-center justify-between p-4 cursor-pointer transition-colors ${nonLetto ? 'hover:bg-blue-50' : 'hover:bg-slate-50'}`}

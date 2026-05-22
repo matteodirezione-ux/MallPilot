@@ -544,7 +544,7 @@ export default function Dashboard({ centroSelezionato, user }) {
       {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6">
           {/* Allert Fornitori DUVRI */}
-          <div className="bg-red-50 rounded-lg border border-red-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
+          <div className="bg-red-50 rounded-lg border border-red-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow cursor-pointer" onClick={() => navigate('/Fornitori')}>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Fornitori</p>
               <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><AlertCircle className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
@@ -554,7 +554,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Report da leggere */}
-          <div className="bg-yellow-50 rounded-lg border border-yellow-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow cursor-pointer" onClick={() => navigate('/Report')}>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Report da Leggere</p>
               <div className="bg-emerald-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><BookOpen className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-emerald-600" /></div>
@@ -564,7 +564,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Incassi Mese */}
-          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
               <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><DollarSign className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
@@ -573,7 +573,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Incassi Anno */}
-          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Anno</p>
               <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><TrendingUp className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
@@ -589,7 +589,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Spazi Occupati */}
-          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Spazi Occupati</p>
               <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Building2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
@@ -605,7 +605,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Affitto Medio Giornaliero */}
-          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Affitto Med/Gg</p>
               <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><BarChart2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
@@ -621,7 +621,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Allert Capex Scaduti */}
-          <div className="bg-red-50 rounded-lg border border-red-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
+          <div className="bg-red-50 rounded-lg border border-red-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow cursor-pointer" onClick={() => navigate('/Capex')}>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Allert Capex</p>
               <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><AlertCircle className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
@@ -631,7 +631,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Segnalazioni Pulizie da leggere */}
-          <div className="bg-yellow-50 rounded-lg border border-yellow-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
+          <div className="bg-yellow-50 rounded-lg border border-yellow-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow cursor-pointer" onClick={() => navigate('/Pulizie')}>
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Seg. Pulizie Nuove</p>
               <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-500" /></div>
@@ -641,7 +641,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Numero Eventi */}
-          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">N. Eventi</p>
               <div className="bg-purple-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Sparkles className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-purple-600" /></div>
@@ -650,7 +650,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Giorni Evento */}
-          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Giorni Evento</p>
               <div className="bg-orange-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Calendar className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-orange-600" /></div>
@@ -659,7 +659,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Costo Eventi */}
-          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Eventi</p>
               <div className="bg-red-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><DollarSign className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-red-600" /></div>
@@ -668,7 +668,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </div>
 
           {/* Costo Medio Giorno Evento */}
-          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-xl hover:shadow-2xl transition-shadow">
+          <div className="bg-purple-50 rounded-lg border border-purple-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Costo Med/Gg Ev</p>
               <div className="bg-green-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Target className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-green-600" /></div>
@@ -692,7 +692,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
 
           {/* Capex */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+          <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Capex')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Pulizie Periodiche */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+          <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
             <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Pulizie')}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -777,7 +777,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Ticket */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+          <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
           <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Ticket')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -829,7 +829,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Eventi */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+          <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
           <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -890,7 +890,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           </Card>
 
           {/* Affitti Correnti */}
-          <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+          <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
           <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -932,7 +932,7 @@ export default function Dashboard({ centroSelezionato, user }) {
                     </Card>
 
                     {/* Prossimi Affitti */}
-                    <Card className="bg-white border-slate-200 shadow-xl hover:shadow-2xl transition-shadow">
+                    <Card className="bg-white border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
                     <CardHeader className="pb-2 sm:pb-3 cursor-pointer hover:bg-slate-50 rounded-t-lg transition-colors" onClick={() => navigate('/Calendario')}>
                     <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

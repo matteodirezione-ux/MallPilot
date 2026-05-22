@@ -225,8 +225,8 @@ export default function CapexPage({ centroSelezionato, user }) {
             const missingDuvri = c.stato === 'pianificato' && (!c.duvri_urls || c.duvri_urls.length === 0) && !c.cse;
             return (
             <div key={c.id} className={`rounded-xl border p-4 cursor-pointer transition-all duration-200
-              shadow-[0_2px_12px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]
-              hover:shadow-[0_8px_28px_rgba(0,0,0,0.1),0_2px_8px_rgba(0,0,0,0.06)] hover:-translate-y-0.5
+              shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]
+              hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
               ${cardBg}`} onClick={() => setDettaglio(c)}>
               {missingDuvri && (
                 <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
