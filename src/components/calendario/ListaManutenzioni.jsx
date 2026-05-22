@@ -18,7 +18,7 @@ function ManutenzioneRow({ manutenzione, onEdit, onDelete, onToggleStatus }) {
   const isScaduto = isPast(dataScad) && !isToday(dataScad) && manutenzione.stato !== 'completato' && manutenzione.stato !== 'annullato';
 
   return (
-    <div className={`rounded-xl border p-3 flex gap-3 items-start ${sConf.bg} ${sConf.border} ${isScaduto ? 'border-red-400' : ''}`}>
+    <div className={`rounded-xl border p-3 flex gap-3 items-start shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200 ${sConf.bg} ${isScaduto ? 'border-red-50' : sConf.border}`}>
       <Checkbox checked={manutenzione.stato === 'completato'} onCheckedChange={() => onToggleStatus(manutenzione)} className="mt-0.5 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
