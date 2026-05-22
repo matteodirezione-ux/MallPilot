@@ -1,42 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { startOfMonth, format, addMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
 export default function FormCorrispettivi({ open, onClose, tenant, user, meseIniziale, corrispettivoDaModificare }) {
   const [loading, setLoading] = useState(false);
   
-  // Genera i mesi per la tendina (ultimi 12 mesi + mesi futuri fino a fine anno)
-  const mesiDisponibili = React.useMemo(() => {
-    const mesi = [];
-    const oggi = new Date();
-    // Parte da 12 mesi fa
-    const start = new Date(oggi.getFullYear() - 1, oggi.getMonth(), 1);
-    // Arriva a fine anno corrente
-    const end = new Date(oggi.getFullYear(), 11, 31);
-    
-    for (let d = new Date(start); d <= end; d = addMonths(d, 1)) {
-      const key = format(d, 'yyyy-MM');
-      const label = format(d, 'MMMM yyyy', { locale: it });
-      mesi.push({ key, label });
-    }
-    return mesi;
-  }, []);
+  // Il mese è fisso (quello selezionato dalla tabella o quello del corrispettivo da modificare)
+  const meseFisso = corrispettivoDaModificare 
+    ? format(new Date(corrispettivoDaModificare.mese), 'yyyy-MM')
+    : meseIniziale || format(new Date(), 'yyyy-MM');
 
   const [formData, setFormData] = useState(
     corrispettivoDaModificare ? {
-      mese: format(new Date(corrispettivoDaModificare.mese), 'yyyy-MM'),
       corrispettivi_ivati: corrispettivoDaModificare.corrispettivi_ivati.toString(),
       corrispettivi_netti: corrispettivoDaModificare.corrispettivi_netti.toString(),
       numero_scontrini: corrispettivoDaModificare.numero_scontrini.toString()
     } : {
-      mese: meseIniziale || format(startOfMonth(addMonths(new Date(), -1)), 'yyyy-MM'),
       corrispettivi_ivati: '',
       corrispettivi_netti: '',
       numero_scontrini: ''
@@ -57,24 +42,12 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
         });
         toast.success('Corrispettivi modificati con successo');
       } else {
-        // Nuovo inserimento
-        // Verifica se esiste già un corrispettivo per quel mese
-        const esistenti = await base44.entities.Corrispettivo.filter({
-          tenant_id: tenant.id,
-          mese: formData.mese + '-01'
-        });
-
-        if (esistenti.length > 0) {
-          toast.error('Esiste già un inserimento per questo mese');
-          setLoading(false);
-          return;
-        }
-
+        // Nuovo inserimento per il mese fisso
         await base44.entities.Corrispettivo.create({
           tenant_id: tenant.id,
           centro_id: tenant.centro_id,
           numero_negozio: tenant.numero_negozio,
-          mese: formData.mese + '-01',
+          mese: meseFisso + '-01',
           corrispettivi_ivati: parseFloat(formData.corrispettivi_ivati),
           corrispettivi_netti: parseFloat(formData.corrispettivi_netti),
           numero_scontrini: parseInt(formData.numero_scontrini),
@@ -86,7 +59,6 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
       }
       onClose();
       setFormData({
-        mese: format(startOfMonth(new Date()), 'yyyy-MM'),
         corrispettivi_ivati: '',
         corrispettivi_netti: '',
         numero_scontrini: ''
@@ -108,21 +80,9 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label>Mese di riferimento</Label>
-            <Select
-              value={formData.mese}
-              onValueChange={(value) => setFormData({ ...formData, mese: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleziona mese" />
-              </SelectTrigger>
-              <SelectContent>
-                {mesiDisponibili.map(mese => (
-                  <SelectItem key={mese.key} value={mese.key}>
-                    {mese.label.charAt(0).toUpperCase() + mese.label.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-700">
+              {meseFisso.charAt(0).toUpperCase() + meseFisso.slice(1).replace('-', ' ')}
+            </div>
           </div>
 
           <div>
