@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2, Link as LinkIcon, Check } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import {
@@ -29,7 +29,6 @@ export default function TenantPage({ centroSelezionato, user }) {
   const [mappaOpen, setMappaOpen] = useState(false);
   const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
   const [uploadingMappa, setUploadingMappa] = useState(false);
-  const [copiedTenantId, setCopiedTenantId] = useState(null);
   const queryClient = useQueryClient();
   
   const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
@@ -73,16 +72,6 @@ export default function TenantPage({ centroSelezionato, user }) {
     if (confirm('Sei sicuro di voler eliminare questo tenant?')) {
       deleteMutation.mutate(id);
     }
-  };
-
-  const handleCopyLink = (tenant) => {
-    const baseUrl = window.location.origin;
-    const link = `${baseUrl}/Corrispettivi?tenant_id=${tenant.id}`;
-    navigator.clipboard.writeText(link).then(() => {
-      setCopiedTenantId(tenant.id);
-      toast.success('Link copiato!');
-      setTimeout(() => setCopiedTenantId(null), 2000);
-    });
   };
 
   const handleUploadMappa = async (e) => {
@@ -256,6 +245,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                     <TableHead className="whitespace-nowrap">Reperibile</TableHead>
                     <TableHead className="whitespace-nowrap">PEC</TableHead>
                     <TableHead className="whitespace-nowrap">Email Urgenze</TableHead>
+                    <TableHead className="whitespace-nowrap">Mail App</TableHead>
                     {canViewContractDetails && <TableHead className="whitespace-nowrap">Data Scadenza</TableHead>}
                     {canViewContractDetails && <TableHead className="whitespace-nowrap text-right">Canone</TableHead>}
                     <TableHead className="text-right whitespace-nowrap">Azioni</TableHead>
@@ -286,6 +276,9 @@ export default function TenantPage({ centroSelezionato, user }) {
                       <TableCell className="max-w-[150px] truncate" title={tenant.mail_urgenze_pv_chiuso}>
                         {tenant.mail_urgenze_pv_chiuso || '-'}
                       </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {tenant.mail_app || '-'}
+                      </TableCell>
                       {canViewContractDetails && (
                         <TableCell className="whitespace-nowrap">
                           {tenant.data_scadenza_contratto ? new Date(tenant.data_scadenza_contratto).toLocaleDateString('it-IT') : '-'}
@@ -298,18 +291,6 @@ export default function TenantPage({ centroSelezionato, user }) {
                       )}
                       <TableCell className="text-right whitespace-nowrap">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => handleCopyLink(tenant)}
-                            title="Copia link Corrispettivi"
-                          >
-                            {copiedTenantId === tenant.id ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <LinkIcon className="w-4 h-4" />
-                            )}
-                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -342,6 +323,7 @@ function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin, canViewContra
     reperibile: tenant?.reperibile || '',
     capoarea_resp_commerciale: tenant?.capoarea_resp_commerciale || '',
     mail_urgenze_pv_chiuso: tenant?.mail_urgenze_pv_chiuso || '',
+    mail_app: tenant?.mail_app || '',
     referente_tecnico: tenant?.referente_tecnico || '',
     indirizzo_ufficio_marketing: tenant?.indirizzo_ufficio_marketing || '',
     macchina_condizionamento_esterna: tenant?.macchina_condizionamento_esterna || '',
@@ -456,6 +438,14 @@ function TenantForm({ tenant, centroId, onSave, onCancel, isAdmin, canViewContra
             type="email"
             value={formData.mail_urgenze_pv_chiuso}
             onChange={(e) => setFormData({ ...formData, mail_urgenze_pv_chiuso: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label>Mail App (per accesso tenant)</Label>
+          <Input
+            type="email"
+            value={formData.mail_app}
+            onChange={(e) => setFormData({ ...formData, mail_app: e.target.value })}
           />
         </div>
       </div>

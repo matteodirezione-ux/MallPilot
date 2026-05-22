@@ -64,7 +64,7 @@ export default function Layout({ children, currentPageName }) {
         base44.entities.Direttore.filter({ email: userData.email }),
         base44.entities.Vigilanza.filter({ email: userData.email }),
         base44.entities.Manutentore.filter({ email: userData.email }),
-        base44.entities.Tenant.filter({ email_referente: userData.email })
+        base44.entities.Tenant.filter({ mail_app: userData.email })
       ]);
       
       if (direttori.length > 0) {

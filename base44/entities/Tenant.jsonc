@@ -62,6 +62,10 @@
       "type": "string",
       "description": "PEC aziendale"
     },
+    "mail_app": {
+      "type": "string",
+      "description": "Email per l'accesso all'app del tenant"
+    },
     "data_inizio_contratto": {
       "type": "string",
       "format": "date",
