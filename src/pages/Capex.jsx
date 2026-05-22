@@ -79,14 +79,14 @@ export default function CapexPage({ centroSelezionato, user }) {
 
     const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-    // Larghezze colonne: Descrizione x4, Stato x2, date x1, importi x1
+    // Larghezze colonne
     ws['!cols'] = [
-      { wch: 60 },  // Descrizione (4x)
-      { wch: 30 },  // Stato (2x)
-      { wch: 15 },  // Data Inizio
-      { wch: 15 },  // Data Fine
-      { wch: 15 },  // Budget
-      { wch: 15 },  // Costo Effettivo
+      { wch: 60 },  // Descrizione
+      { wch: 15 },  // Stato
+      { wch: 10 },  // Data Inizio
+      { wch: 10 },  // Data Fine
+      { wch: 10 },  // Budget
+      { wch: 10 },  // Costo Effettivo
     ];
 
     // Stile titolo (A1): grassetto
@@ -130,7 +130,7 @@ export default function CapexPage({ centroSelezionato, user }) {
         // Formato valuta per colonne E e F (indici 4 e 5)
         if ((ci === 4 || ci === 5) && ws[cellRef].v !== '') {
           ws[cellRef].t = 'n';
-          ws[cellRef].z = '€ #,##0.00';
+          ws[cellRef].z = '€ #,##0';
         }
       });
     }
