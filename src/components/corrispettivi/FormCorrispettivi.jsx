@@ -8,10 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { startOfMonth, format } from 'date-fns';
 
-export default function FormCorrispettivi({ open, onClose, tenant, user }) {
+export default function FormCorrispettivi({ open, onClose, tenant, user, meseIniziale }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    mese: format(startOfMonth(new Date()), 'yyyy-MM'),
+    mese: meseIniziale || format(startOfMonth(new Date()), 'yyyy-MM'),
     corrispettivi_ivati: '',
     corrispettivi_netti: '',
     numero_scontrini: ''

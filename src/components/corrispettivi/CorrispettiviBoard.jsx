@@ -3,15 +3,18 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Edit, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
+import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
 
 export default function CorrispettiviBoard({ centroSelezionato, user }) {
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
+  const [showForm, setShowForm] = useState(false);
+  const [tenantDaInserire, setTenantDaInserire] = useState(null);
 
   // Carica tutti i tenant del centro
   const { data: allTenants = [] } = useQuery({
@@ -56,6 +59,7 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
 
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n || 0);
   const monthName = selectedMonth.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  const monthKey = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
 
   const handlePrevMonth = () => {
     setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1));
@@ -63,6 +67,11 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
 
   const handleNextMonth = () => {
     setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1));
+  };
+
+  const handleInserisci = (tenant) => {
+    setTenantDaInserire(tenant);
+    setShowForm(true);
   };
 
   return (
@@ -121,7 +130,17 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                         {corris ? (
                           <CheckCircle2 className="w-5 h-5 text-green-600 mx-auto" />
                         ) : (
-                          <XCircle className="w-5 h-5 text-red-600 mx-auto" />
+                          <div className="flex items-center justify-center gap-2">
+                            <XCircle className="w-5 h-5 text-red-600" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="w-6 h-6"
+                              onClick={() => handleInserisci(tenant)}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -132,6 +151,17 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
           </div>
         </CardContent>
       </Card>
+
+      <FormCorrispettivi
+        open={showForm}
+        onClose={() => {
+          setShowForm(false);
+          setTenantDaInserire(null);
+        }}
+        tenant={tenantDaInserire}
+        user={user}
+        meseIniziale={monthKey}
+      />
     </div>
   );
 }
