@@ -81,7 +81,7 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
           <div>
             <Label>Mese di riferimento</Label>
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 font-medium text-slate-700">
-              {meseFisso.charAt(0).toUpperCase() + meseFisso.slice(1).replace('-', ' ')}
+              {format(new Date(meseFisso + '-01'), 'MMMM yyyy', { locale: it }).charAt(0).toUpperCase() + format(new Date(meseFisso + '-01'), 'MMMM yyyy', { locale: it }).slice(1)}
             </div>
           </div>
 
