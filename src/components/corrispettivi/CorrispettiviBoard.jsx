@@ -37,7 +37,6 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
     queryFn: async () => {
       if (!centroSelezionato?.id || !selectedMonth) return [];
       
-      const [year, month] = selectedMonth.split('-');
       const dateStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1);
       const dateEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0);
       
