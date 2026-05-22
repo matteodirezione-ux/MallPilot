@@ -51,11 +51,11 @@ export default function ImageLightbox({ urls, startIndex = 0, onClose }) {
         </>
       )}
 
-      <div className="relative z-0">
+      <div className="relative pointer-events-none">
         <img
           src={urls[current]}
           alt=""
-          className="max-h-[90vh] max-w-[90vw] object-contain rounded shadow-2xl pointer-events-none"
+          className="max-h-[90vh] max-w-[90vw] object-contain rounded shadow-2xl"
         />
       </div>
 
