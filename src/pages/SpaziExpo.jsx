@@ -146,42 +146,47 @@ export default function SpaziExpo({ centroSelezionato, user }) {
       {spazi.length === 0 ? (
         <div className="text-center py-8 text-slate-400">Nessuno spazio configurato</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {spazi.map(spazio => (
-            <Card key={spazio.id} className={`border rounded-xl overflow-hidden ${!spazio.attivo ? 'opacity-50' : ''}`}>
-              <CardContent className="p-0">
-                <div className="p-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: spazio.colore || '#3b82f6' }} />
-                      <span className="font-bold text-base text-slate-800 flex-shrink-0">{spazio.numero_spazio}</span>
-                      {spazio.nome && <span className="font-semibold text-sm text-slate-700 truncate">{spazio.nome}</span>}
-                      {spazio.superficie_mq && <span className="text-xs text-slate-400 flex-shrink-0">{spazio.superficie_mq} m²</span>}
-                    </div>
-                    {user?.tipo_account !== 'vigilanza' && (
-                      <div className="flex gap-1 flex-shrink-0">
-                        <button onClick={() => handleEdit(spazio)} className="p-1 rounded-lg hover:bg-slate-100"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
-                        <button onClick={() => handleDelete(spazio.id)} className="p-1 rounded-lg hover:bg-red-50"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
-                      </div>
-                    )}
+            <div
+              key={spazio.id}
+              className={`rounded-2xl overflow-hidden bg-white/80 backdrop-blur-sm transition-all duration-300 cursor-default
+                shadow-[0_4px_20px_rgba(0,0,0,0.08),0_1px_4px_rgba(0,0,0,0.05)]
+                hover:shadow-[0_12px_40px_rgba(0,0,0,0.14),0_4px_12px_rgba(0,0,0,0.08)]
+                hover:-translate-y-1
+                ${!spazio.attivo ? 'opacity-50' : ''}`}
+            >
+              <div className="p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: spazio.colore || '#3b82f6' }} />
+                    <span className="font-bold text-base text-slate-800 flex-shrink-0">{spazio.numero_spazio}</span>
+                    {spazio.nome && <span className="font-semibold text-sm text-slate-700 truncate">{spazio.nome}</span>}
+                    {spazio.superficie_mq && <span className="text-xs text-slate-400 flex-shrink-0">{spazio.superficie_mq} m²</span>}
                   </div>
-                </div>
-                <div className="relative">
-                  {spazio.foto_urls?.length > 0 ? (
-                    <div className="w-full" style={{ aspectRatio: '4/3' }}>
-                      <img src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-full bg-slate-100 flex items-center justify-center" style={{ aspectRatio: '4/3' }}>
-                      <Building2 className="w-6 h-6 text-slate-300" />
+                  {user?.tipo_account !== 'vigilanza' && (
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button onClick={() => handleEdit(spazio)} className="p-1 rounded-lg hover:bg-slate-100 transition-colors"><Pencil className="w-3.5 h-3.5 text-slate-400" /></button>
+                      <button onClick={() => handleDelete(spazio.id)} className="p-1 rounded-lg hover:bg-red-50 transition-colors"><Trash2 className="w-3.5 h-3.5 text-red-400" /></button>
                     </div>
                   )}
-                  {spazio.solo_eventi && (
-                    <span className="absolute top-1.5 left-1.5 text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded-full shadow">Solo eventi</span>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="relative">
+                {spazio.foto_urls?.length > 0 ? (
+                  <div className="w-full" style={{ aspectRatio: '4/3' }}>
+                    <img src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-full bg-slate-100 flex items-center justify-center" style={{ aspectRatio: '4/3' }}>
+                    <Building2 className="w-6 h-6 text-slate-300" />
+                  </div>
+                )}
+                {spazio.solo_eventi && (
+                  <span className="absolute top-1.5 left-1.5 text-xs bg-purple-600 text-white px-1.5 py-0.5 rounded-full shadow">Solo eventi</span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
