@@ -404,20 +404,26 @@ export default function Clienti({ centroSelezionato }) {
             return (
               <Card key={cliente.id} className="bg-white border-slate-200 hover:shadow-lg transition-shadow">
                 <CardContent className="p-3">
-                  {/* Header: nome + tabs + azioni sulla stessa riga */}
-                  <div className="flex items-center gap-3 mb-2">
+                  {/* Riga 1: nome + stats + azioni */}
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base font-semibold text-slate-800 shrink-0">
                       {cliente.ragione_sociale}
                     </h3>
-                    {/* Referente inline */}
-                    {cliente.referente_nome && (
-                      <span className="text-xs text-slate-500 truncate">
-                        👤 {cliente.referente_nome}
-                        {cliente.referente_telefono && ` · ${cliente.referente_telefono}`}
-                        {cliente.referente_email && ` · ${cliente.referente_email}`}
+                    <div className="flex items-center gap-1.5 flex-1 flex-wrap">
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-green-50 rounded text-xs text-slate-700">
+                        <DollarSign className="w-3 h-3 text-green-600" />
+                        {formatCurrency(stats.incassoAnno || 0)}
                       </span>
-                    )}
-                    <div className="flex gap-1 ml-auto shrink-0">
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 rounded text-xs text-slate-700">
+                        <TrendingUp className="w-3 h-3 text-blue-600" />
+                        {stats.numeroAffitti || 0} affitti
+                      </span>
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-purple-50 rounded text-xs text-slate-700">
+                        <Calendar className="w-3 h-3 text-purple-600" />
+                        {stats.giorniDaUltimoAffitto !== null ? `${stats.giorniDaUltimoAffitto}gg fa` : 'Mai'}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(cliente)} className="text-blue-600 h-7 w-7">
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
@@ -427,32 +433,14 @@ export default function Clienti({ centroSelezionato }) {
                     </div>
                   </div>
 
-                  {/* Stats compatte */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                      <DollarSign className="w-4 h-4 text-green-600 shrink-0" />
-                      <div className="min-w-0">
-                        <p className="text-[10px] text-slate-500">Incasso {new Date().getFullYear()}</p>
-                        <p className="text-sm font-semibold text-slate-800 truncate">{formatCurrency(stats.incassoAnno || 0)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                      <TrendingUp className="w-4 h-4 text-blue-600 shrink-0" />
-                      <div>
-                        <p className="text-[10px] text-slate-500">Affitti totali</p>
-                        <p className="text-sm font-semibold text-slate-800">{stats.numeroAffitti || 0}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
-                      <Calendar className="w-4 h-4 text-purple-600 shrink-0" />
-                      <div>
-                        <p className="text-[10px] text-slate-500">Ultimo affitto</p>
-                        <p className="text-sm font-semibold text-slate-800">
-                          {stats.giorniDaUltimoAffitto !== null ? `${stats.giorniDaUltimoAffitto}gg fa` : 'Mai'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Riga 2: referente */}
+                  {cliente.referente_nome && (
+                    <p className="text-xs text-slate-500 mt-1">
+                      👤 {cliente.referente_nome}
+                      {cliente.referente_telefono && ` · ${cliente.referente_telefono}`}
+                      {cliente.referente_email && ` · ${cliente.referente_email}`}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );
