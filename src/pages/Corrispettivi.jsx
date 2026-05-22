@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, TrendingUp } from 'lucide-react';
+import { Plus, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import FormCorrispettivi from '@/components/corrispettivi/FormCorrispettivi';
@@ -15,6 +15,7 @@ import CorrispettiviBoard from '@/components/corrispettivi/CorrispettiviBoard';
 export default function Corrispettivi({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState(null);
+  const [annoSelezionato, setAnnoSelezionato] = useState(new Date().getFullYear());
   const queryClient = useQueryClient();
 
   // Leggi il parametro tenant_id dall'URL
@@ -126,6 +127,29 @@ export default function Corrispettivi({ centroSelezionato, user }) {
     );
   }
 
+  // Genera tutti i 12 mesi per l'anno selezionato
+  const mesiCompleti = Array.from({ length: 12 }, (_, i) => {
+    const mese = new Date(annoSelezionato, i, 1);
+    const corrispettivo = corrispettiviPerAnno[annoSelezionato]?.find(
+      c => new Date(c.mese).getMonth() === i
+    );
+    return {
+      data: mese,
+      corrispettivo
+    };
+  });
+
+  // Calcola anni disponibili (aggiungi anno corrente se non presente)
+  const anniDisponibili = (() => {
+    const anniSet = new Set(anni);
+    const annoCorrente = new Date().getFullYear();
+    anniSet.add(annoCorrente);
+    return Array.from(anniSet).sort((a, b) => b - a);
+  })();
+
+  const annoMinimo = Math.min(...anniDisponibili);
+  const annoMassimo = Math.max(...anniDisponibili, new Date().getFullYear());
+
   return (
     <div className="p-3 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -138,78 +162,85 @@ export default function Corrispettivi({ centroSelezionato, user }) {
             {selectedTenant.ragione_sociale} - Negozio {selectedTenant.numero_negozio}
           </p>
         </div>
-        {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') && (
-          <select
-            value={selectedTenant.id}
-            onChange={(e) => setSelectedTenant(allTenants.find(t => t.id === e.target.value))}
-            className="px-3 py-2 border rounded-lg bg-white text-sm"
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setAnnoSelezionato(prev => prev - 1)}
+            disabled={annoSelezionato <= annoMinimo}
           >
-            {allTenants.map(t => (
-              <option key={t.id} value={t.id}>{t.ragione_sociale} - {t.numero_negozio}</option>
-            ))}
-          </select>
-        )}
-        <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-1" /> Nuovo Inserimento
-        </Button>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-lg font-semibold w-20 text-center">{annoSelezionato}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setAnnoSelezionato(prev => prev + 1)}
+            disabled={annoSelezionato >= annoMassimo}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+          <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
+            <Plus className="w-4 h-4 mr-1" /> Nuovo Inserimento
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
         <div className="text-center py-12 text-slate-400">Caricamento...</div>
-      ) : anni.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-slate-400">
-            Nessun corrispettivo inserito. Clicca su "Nuovo Inserimento" per aggiungere i dati.
-          </CardContent>
-        </Card>
       ) : (
-        <div className="space-y-6">
-          {anni.map(anno => (
-            <Card key={anno}>
-              <CardHeader>
-                <CardTitle className="text-lg">{anno}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b bg-slate-50">
-                        <th className="text-left p-3 font-semibold text-sm">Mese</th>
-                        <th className="text-right p-3 font-semibold text-sm">Corrispettivi Ivati</th>
-                        <th className="text-right p-3 font-semibold text-sm">Corrispettivi Netti</th>
-                        <th className="text-right p-3 font-semibold text-sm">Scontrini</th>
-                        <th className="text-left p-3 font-semibold text-sm">Data Inserimento</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {corrispettiviPerAnno[anno]
-                        .sort((a, b) => new Date(b.mese) - new Date(a.mese))
-                        .map(c => (
-                        <tr key={c.id} className="border-b hover:bg-slate-50">
-                          <td className="p-3 font-medium">
-                            {format(new Date(c.mese), 'MMMM yyyy', { locale: it })}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Andamento Mensile {annoSelezionato}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-slate-50">
+                    <th className="text-left p-3 font-semibold text-sm">Mese</th>
+                    <th className="text-right p-3 font-semibold text-sm">Corrispettivi Ivati</th>
+                    <th className="text-right p-3 font-semibold text-sm">Corrispettivi Netti</th>
+                    <th className="text-right p-3 font-semibold text-sm">Scontrini</th>
+                    <th className="text-left p-3 font-semibold text-sm">Data Inserimento</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mesiCompleti.map(({ data, corrispettivo }) => (
+                    <tr key={data.getMonth()} className="border-b hover:bg-slate-50">
+                      <td className="p-3 font-medium">
+                        {format(data, 'MMMM yyyy', { locale: it })}
+                      </td>
+                      {corrispettivo ? (
+                        <>
+                          <td className="p-3 text-right font-mono">
+                            {fmtEur(corrispettivo.corrispettivi_ivati)}
                           </td>
                           <td className="p-3 text-right font-mono">
-                            {fmtEur(c.corrispettivi_ivati)}
+                            {fmtEur(corrispettivo.corrispettivi_netti)}
                           </td>
                           <td className="p-3 text-right font-mono">
-                            {fmtEur(c.corrispettivi_netti)}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {c.numero_scontrini.toLocaleString('it-IT')}
+                            {corrispettivo.numero_scontrini.toLocaleString('it-IT')}
                           </td>
                           <td className="p-3 text-sm text-slate-500">
-                            {format(new Date(c.data_inserimento), 'dd/MM/yyyy HH:mm')}
+                            {format(new Date(corrispettivo.data_inserimento), 'dd/MM/yyyy HH:mm')}
                           </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                        </>
+                      ) : (
+                        <>
+                          <td className="p-3 text-right font-mono text-slate-400">-</td>
+                          <td className="p-3 text-right font-mono text-slate-400">-</td>
+                          <td className="p-3 text-right font-mono text-slate-400">-</td>
+                          <td className="p-3 text-sm text-slate-400">-</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <FormCorrispettivi
