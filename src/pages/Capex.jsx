@@ -98,9 +98,19 @@ export default function CapexPage({ centroSelezionato, user }) {
       };
     });
 
+    // Colori di sfondo per stato (hex senza #)
+    const statoBgColor = {
+      da_pianificare: 'FEE2E2', // rosso chiaro
+      pianificato:    'FEF9C3', // giallo chiaro
+      completato:     'DCFCE7', // verde chiaro
+    };
+
     // Righe dati (da riga 4)
     capexAnno.forEach((c, idx) => {
       const row = idx + 4;
+      const bgColor = statoBgColor[c.stato] || 'FFFFFF';
+      const rowStyle = { border: borderStyle, fill: { fgColor: { rgb: bgColor } } };
+
       const rowData = [
         { v: c.titolo || '', t: 's' },
         { v: STATO_CONFIG[c.stato]?.label || c.stato || '', t: 's' },
@@ -114,7 +124,7 @@ export default function CapexPage({ centroSelezionato, user }) {
           : { v: '', t: 's' },
       ];
       cols.forEach((col, ci) => {
-        ws[`${col}${row}`] = { ...rowData[ci], s: { border: borderStyle } };
+        ws[`${col}${row}`] = { ...rowData[ci], s: rowStyle };
       });
     });
 
