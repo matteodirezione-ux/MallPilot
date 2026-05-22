@@ -64,7 +64,7 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
             <h2 className="text-xl font-semibold text-slate-800">
               {format(inizioSettimana, 'd MMM', { locale: it })} – {format(fineSettimana, 'd MMM yyyy', { locale: it })}
             </h2>
-            <p className="text-sm text-slate-500 mt-0.5">Vista settimanale</p>
+
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="icon" onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}>
