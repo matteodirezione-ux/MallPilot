@@ -98,7 +98,7 @@ export default function CorrispettiviBoard({ centroSelezionato, user }) {
                   return (
                     <tr key={tenant.id} className="border-b hover:bg-slate-50">
                       <td className="p-3">
-                        <div className="font-medium">{tenant.ragione_sociale}</div>
+                        <div className="font-medium">{tenant.insegna || tenant.ragione_sociale}</div>
                         <div className="text-xs text-slate-500">Negozio {tenant.numero_negozio}</div>
                       </td>
                       <td className="p-3 text-right font-mono">
