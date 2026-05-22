@@ -36,7 +36,7 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
       corrispettivi_netti: corrispettivoDaModificare.corrispettivi_netti.toString(),
       numero_scontrini: corrispettivoDaModificare.numero_scontrini.toString()
     } : {
-      mese: meseIniziale || format(startOfMonth(new Date()), 'yyyy-MM'),
+      mese: meseIniziale || format(startOfMonth(addMonths(new Date(), -1)), 'yyyy-MM'),
       corrispettivi_ivati: '',
       corrispettivi_netti: '',
       numero_scontrini: ''
