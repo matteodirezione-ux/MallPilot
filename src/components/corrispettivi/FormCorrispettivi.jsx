@@ -11,10 +11,21 @@ import { it } from 'date-fns/locale';
 export default function FormCorrispettivi({ open, onClose, tenant, user, meseIniziale, corrispettivoDaModificare }) {
   const [loading, setLoading] = useState(false);
   
+  const oggi = new Date();
+  const giornoOggi = oggi.getDate();
+  
+  // Calcola il mese precedente
+  const mesePrecedente = new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1);
+  const mesePrecedenteStr = format(mesePrecedente, 'yyyy-MM');
+  
   // Il mese è fisso (quello selezionato dalla tabella o quello del corrispettivo da modificare)
   const meseFisso = corrispettivoDaModificare 
     ? format(new Date(corrispettivoDaModificare.mese), 'yyyy-MM')
     : meseIniziale || format(new Date(), 'yyyy-MM');
+
+  // Verifica se il tenant può modificare (solo dal 1 al 10 del mese per il mese precedente)
+  const puoModificare = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore' ||
+    (user?.tipo_account === 'tenant' && giornoOggi <= 10 && meseFisso === mesePrecedenteStr);
 
   const [formData, setFormData] = useState(
     corrispettivoDaModificare ? {
@@ -30,11 +41,18 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Verifica permessi tenant
+    if (user?.tipo_account === 'tenant' && !puoModificare) {
+      toast.error('Puoi inserire i corrispettivi solo dal 1° al 10° giorno del mese per il mese precedente');
+      return;
+    }
+    
     setLoading(true);
 
     try {
       if (corrispettivoDaModificare) {
-        // Modifica esistente (solo proprietà/direttore)
+        // Modifica esistente
         await base44.entities.Corrispettivo.update(corrispettivoDaModificare.id, {
           corrispettivi_ivati: parseFloat(formData.corrispettivi_ivati),
           corrispettivi_netti: parseFloat(formData.corrispettivi_netti),
@@ -75,7 +93,14 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{corrispettivoDaModificare ? 'Modifica Corrispettivi' : 'Nuovo Inserimento Corrispettivi'}</DialogTitle>
+          <DialogTitle>
+            {corrispettivoDaModificare ? 'Modifica Corrispettivi' : 'Nuovo Inserimento Corrispettivi'}
+          </DialogTitle>
+          {user?.tipo_account === 'tenant' && !puoModificare && (
+            <p className="text-sm text-red-500 mt-2">
+              Puoi inserire i corrispettivi solo dal 1° al 10° giorno del mese per il mese precedente
+            </p>
+          )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -94,6 +119,7 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
               onChange={(e) => setFormData({ ...formData, corrispettivi_ivati: e.target.value })}
               placeholder="0.00"
               required
+              disabled={!puoModificare && user?.tipo_account === 'tenant'}
             />
           </div>
 
@@ -106,6 +132,7 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
               onChange={(e) => setFormData({ ...formData, corrispettivi_netti: e.target.value })}
               placeholder="0.00"
               required
+              disabled={!puoModificare && user?.tipo_account === 'tenant'}
             />
           </div>
 
@@ -117,6 +144,7 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
               onChange={(e) => setFormData({ ...formData, numero_scontrini: e.target.value })}
               placeholder="0"
               required
+              disabled={!puoModificare && user?.tipo_account === 'tenant'}
             />
           </div>
 
@@ -124,7 +152,10 @@ export default function FormCorrispettivi({ open, onClose, tenant, user, meseIni
             <Button type="button" variant="outline" onClick={onClose}>
               Annulla
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button 
+              type="submit" 
+              disabled={loading || (!puoModificare && user?.tipo_account === 'tenant')}
+            >
               {loading ? 'Inserimento...' : 'Inserisci'}
             </Button>
           </div>

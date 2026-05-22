@@ -16,7 +16,15 @@ export default function Corrispettivi({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [annoSelezionato, setAnnoSelezionato] = useState(new Date().getFullYear());
+  const [meseDaModificare, setMeseDaModificare] = useState(null);
   const queryClient = useQueryClient();
+  
+  // Calcola se il tenant può modificare (solo dal 1 al 10 del mese per il mese precedente)
+  const oggi = new Date();
+  const giornoOggi = oggi.getDate();
+  const mesePrecedente = new Date(oggi.getFullYear(), oggi.getMonth() - 1, 1);
+  const puoModificareTenant = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore' ||
+    (user?.tipo_account === 'tenant' && giornoOggi <= 10);
 
   // Leggi il parametro tenant_id dall'URL
   const tenantIdFromUrl = new URLSearchParams(window.location.search).get('tenant_id');
@@ -180,9 +188,12 @@ export default function Corrispettivi({ centroSelezionato, user }) {
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
-          <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-1" /> Nuovo Inserimento
-          </Button>
+          {(user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore' || 
+            (user?.tipo_account === 'tenant' && puoModificareTenant)) && (
+            <Button onClick={() => { setMeseDaModificare(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-1" /> Nuovo Inserimento
+            </Button>
+          )}
         </div>
       </div>
 
@@ -206,36 +217,53 @@ export default function Corrispettivi({ centroSelezionato, user }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {mesiCompleti.map(({ data, corrispettivo }) => (
-                    <tr key={data.getMonth()} className="border-b hover:bg-slate-50">
-                      <td className="p-3 font-medium">
-                        {format(data, 'MMMM yyyy', { locale: it })}
-                      </td>
-                      {corrispettivo ? (
-                        <>
-                          <td className="p-3 text-right font-mono">
-                            {fmtEur(corrispettivo.corrispettivi_ivati)}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {fmtEur(corrispettivo.corrispettivi_netti)}
-                          </td>
-                          <td className="p-3 text-right font-mono">
-                            {corrispettivo.numero_scontrini.toLocaleString('it-IT')}
-                          </td>
-                          <td className="p-3 text-sm text-slate-500">
-                            {format(new Date(corrispettivo.data_inserimento), 'dd/MM/yyyy HH:mm')}
-                          </td>
-                        </>
-                      ) : (
-                        <>
-                          <td className="p-3 text-right font-mono text-slate-400">-</td>
-                          <td className="p-3 text-right font-mono text-slate-400">-</td>
-                          <td className="p-3 text-right font-mono text-slate-400">-</td>
-                          <td className="p-3 text-sm text-slate-400">-</td>
-                        </>
-                      )}
-                    </tr>
-                  ))}
+                  {mesiCompleti.map(({ data, corrispettivo }) => {
+                    const meseCorrente = format(data, 'yyyy-MM');
+                    const canEdit = puoModificareTenant && corrispettivo && meseCorrente === mesePrecedente;
+                    
+                    return (
+                      <tr key={data.getMonth()} className="border-b hover:bg-slate-50">
+                        <td className="p-3 font-medium">
+                          {format(data, 'MMMM yyyy', { locale: it })}
+                        </td>
+                        {corrispettivo ? (
+                          <>
+                            <td className="p-3 text-right font-mono">
+                              {fmtEur(corrispettivo.corrispettivi_ivati)}
+                            </td>
+                            <td className="p-3 text-right font-mono">
+                              {fmtEur(corrispettivo.corrispettivi_netti)}
+                            </td>
+                            <td className="p-3 text-right font-mono">
+                              {corrispettivo.numero_scontrini.toLocaleString('it-IT')}
+                            </td>
+                            <td className="p-3 text-sm text-slate-500">
+                              {format(new Date(corrispettivo.data_inserimento), 'dd/MM/yyyy HH:mm')}
+                            </td>
+                            {canEdit && (
+                              <td className="p-3 text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => { setMeseDaModificare(corrispettivo); setShowForm(true); }}
+                                >
+                                  Modifica
+                                </Button>
+                              </td>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <td className="p-3 text-right font-mono text-slate-400">-</td>
+                            <td className="p-3 text-right font-mono text-slate-400">-</td>
+                            <td className="p-3 text-right font-mono text-slate-400">-</td>
+                            <td className="p-3 text-sm text-slate-400">-</td>
+                            <td></td>
+                          </>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -248,6 +276,8 @@ export default function Corrispettivi({ centroSelezionato, user }) {
         onClose={() => setShowForm(false)}
         tenant={selectedTenant}
         user={user}
+        meseIniziale={meseDaModificare ? format(new Date(meseDaModificare.mese), 'yyyy-MM') : null}
+        corrispettivoDaModificare={meseDaModificare}
       />
     </div>
   );
