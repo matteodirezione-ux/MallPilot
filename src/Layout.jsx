@@ -117,35 +117,20 @@ export default function Layout({ children, currentPageName }) {
         }
       } else if (tenantList.length > 0) {
         // Questo utente è un tenant
+        const tenant = tenantList[0];
         if (userData.tipo_account !== 'tenant') {
           await base44.auth.updateMe({ 
             tipo_account: 'tenant',
-            full_name: tenantList[0].ragione_sociale
+            full_name: tenant.ragione_sociale
           });
           userData.tipo_account = 'tenant';
-          userData.full_name = tenantList[0].ragione_sociale;
+          userData.full_name = tenant.ragione_sociale;
         }
         
-        // Carica centri assegnati al tenant
-        const assegnazioniMan = await base44.entities.Assegnazione.filter({ user_email: userData.email });
-        const centriIds = [...new Set(assegnazioniMan.map(a => a.centro_id))];
-        if (centriIds.length > 0) {
+        // Assegna il centro commerciale dal tenant
+        if (tenant.centro_id) {
           const allCentri = await base44.entities.CentroCommerciale.list();
-          const centriAssegnati = allCentri.filter(c => centriIds.includes(c.id) && c.attivo);
-          setCentri(centriAssegnati);
-          if (centriAssegnati.length > 0) {
-            const savedCentroId = localStorage.getItem('centroSelezionatoId');
-            const preferito = manutentori[0]?.centro_preferito_id;
-            const centroIniziale = centriAssegnati.find(c => c.id === savedCentroId) || centriAssegnati.find(c => c.id === preferito) || centriAssegnati[0];
-            setCentroSelezionato(centroIniziale);
-          }
-        }
-      } else if (tenantList.length > 0) {
-        // Carica centri assegnati al tenant
-        const centroId = tenantList[0].centro_id;
-        if (centroId) {
-          const allCentri = await base44.entities.CentroCommerciale.list();
-          const centroAssegnato = allCentri.find(c => c.id === centroId && c.attivo);
+          const centroAssegnato = allCentri.find(c => c.id === tenant.centro_id && c.attivo);
           if (centroAssegnato) {
             setCentri([centroAssegnato]);
             setCentroSelezionato(centroAssegnato);
