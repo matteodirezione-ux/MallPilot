@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2 } from 'lucide-react';
+import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2, Link as LinkIcon, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import {
@@ -29,6 +29,7 @@ export default function TenantPage({ centroSelezionato, user }) {
   const [mappaOpen, setMappaOpen] = useState(false);
   const [mappaUrl, setMappaUrl] = useState(centroSelezionato?.piantina_url || null);
   const [uploadingMappa, setUploadingMappa] = useState(false);
+  const [copiedTenantId, setCopiedTenantId] = useState(null);
   const queryClient = useQueryClient();
   
   const isAdmin = user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore';
@@ -72,6 +73,16 @@ export default function TenantPage({ centroSelezionato, user }) {
     if (confirm('Sei sicuro di voler eliminare questo tenant?')) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleCopyLink = (tenant) => {
+    const baseUrl = window.location.origin;
+    const link = `${baseUrl}/Corrispettivi?tenant_id=${tenant.id}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedTenantId(tenant.id);
+      toast.success('Link copiato!');
+      setTimeout(() => setCopiedTenantId(null), 2000);
+    });
   };
 
   const handleUploadMappa = async (e) => {
@@ -287,6 +298,18 @@ export default function TenantPage({ centroSelezionato, user }) {
                       )}
                       <TableCell className="text-right whitespace-nowrap">
                         <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleCopyLink(tenant)}
+                            title="Copia link Corrispettivi"
+                          >
+                            {copiedTenantId === tenant.id ? (
+                              <Check className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <LinkIcon className="w-4 h-4" />
+                            )}
+                          </Button>
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
                             <Edit className="w-4 h-4" />
                           </Button>

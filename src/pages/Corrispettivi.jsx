@@ -17,6 +17,9 @@ export default function Corrispettivi({ centroSelezionato, user }) {
   const [selectedTenant, setSelectedTenant] = useState(null);
   const queryClient = useQueryClient();
 
+  // Leggi il parametro tenant_id dall'URL
+  const tenantIdFromUrl = new URLSearchParams(window.location.search).get('tenant_id');
+
   // Carica tutti i tenant (per proprietà/direttore)
   const { data: allTenants } = useQuery({
     queryKey: ['tenants', centroSelezionato?.id],
@@ -49,14 +52,31 @@ export default function Corrispettivi({ centroSelezionato, user }) {
     enabled: user?.tipo_account === 'tenant',
   });
 
+  // Carica il tenant specifico dall'URL se presente
+  const { data: tenantFromUrl } = useQuery({
+    queryKey: ['tenant-from-url', tenantIdFromUrl],
+    queryFn: async () => {
+      if (!tenantIdFromUrl) return null;
+      try {
+        return await base44.entities.Tenant.get(tenantIdFromUrl);
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!tenantIdFromUrl,
+  });
+
   // Imposta il tenant selezionato
   useEffect(() => {
-    if (user?.tipo_account === 'tenant' && userTenant) {
+    if (tenantFromUrl) {
+      // Priorità al tenant dall'URL
+      setSelectedTenant(tenantFromUrl);
+    } else if (user?.tipo_account === 'tenant' && userTenant) {
       setSelectedTenant(userTenant);
     } else if (allTenants?.length > 0 && !selectedTenant) {
       setSelectedTenant(allTenants[0]);
     }
-  }, [userTenant, allTenants, user?.tipo_account]);
+  }, [tenantFromUrl, userTenant, allTenants, user?.tipo_account]);
 
   // Carica i corrispettivi del tenant selezionato
   const { data: corrispettivi, isLoading } = useQuery({
