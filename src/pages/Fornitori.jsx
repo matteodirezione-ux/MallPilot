@@ -93,7 +93,11 @@ export default function Fornitori({ centroSelezionato, user }) {
                 ${!hasDuvri ? 'border-orange-300 bg-orange-50' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
                   <div className="p-4 flex items-center justify-between cursor-pointer" onClick={() => toggleEspanso(fornitore.id)}>
                     <div className="flex-1 min-w-0">
-                      {!hasDuvri && <span className="text-xs text-orange-600 font-medium mb-1 block">⚠️ DUVRI MANCANTE</span>}
+                      {!hasDuvri && (
+                        <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
+                          ⚠️ DUVRI MANCANTE
+                        </div>
+                      )}
                       <p className="font-semibold text-slate-800">{fornitore.nome_ditta}</p>
                       <div className="flex flex-wrap gap-3 mt-1 text-sm text-slate-500">
                         {fornitore.referente_nome && <span>· {fornitore.referente_nome}</span>}
@@ -139,7 +143,11 @@ export default function Fornitori({ centroSelezionato, user }) {
                           <div className="space-y-2">
                             {fornitore.subornitori.map((sub, idx) => (
                               <div key={idx} className={`p-3 rounded-lg border text-sm ${!sub.duvri_urls?.length ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
-                                {!sub.duvri_urls?.length && <p className="text-xs text-orange-600 font-medium mb-1">⚠️ DUVRI MANCANTE</p>}
+                                {!sub.duvri_urls?.length && (
+                                  <div className="bg-red-500 text-white px-3 py-1 font-bold text-xs mb-2 rounded">
+                                    ⚠️ DUVRI MANCANTE
+                                  </div>
+                                )}
                                 <p className="font-medium text-slate-800">{sub.nome_ditta}</p>
                                 {sub.referente_nome && <p className="text-slate-500 text-xs">{sub.referente_nome}</p>}
                                 {sub.referente_email && <a href={`mailto:${sub.referente_email}`} className="text-blue-600 text-xs hover:underline block">{sub.referente_email}</a>}
