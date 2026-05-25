@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import FormTicket from '@/components/tickets/FormTicket';
@@ -26,7 +26,7 @@ const formatData = (d) => {
   try { return format(new Date(d), 'dd/MM/yyyy', { locale: it }); } catch { return d; }
 };
 
-function DettaglioTicketDialog({ ticket, onClose, onEdit }) {
+function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm }) {
   const [lightbox, setLightbox] = useState(null);
   const tipConf = tipologiaConfig[ticket.tipologia] || tipologiaConfig.ordinario;
   const stConf = statoConfig[ticket.stato] || statoConfig.aperto;
@@ -55,6 +55,13 @@ function DettaglioTicketDialog({ ticket, onClose, onEdit }) {
           <Row label="Operatore" value={ticket.operatore} />
           <Row label="Tipologia" value={<Badge className={tipConf.color}>{tipConf.label}</Badge>} />
           <Row label="Stato" value={<Badge className={stConf.color}>{stConf.label}</Badge>} />
+          {canConfirm && (
+            <Row label="Conferma Direttore" value={
+              ticket.confermato
+                ? <span className="inline-flex items-center gap-1 text-green-700 font-medium"><ShieldCheck className="w-4 h-4" /> Confermato</span>
+                : <span className="inline-flex items-center gap-1 text-amber-700 font-medium"><ShieldAlert className="w-4 h-4" /> Da confermare</span>
+            } />
+          )}
           <Row label="Data apertura" value={formatData(ticket.data_apertura)} />
           <Row label="Scadenza" value={formatData(ticket.scadenza)} />
           {ticket.numero_sollecito > 0 && <Row label="Sollecito" value={`Sollecito ${ticket.numero_sollecito}`} />}
@@ -182,9 +189,18 @@ export default function Ticket({ centroSelezionato, user }) {
     sollecitati: tickets.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
     scaduti: tickets.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso').length,
     chiuso: tickets.filter(t => t.stato === 'chiuso').length,
+    daConfermare: tickets.filter(t => !t.confermato && t.stato !== 'chiuso').length,
   };
 
   const isReadOnly = user?.tipo_account === 'manutentore';
+  const canConfirm = user?.tipo_account === 'direttore' || user?.tipo_account === 'proprieta';
+
+  const handleConferma = async (ticket, e) => {
+    e.stopPropagation();
+    const nuovoValore = !ticket.confermato;
+    await base44.entities.Ticket.update(ticket.id, { confermato: nuovoValore });
+    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, confermato: nuovoValore } : t));
+  };
 
   return (
     <div className="p-4 md:p-6">
@@ -202,12 +218,13 @@ export default function Ticket({ centroSelezionato, user }) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+      <div className={`grid gap-3 mb-5 ${canConfirm ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {[
           { icon: TicketIcon, color: 'bg-blue-100', iconColor: 'text-blue-600', value: counts.aperto, label: 'Aperti' },
           { icon: AlertCircle, color: 'bg-red-100', iconColor: 'text-red-600', value: counts.scaduti, label: 'Scaduti' },
           { icon: AlertCircle, color: 'bg-orange-100', iconColor: 'text-orange-600', value: counts.sollecitati, label: 'Sollecitati' },
           { icon: CheckCircle2, color: 'bg-green-100', iconColor: 'text-green-600', value: counts.chiuso, label: 'Chiusi' },
+          ...(canConfirm ? [{ icon: ShieldAlert, color: 'bg-amber-100', iconColor: 'text-amber-600', value: counts.daConfermare, label: 'Da confermare' }] : []),
         ].map(({ icon: Icon, color, iconColor, value, label }) => (
           <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-white p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]">
             <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
@@ -304,7 +321,15 @@ export default function Ticket({ centroSelezionato, user }) {
                      <span className="h-6 text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</span>
                    )}
                    {isScaduto && <Badge className="bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</Badge>}
-                  </div>
+                   {canConfirm && (
+                     <button
+                       onClick={(e) => handleConferma(ticket, e)}
+                       className={`flex items-center gap-1 h-6 text-xs px-2 py-1 rounded-full font-medium transition-colors ${ticket.confermato ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
+                     >
+                       {ticket.confermato ? <><ShieldCheck className="w-3 h-3" /> Confermato</> : <><ShieldAlert className="w-3 h-3" /> Da confermare</>}
+                     </button>
+                   )}
+                   </div>
                   {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 items-center">
                    <span>Operatore: <strong className="text-slate-700">{ticket.operatore}</strong></span>
@@ -372,6 +397,7 @@ export default function Ticket({ centroSelezionato, user }) {
           ticket={dettaglioTicket}
           onClose={() => setDettaglioTicket(null)}
           onEdit={!isReadOnly ? () => { handleEdit(dettaglioTicket); } : null}
+          canConfirm={canConfirm}
         />
       )}
 

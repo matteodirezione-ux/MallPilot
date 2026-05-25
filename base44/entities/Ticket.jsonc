@@ -1,0 +1,73 @@
+{
+  "name": "Ticket",
+  "type": "object",
+  "properties": {
+    "numero_ticket": {
+      "type": "string",
+      "description": "Numero identificativo del ticket"
+    },
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "data_apertura": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di apertura del ticket"
+    },
+    "operatore": {
+      "type": "string",
+      "description": "Nome dell'operatore che apre il ticket"
+    },
+    "tipologia": {
+      "type": "string",
+      "enum": [
+        "ordinario",
+        "urgente"
+      ],
+      "default": "ordinario",
+      "description": "Tipologia del ticket"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione del ticket"
+    },
+    "scadenza": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di scadenza del ticket"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "aperto",
+        "in_corso",
+        "chiuso"
+      ],
+      "default": "aperto",
+      "description": "Stato del ticket"
+    },
+    "numero_sollecito": {
+      "type": "number",
+      "description": "Numero del sollecito (0 = nessun sollecito)"
+    },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto allegate al ticket"
+    },
+    "confermato": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se il ticket \u00e8 stato confermato dal direttore"
+    }
+  },
+  "required": [
+    "numero_ticket",
+    "operatore",
+    "tipologia",
+    "data_apertura"
+  ]
+}
