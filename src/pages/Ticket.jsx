@@ -288,7 +288,7 @@ export default function Ticket({ centroSelezionato, user }) {
               <div key={ticket.id} onClick={() => handleCardClick(ticket)} className={`rounded-xl border p-4 flex gap-4 items-start transition-all duration-200 cursor-pointer
                 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]
                                  hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
-                ${isScaduto ? 'bg-red-50 border-red-200' : canConfirm && ticket.confermato ? 'bg-green-50 border-green-200' : canConfirm && !ticket.confermato ? 'bg-yellow-50 border-yellow-200' : 'bg-white/80 backdrop-blur-sm border-white'}`}>
+                ${canConfirm && ticket.confermato ? 'bg-green-50 border-green-200' : canConfirm && !ticket.confermato ? 'bg-yellow-50 border-yellow-200' : 'bg-white/80 backdrop-blur-sm border-white'}`}>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                    <span className="font-semibold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
