@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Building2, MapPin, Pencil, Trash2, Map, Loader2 } from 'lucide-react';
+import SafeImage from '@/components/ui/SafeImage';
 import { toast } from 'sonner';
 
 export default function SpaziExpo({ centroSelezionato, user }) {
@@ -175,7 +176,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
               <div className="relative">
                 {spazio.foto_urls?.length > 0 ? (
                   <div className="w-full" style={{ aspectRatio: '4/3' }}>
-                    <img src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" />
+                    <SafeImage src={spazio.foto_urls[0]} alt="" className="w-full h-full object-cover" fallback={<div className="w-full h-full bg-slate-100 flex items-center justify-center"><Building2 className="w-6 h-6 text-slate-300" /></div>} />
                   </div>
                 ) : (
                   <div className="w-full bg-slate-100 flex items-center justify-center" style={{ aspectRatio: '4/3' }}>
@@ -230,7 +231,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
                 <div className="flex flex-wrap gap-1 mt-2">
                   {formData.foto_urls.map((url, i) => (
                     <div key={i} className="relative">
-                      <img src={url} alt="" className="w-14 h-14 rounded object-cover" />
+                      <SafeImage src={url} alt="" className="w-14 h-14 rounded object-cover" />
                       <button type="button" onClick={() => setFormData(prev => ({ ...prev, foto_urls: prev.foto_urls.filter((_, idx) => idx !== i) }))} className="absolute -top-1 -right-1 bg-white rounded-full shadow p-0.5 text-xs">✕</button>
                     </div>
                   ))}
@@ -251,7 +252,7 @@ export default function SpaziExpo({ centroSelezionato, user }) {
           <DialogHeader><DialogTitle>Mappa centro - {centroSelezionato?.nome}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             {mappaUrl ? (
-              <img src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[75vh]" />
+              <SafeImage src={mappaUrl} alt="Mappa centro" className="w-full rounded-lg object-contain max-h-[75vh]" />
             ) : (
               <div className="flex items-center justify-center h-40 bg-slate-100 rounded-lg text-slate-400 text-sm">Nessuna mappa caricata</div>
             )}

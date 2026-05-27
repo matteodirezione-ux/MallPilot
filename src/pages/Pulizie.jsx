@@ -10,6 +10,7 @@ import FormPulizia from '@/components/pulizie/FormPulizia';
 import ListaPuliziePeriodiche from '@/components/pulizie/ListaPuliziePeriodiche';
 import FormPuliziaPeriodica from '@/components/pulizie/FormPuliziaPeriodica';
 import ImageLightbox from '@/components/ui/ImageLightbox';
+import SafeImage from '@/components/ui/SafeImage';
 
 const parseLocalDate = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
 const MESI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
@@ -165,9 +166,9 @@ export default function PuliziePage({ centroSelezionato, user }) {
                               <p className="text-xs text-slate-500 mt-0.5">{format(parseLocalDate(p.data), 'dd MMM yyyy', { locale: it })}</p>
                               {p.descrizione && <p className="text-sm text-slate-600 mt-1 line-clamp-2">{p.descrizione}</p>}
                               {p.foto_urls?.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {p.foto_urls.map((url, i) => <img key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
-                                </div>
+                              <div className="flex flex-wrap gap-1 mt-2">
+                              {p.foto_urls.map((url, i) => <SafeImage key={i} src={url} alt="" className="w-10 h-10 rounded object-cover" />)}
+                              </div>
                               )}
                               {p.creato_da_nome && <p className="text-xs text-slate-400 mt-1">Creato da {p.creato_da_nome}</p>}
                             </div>
@@ -198,7 +199,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
                       <p className="text-xs font-medium text-slate-500 mb-1">Foto ({dettaglio.foto_urls.length})</p>
                       <div className="flex flex-wrap gap-2">
                         {dettaglio.foto_urls.map((url, i) => (
-                          <img 
+                          <SafeImage 
                             key={i} 
                             src={url} 
                             alt="" 

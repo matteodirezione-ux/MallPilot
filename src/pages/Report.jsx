@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ImageLightbox from '@/components/ui/ImageLightbox';
+import SafeImage from '@/components/ui/SafeImage';
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
 
@@ -244,7 +245,7 @@ export default function Report({ centroSelezionato, user }) {
                           {r.foto_urls?.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-3">
                               {r.foto_urls.map((url, i) => (
-                                <img key={i} src={url} alt="" className="w-20 h-20 rounded-lg object-cover border border-slate-200 cursor-pointer hover:opacity-90"
+                                <SafeImage key={i} src={url} alt="" className="w-20 h-20 rounded-lg object-cover border border-slate-200 cursor-pointer hover:opacity-90"
                                   onClick={() => setLightbox({ urls: r.foto_urls, index: i })} />
                               ))}
                             </div>
@@ -306,7 +307,7 @@ export default function Report({ centroSelezionato, user }) {
               <div className="flex flex-wrap gap-2 mb-2">
                 {form.foto_urls.map((url, i) => (
                   <div key={i} className="relative">
-                    <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-slate-200" />
+                    <SafeImage src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-slate-200" />
                     <button onClick={() => rimuoviFoto(i)} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600">
                       <X className="w-3 h-3" />
                     </button>
