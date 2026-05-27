@@ -24,6 +24,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
+import SafeImage from '@/components/ui/SafeImage';
 import { Button } from '@/components/ui/button';
 
 export default function Layout({ children, currentPageName }) {
@@ -319,17 +320,18 @@ export default function Layout({ children, currentPageName }) {
               {centroSelezionato && centri.length > 0 ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
                   {centroSelezionato.logo_url ? (
-                    <img
+                    <SafeImage
                       src={centroSelezionato.logo_url}
                       alt={centroSelezionato.nome}
                       className="h-10 w-full object-contain flex-shrink-0"
                       style={{maxWidth: '160px'}}
-                      onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }}
+                      fallback={<p className="font-bold text-slate-800 text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>}
                     />
-                  ) : null}
-                  <div style={{display: centroSelezionato.logo_url ? 'none' : 'block'}} className="flex-1 min-w-0">
-                    <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
-                  </div>
+                  ) : (
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
+                    </div>
+                  )}
                   {centri.length > 1 && <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
                   {centri.length > 1 && (
                     <select

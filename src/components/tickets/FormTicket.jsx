@@ -5,6 +5,7 @@ import DatePicker from '@/components/ui/DatePicker';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Image as ImageIcon, X as XIcon, Loader2, Camera, Trash2 } from 'lucide-react';
+import SafeImage from '@/components/ui/SafeImage';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import { base44 } from '@/api/base44Client';
 import { compressImages } from '@/lib/compressImage';
@@ -123,7 +124,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
                 <span className={labelClass}>Foto</span>
                 <div className="flex-1 grid grid-cols-4 gap-1 pt-1">
                   {(form.foto_urls || []).map((url, i) => (
-                   <img key={i} src={url} alt="" className="w-full h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightbox(i)} />
+                   <SafeImage key={i} src={url} alt="" className="w-full h-16 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightbox(i)} />
                   ))}
                 </div>
               </div>
@@ -242,7 +243,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, readOn
                 <div className="grid grid-cols-4 gap-1">
                   {(form.foto_urls || []).map((url, i) => (
                     <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full h-16 object-cover rounded" />
+                      <SafeImage src={url} alt="" className="w-full h-16 object-cover rounded" />
                       <button
                         type="button"
                         onClick={() => handleRemoveFoto(url)}

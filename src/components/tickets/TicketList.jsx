@@ -1,4 +1,5 @@
 import React from 'react';
+import SafeImage from '@/components/ui/SafeImage';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, ShieldCheck, ShieldAlert, Pencil, Trash2 } from 'lucide-react';
@@ -86,7 +87,7 @@ const TicketCard = React.memo(({ ticket, oggi, canConfirm, isReadOnly, handleCar
         {ticket.foto_urls?.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2">
             {ticket.foto_urls.map((url, i) => (
-              <img key={i} src={url} alt="" className="w-10 h-10 rounded-md object-cover border border-slate-200" />
+              <SafeImage key={i} src={url} alt="" className="w-10 h-10 rounded-md object-cover border border-slate-200" />
             ))}
           </div>
         )}
