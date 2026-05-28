@@ -212,7 +212,7 @@ export default function Ticket({ centroSelezionato, user }) {
     return d && d >= inizio && d <= fine;
   });
   const counts = {
-    attesa: ticketsMese.filter(t => t.stato === 'in_attesa_approvazione').length,
+    attesa: ticketsMese.filter(t => ['in_attesa_approvazione', 'preventivo_inserito'].includes(t.stato)).length,
     approvati: ticketsMese.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito'].includes(t.stato)).length,
     daControllare: ticketsMese.filter(t => t.stato === 'da_controllare').length,
     chiusi: ticketsMese.filter(t => t.stato === 'chiuso').length,
