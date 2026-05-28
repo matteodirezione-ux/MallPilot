@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export const STATI_CONFIG = {
   in_attesa_approvazione: { label: 'In attesa approvazione', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400' },
   approvato:              { label: 'Approvato',              color: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500' },
-  approvato_con_preventivo: { label: 'Approvato con preventivo', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
+  approvato_con_preventivo: { label: 'Richiesta preventivo', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
   preventivo_inserito:    { label: 'Preventivo inserito',    color: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500' },
   da_controllare:         { label: 'Da controllare',         color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500' },
   chiuso:                 { label: 'Chiuso',                 color: 'bg-green-100 text-green-700',  dot: 'bg-green-500' },
