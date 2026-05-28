@@ -131,7 +131,7 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
         ${cardBg}`}
     >
       {/* Dot tipologia */}
-      <div className={`w-1.5 self-stretch rounded-full flex-shrink-0 ${ticket.tipologia === 'urgente' ? 'bg-red-500' : 'bg-blue-400'}`} />
+
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2 mb-1.5">
