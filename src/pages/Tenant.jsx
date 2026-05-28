@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2 } from 'lucide-react';
+import DettaglioTenantDialog from '@/components/tenant/DettaglioTenantDialog';
 import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import {
@@ -23,6 +24,7 @@ import {
 export default function TenantPage({ centroSelezionato, user }) {
   const [openForm, setOpenForm] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
+  const [viewingTenant, setViewingTenant] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('numero_negozio');
   const [sortDirection, setSortDirection] = useState('asc');
@@ -253,7 +255,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                 </TableHeader>
                 <TableBody>
                   {filteredAndSortedTenants.map((tenant) => (
-                    <TableRow key={tenant.id} className="hover:bg-slate-50">
+                    <TableRow key={tenant.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => setViewingTenant(tenant)}>
                       <TableCell>
                         {tenant.logo_url ? (
                           <img src={tenant.logo_url} alt={tenant.insegna || tenant.ragione_sociale} className="w-10 h-10 rounded-lg object-cover" />
@@ -290,7 +292,7 @@ export default function TenantPage({ centroSelezionato, user }) {
                         </TableCell>
                       )}
                       <TableCell className="text-right whitespace-nowrap">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2" onClick={e => e.stopPropagation()}>
                           <Button variant="ghost" size="icon" onClick={() => handleEdit(tenant)}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -307,6 +309,13 @@ export default function TenantPage({ centroSelezionato, user }) {
           </CardContent>
         </Card>
       )}
+
+      <DettaglioTenantDialog
+        tenant={viewingTenant}
+        open={!!viewingTenant}
+        onClose={() => setViewingTenant(null)}
+        canViewContractDetails={canViewContractDetails}
+      />
     </div>
   );
 }
