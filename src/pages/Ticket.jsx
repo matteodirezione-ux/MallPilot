@@ -171,6 +171,19 @@ export default function Ticket({ centroSelezionato, user }) {
     if (!Object.keys(update).length) return;
     await base44.entities.Ticket.update(ticket.id, update);
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, ...update } : t));
+
+    // Crea automaticamente un controllo quando il ticket viene messo "da_controllare"
+    if (update.stato === 'da_controllare') {
+      const oggi = new Date().toISOString().split('T')[0];
+      await base44.entities.Manutenzione.create({
+        titolo: `Controllare ticket n. ${ticket.numero_ticket}`,
+        descrizione: ticket.descrizione || '',
+        centro_id: ticket.centro_id || '',
+        data_scadenza: oggi,
+        stato: 'da_fare',
+      });
+    }
+
     setAzioneDialog(null);
   };
 
