@@ -82,6 +82,12 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
     if (isNuovo) {
       data.stato = form.tipologia === 'urgente' ? 'approvato' : 'in_attesa_approvazione';
     }
+    // Manutentore: se inserisce un preventivo, passa automaticamente a preventivo_inserito
+    if (isManutentore && data.costo_stimato !== '' && data.costo_stimato !== null && data.costo_stimato !== undefined) {
+      if (['approvato', 'approvato_con_preventivo'].includes(ticket?.stato)) {
+        data.stato = 'preventivo_inserito';
+      }
+    }
     if (data.costo_stimato !== '' && data.costo_stimato !== null) {
       data.costo_stimato = Number(data.costo_stimato);
     } else {
@@ -147,11 +153,12 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
               </div>
             </div>
 
-            {(ticket.stato === 'approvato_con_preventivo') && (
+            {['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
               <div className={rowClass}>
-                <label className={labelClass}>Costo stimato (€)</label>
+                <label className={labelClass}>Preventivo (€)</label>
                 <div className={fieldClass}>
-                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm" placeholder="es. 250" />
+                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm" placeholder="es. 250 — inserendo il costo lo stato diventa Preventivo inserito" />
+                  <p className="text-xs text-slate-400 mt-1">Inserendo un importo lo stato passerà automaticamente a <strong>Preventivo inserito</strong></p>
                 </div>
               </div>
             )}
