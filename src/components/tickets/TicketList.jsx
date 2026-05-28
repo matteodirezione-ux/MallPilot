@@ -209,25 +209,48 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
   );
 }
 
-export default function TicketList({ filtered, oggi, userRole, onCardClick, onEdit, onDelete, onAzione }) {
-  const scaduti = filtered.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso' && t.stato !== 'rifiutato');
-  const attivi = filtered.filter(t => !scaduti.includes(t));
+const STATI_ORDER = [
+  'in_attesa_approvazione',
+  'approvato',
+  'approvato_con_preventivo',
+  'preventivo_inserito',
+  'da_controllare',
+  'chiuso',
+  'rifiutato',
+];
 
+const sortByScadenza = (a, b) => {
+  if (!a.scadenza && !b.scadenza) return 0;
+  if (!a.scadenza) return 1;
+  if (!b.scadenza) return -1;
+  return new Date(a.scadenza) - new Date(b.scadenza);
+};
+
+export default function TicketList({ filtered, oggi, userRole, onCardClick, onEdit, onDelete, onAzione }) {
   const cardProps = { oggi, userRole, onCardClick, onEdit, onDelete, onAzione };
 
+  // Raggruppa per stato
+  const gruppi = STATI_ORDER.map(stato => ({
+    stato,
+    tickets: filtered.filter(t => t.stato === stato).sort(sortByScadenza),
+  })).filter(g => g.tickets.length > 0);
+
   return (
-    <div className="space-y-5">
-      {scaduti.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-red-600 mb-2 flex items-center gap-1.5">
-            <AlertCircle className="w-4 h-4" /> Scaduti ({scaduti.length})
-          </h3>
-          <div className="space-y-2">{scaduti.map(t => <TicketCard key={t.id} ticket={t} {...cardProps} />)}</div>
-        </div>
-      )}
-      {attivi.length > 0 && (
-        <div className="space-y-2">{attivi.map(t => <TicketCard key={t.id} ticket={t} {...cardProps} />)}</div>
-      )}
+    <div className="space-y-6">
+      {gruppi.map(({ stato, tickets }) => {
+        const conf = STATI_CONFIG[stato];
+        return (
+          <div key={stato}>
+            <h3 className={`text-xs font-bold uppercase tracking-widest px-2 py-1 rounded-md inline-flex items-center gap-1.5 mb-2 ${conf.color}`}>
+              <span className={`w-2 h-2 rounded-full ${conf.dot}`} />
+              {conf.label} ({tickets.length})
+            </h3>
+            <div className="space-y-2">
+              {tickets.map(t => <TicketCard key={t.id} ticket={t} {...cardProps} />)}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
