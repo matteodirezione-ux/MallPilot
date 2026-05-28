@@ -26,22 +26,21 @@ const formatData = (d) => {
   } catch { return d; }
 };
 
-// Transizioni stato permesse per ruolo
+// Transizioni stato permesse per ruolo: [statoAttuale] -> [stati selezionabili]
 function getStatiPermessi(ticket, userRole) {
   const s = ticket.stato;
   if (userRole === 'direttore' || userRole === 'proprieta') {
     if (s === 'in_attesa_approvazione') return ['in_attesa_approvazione', 'approvato', 'approvato_con_preventivo', 'rifiutato'];
-    if (s === 'preventivo_inserito') return ['preventivo_inserito', 'approvato', 'rifiutato'];
     if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
-    if (s === 'approvato' || s === 'approvato_con_preventivo') return [s, 'rifiutato', 'chiuso'];
-    return null; // stato fisso
+    return null;
   }
   if (userRole === 'vigilanza') {
     if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
     return null;
   }
   if (userRole === 'manutentore') {
-    if (s === 'approvato' || s === 'approvato_con_preventivo') return [s, 'preventivo_inserito', 'da_controllare'];
+    if (s === 'approvato') return ['approvato', 'preventivo_inserito', 'da_controllare'];
+    if (s === 'approvato_con_preventivo') return ['approvato_con_preventivo', 'preventivo_inserito', 'da_controllare'];
     if (s === 'preventivo_inserito') return ['preventivo_inserito', 'da_controllare'];
     return null;
   }
@@ -58,16 +57,12 @@ function StatoBadge({ ticket, userRole, onAzione }) {
 
   const handleChange = (nuovoStato) => {
     if (nuovoStato === ticket.stato) return;
-    // Mappa stati che richiedono conferma/rifiuto dialog
-    const azioniSpeciali = {
-      rifiutato: ticket.stato === 'preventivo_inserito' ? 'rifiuta_preventivo' : 'rifiuta',
-      approvato: ticket.stato === 'preventivo_inserito' ? 'conferma_preventivo' : 'approva',
-      approvato_con_preventivo: 'approva_preventivo',
-      da_controllare: 'da_controllare',
-      chiuso: 'chiudi',
-      preventivo_inserito: 'inserisci_preventivo',
-    };
-    onAzione(ticket, azioniSpeciali[nuovoStato] || nuovoStato);
+    // Solo rifiutato richiede il dialog per il motivo, tutto il resto è update diretto
+    if (nuovoStato === 'rifiutato') {
+      onAzione(ticket, 'rifiuta');
+    } else {
+      onAzione(ticket, 'set_stato:' + nuovoStato);
+    }
   };
 
   return (
@@ -79,7 +74,7 @@ function StatoBadge({ ticket, userRole, onAzione }) {
         <SelectContent>
           {statiPermessi.map(s => (
             <SelectItem key={s} value={s} className="text-xs">
-              <span className={`inline-flex items-center gap-1.5`}>
+              <span className="inline-flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${STATI_CONFIG[s]?.dot}`} />
                 {STATI_CONFIG[s]?.label}
               </span>

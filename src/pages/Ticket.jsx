@@ -164,16 +164,11 @@ export default function Ticket({ centroSelezionato, user }) {
 
   const eseguiAzione = async (ticket, tipo, testo) => {
     let update = {};
-    if (tipo === 'approva') update = { stato: 'approvato' };
-    else if (tipo === 'approva_preventivo') update = { stato: 'approvato_con_preventivo' };
-    else if (tipo === 'rifiuta') update = { stato: 'rifiutato', motivo_rifiuto: testo };
-    else if (tipo === 'conferma_preventivo') update = { stato: 'approvato', preventivo_confermato: true };
-    else if (tipo === 'rifiuta_preventivo') update = { stato: 'rifiutato', motivo_rifiuto: testo };
-    else if (tipo === 'da_controllare') update = { stato: 'da_controllare' };
-    else if (tipo === 'inserisci_preventivo') update = { stato: 'preventivo_inserito' };
-    else if (tipo === 'chiudi') update = { stato: 'chiuso' };
+    if (tipo === 'rifiuta') update = { stato: 'rifiutato', motivo_rifiuto: testo };
+    else if (tipo.startsWith('set_stato:')) update = { stato: tipo.split(':')[1] };
     else if (tipo.startsWith('sollecito:')) update = { numero_sollecito: Number(tipo.split(':')[1]) };
 
+    if (!Object.keys(update).length) return;
     await base44.entities.Ticket.update(ticket.id, update);
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, ...update } : t));
     setAzioneDialog(null);
