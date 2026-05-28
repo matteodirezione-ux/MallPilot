@@ -563,13 +563,15 @@ export default function Dashboard({ centroSelezionato, user }) {
             {stats.reportDaLeggere > 0 && <p className="text-[10px] sm:text-xs text-blue-500 mt-0.5">non letti</p>}
           </div>
 
-          {/* Incassi Mese */}
-          <div className="bg-blue-50 rounded-lg border border-blue-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow">
+          {/* Ticket in attesa */}
+          <div className="bg-orange-50 rounded-lg border border-orange-50 p-2 sm:p-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] transition-shadow cursor-pointer" onClick={() => navigate('/Ticket')}>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Incassi Mese</p>
-              <div className="bg-blue-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><DollarSign className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-blue-600" /></div>
+              <p className="text-[10px] sm:text-xs font-medium text-slate-500 uppercase tracking-wide line-clamp-2">Ticket in attesa</p>
+              <div className="bg-orange-100 p-1 sm:p-1.5 rounded-lg flex-shrink-0"><Ticket className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-orange-600" /></div>
             </div>
-            <p className="text-base sm:text-lg font-bold text-slate-900 line-clamp-1">{formatCurrency(stats.incassiMese)}</p>
+            <p className={`text-base sm:text-lg font-bold ${stats.ticketsList.filter(t => ['in_attesa_approvazione', 'preventivo_inserito'].includes(t.stato)).length > 0 ? 'text-orange-600' : 'text-slate-900'}`}>
+              {stats.ticketsList.filter(t => ['in_attesa_approvazione', 'preventivo_inserito'].includes(t.stato)).length}
+            </p>
           </div>
 
           {/* Incassi Anno */}
