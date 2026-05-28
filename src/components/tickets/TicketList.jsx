@@ -14,7 +14,7 @@ const statoConfig = {
   chiuso: { label: 'Chiuso', color: 'bg-green-100 text-green-700' },
 };
 
-const TicketCard = React.memo(({ ticket, oggi, canConfirm, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData }) => {
+const TicketCard = React.memo(({ ticket, oggi, canConfirm, canViewConferma, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData }) => {
   const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < oggi && ticket.stato !== 'chiuso';
 
   return (
@@ -23,7 +23,7 @@ const TicketCard = React.memo(({ ticket, oggi, canConfirm, isReadOnly, handleCar
       className={`rounded-xl border p-4 flex gap-4 items-start transition-all duration-200 cursor-pointer
         shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]
         hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
-        ${canConfirm && ticket.confermato ? 'bg-green-50 border-green-200' : canConfirm && !ticket.confermato ? 'bg-yellow-50 border-yellow-200' : 'bg-white/80 backdrop-blur-sm border-white'}`}
+        ${canViewConferma && ticket.confermato ? 'bg-green-50 border-green-200' : canViewConferma && !ticket.confermato ? 'bg-yellow-50 border-yellow-200' : 'bg-white/80 backdrop-blur-sm border-white'}`}
     >
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -64,6 +64,11 @@ const TicketCard = React.memo(({ ticket, oggi, canConfirm, isReadOnly, handleCar
             >
               {ticket.confermato ? <><ShieldCheck className="w-3 h-3" /> Confermato</> : <><ShieldAlert className="w-3 h-3" /> Da confermare</>}
             </button>
+          )}
+          {!canConfirm && canViewConferma && (
+            <span className={`flex items-center gap-1 h-6 text-xs px-2 py-1 rounded-full font-medium ${ticket.confermato ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              {ticket.confermato ? <><ShieldCheck className="w-3 h-3" /> Confermato</> : <><ShieldAlert className="w-3 h-3" /> Da confermare</>}
+            </span>
           )}
         </div>
         {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
@@ -108,7 +113,7 @@ const TicketCard = React.memo(({ ticket, oggi, canConfirm, isReadOnly, handleCar
   );
 });
 
-export default function TicketList({ filtered, oggi, canConfirm, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData }) {
+export default function TicketList({ filtered, oggi, canConfirm, canViewConferma, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData }) {
   const scaduti = filtered.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso')
     .sort((a, b) => new Date(a.scadenza) - new Date(b.scadenza));
   const inCorso = filtered.filter(t => !t.scadenza || new Date(t.scadenza) >= oggi || t.stato === 'chiuso')
@@ -119,7 +124,7 @@ export default function TicketList({ filtered, oggi, canConfirm, isReadOnly, han
       return new Date(a.scadenza) - new Date(b.scadenza);
     });
 
-  const cardProps = { oggi, canConfirm, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData };
+  const cardProps = { oggi, canConfirm, canViewConferma, isReadOnly, handleCardClick, handleStatoChange, handleFieldChange, handleConferma, handleEdit, handleDelete, formatData };
 
   return (
     <div className="space-y-6">

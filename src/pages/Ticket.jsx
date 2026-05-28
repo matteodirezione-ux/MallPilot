@@ -27,7 +27,7 @@ const formatData = (d) => {
   try { return format(new Date(d), 'dd/MM/yyyy', { locale: it }); } catch { return d; }
 };
 
-function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm }) {
+function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm, canViewConferma }) {
   const [lightbox, setLightbox] = useState(null);
   const tipConf = tipologiaConfig[ticket.tipologia] || tipologiaConfig.ordinario;
   const stConf = statoConfig[ticket.stato] || statoConfig.aperto;
@@ -56,7 +56,7 @@ function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm }) {
           <Row label="Operatore" value={ticket.operatore} />
           <Row label="Tipologia" value={<Badge className={tipConf.color}>{tipConf.label}</Badge>} />
           <Row label="Stato" value={<Badge className={stConf.color}>{stConf.label}</Badge>} />
-          {canConfirm && (
+          {(canConfirm || canViewConferma) && (
             <Row label="Conferma Direttore" value={
               ticket.confermato
                 ? <span className="inline-flex items-center gap-1 text-green-700 font-medium"><ShieldCheck className="w-4 h-4" /> Confermato</span>
@@ -195,6 +195,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
   const isReadOnly = user?.tipo_account === 'manutentore';
   const canConfirm = user?.tipo_account === 'direttore' || user?.tipo_account === 'proprieta';
+  const canViewConferma = canConfirm || user?.tipo_account === 'vigilanza';
 
   const handleConferma = async (ticket, e) => {
     e.stopPropagation();
@@ -274,6 +275,7 @@ export default function Ticket({ centroSelezionato, user }) {
           filtered={filtered}
           oggi={oggi}
           canConfirm={canConfirm}
+          canViewConferma={canViewConferma}
           isReadOnly={isReadOnly}
           handleCardClick={handleCardClick}
           handleStatoChange={handleStatoChange}
@@ -292,6 +294,7 @@ export default function Ticket({ centroSelezionato, user }) {
           onClose={() => setDettaglioTicket(null)}
           onEdit={!isReadOnly ? () => { handleEdit(dettaglioTicket); } : null}
           canConfirm={canConfirm}
+          canViewConferma={canViewConferma}
         />
       )}
 
