@@ -160,22 +160,22 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
             <hr />
             <p className="text-sm font-semibold text-slate-700">Il tuo intervento</p>
 
+            {['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
+              <div className={rowClass}>
+                <label className={labelClass}>Preventivo (€)</label>
+                <div className={fieldClass}>
+                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm" placeholder="es. 250" />
+                  <p className="text-xs text-slate-400 mt-1">Inserendo un importo lo stato passerà automaticamente a <strong>Preventivo inserito</strong></p>
+                </div>
+              </div>
+            )}
+
             <div className={rowClass}>
               <label className={labelClass}>Note</label>
               <div className={fieldClass}>
                 <Textarea value={form.note_manutentore} onChange={e => set('note_manutentore', e.target.value)} rows={3} className="text-sm" placeholder="Note sull'intervento..." />
               </div>
             </div>
-
-            {['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
-              <div className={rowClass}>
-                <label className={labelClass}>Preventivo (€)</label>
-                <div className={fieldClass}>
-                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm" placeholder="es. 250 — inserendo il costo lo stato diventa Preventivo inserito" />
-                  <p className="text-xs text-slate-400 mt-1">Inserendo un importo lo stato passerà automaticamente a <strong>Preventivo inserito</strong></p>
-                </div>
-              </div>
-            )}
 
             <div className={rowClass}>
               <label className={labelClass}>Allegati</label>
