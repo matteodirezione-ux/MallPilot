@@ -32,7 +32,8 @@ function getStatiPermessi(ticket, userRole) {
   if (userRole === 'direttore' || userRole === 'proprieta') {
     if (s === 'in_attesa_approvazione') return ['in_attesa_approvazione', 'approvato', 'approvato_con_preventivo', 'rifiutato'];
     if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
-    return null;
+    // Per tutti gli altri stati, il direttore/proprietà può comunque cambiarlo a qualsiasi stato
+    return Object.keys(STATI_CONFIG);
   }
   if (userRole === 'vigilanza') {
     if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
