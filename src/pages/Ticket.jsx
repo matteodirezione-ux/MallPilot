@@ -194,8 +194,8 @@ export default function Ticket({ centroSelezionato, user }) {
       t.operatore?.toLowerCase().includes(search.toLowerCase()) ||
       t.descrizione?.toLowerCase().includes(search.toLowerCase());
 
-    const dataApertura = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
-    const matchMese = dataApertura && dataApertura >= inizio && dataApertura <= fine;
+    const dataFiltro = t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
+    const matchMese = dataFiltro && dataFiltro >= inizio && dataFiltro <= fine;
 
     let matchStato = true;
     if (filtroStato === 'attivi') matchStato = !['chiuso', 'rifiutato'].includes(t.stato);
@@ -208,7 +208,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
   // KPI sul totale del mese
   const ticketsMese = ticketsVisibili.filter(t => {
-    const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
+    const d = t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
     return d && d >= inizio && d <= fine;
   });
   const counts = {
