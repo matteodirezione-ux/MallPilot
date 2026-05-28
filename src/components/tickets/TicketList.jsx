@@ -190,7 +190,7 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
         )}
         {userRole === 'manutentore' && (
           <div className="flex flex-col gap-1 items-end">
-            {['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
+            {ticket.stato === 'approvato_con_preventivo' && (
               <button
                 onClick={() => onEdit(ticket)}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
