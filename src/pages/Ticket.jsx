@@ -256,9 +256,9 @@ export default function Ticket({ centroSelezionato, user }) {
   };
 
   const filtriStato = [
-    { key: 'attivi', label: 'Attivi' },
-    { key: 'chiuso', label: 'Chiusi' },
-    { key: 'rifiutato', label: 'Rifiutati' },
+    { key: 'attivi', label: 'Attivi', activeClass: 'bg-blue-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
+    { key: 'chiuso', label: 'Chiusi', activeClass: 'bg-green-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
+    { key: 'rifiutato', label: 'Rifiutati', activeClass: 'bg-red-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
   ];
 
   return (
@@ -324,7 +324,7 @@ export default function Ticket({ centroSelezionato, user }) {
               <button
                 key={f.key}
                 onClick={() => setFiltroStato(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? f.activeClass : f.inactiveClass}`}
               >
                 {f.label}
               </button>
