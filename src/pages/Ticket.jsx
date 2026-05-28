@@ -58,7 +58,7 @@ function DettaglioTicketDialog({ ticket, onClose, onEdit, userRole }) {
           {ticket.numero_sollecito > 0 && <Row label="Sollecito" value={`Sollecito ${ticket.numero_sollecito}`} />}
           <Row label="Descrizione" value={ticket.descrizione} />
           {ticket.note_manutentore && <Row label="Note manutentore" value={ticket.note_manutentore} />}
-          {ticket.costo_stimato && <Row label="Preventivo" value={`€ ${Number(ticket.costo_stimato).toLocaleString('it-IT')}`} />}
+          {ticket.costo_stimato && userRole !== 'vigilanza' && <Row label="Preventivo" value={`€ ${Number(ticket.costo_stimato).toLocaleString('it-IT')}`} />}
           {ticket.motivo_rifiuto && <Row label="Motivo rifiuto" value={ticket.motivo_rifiuto} />}
         </div>
         {allUrls.length > 0 && (

@@ -157,7 +157,7 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
               Scadenza: <strong className={isScaduto ? 'text-red-700' : 'text-slate-700'}>{formatData(ticket.scadenza)}</strong>
             </span>
           )}
-          {ticket.costo_stimato && (
+          {ticket.costo_stimato && userRole !== 'vigilanza' && (
             <span>Preventivo: <strong className="text-slate-700">€ {ticket.costo_stimato.toLocaleString('it-IT')}</strong></span>
           )}
         </div>
