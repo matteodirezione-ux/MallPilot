@@ -221,11 +221,8 @@ export default function Ticket({ centroSelezionato, user }) {
 
   const filtriStato = [
     { key: 'attivi', label: 'Attivi' },
-    { key: 'in_attesa_approvazione', label: 'In attesa' },
-    { key: 'da_controllare', label: 'Da controllare' },
     { key: 'chiuso', label: 'Chiusi' },
     { key: 'rifiutato', label: 'Rifiutati' },
-    { key: 'tutti', label: 'Tutti' },
   ];
 
   return (
