@@ -4,13 +4,13 @@ import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, E
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const STATI_CONFIG = {
-  in_attesa_approvazione: { label: 'In attesa approvazione', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400' },
-  approvato:              { label: 'Approvato',              color: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500' },
-  approvato_con_preventivo: { label: 'Richiesta preventivo', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500' },
-  preventivo_inserito:    { label: 'Preventivo inserito',    color: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500' },
-  da_controllare:         { label: 'Da controllare',         color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500' },
-  chiuso:                 { label: 'Chiuso',                 color: 'bg-green-100 text-green-700',  dot: 'bg-green-500' },
-  rifiutato:              { label: 'Rifiutato',              color: 'bg-red-100 text-red-700',      dot: 'bg-red-500' },
+  in_attesa_approvazione: { label: 'In attesa approvazione', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400', cardBg: 'bg-slate-50 border-slate-300', leftBar: 'bg-slate-400' },
+  approvato:              { label: 'Approvato',              color: 'bg-blue-100 text-blue-700',   dot: 'bg-blue-500',  cardBg: 'bg-blue-50 border-blue-200',   leftBar: 'bg-blue-500' },
+  approvato_con_preventivo: { label: 'Richiesta preventivo', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500', cardBg: 'bg-purple-50 border-purple-200', leftBar: 'bg-purple-500' },
+  preventivo_inserito:    { label: 'Preventivo inserito',    color: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500', cardBg: 'bg-yellow-50 border-yellow-200', leftBar: 'bg-yellow-500' },
+  da_controllare:         { label: 'Da controllare',         color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500', cardBg: 'bg-orange-50 border-orange-200', leftBar: 'bg-orange-500' },
+  chiuso:                 { label: 'Chiuso',                 color: 'bg-green-100 text-green-700',  dot: 'bg-green-500',  cardBg: 'bg-green-50 border-green-200',  leftBar: 'bg-green-500' },
+  rifiutato:              { label: 'Rifiutato',              color: 'bg-red-100 text-red-700',      dot: 'bg-red-500',    cardBg: 'bg-red-50 border-red-200',      leftBar: 'bg-red-500' },
 };
 
 export const TIPOLOGIA_CONFIG = {
@@ -112,27 +112,19 @@ function SollecitoControl({ ticket, userRole, onAzione }) {
 function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onAzione }) {
   const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < oggi && ticket.stato !== 'chiuso';
   const tipConf = TIPOLOGIA_CONFIG[ticket.tipologia] || TIPOLOGIA_CONFIG.ordinario;
-
-  const cardBg = ticket.tipologia === 'urgente' && ticket.stato !== 'chiuso'
-    ? 'bg-red-50 border-red-200'
-    : ticket.stato === 'chiuso'
-    ? 'bg-green-50 border-green-200'
-    : ticket.stato === 'da_controllare'
-    ? 'bg-orange-50 border-orange-200'
-    : ticket.stato === 'rifiutato'
-    ? 'bg-slate-50 border-slate-300'
-    : 'bg-white border-slate-200';
+  const statoConf = STATI_CONFIG[ticket.stato] || STATI_CONFIG.in_attesa_approvazione;
 
   return (
     <div
       onClick={() => onCardClick(ticket)}
-      className={`rounded-xl border p-4 flex gap-4 items-start transition-all duration-200 cursor-pointer
+      className={`rounded-xl border overflow-hidden flex gap-0 items-stretch transition-all duration-200 cursor-pointer
         shadow-[0_2px_12px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_28px_rgba(0,0,0,0.14)] hover:-translate-y-0.5
-        ${cardBg}`}
+        ${statoConf.cardBg}`}
     >
-      {/* Dot tipologia */}
+      {/* Barra colorata sinistra */}
+      <div className={`w-1.5 flex-shrink-0 ${statoConf.leftBar}`} />
 
-
+      <div className="flex-1 min-w-0 p-4 flex gap-4 items-start">
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-2 mb-1.5">
           <span className="font-bold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
@@ -204,6 +196,7 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
             </button>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
