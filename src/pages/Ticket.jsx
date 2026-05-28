@@ -1,43 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X, ShieldCheck, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight, Wrench, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 import ImageLightbox from '@/components/ui/ImageLightbox';
+import SafeImage from '@/components/ui/SafeImage';
 import FormTicket from '@/components/tickets/FormTicket';
-import TicketList from '@/components/tickets/TicketList';
+import TicketList, { STATI_CONFIG, TIPOLOGIA_CONFIG } from '@/components/tickets/TicketList';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-const statoConfig = {
-  aperto: { label: 'Aperto', color: 'bg-blue-100 text-blue-700' },
-  chiuso: { label: 'Chiuso', color: 'bg-green-100 text-green-700' },
-};
-
-const tipologiaConfig = {
-  ordinario: { label: 'Ordinario', color: 'bg-slate-100 text-slate-600' },
-  urgente: { label: 'Urgente', color: 'bg-red-100 text-red-700' },
-};
-
 const formatData = (d) => {
   if (!d) return '-';
-  try { return format(new Date(d), 'dd/MM/yyyy', { locale: it }); } catch { return d; }
+  try { return format(new Date(d + 'T00:00:00'), 'dd/MM/yyyy'); } catch { return d; }
 };
 
-function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm, canViewConferma }) {
+// Dialog dettaglio completo (read-only view)
+function DettaglioTicketDialog({ ticket, onClose, onEdit, userRole }) {
   const [lightbox, setLightbox] = useState(null);
-  const tipConf = tipologiaConfig[ticket.tipologia] || tipologiaConfig.ordinario;
-  const stConf = statoConfig[ticket.stato] || statoConfig.aperto;
+  if (!ticket) return null;
+  const stConf = STATI_CONFIG[ticket.stato] || {};
+  const tipConf = TIPOLOGIA_CONFIG[ticket.tipologia] || {};
+  const isDirettore = userRole === 'direttore' || userRole === 'proprieta';
 
   const Row = ({ label, value }) => value ? (
     <div className="flex flex-col sm:flex-row sm:gap-3 py-2 border-b border-slate-100 last:border-0">
-      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide sm:w-36 shrink-0">{label}</span>
+      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide sm:w-40 shrink-0">{label}</span>
       <span className="text-sm text-slate-800 mt-0.5 sm:mt-0">{value}</span>
     </div>
   ) : null;
+
+  const allUrls = [...(ticket.foto_urls || []), ...(ticket.allegati_manutentore || [])];
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -46,41 +41,57 @@ function DettaglioTicketDialog({ ticket, onClose, onEdit, canConfirm, canViewCon
           <div className="flex items-center justify-between pr-6">
             <DialogTitle>Ticket #{ticket.numero_ticket}</DialogTitle>
             {onEdit && (
-              <button onClick={onEdit} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors">
-                <Pencil className="w-3.5 h-3.5" /> Modifica
+              <button onClick={onEdit} className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-600">
+                Modifica
               </button>
             )}
+          </div>
+          <div className="flex gap-2 mt-1 flex-wrap">
+            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${tipConf.color}`}>{tipConf.label}</span>
+            <span className={`text-xs px-2 py-1 rounded-full font-medium ${stConf.color}`}>{stConf.label}</span>
           </div>
         </DialogHeader>
         <div className="divide-y divide-slate-100">
           <Row label="Operatore" value={ticket.operatore} />
-          <Row label="Tipologia" value={<Badge className={tipConf.color}>{tipConf.label}</Badge>} />
-          <Row label="Stato" value={<Badge className={stConf.color}>{stConf.label}</Badge>} />
-          {(canConfirm || canViewConferma) && (
-            <Row label="Conferma Direttore" value={
-              ticket.confermato
-                ? <span className="inline-flex items-center gap-1 text-green-700 font-medium"><ShieldCheck className="w-4 h-4" /> Confermato</span>
-                : <span className="inline-flex items-center gap-1 text-amber-700 font-medium"><ShieldAlert className="w-4 h-4" /> Da confermare</span>
-            } />
-          )}
           <Row label="Data apertura" value={formatData(ticket.data_apertura)} />
           <Row label="Scadenza" value={formatData(ticket.scadenza)} />
           {ticket.numero_sollecito > 0 && <Row label="Sollecito" value={`Sollecito ${ticket.numero_sollecito}`} />}
           <Row label="Descrizione" value={ticket.descrizione} />
+          {ticket.note_manutentore && <Row label="Note manutentore" value={ticket.note_manutentore} />}
+          {ticket.costo_stimato && <Row label="Preventivo" value={`€ ${Number(ticket.costo_stimato).toLocaleString('it-IT')}`} />}
+          {ticket.motivo_rifiuto && <Row label="Motivo rifiuto" value={ticket.motivo_rifiuto} />}
         </div>
-        {ticket.foto_urls?.length > 0 && (
+        {allUrls.length > 0 && (
           <div className="pt-2">
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto</p>
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto / Allegati</p>
             <div className="flex gap-2 flex-wrap">
-              {ticket.foto_urls.map((url, i) => (
-                <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => setLightbox(i)} />
+              {allUrls.map((url, i) => (
+                <SafeImage key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80" onClick={() => setLightbox(i)} />
               ))}
             </div>
           </div>
         )}
-        {lightbox !== null && (
-          <ImageLightbox urls={ticket.foto_urls} startIndex={lightbox} onClose={() => setLightbox(null)} />
+        {lightbox !== null && <ImageLightbox urls={allUrls} startIndex={lightbox} onClose={() => setLightbox(null)} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Dialog per azioni con input opzionale (rifiuto, ecc.)
+function AzioneDialog({ open, onClose, title, placeholder, onConfirm, confirmLabel = 'Conferma', confirmClass = 'bg-blue-600 hover:bg-blue-700' }) {
+  const [testo, setTesto] = useState('');
+  useEffect(() => { if (open) setTesto(''); }, [open]);
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        {placeholder && (
+          <Textarea value={testo} onChange={e => setTesto(e.target.value)} placeholder={placeholder} rows={3} className="text-sm" />
         )}
+        <div className="flex justify-end gap-2 pt-2">
+          <Button variant="outline" size="sm" onClick={onClose}>Annulla</Button>
+          <Button size="sm" className={confirmClass} onClick={() => onConfirm(testo)}>{confirmLabel}</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -92,23 +103,19 @@ export default function Ticket({ centroSelezionato, user }) {
   const [formOpen, setFormOpen] = useState(false);
   const [ticketSelezionato, setTicketSelezionato] = useState(null);
   const [dettaglioTicket, setDettaglioTicket] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filtroStato, setFiltroStato] = useState('attivi');
+  const [meseFiltrato, setMeseFiltrato] = useState(new Date());
+  const [azioneDialog, setAzioneDialog] = useState(null); // { ticket, tipo }
 
-  // Apertura automatica da URL param ?edit=<id>
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const editId = params.get('edit');
     if (editId && tickets.length > 0) {
-      const ticket = tickets.find(t => t.id === editId);
-      if (ticket) {
-        setTicketSelezionato(ticket);
-        setFormOpen(true);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
+      const t = tickets.find(t => t.id === editId);
+      if (t) { setTicketSelezionato(t); setFormOpen(true); window.history.replaceState({}, '', window.location.pathname); }
     }
   }, [tickets]);
-  const [search, setSearch] = useState('');
-  const [filtroStato, setFiltroStato] = useState('aperto');
-  const [meseFiltrato, setMeseFiltrato] = useState(new Date());
 
   useEffect(() => {
     if (centroSelezionato || user?.tipo_account === 'manutentore') loadTickets();
@@ -117,9 +124,7 @@ export default function Ticket({ centroSelezionato, user }) {
   const loadTickets = async () => {
     setLoading(true);
     let query = {};
-    if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') {
-      query.centro_id = centroSelezionato.id;
-    }
+    if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') query.centro_id = centroSelezionato.id;
     const data = await base44.entities.Ticket.filter(query, '-created_date');
     setTickets(data);
     setLoading(false);
@@ -143,104 +148,126 @@ export default function Ticket({ centroSelezionato, user }) {
     setFormOpen(true);
   };
 
-  const handleCardClick = (ticket) => {
-    setDettaglioTicket(ticket);
-  };
-
   const handleDelete = async (ticket) => {
     if (!confirm('Eliminare questo ticket?')) return;
     await base44.entities.Ticket.delete(ticket.id);
     loadTickets();
   };
 
-  const handleStatoChange = async (ticket, nuovoStato) => {
-    await base44.entities.Ticket.update(ticket.id, { stato: nuovoStato });
-    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, stato: nuovoStato } : t));
+  const handleAzione = (ticket, tipo) => {
+    if (tipo === 'rifiuta' || tipo === 'rifiuta_preventivo') {
+      setAzioneDialog({ ticket, tipo });
+    } else {
+      eseguiAzione(ticket, tipo, '');
+    }
   };
 
-  const fieldChangeTimers = useRef({});
-  const handleFieldChange = (ticket, field, value) => {
-    // Aggiorna subito lo stato locale per reattività UI
-    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, [field]: value } : t));
-    // Debounce la chiamata API per evitare rate limit
-    const key = `${ticket.id}_${field}`;
-    clearTimeout(fieldChangeTimers.current[key]);
-    fieldChangeTimers.current[key] = setTimeout(async () => {
-      await base44.entities.Ticket.update(ticket.id, { [field]: value });
-    }, 600);
+  const eseguiAzione = async (ticket, tipo, testo) => {
+    let update = {};
+    if (tipo === 'approva') update = { stato: 'approvato' };
+    else if (tipo === 'approva_preventivo') update = { stato: 'approvato_con_preventivo' };
+    else if (tipo === 'rifiuta') update = { stato: 'rifiutato', motivo_rifiuto: testo };
+    else if (tipo === 'conferma_preventivo') update = { stato: 'approvato', preventivo_confermato: true };
+    else if (tipo === 'rifiuta_preventivo') update = { stato: 'rifiutato', motivo_rifiuto: testo };
+    else if (tipo === 'da_controllare') update = { stato: 'da_controllare' };
+    else if (tipo === 'chiudi') update = { stato: 'chiuso' };
+
+    await base44.entities.Ticket.update(ticket.id, update);
+    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, ...update } : t));
+    setAzioneDialog(null);
   };
 
-  const handleNuovo = () => {
-    setTicketSelezionato(null);
-    setFormOpen(true);
-  };
+  const userRole = user?.tipo_account;
+  const isManutentore = userRole === 'manutentore';
+  const isDirettore = userRole === 'direttore' || userRole === 'proprieta';
+  const canCreate = isDirettore || userRole === 'vigilanza';
 
+  const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
   const inizio = startOfMonth(meseFiltrato);
   const fine = endOfMonth(meseFiltrato);
 
-  const filtered = tickets.filter(t => {
-    const matchSearch = !search || t.numero_ticket?.toLowerCase().includes(search.toLowerCase()) || t.operatore?.toLowerCase().includes(search.toLowerCase()) || t.descrizione?.toLowerCase().includes(search.toLowerCase());
-    const matchStato = filtroStato === 'tutti' || t.stato === filtroStato;
-    const dataApertura = t.data_apertura ? new Date(t.data_apertura) : null;
+  // Filtro visibilità per manutentore
+  const ticketsVisibili = isManutentore
+    ? tickets.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito', 'da_controllare'].includes(t.stato))
+    : tickets;
+
+  const filtered = ticketsVisibili.filter(t => {
+    const matchSearch = !search ||
+      t.numero_ticket?.toLowerCase().includes(search.toLowerCase()) ||
+      t.operatore?.toLowerCase().includes(search.toLowerCase()) ||
+      t.descrizione?.toLowerCase().includes(search.toLowerCase());
+
+    const dataApertura = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
     const matchMese = dataApertura && dataApertura >= inizio && dataApertura <= fine;
-    return matchSearch && matchStato && matchMese;
+
+    let matchStato = true;
+    if (filtroStato === 'attivi') matchStato = !['chiuso', 'rifiutato'].includes(t.stato);
+    else if (filtroStato === 'chiuso') matchStato = t.stato === 'chiuso';
+    else if (filtroStato === 'rifiutato') matchStato = t.stato === 'rifiutato';
+    else if (filtroStato !== 'tutti') matchStato = t.stato === filtroStato;
+
+    return matchSearch && matchMese && matchStato;
   });
 
-  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  // KPI sul totale del mese
+  const ticketsMese = ticketsVisibili.filter(t => {
+    const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
+    return d && d >= inizio && d <= fine;
+  });
   const counts = {
-    aperto: filtered.filter(t => t.stato === 'aperto').length,
-    sollecitati: filtered.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
-    scaduti: filtered.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso').length,
-    chiuso: filtered.filter(t => t.stato === 'chiuso').length,
-    daConfermare: filtered.filter(t => !t.confermato && t.stato !== 'chiuso').length,
+    attesa: ticketsMese.filter(t => t.stato === 'in_attesa_approvazione').length,
+    approvati: ticketsMese.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito'].includes(t.stato)).length,
+    daControllare: ticketsMese.filter(t => t.stato === 'da_controllare').length,
+    chiusi: ticketsMese.filter(t => t.stato === 'chiuso').length,
+    urgenti: ticketsMese.filter(t => t.tipologia === 'urgente' && t.stato !== 'chiuso').length,
   };
 
-  const isReadOnly = user?.tipo_account === 'manutentore';
-  const canConfirm = user?.tipo_account === 'direttore' || user?.tipo_account === 'proprieta';
-  const canViewConferma = canConfirm || user?.tipo_account === 'vigilanza';
-
-  const handleConferma = async (ticket, e) => {
-    e.stopPropagation();
-    const nuovoValore = !ticket.confermato;
-    await base44.entities.Ticket.update(ticket.id, { confermato: nuovoValore });
-    setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, confermato: nuovoValore } : t));
-  };
+  const filtriStato = [
+    { key: 'attivi', label: 'Attivi' },
+    { key: 'in_attesa_approvazione', label: 'In attesa' },
+    { key: 'da_controllare', label: 'Da controllare' },
+    { key: 'chiuso', label: 'Chiusi' },
+    { key: 'rifiutato', label: 'Rifiutati' },
+    { key: 'tutti', label: 'Tutti' },
+  ];
 
   return (
     <div className="p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Ticket</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{isReadOnly ? 'Visualizzazione ticket manutenzione' : 'Gestione ticket manutenzione'}</p>
+          <h1 className="text-2xl font-bold text-slate-800">Ticket Manutenzione</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{isManutentore ? 'I tuoi ticket assegnati' : 'Gestione ticket manutenzione'}</p>
         </div>
-        {!isReadOnly && (
-          <Button onClick={handleNuovo} className="bg-blue-600 hover:bg-blue-700 gap-2">
+        {canCreate && (
+          <Button onClick={() => { setTicketSelezionato(null); setFormOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
             <Plus className="w-4 h-4" /> Nuovo Ticket
           </Button>
         )}
       </div>
 
-      {/* KPI Cards */}
-      <div className={`grid gap-3 mb-5 ${canConfirm ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'}`}>
-        {[
-          { icon: TicketIcon, color: 'bg-blue-100', iconColor: 'text-blue-600', value: counts.aperto, label: 'Aperti' },
-          { icon: AlertCircle, color: 'bg-red-100', iconColor: 'text-red-600', value: counts.scaduti, label: 'Scaduti' },
-          { icon: AlertCircle, color: 'bg-orange-100', iconColor: 'text-orange-600', value: counts.sollecitati, label: 'Sollecitati' },
-          { icon: CheckCircle2, color: 'bg-green-100', iconColor: 'text-green-600', value: counts.chiuso, label: 'Chiusi' },
-          ...(canConfirm ? [{ icon: ShieldAlert, color: 'bg-amber-100', iconColor: 'text-amber-600', value: counts.daConfermare, label: 'Da confermare' }] : []),
-        ].map(({ icon: Icon, color, iconColor, value, label }) => (
-          <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-white p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.08)]">
-            <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
-              <Icon className={`w-5 h-5 ${iconColor}`} />
+      {/* KPI */}
+      {!isManutentore && (
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">
+          {[
+            { icon: Clock, color: 'bg-slate-100', iconColor: 'text-slate-600', value: counts.attesa, label: 'In attesa' },
+            { icon: CheckCircle2, color: 'bg-blue-100', iconColor: 'text-blue-600', value: counts.approvati, label: 'Approvati' },
+            { icon: Eye, color: 'bg-orange-100', iconColor: 'text-orange-600', value: counts.daControllare, label: 'Da controllare' },
+            { icon: CheckCircle2, color: 'bg-green-100', iconColor: 'text-green-600', value: counts.chiusi, label: 'Chiusi' },
+            { icon: AlertCircle, color: 'bg-red-100', iconColor: 'text-red-600', value: counts.urgenti, label: 'Urgenti aperti' },
+          ].map(({ icon: Icon, color, iconColor, value, label }) => (
+            <div key={label} className="bg-white/80 backdrop-blur-sm rounded-xl border border-white p-4 flex items-center gap-3 shadow-[0_4px_20px_rgba(0,0,0,0.12)]">
+              <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
+                <Icon className={`w-5 h-5 ${iconColor}`} />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-800">{value}</p>
+                <p className="text-xs text-slate-500">{label}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-800">{value}</p>
-              <p className="text-xs text-slate-500">{label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Filtri */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -261,17 +288,19 @@ export default function Ticket({ centroSelezionato, user }) {
           </button>
         </div>
 
-        <div className="flex gap-1">
-          {['tutti', 'aperto', 'chiuso'].map(s => (
-            <button
-              key={s}
-              onClick={() => setFiltroStato(s)}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === s ? (s === 'aperto' ? 'bg-red-600 text-white' : s === 'chiuso' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white') : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
-            >
-              {s === 'tutti' ? 'Tutti' : statoConfig[s]?.label}
-            </button>
-          ))}
-        </div>
+        {!isManutentore && (
+          <div className="flex flex-wrap gap-1">
+            {filtriStato.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setFiltroStato(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? 'bg-blue-600 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lista */}
@@ -288,27 +317,34 @@ export default function Ticket({ centroSelezionato, user }) {
         <TicketList
           filtered={filtered}
           oggi={oggi}
-          canConfirm={canConfirm}
-          canViewConferma={canViewConferma}
-          isReadOnly={isReadOnly}
-          handleCardClick={handleCardClick}
-          handleStatoChange={handleStatoChange}
-          handleFieldChange={handleFieldChange}
-          handleConferma={handleConferma}
-          handleEdit={handleEdit}
-          handleDelete={handleDelete}
-          formatData={formatData}
+          userRole={userRole}
+          onCardClick={setDettaglioTicket}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onAzione={handleAzione}
         />
       )}
 
-      {/* Dialog riepilogo */}
+      {/* Dialog dettaglio */}
       {dettaglioTicket && (
         <DettaglioTicketDialog
           ticket={dettaglioTicket}
           onClose={() => setDettaglioTicket(null)}
-          onEdit={!isReadOnly ? () => { handleEdit(dettaglioTicket); } : null}
-          canConfirm={canConfirm}
-          canViewConferma={canViewConferma}
+          onEdit={canCreate ? () => handleEdit(dettaglioTicket) : null}
+          userRole={userRole}
+        />
+      )}
+
+      {/* Dialog azione (rifiuto) */}
+      {azioneDialog && (
+        <AzioneDialog
+          open
+          onClose={() => setAzioneDialog(null)}
+          title={azioneDialog.tipo === 'rifiuta' ? 'Rifiuta ticket' : 'Rifiuta preventivo'}
+          placeholder="Motivo del rifiuto (opzionale)..."
+          confirmLabel="Rifiuta"
+          confirmClass="bg-red-600 hover:bg-red-700 text-white"
+          onConfirm={(testo) => eseguiAzione(azioneDialog.ticket, azioneDialog.tipo, testo)}
         />
       )}
 
@@ -318,7 +354,6 @@ export default function Ticket({ centroSelezionato, user }) {
         onSave={handleSave}
         ticket={ticketSelezionato}
         user={user}
-        readOnly={isReadOnly}
       />
     </div>
   );

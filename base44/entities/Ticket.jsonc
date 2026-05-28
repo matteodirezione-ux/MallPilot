@@ -40,11 +40,15 @@
     "stato": {
       "type": "string",
       "enum": [
-        "aperto",
-        "in_corso",
-        "chiuso"
+        "in_attesa_approvazione",
+        "approvato",
+        "approvato_con_preventivo",
+        "preventivo_inserito",
+        "da_controllare",
+        "chiuso",
+        "rifiutato"
       ],
-      "default": "aperto",
+      "default": "in_attesa_approvazione",
       "description": "Stato del ticket"
     },
     "numero_sollecito": {
@@ -58,10 +62,34 @@
       },
       "description": "URL delle foto allegate al ticket"
     },
+    "note_manutentore": {
+      "type": "string",
+      "description": "Note inserite dal manutentore durante l'intervento"
+    },
+    "allegati_manutentore": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Allegati caricati dal manutentore"
+    },
+    "costo_stimato": {
+      "type": "number",
+      "description": "Costo stimato inserito dal manutentore (preventivo)"
+    },
+    "preventivo_confermato": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se il preventivo \u00e8 stato confermato dal direttore"
+    },
+    "motivo_rifiuto": {
+      "type": "string",
+      "description": "Motivo del rifiuto del ticket"
+    },
     "confermato": {
       "type": "boolean",
       "default": false,
-      "description": "Se il ticket \u00e8 stato confermato dal direttore"
+      "description": "Se il ticket \u00e8 stato confermato dal direttore (legacy)"
     }
   },
   "required": [
