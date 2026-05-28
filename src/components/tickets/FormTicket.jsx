@@ -164,7 +164,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
               <div className={rowClass}>
                 <label className={labelClass}>Preventivo (€)</label>
                 <div className={fieldClass}>
-                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm" placeholder="es. 250" />
+                  <Input type="number" value={form.costo_stimato} onChange={e => set('costo_stimato', e.target.value)} className="h-8 text-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="es. 250" />
                   <p className="text-xs text-slate-400 mt-1">Inserendo un importo lo stato passerà automaticamente a <strong>Preventivo inserito</strong></p>
                 </div>
               </div>
