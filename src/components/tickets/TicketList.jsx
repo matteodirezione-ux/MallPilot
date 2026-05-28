@@ -1,6 +1,6 @@
 import React from 'react';
 import SafeImage from '@/components/ui/SafeImage';
-import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye, ChevronDown } from 'lucide-react';
+import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye, ChevronDown, ClipboardList } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const STATI_CONFIG = {
@@ -175,7 +175,7 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
         )}
       </div>
 
-      <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+      <div className="flex gap-1 flex-shrink-0 items-start" onClick={e => e.stopPropagation()}>
         {(userRole === 'direttore' || userRole === 'proprieta' || userRole === 'vigilanza') && (
           <>
             <button onClick={() => onEdit(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
@@ -189,9 +189,20 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
           </>
         )}
         {userRole === 'manutentore' && (
-          <button onClick={() => onCardClick(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
-            <Eye className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col gap-1 items-end">
+            {['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
+              <button
+                onClick={() => onEdit(ticket)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                Inserisci preventivo
+              </button>
+            )}
+            <button onClick={() => onCardClick(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+              <Eye className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
     </div>
