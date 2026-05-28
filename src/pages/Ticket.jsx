@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Pencil, Trash2, X, ShieldCheck, ShieldAlert, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import FormTicket from '@/components/tickets/FormTicket';
@@ -175,22 +175,24 @@ export default function Ticket({ centroSelezionato, user }) {
     setFormOpen(true);
   };
 
+  const inizio = startOfMonth(meseFiltrato);
+  const fine = endOfMonth(meseFiltrato);
+
   const filtered = tickets.filter(t => {
     const matchSearch = !search || t.numero_ticket?.toLowerCase().includes(search.toLowerCase()) || t.operatore?.toLowerCase().includes(search.toLowerCase()) || t.descrizione?.toLowerCase().includes(search.toLowerCase());
     const matchStato = filtroStato === 'tutti' || t.stato === filtroStato;
     const dataApertura = t.data_apertura ? new Date(t.data_apertura) : null;
-    const inizio = startOfMonth(meseFiltrato);
-    const fine = endOfMonth(meseFiltrato);
-    return matchSearch && matchStato;
+    const matchMese = dataApertura && dataApertura >= inizio && dataApertura <= fine;
+    return matchSearch && matchStato && matchMese;
   });
 
   const oggi = new Date(); oggi.setHours(0,0,0,0);
   const counts = {
-    aperto: tickets.filter(t => t.stato === 'aperto').length,
-    sollecitati: tickets.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
-    scaduti: tickets.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso').length,
-    chiuso: tickets.filter(t => t.stato === 'chiuso').length,
-    daConfermare: tickets.filter(t => !t.confermato && t.stato !== 'chiuso').length,
+    aperto: filtered.filter(t => t.stato === 'aperto').length,
+    sollecitati: filtered.filter(t => t.numero_sollecito > 0 && t.stato !== 'chiuso').length,
+    scaduti: filtered.filter(t => t.scadenza && new Date(t.scadenza) < oggi && t.stato !== 'chiuso').length,
+    chiuso: filtered.filter(t => t.stato === 'chiuso').length,
+    daConfermare: filtered.filter(t => !t.confermato && t.stato !== 'chiuso').length,
   };
 
   const isReadOnly = user?.tipo_account === 'manutentore';
@@ -245,6 +247,18 @@ export default function Ticket({ centroSelezionato, user }) {
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
+        </div>
+
+        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
+          <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+            <ChevronLeft className="w-4 h-4 text-slate-600" />
+          </button>
+          <span className="text-sm font-medium text-slate-700 min-w-max">
+            {format(meseFiltrato, 'MMMM yyyy', { locale: it })}
+          </span>
+          <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() + 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
+            <ChevronRight className="w-4 h-4 text-slate-600" />
+          </button>
         </div>
 
         <div className="flex gap-1">
