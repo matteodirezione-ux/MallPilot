@@ -197,7 +197,7 @@ export default function Ticket({ centroSelezionato, user }) {
       const manutentori = await base44.entities.Manutentore.list();
       const notifiche = manutentori.map(m => ({
         destinatario_email: m.email,
-        tipo: 'manutenzione',
+        tipo: 'ticket',
         titolo,
         messaggio,
         centro_id: ticket.centro_id || '',

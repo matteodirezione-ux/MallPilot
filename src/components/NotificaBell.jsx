@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-const TIPO_ICON = { task: '📋', prenotazione: '📅', manutenzione: '🔧' };
+const TIPO_ICON = { task: '📋', prenotazione: '📅', manutenzione: '🔧', ticket: '🎫' };
 
 export default function NotificaBell({ user }) {
   const [notifiche, setNotifiche] = useState([]);
@@ -17,7 +17,10 @@ export default function NotificaBell({ user }) {
 
     const unsubscribe = base44.entities.Notifica.subscribe((event) => {
       if (event.type === 'create' && event.data?.destinatario_email === user.email) {
-        setNotifiche(prev => [event.data, ...prev]);
+        const isManutentore = user?.tipo_account === 'manutentore';
+        if (!isManutentore || event.data?.tipo === 'ticket') {
+          setNotifiche(prev => [event.data, ...prev]);
+        }
       } else if (event.type === 'update') {
         setNotifiche(prev => prev.map(n => n.id === event.id ? event.data : n));
       }
@@ -32,7 +35,10 @@ export default function NotificaBell({ user }) {
       '-created_date',
       50
     );
-    setNotifiche(data);
+    const filtered = user?.tipo_account === 'manutentore'
+      ? data.filter(n => n.tipo === 'ticket')
+      : data;
+    setNotifiche(filtered);
   };
 
   const unreadCount = notifiche.filter(n => !n.letta).length;
