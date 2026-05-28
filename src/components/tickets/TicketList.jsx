@@ -220,6 +220,9 @@ const STATI_ORDER = [
 ];
 
 const sortByScadenza = (a, b) => {
+  // Urgenti prima
+  if (a.tipologia === 'urgente' && b.tipologia !== 'urgente') return -1;
+  if (a.tipologia !== 'urgente' && b.tipologia === 'urgente') return 1;
   if (!a.scadenza && !b.scadenza) return 0;
   if (!a.scadenza) return 1;
   if (!b.scadenza) return -1;
