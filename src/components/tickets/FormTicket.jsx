@@ -18,7 +18,7 @@ const today = () => format(new Date(), 'yyyy-MM-dd');
 // Per ordinario: lun-mer → giovedì successivo; gio-dom → lunedì successivo
 // Per urgente: giorno successivo
 const defaultScadenza = (tipologia) => {
-  if (tipologia === 'urgente') return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+  if (tipologia === 'urgente') return format(new Date(), 'yyyy-MM-dd');
   const dow = new Date().getDay(); // 0=dom, 1=lun, 2=mar, 3=mer, 4=gio, 5=ven, 6=sab
   // lun(1), mar(2), mer(3) → giovedì successivo
   if (dow >= 1 && dow <= 3) {
