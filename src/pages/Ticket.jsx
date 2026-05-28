@@ -170,7 +170,9 @@ export default function Ticket({ centroSelezionato, user }) {
     else if (tipo === 'conferma_preventivo') update = { stato: 'approvato', preventivo_confermato: true };
     else if (tipo === 'rifiuta_preventivo') update = { stato: 'rifiutato', motivo_rifiuto: testo };
     else if (tipo === 'da_controllare') update = { stato: 'da_controllare' };
+    else if (tipo === 'inserisci_preventivo') update = { stato: 'preventivo_inserito' };
     else if (tipo === 'chiudi') update = { stato: 'chiuso' };
+    else if (tipo.startsWith('sollecito:')) update = { numero_sollecito: Number(tipo.split(':')[1]) };
 
     await base44.entities.Ticket.update(ticket.id, update);
     setTickets(prev => prev.map(t => t.id === ticket.id ? { ...t, ...update } : t));

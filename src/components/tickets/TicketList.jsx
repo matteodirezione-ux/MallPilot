@@ -1,7 +1,7 @@
 import React from 'react';
 import SafeImage from '@/components/ui/SafeImage';
-import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye } from 'lucide-react';
+import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye, ChevronDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const STATI_CONFIG = {
   in_attesa_approvazione: { label: 'In attesa approvazione', color: 'bg-slate-100 text-slate-700', dot: 'bg-slate-400' },
@@ -26,47 +26,106 @@ const formatData = (d) => {
   } catch { return d; }
 };
 
+// Transizioni stato permesse per ruolo
+function getStatiPermessi(ticket, userRole) {
+  const s = ticket.stato;
+  if (userRole === 'direttore' || userRole === 'proprieta') {
+    if (s === 'in_attesa_approvazione') return ['in_attesa_approvazione', 'approvato', 'approvato_con_preventivo', 'rifiutato'];
+    if (s === 'preventivo_inserito') return ['preventivo_inserito', 'approvato', 'rifiutato'];
+    if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
+    if (s === 'approvato' || s === 'approvato_con_preventivo') return [s, 'rifiutato', 'chiuso'];
+    return null; // stato fisso
+  }
+  if (userRole === 'vigilanza') {
+    if (s === 'da_controllare') return ['da_controllare', 'chiuso'];
+    return null;
+  }
+  if (userRole === 'manutentore') {
+    if (s === 'approvato' || s === 'approvato_con_preventivo') return [s, 'preventivo_inserito', 'da_controllare'];
+    if (s === 'preventivo_inserito') return ['preventivo_inserito', 'da_controllare'];
+    return null;
+  }
+  return null;
+}
+
+function StatoBadge({ ticket, userRole, onAzione }) {
+  const stConf = STATI_CONFIG[ticket.stato] || STATI_CONFIG.in_attesa_approvazione;
+  const statiPermessi = getStatiPermessi(ticket, userRole);
+
+  if (!statiPermessi) {
+    return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${stConf.color}`}>{stConf.label}</span>;
+  }
+
+  const handleChange = (nuovoStato) => {
+    if (nuovoStato === ticket.stato) return;
+    // Mappa stati che richiedono conferma/rifiuto dialog
+    const azioniSpeciali = {
+      rifiutato: ticket.stato === 'preventivo_inserito' ? 'rifiuta_preventivo' : 'rifiuta',
+      approvato: ticket.stato === 'preventivo_inserito' ? 'conferma_preventivo' : 'approva',
+      approvato_con_preventivo: 'approva_preventivo',
+      da_controllare: 'da_controllare',
+      chiuso: 'chiudi',
+      preventivo_inserito: 'inserisci_preventivo',
+    };
+    onAzione(ticket, azioniSpeciali[nuovoStato] || nuovoStato);
+  };
+
+  return (
+    <div onClick={e => e.stopPropagation()}>
+      <Select value={ticket.stato} onValueChange={handleChange}>
+        <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 shadow-none focus:ring-0 ${stConf.color}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {statiPermessi.map(s => (
+            <SelectItem key={s} value={s} className="text-xs">
+              <span className={`inline-flex items-center gap-1.5`}>
+                <span className={`w-2 h-2 rounded-full ${STATI_CONFIG[s]?.dot}`} />
+                {STATI_CONFIG[s]?.label}
+              </span>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function SollecitoControl({ ticket, userRole, onAzione }) {
+  const canEdit = userRole === 'direttore' || userRole === 'proprieta';
+  if (!canEdit) {
+    if (ticket.numero_sollecito > 0)
+      return <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</span>;
+    return null;
+  }
+  return (
+    <div onClick={e => e.stopPropagation()}>
+      <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => onAzione(ticket, 'sollecito:' + v)}>
+        <SelectTrigger className={`h-6 text-xs px-2 py-0 rounded-full font-medium w-auto gap-1 shadow-none focus:ring-0 ${ticket.numero_sollecito > 0 ? 'border-0 bg-orange-100 text-orange-700' : 'border border-slate-200 text-slate-400 bg-white'}`}>
+          <SelectValue>{ticket.numero_sollecito > 0 ? `Sollecito ${ticket.numero_sollecito}` : '+ Sollecito'}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="0" className="text-xs">Nessun sollecito</SelectItem>
+          {[1,2,3,4,5].map(n => <SelectItem key={n} value={String(n)} className="text-xs">Sollecito {n}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onAzione }) {
   const isScaduto = ticket.scadenza && new Date(ticket.scadenza) < oggi && ticket.stato !== 'chiuso';
-  const stConf = STATI_CONFIG[ticket.stato] || STATI_CONFIG.in_attesa_approvazione;
   const tipConf = TIPOLOGIA_CONFIG[ticket.tipologia] || TIPOLOGIA_CONFIG.ordinario;
 
-  const cardBg = ticket.tipologia === 'urgente'
+  const cardBg = ticket.tipologia === 'urgente' && ticket.stato !== 'chiuso'
     ? 'bg-red-50 border-red-200'
     : ticket.stato === 'chiuso'
     ? 'bg-green-50 border-green-200'
     : ticket.stato === 'da_controllare'
     ? 'bg-orange-50 border-orange-200'
     : ticket.stato === 'rifiutato'
-    ? 'bg-red-50 border-red-200'
+    ? 'bg-slate-50 border-slate-300'
     : 'bg-white border-slate-200';
-
-  // Azioni contestuali per ruolo
-  const azioni = [];
-  if (userRole === 'direttore' || userRole === 'proprieta') {
-    if (ticket.stato === 'in_attesa_approvazione') {
-      azioni.push({ key: 'approva', label: 'Approva', icon: CheckCircle2, className: 'bg-blue-600 hover:bg-blue-700 text-white' });
-      azioni.push({ key: 'approva_preventivo', label: 'Richiedi preventivo', icon: FileText, className: 'bg-purple-600 hover:bg-purple-700 text-white' });
-      azioni.push({ key: 'rifiuta', label: 'Rifiuta', icon: XCircle, className: 'bg-red-600 hover:bg-red-700 text-white' });
-    }
-    if (ticket.stato === 'preventivo_inserito') {
-      azioni.push({ key: 'conferma_preventivo', label: 'Conferma preventivo', icon: CheckCircle2, className: 'bg-green-600 hover:bg-green-700 text-white' });
-      azioni.push({ key: 'rifiuta_preventivo', label: 'Rifiuta preventivo', icon: XCircle, className: 'bg-red-600 hover:bg-red-700 text-white' });
-    }
-    if (ticket.stato === 'da_controllare') {
-      azioni.push({ key: 'chiudi', label: 'Chiudi ticket', icon: CheckCircle2, className: 'bg-green-600 hover:bg-green-700 text-white' });
-    }
-  }
-  if (userRole === 'vigilanza') {
-    if (ticket.stato === 'da_controllare') {
-      azioni.push({ key: 'chiudi', label: 'Chiudi ticket', icon: CheckCircle2, className: 'bg-green-600 hover:bg-green-700 text-white' });
-    }
-  }
-  if (userRole === 'manutentore') {
-    if (ticket.stato === 'approvato' || ticket.stato === 'approvato_con_preventivo' || ticket.stato === 'preventivo_inserito') {
-      azioni.push({ key: 'da_controllare', label: 'Lavoro completato', icon: Wrench, className: 'bg-orange-600 hover:bg-orange-700 text-white' });
-    }
-  }
 
   return (
     <div
@@ -82,11 +141,14 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
         <div className="flex flex-wrap items-center gap-2 mb-1.5">
           <span className="font-bold text-slate-800 text-sm">#{ticket.numero_ticket}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${tipConf.color}`}>{tipConf.label}</span>
-          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${stConf.color}`}>{stConf.label}</span>
+
+          {/* Stato inline con dropdown per chi può cambiarlo */}
+          <StatoBadge ticket={ticket} userRole={userRole} onAzione={onAzione} />
+
           {isScaduto && <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" />Scaduto</span>}
-          {ticket.numero_sollecito > 0 && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-orange-100 text-orange-700">Sollecito {ticket.numero_sollecito}</span>
-          )}
+
+          {/* Sollecito inline */}
+          <SollecitoControl ticket={ticket} userRole={userRole} onAzione={onAzione} />
         </div>
 
         {ticket.descrizione && <p className="text-sm text-slate-600 mb-2 line-clamp-2">{ticket.descrizione}</p>}
@@ -106,22 +168,6 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
 
         {ticket.note_manutentore && (
           <p className="text-xs text-slate-500 mt-1 italic line-clamp-1">Note: {ticket.note_manutentore}</p>
-        )}
-
-        {/* Azioni contestuali */}
-        {azioni.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3" onClick={e => e.stopPropagation()}>
-            {azioni.map(a => (
-              <button
-                key={a.key}
-                onClick={() => onAzione(ticket, a.key)}
-                className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-medium transition-colors ${a.className}`}
-              >
-                <a.icon className="w-3.5 h-3.5" />
-                {a.label}
-              </button>
-            ))}
-          </div>
         )}
 
         {(ticket.foto_urls?.length > 0 || ticket.allegati_manutentore?.length > 0) && (
