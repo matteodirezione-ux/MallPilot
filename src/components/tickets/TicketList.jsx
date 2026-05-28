@@ -66,7 +66,7 @@ function StatoBadge({ ticket, userRole, onAzione }) {
   };
 
   return (
-    <div onClick={e => e.stopPropagation()}>
+    <div onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
       <Select value={ticket.stato} onValueChange={handleChange}>
         <SelectTrigger className={`h-6 text-xs px-2 py-0 border-0 rounded-full font-medium w-auto gap-1 shadow-none focus:ring-0 ${stConf.color}`}>
           <SelectValue />
@@ -94,7 +94,7 @@ function SollecitoControl({ ticket, userRole, onAzione }) {
     return null;
   }
   return (
-    <div onClick={e => e.stopPropagation()}>
+    <div onClick={e => e.stopPropagation()} onPointerDown={e => e.stopPropagation()}>
       <Select value={String(ticket.numero_sollecito ?? 0)} onValueChange={v => onAzione(ticket, 'sollecito:' + v)}>
         <SelectTrigger className={`h-6 text-xs px-2 py-0 rounded-full font-medium w-auto gap-1 shadow-none focus:ring-0 ${ticket.numero_sollecito > 0 ? 'border-0 bg-orange-100 text-orange-700' : 'border border-slate-200 text-slate-400 bg-white'}`}>
           <SelectValue>{ticket.numero_sollecito > 0 ? `Sollecito ${ticket.numero_sollecito}` : '+ Sollecito'}</SelectValue>
