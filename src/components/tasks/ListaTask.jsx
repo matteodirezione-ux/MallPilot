@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Pencil, Trash2, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Pencil, Trash2, CheckCircle2, Flag, AlertCircle } from 'lucide-react';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -15,7 +15,7 @@ const prioritaConfig = {
 };
 
 const statoConfig = {
-  da_fare: { label: 'Da fare', class: 'bg-slate-100 text-slate-700', icon: Clock },
+  da_fare: { label: 'Da fare', class: 'bg-slate-100 text-slate-700', icon: Flag },
   in_corso: { label: 'In corso', class: 'bg-blue-100 text-blue-700', icon: AlertCircle },
   completato: { label: 'Completato', class: 'bg-green-100 text-green-700', icon: CheckCircle2 },
   annullato: { label: 'Annullato', class: 'bg-slate-100 text-slate-400', icon: null },
@@ -79,7 +79,7 @@ function TaskRow({ task, onEdit, onDelete, onToggleStato, canEdit, canDelete }) 
         hover:shadow-[0_12px_36px_rgba(0,0,0,0.18),0_4px_12px_rgba(0,0,0,0.1)] hover:-translate-y-0.5
         ${task.stato === 'completato' ? 'bg-green-50/60 border-green-50' : isScaduto ? 'bg-red-50 border-red-50' : 'bg-white/80 backdrop-blur-sm border-white'}`} onClick={() => setShowDettaglio(true)}>
         <button onClick={e => { e.stopPropagation(); onToggleStato(task); }} className="mt-0.5 flex-shrink-0">
-          {task.stato === 'completato' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Clock className="w-5 h-5 text-slate-300" />}
+          {task.stato === 'completato' ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Flag className="w-5 h-5 text-slate-300" />}
         </button>
         <div className="flex-1 min-w-0">
           <p className={`font-medium text-sm ${task.stato === 'completato' ? 'line-through text-slate-400' : 'text-slate-800'}`}>{task.titolo}</p>
