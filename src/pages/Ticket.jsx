@@ -418,10 +418,14 @@ export default function Ticket({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Ticket Manutenzione</h1>
           <p className="text-sm text-slate-500 mt-0.5">{isManutentore ? 'I tuoi ticket assegnati' : 'Gestione ticket manutenzione'}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <div className="relative md:hidden">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca..." className="pl-9 h-9 text-sm w-36" />
+          </div>
           {(userRole === 'proprieta' || userRole === 'direttore' || userRole === 'manutentore') && (
             <Button variant="outline" onClick={esportaExcel} className="gap-2">
-              <Download className="w-4 h-4" /> Esporta Chiusi
+              <Download className="w-4 h-4" /> <span className="hidden sm:inline">Esporta Chiusi</span>
             </Button>
           )}
           {canCreate && (
@@ -457,7 +461,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
       {/* Filtri */}
       <div className="flex flex-wrap gap-2 mb-4">
-        <div className="relative flex-1 min-w-48">
+        <div className="relative flex-1 min-w-48 hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
         </div>
