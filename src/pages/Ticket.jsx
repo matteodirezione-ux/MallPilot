@@ -109,6 +109,7 @@ export default function Ticket({ centroSelezionato, user }) {
   const [filtroStato, setFiltroStato] = useState('attivi');
   const [meseFiltrato, setMeseFiltrato] = useState(new Date());
   const [azioneDialog, setAzioneDialog] = useState(null); // { ticket, tipo }
+  const [mapCentri, setMapCentri] = useState({}); // { id: nome }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -118,6 +119,14 @@ export default function Ticket({ centroSelezionato, user }) {
       if (t) { setTicketSelezionato(t); setFormOpen(true); window.history.replaceState({}, '', window.location.pathname); }
     }
   }, [tickets]);
+
+  useEffect(() => {
+    base44.entities.CentroCommerciale.list().then(centri => {
+      const map = {};
+      centri.forEach(c => { map[c.id] = c.nome; });
+      setMapCentri(map);
+    });
+  }, []);
 
   useEffect(() => {
     if (centroSelezionato || user?.tipo_account === 'manutentore') loadTickets();
@@ -268,7 +277,10 @@ export default function Ticket({ centroSelezionato, user }) {
     const ws = {};
 
     // Riga 1: Nome centro
-    const nomeCentro = centroSelezionato?.nome || 'Centro Commerciale';
+    const centroDalTicket = chiusi[0]?.centro_id ? mapCentri[chiusi[0].centro_id] : null;
+    const nomeCentro = (centroSelezionato?.id && centroSelezionato.id !== 'tutti')
+      ? (centroSelezionato.nome || centroDalTicket || 'Centro Commerciale')
+      : (centroDalTicket || 'Centro Commerciale');
     const titoloCentroStyle = {
       font: { bold: true, sz: 13, color: { rgb: '1E3A5F' } },
       alignment: { horizontal: 'left', vertical: 'center' },
