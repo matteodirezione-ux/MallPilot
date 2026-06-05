@@ -1,0 +1,56 @@
+{
+  "name": "SpazioExpo",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "numero_spazio": {
+      "type": "string",
+      "description": "Numero identificativo dello spazio (es. A12, B05)"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome descrittivo dello spazio"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione dello spazio"
+    },
+    "superficie_mq": {
+      "type": "number",
+      "description": "Superficie in metri quadrati"
+    },
+    "colore": {
+      "type": "string",
+      "default": "#3b82f6",
+      "description": "Colore identificativo dello spazio nel calendario"
+    },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto dello spazio"
+    },
+    "piantina_url": {
+      "type": "string",
+      "description": "URL della piantina che mostra la posizione dello spazio"
+    },
+    "solo_eventi": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se true, lo spazio \u00e8 dedicato solo agli eventi e non viene conteggiato nelle statistiche di affitto"
+    },
+    "attivo": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se lo spazio \u00e8 attivo e disponibile per prenotazioni"
+    }
+  },
+  "required": [
+    "centro_id",
+    "numero_spazio"
+  ]
+}

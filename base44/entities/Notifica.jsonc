@@ -1,0 +1,45 @@
+{
+  "name": "Notifica",
+  "type": "object",
+  "properties": {
+    "destinatario_email": {
+      "type": "string",
+      "description": "Email del destinatario"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "task",
+        "prenotazione",
+        "manutenzione"
+      ],
+      "description": "Tipo di notifica"
+    },
+    "titolo": {
+      "type": "string",
+      "description": "Titolo della notifica"
+    },
+    "messaggio": {
+      "type": "string",
+      "description": "Corpo della notifica"
+    },
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "entity_id": {
+      "type": "string",
+      "description": "ID dell'entit\u00e0 che ha generato la notifica"
+    },
+    "letta": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se la notifica \u00e8 stata letta"
+    }
+  },
+  "required": [
+    "destinatario_email",
+    "tipo",
+    "titolo"
+  ]
+}

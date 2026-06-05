@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight, Wrench, Eye } from 'lucide-react';
+import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight, Wrench, Eye, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import ImageLightbox from '@/components/ui/ImageLightbox';
@@ -210,6 +211,32 @@ export default function Ticket({ centroSelezionato, user }) {
     setAzioneDialog(null);
   };
 
+  const esportaExcel = () => {
+    const chiusi = tickets.filter(t => t.stato === 'chiuso');
+
+    const righe = chiusi.map(t => ({
+      'Numero Ticket': t.numero_ticket || '',
+      'Giorno Apertura': formatData(t.data_apertura),
+      'Giorno Chiusura': formatData(t.updated_date ? t.updated_date.split('T')[0] : t.scadenza),
+      'Descrizione': t.descrizione || '',
+      'Importo (€)': t.costo_stimato ? Number(t.costo_stimato) : 0,
+    }));
+
+    const totale = righe.reduce((acc, r) => acc + r['Importo (€)'], 0);
+    righe.push({
+      'Numero Ticket': '',
+      'Giorno Apertura': '',
+      'Giorno Chiusura': '',
+      'Descrizione': 'TOTALE',
+      'Importo (€)': totale,
+    });
+
+    const ws = XLSX.utils.json_to_sheet(righe);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Ticket Chiusi');
+    XLSX.writeFile(wb, `ticket_chiusi_${format(new Date(), 'yyyy-MM')}.xlsx`);
+  };
+
   const userRole = user?.tipo_account;
   const isManutentore = userRole === 'manutentore';
   const isDirettore = userRole === 'direttore' || userRole === 'proprieta';
@@ -269,11 +296,18 @@ export default function Ticket({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800">Ticket Manutenzione</h1>
           <p className="text-sm text-slate-500 mt-0.5">{isManutentore ? 'I tuoi ticket assegnati' : 'Gestione ticket manutenzione'}</p>
         </div>
-        {canCreate && (
-          <Button onClick={() => { setTicketSelezionato(null); setFormOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Ticket
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {!isManutentore && (
+            <Button variant="outline" onClick={esportaExcel} className="gap-2">
+              <Download className="w-4 h-4" /> Esporta Chiusi
+            </Button>
+          )}
+          {canCreate && (
+            <Button onClick={() => { setTicketSelezionato(null); setFormOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+              <Plus className="w-4 h-4" /> Nuovo Ticket
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* KPI */}

@@ -1,0 +1,49 @@
+{
+  "name": "Documento",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "prenotazione_id": {
+      "type": "string",
+      "description": "ID della prenotazione collegata"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID del cliente"
+    },
+    "tipo_documento": {
+      "type": "string",
+      "enum": [
+        "contratto",
+        "fattura",
+        "ricevuta",
+        "altro"
+      ],
+      "description": "Tipo di documento"
+    },
+    "nome_file": {
+      "type": "string",
+      "description": "Nome del file"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL del documento caricato"
+    },
+    "contratto_firmato_url": {
+      "type": "string",
+      "description": "URL del contratto firmato caricato dal cliente"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note sul documento"
+    }
+  },
+  "required": [
+    "centro_id",
+    "tipo_documento",
+    "nome_file"
+  ]
+}

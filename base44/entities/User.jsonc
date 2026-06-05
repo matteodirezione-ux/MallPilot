@@ -6,5 +6,8 @@
       "type": "string",
       "description": "ID del tenant collegato (solo per utenti con ruolo tenant)"
     }
-  }
+  },
+  "required": [
+    "tenant_id"
+  ]
 }

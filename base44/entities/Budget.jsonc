@@ -1,0 +1,23 @@
+{
+  "name": "Budget",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "anno": {
+      "type": "number",
+      "description": "Anno di riferimento"
+    },
+    "importo_budget": {
+      "type": "number",
+      "description": "Importo del budget annuale previsto"
+    }
+  },
+  "required": [
+    "centro_id",
+    "anno",
+    "importo_budget"
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "name": "Task",
+  "type": "object",
+  "properties": {
+    "titolo": {
+      "type": "string",
+      "description": "Titolo del task"
+    },
+    "descrizione": {
+      "type": "string",
+      "description": "Descrizione del task"
+    },
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "assegnato_a_email": {
+      "type": "string",
+      "description": "Email dell'utente a cui \u00e8 assegnato il task"
+    },
+    "assegnato_a_nome": {
+      "type": "string",
+      "description": "Nome dell'utente a cui \u00e8 assegnato il task"
+    },
+    "assegnato_da_email": {
+      "type": "string",
+      "description": "Email di chi ha creato/assegnato il task"
+    },
+    "assegnato_da_nome": {
+      "type": "string",
+      "description": "Nome di chi ha creato/assegnato il task"
+    },
+    "priorita": {
+      "type": "string",
+      "enum": [
+        "bassa",
+        "media",
+        "alta",
+        "urgente"
+      ],
+      "default": "media",
+      "description": "Priorit\u00e0 del task"
+    },
+    "stato": {
+      "type": "string",
+      "enum": [
+        "da_fare",
+        "in_corso",
+        "completato",
+        "annullato"
+      ],
+      "default": "da_fare",
+      "description": "Stato del task"
+    },
+    "data_scadenza": {
+      "type": "string",
+      "format": "date",
+      "description": "Data di scadenza"
+    },
+    "ricorrente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se il task \u00e8 ricorrente"
+    },
+    "ricorrenza_tipo": {
+      "type": "string",
+      "enum": [
+        "giornaliero",
+        "settimanale",
+        "mensile",
+        "annuale",
+        "personalizzato"
+      ],
+      "description": "Tipo di ricorrenza"
+    },
+    "ricorrenza_ogni": {
+      "type": "number",
+      "description": "Ogni quante unit\u00e0 si ripete"
+    },
+    "ricorrenza_unita": {
+      "type": "string",
+      "enum": [
+        "giorni",
+        "settimane",
+        "mesi"
+      ],
+      "description": "Unit\u00e0 per ricorrenza personalizzata"
+    },
+    "ricorrenza_fine": {
+      "type": "string",
+      "format": "date",
+      "description": "Data fine ricorrenza"
+    },
+    "task_padre_id": {
+      "type": "string",
+      "description": "ID del task padre (per ricorrenze generate)"
+    },
+    "gruppo_id": {
+      "type": "string",
+      "description": "ID gruppo per task multipli assegnati a pi\u00f9 centri/persone contemporaneamente"
+    },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto allegate al task"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive"
+    }
+  },
+  "required": [
+    "titolo",
+    "data_scadenza"
+  ]
+}

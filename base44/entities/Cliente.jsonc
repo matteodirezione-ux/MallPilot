@@ -1,0 +1,72 @@
+{
+  "name": "Cliente",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale a cui appartiene il cliente"
+    },
+    "ragione_sociale": {
+      "type": "string",
+      "description": "Ragione sociale dell'azienda"
+    },
+    "partita_iva": {
+      "type": "string",
+      "description": "Partita IVA"
+    },
+    "codice_fiscale": {
+      "type": "string",
+      "description": "Codice fiscale"
+    },
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email di contatto"
+    },
+    "pec": {
+      "type": "string",
+      "description": "PEC aziendale"
+    },
+    "telefono": {
+      "type": "string",
+      "description": "Telefono"
+    },
+    "indirizzo": {
+      "type": "string",
+      "description": "Indirizzo sede legale"
+    },
+    "citta": {
+      "type": "string",
+      "description": "Citt\u00e0"
+    },
+    "provincia": {
+      "type": "string",
+      "description": "Provincia"
+    },
+    "cap": {
+      "type": "string",
+      "description": "CAP"
+    },
+    "referente_nome": {
+      "type": "string",
+      "description": "Nome del referente aziendale"
+    },
+    "referente_telefono": {
+      "type": "string",
+      "description": "Telefono del referente"
+    },
+    "referente_email": {
+      "type": "string",
+      "description": "Email del referente"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note aggiuntive sul cliente"
+    }
+  },
+  "required": [
+    "centro_id",
+    "ragione_sociale",
+    "email"
+  ]
+}
