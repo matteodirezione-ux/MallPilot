@@ -466,7 +466,7 @@ export default function Ticket({ centroSelezionato, user }) {
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-nowrap overflow-x-auto">
           <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
             <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
               <ChevronLeft className="w-4 h-4 text-slate-600" />
