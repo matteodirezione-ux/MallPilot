@@ -474,19 +474,17 @@ export default function Ticket({ centroSelezionato, user }) {
           </button>
         </div>
 
-        {!isManutentore && (
-          <div className="flex flex-wrap gap-1">
-            {filtriStato.map(f => (
-              <button
-                key={f.key}
-                onClick={() => setFiltroStato(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? f.activeClass : f.inactiveClass}`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1">
+          {filtriStato.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFiltroStato(f.key)}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? f.activeClass : f.inactiveClass}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Lista */}
