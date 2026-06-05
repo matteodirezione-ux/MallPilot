@@ -191,9 +191,20 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
                 Inserisci preventivo
               </button>
             )}
-            <button onClick={() => onCardClick(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
-              <Eye className="w-4 h-4" />
-            </button>
+            {ticket.stato === 'approvato' && (
+              <button
+                onClick={() => onEdit(ticket)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+              >
+                <ClipboardList className="w-3.5 h-3.5" />
+                Inserisci importo
+              </button>
+            )}
+            {!['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
+              <button onClick={() => onCardClick(ticket)} className="p-2 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-blue-600 transition-colors">
+                <Eye className="w-4 h-4" />
+              </button>
+            )}
           </div>
         )}
       </div>
