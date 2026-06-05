@@ -1,6 +1,6 @@
 import React from 'react';
 import SafeImage from '@/components/ui/SafeImage';
-import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye, ChevronDown, ClipboardList } from 'lucide-react';
+import { AlertCircle, Pencil, Trash2, CheckCircle2, XCircle, FileText, Wrench, Eye, ChevronDown, ClipboardList, Euro } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const STATI_CONFIG = {
@@ -194,10 +194,10 @@ function TicketCard({ ticket, oggi, userRole, onCardClick, onEdit, onDelete, onA
             {ticket.stato === 'approvato' && (
               <button
                 onClick={() => onEdit(ticket)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors whitespace-nowrap"
+                className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                title="Inserisci importo"
               >
-                <ClipboardList className="w-3.5 h-3.5" />
-                Inserisci importo
+                <Euro className="w-4 h-4" />
               </button>
             )}
             {!['approvato', 'approvato_con_preventivo'].includes(ticket.stato) && (
