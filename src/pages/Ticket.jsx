@@ -478,15 +478,28 @@ export default function Ticket({ centroSelezionato, user }) {
               <ChevronRight className="w-4 h-4 text-slate-600" />
             </button>
           </div>
+          {/* Tendina su mobile */}
           <select
             value={filtroStato}
             onChange={e => setFiltroStato(e.target.value)}
-            className="h-9 text-sm border border-slate-200 rounded-lg px-2 bg-white text-slate-700 flex-shrink-0 cursor-pointer"
+            className="md:hidden h-9 text-sm border border-slate-200 rounded-lg px-2 bg-white text-slate-700 flex-shrink-0 cursor-pointer"
           >
             {filtriStato.map(f => (
               <option key={f.key} value={f.key}>{f.label}</option>
             ))}
           </select>
+          {/* Bottoni su desktop */}
+          <div className="hidden md:flex gap-1">
+            {filtriStato.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setFiltroStato(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? f.activeClass : f.inactiveClass}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
