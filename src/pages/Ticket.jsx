@@ -429,7 +429,7 @@ export default function Ticket({ centroSelezionato, user }) {
             </Button>
           )}
           {canCreate && (
-            <Button onClick={() => { setTicketSelezionato(null); setFormOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+            <Button onClick={() => { setTicketSelezionato(null); setFormOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2 md:w-auto w-full">
               <Plus className="w-4 h-4" /> Nuovo Ticket
             </Button>
           )}
