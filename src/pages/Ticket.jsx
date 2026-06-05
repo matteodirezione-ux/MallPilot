@@ -413,7 +413,7 @@ export default function Ticket({ centroSelezionato, user }) {
   return (
     <div className="p-4 md:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Ticket Manutenzione</h1>
           <p className="text-sm text-slate-500 mt-0.5">{isManutentore ? 'I tuoi ticket assegnati' : 'Gestione ticket manutenzione'}</p>
@@ -438,7 +438,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
       {/* KPI */}
       {!isManutentore && (
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-2">
           {[
             { icon: Clock, color: 'bg-slate-100', iconColor: 'text-slate-600', value: counts.attesa, label: 'In attesa' },
             { icon: CheckCircle2, color: 'bg-blue-100', iconColor: 'text-blue-600', value: counts.approvati, label: 'Approvati' },
@@ -460,7 +460,7 @@ export default function Ticket({ centroSelezionato, user }) {
       )}
 
       {/* Filtri */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-2">
         <div className="relative flex-1 min-w-48 hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca ticket..." className="pl-9 h-9 text-sm" />
