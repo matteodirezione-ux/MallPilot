@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Ticket as TicketIcon, AlertCircle, CheckCircle2, Clock, XCircle, ChevronLeft, ChevronRight, Wrench, Eye, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import XLSXStyle from 'xlsx-js-style';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import ImageLightbox from '@/components/ui/ImageLightbox';
@@ -212,29 +213,92 @@ export default function Ticket({ centroSelezionato, user }) {
   };
 
   const esportaExcel = () => {
-    const chiusi = tickets.filter(t => t.stato === 'chiuso');
-
-    const righe = chiusi.map(t => ({
-      'Numero Ticket': t.numero_ticket || '',
-      'Giorno Apertura': formatData(t.data_apertura),
-      'Giorno Chiusura': formatData(t.updated_date ? t.updated_date.split('T')[0] : t.scadenza),
-      'Descrizione': t.descrizione || '',
-      'Importo (€)': t.costo_stimato ? Number(t.costo_stimato) : 0,
-    }));
-
-    const totale = righe.reduce((acc, r) => acc + r['Importo (€)'], 0);
-    righe.push({
-      'Numero Ticket': '',
-      'Giorno Apertura': '',
-      'Giorno Chiusura': '',
-      'Descrizione': 'TOTALE',
-      'Importo (€)': totale,
+    // Filtra solo chiusi del mese selezionato
+    const chiusi = tickets.filter(t => {
+      if (t.stato !== 'chiuso') return false;
+      const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
+      return d && d >= inizio && d <= fine;
     });
 
-    const ws = XLSX.utils.json_to_sheet(righe);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Ticket Chiusi');
-    XLSX.writeFile(wb, `ticket_chiusi_${format(new Date(), 'yyyy-MM')}.xlsx`);
+    const headers = ['Numero Ticket', 'Giorno Apertura', 'Giorno Chiusura', 'Descrizione', 'Importo (€)'];
+    const colLetters = ['A', 'B', 'C', 'D', 'E'];
+
+    const headerStyle = {
+      font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 11 },
+      fill: { fgColor: { rgb: '1E3A5F' } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+      border: {
+        top: { style: 'thin', color: { rgb: 'AAAAAA' } },
+        bottom: { style: 'thin', color: { rgb: 'AAAAAA' } },
+        left: { style: 'thin', color: { rgb: 'AAAAAA' } },
+        right: { style: 'thin', color: { rgb: 'AAAAAA' } },
+      }
+    };
+
+    const cellStyle = (isEven) => ({
+      font: { sz: 10 },
+      fill: { fgColor: { rgb: isEven ? 'EBF3FB' : 'FFFFFF' } },
+      alignment: { vertical: 'center', wrapText: true },
+      border: {
+        top: { style: 'thin', color: { rgb: 'DDDDDD' } },
+        bottom: { style: 'thin', color: { rgb: 'DDDDDD' } },
+        left: { style: 'thin', color: { rgb: 'DDDDDD' } },
+        right: { style: 'thin', color: { rgb: 'DDDDDD' } },
+      }
+    });
+
+    const totalStyle = {
+      font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } },
+      fill: { fgColor: { rgb: '1E3A5F' } },
+      alignment: { horizontal: 'right', vertical: 'center' },
+      border: {
+        top: { style: 'medium', color: { rgb: '1E3A5F' } },
+        bottom: { style: 'medium', color: { rgb: '1E3A5F' } },
+        left: { style: 'thin', color: { rgb: '1E3A5F' } },
+        right: { style: 'thin', color: { rgb: '1E3A5F' } },
+      }
+    };
+
+    const ws = {};
+
+    // Intestazioni
+    headers.forEach((h, i) => {
+      ws[`${colLetters[i]}1`] = { v: h, s: headerStyle };
+    });
+
+    // Dati
+    chiusi.forEach((t, idx) => {
+      const row = idx + 2;
+      const isEven = idx % 2 === 1;
+      const s = cellStyle(isEven);
+      const importo = t.costo_stimato ? Number(t.costo_stimato) : 0;
+      ws[`A${row}`] = { v: t.numero_ticket || '', s };
+      ws[`B${row}`] = { v: formatData(t.data_apertura), s: { ...s, alignment: { ...s.alignment, horizontal: 'center' } } };
+      ws[`C${row}`] = { v: formatData(t.updated_date ? t.updated_date.split('T')[0] : t.scadenza), s: { ...s, alignment: { ...s.alignment, horizontal: 'center' } } };
+      ws[`D${row}`] = { v: t.descrizione || '', s };
+      ws[`E${row}`] = { v: importo, s: { ...s, alignment: { ...s.alignment, horizontal: 'right' }, numFmt: '€ #,##0.00' } };
+    });
+
+    // Riga totale
+    const totaleRow = chiusi.length + 2;
+    const totale = chiusi.reduce((acc, t) => acc + (t.costo_stimato ? Number(t.costo_stimato) : 0), 0);
+    ['A', 'B', 'C'].forEach(col => { ws[`${col}${totaleRow}`] = { v: '', s: totalStyle }; });
+    ws[`D${totaleRow}`] = { v: 'TOTALE', s: { ...totalStyle, alignment: { horizontal: 'right', vertical: 'center' } } };
+    ws[`E${totaleRow}`] = { v: totale, s: { ...totalStyle, numFmt: '€ #,##0.00' } };
+
+    ws['!ref'] = `A1:E${totaleRow}`;
+    ws['!cols'] = [
+      { wch: 16 },  // Numero Ticket
+      { wch: 18 },  // Giorno Apertura
+      { wch: 18 },  // Giorno Chiusura
+      { wch: 60 },  // Descrizione
+      { wch: 16 },  // Importo
+    ];
+    ws['!rows'] = [{ hpt: 28 }, ...chiusi.map(() => ({ hpt: 36 })), { hpt: 28 }];
+
+    const wb = XLSXStyle.utils.book_new();
+    XLSXStyle.utils.book_append_sheet(wb, ws, 'Ticket Chiusi');
+    XLSXStyle.writeFile(wb, `ticket_chiusi_${format(meseFiltrato, 'yyyy-MM')}.xlsx`);
   };
 
   const userRole = user?.tipo_account;
