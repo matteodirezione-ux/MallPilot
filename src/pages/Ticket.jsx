@@ -297,7 +297,7 @@ export default function Ticket({ centroSelezionato, user }) {
           <p className="text-sm text-slate-500 mt-0.5">{isManutentore ? 'I tuoi ticket assegnati' : 'Gestione ticket manutenzione'}</p>
         </div>
         <div className="flex gap-2">
-          {!isManutentore && (
+          {(userRole === 'proprieta' || userRole === 'direttore' || userRole === 'manutentore') && (
             <Button variant="outline" onClick={esportaExcel} className="gap-2">
               <Download className="w-4 h-4" /> Esporta Chiusi
             </Button>
