@@ -132,6 +132,22 @@ export default function Ticket({ centroSelezionato, user }) {
     if (centroSelezionato || user?.tipo_account === 'manutentore') loadTickets();
   }, [centroSelezionato, user]);
 
+  useEffect(() => {
+    const unsubscribe = base44.entities.Ticket.subscribe((event) => {
+      if (event.type === 'create') {
+        setTickets(prev => {
+          if (prev.find(t => t.id === event.id)) return prev;
+          return [event.data, ...prev];
+        });
+      } else if (event.type === 'update') {
+        setTickets(prev => prev.map(t => t.id === event.id ? { ...t, ...event.data } : t));
+      } else if (event.type === 'delete') {
+        setTickets(prev => prev.filter(t => t.id !== event.id));
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   const loadTickets = async () => {
     setLoading(true);
     let query = {};
