@@ -213,12 +213,18 @@ export default function Ticket({ centroSelezionato, user }) {
   };
 
   const esportaExcel = () => {
-    // Filtra solo chiusi del mese selezionato
-    const chiusi = tickets.filter(t => {
-      if (t.stato !== 'chiuso') return false;
-      const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
-      return d && d >= inizio && d <= fine;
-    });
+    // Filtra solo chiusi del mese selezionato, ordinati per data apertura crescente
+    const chiusi = tickets
+      .filter(t => {
+        if (t.stato !== 'chiuso') return false;
+        const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
+        return d && d >= inizio && d <= fine;
+      })
+      .sort((a, b) => {
+        const da = a.data_apertura ? new Date(a.data_apertura) : 0;
+        const db = b.data_apertura ? new Date(b.data_apertura) : 0;
+        return da - db;
+      });
 
     const headers = ['Numero Ticket', 'Giorno Apertura', 'Giorno Chiusura', 'Descrizione', 'Importo (€)'];
     const colLetters = ['A', 'B', 'C', 'D', 'E'];
@@ -261,14 +267,42 @@ export default function Ticket({ centroSelezionato, user }) {
 
     const ws = {};
 
-    // Intestazioni
+    // Riga 1: Nome centro
+    const nomeCentro = centroSelezionato?.nome || 'Centro Commerciale';
+    const titoloCentroStyle = {
+      font: { bold: true, sz: 13, color: { rgb: '1E3A5F' } },
+      alignment: { horizontal: 'left', vertical: 'center' },
+    };
+    ws['A1'] = { v: nomeCentro, s: titoloCentroStyle };
+    ws['B1'] = { v: '', s: {} };
+    ws['C1'] = { v: '', s: {} };
+    ws['D1'] = { v: '', s: {} };
+    ws['E1'] = { v: '', s: {} };
+
+    // Riga 2: Data scaricamento e periodo
+    const dataOggi = format(new Date(), 'dd/MM/yyyy', { locale: it });
+    const periodoMese = format(meseFiltrato, 'MMMM yyyy', { locale: it });
+    const subtitoloStyle = {
+      font: { sz: 10, color: { rgb: '666666' }, italic: true },
+      alignment: { horizontal: 'left', vertical: 'center' },
+    };
+    ws['A2'] = { v: `Periodo: ${periodoMese}  |  Scaricato il: ${dataOggi}`, s: subtitoloStyle };
+    ws['B2'] = { v: '', s: {} };
+    ws['C2'] = { v: '', s: {} };
+    ws['D2'] = { v: '', s: {} };
+    ws['E2'] = { v: '', s: {} };
+
+    // Riga 3: vuota
+    ws['A3'] = { v: '', s: {} };
+
+    // Intestazioni riga 4
     headers.forEach((h, i) => {
-      ws[`${colLetters[i]}1`] = { v: h, s: headerStyle };
+      ws[`${colLetters[i]}4`] = { v: h, s: headerStyle };
     });
 
-    // Dati
+    // Dati dalla riga 5
     chiusi.forEach((t, idx) => {
-      const row = idx + 2;
+      const row = idx + 5;
       const isEven = idx % 2 === 1;
       const s = cellStyle(isEven);
       const importo = t.costo_stimato ? Number(t.costo_stimato) : 0;
@@ -279,8 +313,8 @@ export default function Ticket({ centroSelezionato, user }) {
       ws[`E${row}`] = { v: importo, s: { ...s, alignment: { ...s.alignment, horizontal: 'right' }, numFmt: '€ #,##0.00' } };
     });
 
-    // Riga totale
-    const totaleRow = chiusi.length + 2;
+    // Riga totale (dati iniziano alla riga 5, quindi: 5 + chiusi.length)
+    const totaleRow = chiusi.length + 5;
     const totale = chiusi.reduce((acc, t) => acc + (t.costo_stimato ? Number(t.costo_stimato) : 0), 0);
     ['A', 'B', 'C'].forEach(col => { ws[`${col}${totaleRow}`] = { v: '', s: totalStyle }; });
     ws[`D${totaleRow}`] = { v: 'TOTALE', s: { ...totalStyle, alignment: { horizontal: 'right', vertical: 'center' } } };
@@ -289,12 +323,24 @@ export default function Ticket({ centroSelezionato, user }) {
     ws['!ref'] = `A1:E${totaleRow}`;
     ws['!cols'] = [
       { wch: 16 },  // Numero Ticket
-      { wch: 18 },  // Giorno Apertura
-      { wch: 18 },  // Giorno Chiusura
-      { wch: 60 },  // Descrizione
+      { wch: 20 },  // Giorno Apertura
+      { wch: 20 },  // Giorno Chiusura
+      { wch: 65 },  // Descrizione
       { wch: 16 },  // Importo
     ];
-    ws['!rows'] = [{ hpt: 28 }, ...chiusi.map(() => ({ hpt: 36 })), { hpt: 28 }];
+    ws['!rows'] = [
+      { hpt: 24 }, // nome centro
+      { hpt: 18 }, // data scaricamento
+      { hpt: 10 }, // vuota
+      { hpt: 28 }, // header
+      ...chiusi.map(() => ({ hpt: 36 })),
+      { hpt: 28 }  // totale
+    ];
+    // Unisci celle per il titolo e sottotitolo
+    ws['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }, // riga 1
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } }, // riga 2
+    ];
 
     const wb = XLSXStyle.utils.book_new();
     XLSXStyle.utils.book_append_sheet(wb, ws, 'Ticket Chiusi');
