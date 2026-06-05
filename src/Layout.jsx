@@ -206,6 +206,16 @@ export default function Layout({ children, currentPageName }) {
           setCentri([]);
           setCentroSelezionato(null);
         }
+      } else if (userData.tipo_account === 'manutentore') {
+        // Carica tutti i centri attivi per il manutentore
+        const allCentri = await base44.entities.CentroCommerciale.filter({ attivo: true });
+        setCentri(allCentri);
+        if (allCentri.length > 0) {
+          const savedCentroId = localStorage.getItem('centroSelezionatoId');
+          const preferito = manutentori[0]?.centro_preferito_id;
+          const centroIniziale = allCentri.find(c => c.id === savedCentroId) || allCentri.find(c => c.id === preferito) || allCentri[0];
+          setCentroSelezionato(centroIniziale);
+        }
       } else if (userData.tipo_account === 'tenant') {
         // Gestione centro commerciale per tenant (già impostato sopra, ma assicuriamo che sia selezionato)
         if (tenantList.length > 0 && tenantList[0].centro_id) {
