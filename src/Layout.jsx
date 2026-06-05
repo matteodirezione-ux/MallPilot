@@ -317,7 +317,7 @@ export default function Layout({ children, currentPageName }) {
           {/* Header */}
           <div className="p-4 border-b border-slate-700 bg-white">
             <div className="flex items-center justify-between gap-2">
-              {centroSelezionato && centri.length > 0 ? (
+              {centroSelezionato && centroSelezionato.id !== 'tutti' ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
                   {centroSelezionato.logo_url ? (
                     <SafeImage
