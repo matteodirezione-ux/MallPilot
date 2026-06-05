@@ -370,7 +370,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
   // Filtro visibilità per manutentore
   const ticketsVisibili = isManutentore
-    ? tickets.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito', 'da_controllare'].includes(t.stato))
+    ? tickets.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito', 'da_controllare', 'chiuso', 'rifiutato'].includes(t.stato))
     : tickets;
 
   const filtered = ticketsVisibili.filter(t => {
