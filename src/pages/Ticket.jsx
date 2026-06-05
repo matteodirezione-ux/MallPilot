@@ -467,7 +467,7 @@ export default function Ticket({ centroSelezionato, user }) {
         </div>
 
         <div className="flex items-center gap-2 flex-nowrap overflow-x-auto">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2">
+          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2 flex-shrink-0">
             <button onClick={() => setMeseFiltrato(d => new Date(d.getFullYear(), d.getMonth() - 1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors">
               <ChevronLeft className="w-4 h-4 text-slate-600" />
             </button>
@@ -478,17 +478,15 @@ export default function Ticket({ centroSelezionato, user }) {
               <ChevronRight className="w-4 h-4 text-slate-600" />
             </button>
           </div>
-          <div className="flex flex-wrap gap-1">
+          <select
+            value={filtroStato}
+            onChange={e => setFiltroStato(e.target.value)}
+            className="h-9 text-sm border border-slate-200 rounded-lg px-2 bg-white text-slate-700 flex-shrink-0 cursor-pointer"
+          >
             {filtriStato.map(f => (
-              <button
-                key={f.key}
-                onClick={() => setFiltroStato(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${filtroStato === f.key ? f.activeClass : f.inactiveClass}`}
-              >
-                {f.label}
-              </button>
+              <option key={f.key} value={f.key}>{f.label}</option>
             ))}
-          </div>
+          </select>
         </div>
       </div>
 
