@@ -10,16 +10,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, X, Loader2, Plus } from 'lucide-react';
 
-const defaultCapex = (centroId) => ({
+const defaultCapex = (centroId, anno) => ({
   centro_id: centroId || '',
   titolo: '',
-  anno_capex: new Date().getFullYear(),
+  anno_capex: anno || new Date().getFullYear(),
   descrizione: '',
   data_inizio: '',
   data_fine: '',
   costo_previsto: '',
   costo_effettivo: '',
-  stato: 'da_pianificare',
+  stato: 'da_proporre',
   categoria: 'altro',
   fornitore: '',
   note: '',
@@ -29,8 +29,8 @@ const defaultCapex = (centroId) => ({
   dpi: []
 });
 
-export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
-  const [form, setForm] = useState(defaultCapex(centroId));
+export default function FormCapex({ open, onClose, capex, centroId, annoDefault, onSave }) {
+  const [form, setForm] = useState(defaultCapex(centroId, annoDefault));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [newDpi, setNewDpi] = useState('');
@@ -40,11 +40,11 @@ export default function FormCapex({ open, onClose, capex, centroId, onSave }) {
       const lavoratori_note = Array.isArray(capex.lavoratori) && capex.lavoratori.length > 0
         ? capex.lavoratori.map(l => l.nome + (l.mansione ? ` (${l.mansione})` : '')).join('\n')
         : (capex.lavoratori_note || '');
-      setForm({ ...defaultCapex(centroId), ...capex, lavoratori_note });
+      setForm({ ...defaultCapex(centroId, annoDefault), ...capex, lavoratori_note });
     } else {
-      setForm(defaultCapex(centroId));
+      setForm(defaultCapex(centroId, annoDefault));
     }
-  }, [capex, centroId, open]);
+  }, [capex, centroId, annoDefault, open]);
 
   const set = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
 

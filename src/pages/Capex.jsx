@@ -761,6 +761,7 @@ export default function CapexPage({ centroSelezionato, user }) {
         onClose={() => { setShowForm(false); setEditing(null); }}
         capex={editing}
         centroId={centroSelezionato?.id}
+        annoDefault={annoSelezionato}
         onSave={handleSave}
       />
     </div>
