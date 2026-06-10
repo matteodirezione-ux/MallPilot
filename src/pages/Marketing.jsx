@@ -46,10 +46,20 @@ export default function Marketing({ centroSelezionato, user }) {
   };
 
   const handleSave = async (formData) => {
-    if (editRow?.id) {
-      await base44.entities.Marketing.update(editRow.id, formData);
+    const cleaned = { ...formData };
+    MESI.forEach(m => {
+      const v = cleaned[m];
+      cleaned[m] = (v !== '' && v !== null && v !== undefined) ? (parseFloat(String(v).replace(',', '.')) || null) : null;
+    });
+    if (cleaned.budget_totale !== '' && cleaned.budget_totale !== null && cleaned.budget_totale !== undefined) {
+      cleaned.budget_totale = parseFloat(String(cleaned.budget_totale).replace(',', '.')) || null;
     } else {
-      await base44.entities.Marketing.create({ ...formData, centro_id: centroId, anno });
+      cleaned.budget_totale = null;
+    }
+    if (editRow?.id) {
+      await base44.entities.Marketing.update(editRow.id, cleaned);
+    } else {
+      await base44.entities.Marketing.create({ ...cleaned, centro_id: centroId, anno });
     }
     setFormOpen(false);
     setEditRow(null);
