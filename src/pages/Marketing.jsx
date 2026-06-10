@@ -51,10 +51,11 @@ export default function Marketing({ centroSelezionato, user }) {
       const v = cleaned[m];
       cleaned[m] = (v !== '' && v !== null && v !== undefined) ? (parseFloat(String(v).replace(',', '.')) || null) : null;
     });
+    const sommaMesi = MESI.reduce((acc, m) => acc + (cleaned[m] || 0), 0);
     if (cleaned.budget_totale !== '' && cleaned.budget_totale !== null && cleaned.budget_totale !== undefined) {
-      cleaned.budget_totale = parseFloat(String(cleaned.budget_totale).replace(',', '.')) || null;
+      cleaned.budget_totale = parseFloat(String(cleaned.budget_totale).replace(',', '.')) || sommaMesi || null;
     } else {
-      cleaned.budget_totale = null;
+      cleaned.budget_totale = sommaMesi || null;
     }
     if (editRow?.id) {
       await base44.entities.Marketing.update(editRow.id, cleaned);
