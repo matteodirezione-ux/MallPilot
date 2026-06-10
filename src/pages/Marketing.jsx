@@ -274,7 +274,7 @@ function MarketingForm({ row, onSave, onClose }) {
           </div>
           <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={onClose} className="flex-1">Annulla</Button>
-            <Button onClick={() => onSave(form)} className="flex-1 bg-blue-600 hover:bg-blue-700">Salva</Button>
+            <Button type="button" onClick={() => onSave(form)} className="flex-1 bg-blue-600 hover:bg-blue-700">Salva</Button>
           </div>
         </div>
       </DialogContent>
