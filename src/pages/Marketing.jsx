@@ -247,6 +247,14 @@ function MarketingForm({ row, onSave, onClose }) {
     ...MESI.reduce((acc, m) => ({ ...acc, [m]: row?.[m] || '' }), {})
   });
 
+  const setMese = (m, v) => {
+    setForm(prev => {
+      const updated = { ...prev, [m]: v };
+      const somma = MESI.reduce((acc, k) => acc + (parseFloat(String(updated[k]).replace(',', '.')) || 0), 0);
+      return { ...updated, budget_totale: somma > 0 ? somma : '' };
+    });
+  };
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -278,7 +286,7 @@ function MarketingForm({ row, onSave, onClose }) {
               {MESI.map((m, i) => (
                 <div key={m}>
                   <p className="text-xs text-slate-500 mb-0.5">{MESI_LABEL[i]}</p>
-                  <Input type="number" value={form[m]} onChange={e => setForm(p => ({ ...p, [m]: e.target.value }))} className="h-8 text-xs" />
+                  <Input type="number" value={form[m]} onChange={e => setMese(m, e.target.value)} className="h-8 text-xs" />
                 </div>
               ))}
             </div>
