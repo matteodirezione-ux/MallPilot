@@ -11,6 +11,7 @@ import { compressImages } from '@/lib/compressImage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format, addDays } from 'date-fns';
+import { it } from 'date-fns/locale';
 import { STATI_CONFIG, TIPOLOGIA_CONFIG } from './TicketList';
 
 const today = () => format(new Date(), 'yyyy-MM-dd');
@@ -46,7 +47,26 @@ const defaultForm = {
   motivo_rifiuto: '',
 };
 
-export default function FormTicket({ open, onClose, onSave, ticket, user }) {
+const getMeseAbbr = (date) => format(date, 'MMM', { locale: it }).toUpperCase().replace('.', '');
+
+const getNextNumeroTicket = (allTickets) => {
+  const now = new Date();
+  const meseAbbr = getMeseAbbr(now);
+  const anno = now.getFullYear();
+  const mese = now.getMonth(); // 0-based
+  // Trova tutti i ticket del mese corrente con formato N-MMM
+  const regex = new RegExp(`^(\\d+)-${meseAbbr}$`, 'i');
+  const numeriMese = (allTickets || [])
+    .map(t => {
+      const m = t.numero_ticket?.match(regex);
+      return m ? parseInt(m[1]) : null;
+    })
+    .filter(n => n !== null);
+  const nextNum = numeriMese.length > 0 ? Math.max(...numeriMese) + 1 : 1;
+  return `${nextNum}-${meseAbbr}`;
+};
+
+export default function FormTicket({ open, onClose, onSave, ticket, user, allTickets }) {
   const [form, setForm] = useState(defaultForm);
   const [uploadingFoto, setUploadingFoto] = useState(false);
   const [uploadingAllegati, setUploadingAllegati] = useState(false);
@@ -62,7 +82,7 @@ export default function FormTicket({ open, onClose, onSave, ticket, user }) {
     if (ticket) {
       setForm({ ...defaultForm, ...ticket, costo_stimato: ticket.costo_stimato ?? '' });
     } else {
-      setForm({ ...defaultForm, data_apertura: today(), scadenza: defaultScadenza('ordinario'), operatore: '' });
+      setForm({ ...defaultForm, data_apertura: today(), scadenza: defaultScadenza('ordinario'), operatore: '', numero_ticket: getNextNumeroTicket(allTickets) });
     }
   }, [ticket, open]);
 

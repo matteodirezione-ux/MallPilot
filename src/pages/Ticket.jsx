@@ -570,6 +570,7 @@ export default function Ticket({ centroSelezionato, user }) {
         onSave={handleSave}
         ticket={ticketSelezionato}
         user={user}
+        allTickets={tickets}
       />
     </div>
   );
