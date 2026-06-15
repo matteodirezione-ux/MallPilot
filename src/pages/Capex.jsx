@@ -558,7 +558,7 @@ export default function CapexPage({ centroSelezionato, user }) {
                     </span>
                   </div>
                   {c.descrizione && <p className="text-xs text-slate-500 truncate mb-1">{c.descrizione}</p>}
-                  {c.note && <p className="text-xs text-slate-400 italic truncate mb-2">📝 {c.note}</p>}
+                  {c.note && <p className="text-xs text-slate-400 italic mb-2 line-clamp-2">📝 {c.note}</p>}
                   <div className="flex flex-wrap gap-3 text-xs text-slate-500">
                     <span>📅 Anno: <strong>{c.anno_capex || (c.data_inizio ? c.data_inizio.substring(0,4) : '—')}</strong></span>
                     {c.stato !== 'da_pianificare' && c.data_inizio && (
