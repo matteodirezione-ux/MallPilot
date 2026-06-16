@@ -66,9 +66,9 @@ function DettaglioTicketDialog({ ticket, onClose, onEdit, userRole }) {
         {allUrls.length > 0 && (
           <div className="pt-2">
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">Foto / Allegati</p>
-            <div className="flex gap-2 flex-wrap">
+            <div className="grid grid-cols-2 gap-2">
               {allUrls.map((url, i) => (
-                <SafeImage key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80" onClick={() => setLightbox(i)} />
+                <SafeImage key={i} src={url} alt="" className="w-full aspect-video object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80" onClick={() => setLightbox(i)} />
               ))}
             </div>
           </div>
