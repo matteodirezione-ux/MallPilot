@@ -11,9 +11,12 @@ Deno.serve(async (req) => {
             return Response.json({ success: false, reason: 'no ticket data' });
         }
 
-        if (ticket.stato !== 'approvato') {
+        const statiValidi = ['approvato', 'approvato_con_preventivo'];
+        if (!statiValidi.includes(ticket.stato)) {
             return Response.json({ success: false, reason: 'stato non rilevante' });
         }
+
+        const richiedePreventivo = ticket.stato === 'approvato_con_preventivo';
 
         const [manutentori, centri] = await Promise.all([
             base44.asServiceRole.entities.Manutentore.list(),
@@ -40,7 +43,11 @@ Deno.serve(async (req) => {
   <li><strong>Scadenza:</strong> ${ticket.scadenza || '-'}</li>
   ${ticket.descrizione ? `<li><strong>Descrizione:</strong> ${ticket.descrizione}</li>` : ''}
 </ul>
-<p>Accedi all'app per inserire il preventivo o le note d'intervento.</p>
+${richiedePreventivo
+    ? `<p style="color:#d97706;font-weight:bold;">⚠️ Per questo ticket è richiesto un preventivo prima di intervenire.</p>
+       <p>Accedi all'app per inserire il tuo preventivo (costo stimato).</p>`
+    : `<p>Accedi all'app per inserire le note d'intervento.</p>`
+}
         `.trim();
 
         let emailInviate = 0;
