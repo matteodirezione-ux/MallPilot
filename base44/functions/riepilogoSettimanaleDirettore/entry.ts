@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
         const inizioFormattato = formatDate(inizio);
         const fineFormattato = formatDate(fine);
 
-        const [direttori, reports, manutenzioni, tickets, capexList, puliziePeriodiche, centri, assegnazioni, tasks] = await Promise.all([
+        const [direttori, reports, manutenzioni, tickets, capexList, puliziePeriodiche, centri, assegnazioni, tasks, prenotazioni, clienti] = await Promise.all([
             base44.asServiceRole.entities.Direttore.list(),
             base44.asServiceRole.entities.Report.list(),
             base44.asServiceRole.entities.Manutenzione.list(),
@@ -37,7 +37,12 @@ Deno.serve(async (req) => {
             base44.asServiceRole.entities.CentroCommerciale.list(),
             base44.asServiceRole.entities.Assegnazione.list(),
             base44.asServiceRole.entities.Task.list(),
+            base44.asServiceRole.entities.Prenotazione.list(),
+            base44.asServiceRole.entities.Cliente.list(),
         ]);
+
+        const clienteMap = {};
+        clienti.forEach(c => { clienteMap[c.id] = c; });
 
         const centroMap = {};
         centri.forEach(c => { centroMap[c.id] = c; });
@@ -78,6 +83,17 @@ Deno.serve(async (req) => {
                 (t.stato === 'completato' && t.updated_date && t.updated_date >= inizio)
             );
 
+            // Prenotazioni: eventi nella settimana (per data_inizio) + nuovi affitti creati/che iniziano nella settimana
+            const eventiSettimana = filtraPerCentri(prenotazioni).filter(p =>
+                p.is_event && p.data_inizio >= inizio && p.data_inizio <= fine
+            );
+            const affittiSettimana = filtraPerCentri(prenotazioni).filter(p =>
+                !p.is_event && (
+                    (p.data_inizio >= inizio && p.data_inizio <= fine) ||
+                    (p.created_date && p.created_date >= inizio && p.created_date <= fine + 'T23:59:59')
+                )
+            );
+
             // Costruisci un riepilogo strutturato per centro
             const datiPerCentro = [];
             const centriConDati = new Set();
@@ -88,6 +104,8 @@ Deno.serve(async (req) => {
             capexFiltrati.forEach(c => centriConDati.add(c.centro_id));
             pulizieSettimana.forEach(p => centriConDati.add(p.centro_id));
             tasksSettimana.forEach(t => centriConDati.add(t.centro_id));
+            eventiSettimana.forEach(e => centriConDati.add(e.centro_id));
+            affittiSettimana.forEach(a => centriConDati.add(a.centro_id));
 
             for (const cid of centriConDati) {
                 const nome = centroMap[cid]?.nome || cid;
@@ -146,6 +164,23 @@ Deno.serve(async (req) => {
                         priorita: t.priorita,
                         assegnato_a: t.assegnato_a_nome || 'N/D',
                     })),
+                    eventi: eventiSettimana.filter(x => x.centro_id === cid).map(e => ({
+                        nome_evento: e.nome_evento || 'Senza nome',
+                        cliente: clienteMap[e.cliente_id]?.ragione_sociale || 'N/D',
+                        data_inizio: formatDate(e.data_inizio),
+                        data_fine: formatDate(e.data_fine),
+                        prezzo_totale: e.prezzo_totale || null,
+                        note: (e.note || '').substring(0, 150),
+                    })),
+                    affitti: affittiSettimana.filter(x => x.centro_id === cid).map(a => ({
+                        cliente: clienteMap[a.cliente_id]?.ragione_sociale || 'N/D',
+                        data_inizio: formatDate(a.data_inizio),
+                        data_fine: formatDate(a.data_fine),
+                        prezzo_totale: a.prezzo_totale || null,
+                        materiale_dimostrativo: (a.materiale_dimostrativo || '').substring(0, 150),
+                        stato: a.stato,
+                        note: (a.note || '').substring(0, 150),
+                    })),
                 };
                 datiPerCentro.push(riepilogo);
             }
@@ -166,6 +201,8 @@ I dati sono in formato JSON. Per ogni centro commerciale, analizza e sintetizza:
 4. 📈 CAPEX: stato dei progetti capex attivi, eventuali aggiornamenti, costi previsti vs effettivi.
 5. 🧹 PULIZIE: stato delle pulizie periodiche, cosa è stato fatto, cosa è in scadenza.
 6. ✅ TASK: task completati e in scadenza, con priorità.
+7. 🎪 EVENTI: eventi che si sono svolti nella settimana. Per ciascuno indica nome evento, cliente, date e prezzo.
+8. 🏬 NUOVI AFFITTI: nuovi contratti di affitto spazi expo creati o iniziati nella settimana. Indica cliente, date, prezzo e materiale dimostrativo.
 
 REGOLE:
 - NON elencare ogni singolo elemento. Fai una sintesi narrativa, come un briefing da leggere ad alta voce in riunione.
