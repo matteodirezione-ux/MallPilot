@@ -83,9 +83,9 @@ Deno.serve(async (req) => {
                 (t.stato === 'completato' && t.updated_date && t.updated_date >= inizio)
             );
 
-            // Prenotazioni: eventi nella settimana (per data_inizio) + nuovi affitti creati/che iniziano nella settimana
+            // Prenotazioni: eventi in corso nella settimana (date range si sovrappone) + nuovi affitti creati/che iniziano nella settimana
             const eventiSettimana = filtraPerCentri(prenotazioni).filter(p =>
-                p.is_event && p.data_inizio >= inizio && p.data_inizio <= fine
+                p.is_event && p.data_inizio <= fine && p.data_fine >= inizio
             );
             const affittiSettimana = filtraPerCentri(prenotazioni).filter(p =>
                 !p.is_event && (
@@ -201,7 +201,7 @@ I dati sono in formato JSON. Per ogni centro commerciale, analizza e sintetizza:
 4. 📈 CAPEX: stato dei progetti capex attivi, eventuali aggiornamenti, costi previsti vs effettivi.
 5. 🧹 PULIZIE: stato delle pulizie periodiche, cosa è stato fatto, cosa è in scadenza.
 6. ✅ TASK: task completati e in scadenza, con priorità.
-7. 🎪 EVENTI: eventi che si sono svolti nella settimana. Per ciascuno indica nome evento, cliente, date e prezzo.
+7. 🎪 EVENTI: eventi in corso nella settimana. Per ciascuno indica nome evento, cliente, date e prezzo.
 8. 🏬 NUOVI AFFITTI: nuovi contratti di affitto spazi expo creati o iniziati nella settimana. Indica cliente, date, prezzo e materiale dimostrativo.
 
 REGOLE:
