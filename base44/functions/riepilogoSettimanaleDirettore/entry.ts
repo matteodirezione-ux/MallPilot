@@ -27,6 +27,16 @@ Deno.serve(async (req) => {
         const inizioFormattato = formatDate(inizio);
         const fineFormattato = formatDate(fine);
 
+        // Calcola la settimana prossima (lunedì – domenica)
+        const lunediProssimo = new Date(lunediScorso);
+        lunediProssimo.setDate(lunediScorso.getDate() + 7);
+        const domenicaProssima = new Date(domenicaScorsa);
+        domenicaProssima.setDate(domenicaScorsa.getDate() + 7);
+        const prossimoInizio = lunediProssimo.toISOString().split('T')[0];
+        const prossimaFine = domenicaProssima.toISOString().split('T')[0];
+        const prossimoInizioFormattato = formatDate(prossimoInizio);
+        const prossimaFineFormattato = formatDate(prossimaFine);
+
         const [direttori, reports, manutenzioni, tickets, capexList, puliziePeriodiche, centri, assegnazioni, tasks, prenotazioni, clienti] = await Promise.all([
             base44.asServiceRole.entities.Direttore.list(),
             base44.asServiceRole.entities.Report.list(),
@@ -94,6 +104,34 @@ Deno.serve(async (req) => {
                 )
             );
 
+            // PREVISIONALE – Settimana prossima
+            const controlliProssima = filtraPerCentri(manutenzioni).filter(m =>
+                m.data_scadenza >= prossimoInizio && m.data_scadenza <= prossimaFine &&
+                m.stato !== 'completato' && m.stato !== 'annullato'
+            );
+            const pulizieProssima = filtraPerCentri(puliziePeriodiche).filter(p =>
+                p.prossima_scadenza >= prossimoInizio && p.prossima_scadenza <= prossimaFine &&
+                p.stato !== 'completato'
+            );
+            const tasksProssima = filtraPerCentri(tasks).filter(t =>
+                t.data_scadenza >= prossimoInizio && t.data_scadenza <= prossimaFine &&
+                t.stato !== 'completato' && t.stato !== 'annullato'
+            );
+            const ticketsProssima = filtraPerCentri(tickets).filter(t =>
+                t.scadenza >= prossimoInizio && t.scadenza <= prossimaFine &&
+                t.stato !== 'chiuso' && t.stato !== 'rifiutato'
+            );
+            const capexProssima = filtraPerCentri(capexList).filter(cx =>
+                cx.data_inizio && cx.data_inizio >= prossimoInizio && cx.data_inizio <= prossimaFine &&
+                (!cx.stato || cx.stato !== 'completato')
+            );
+            const eventiProssima = filtraPerCentri(prenotazioni).filter(p =>
+                p.is_event && p.data_inizio <= prossimaFine && p.data_fine >= prossimoInizio
+            );
+            const affittiProssima = filtraPerCentri(prenotazioni).filter(p =>
+                !p.is_event && p.data_inizio >= prossimoInizio && p.data_inizio <= prossimaFine
+            );
+
             // Costruisci un riepilogo strutturato per centro
             const datiPerCentro = [];
             const centriConDati = new Set();
@@ -106,6 +144,13 @@ Deno.serve(async (req) => {
             tasksSettimana.forEach(t => centriConDati.add(t.centro_id));
             eventiSettimana.forEach(e => centriConDati.add(e.centro_id));
             affittiSettimana.forEach(a => centriConDati.add(a.centro_id));
+            controlliProssima.forEach(m => centriConDati.add(m.centro_id));
+            pulizieProssima.forEach(p => centriConDati.add(p.centro_id));
+            tasksProssima.forEach(t => centriConDati.add(t.centro_id));
+            ticketsProssima.forEach(t => centriConDati.add(t.centro_id));
+            capexProssima.forEach(c => centriConDati.add(c.centro_id));
+            eventiProssima.forEach(e => centriConDati.add(e.centro_id));
+            affittiProssima.forEach(a => centriConDati.add(a.centro_id));
 
             for (const cid of centriConDati) {
                 const nome = centroMap[cid]?.nome || cid;
@@ -181,6 +226,47 @@ Deno.serve(async (req) => {
                         stato: a.stato,
                         note: (a.note || '').substring(0, 150),
                     })),
+                    prossimaSettimana: {
+                        controlli: controlliProssima.filter(x => x.centro_id === cid).map(m => ({
+                            titolo: m.titolo,
+                            scadenza: formatDate(m.data_scadenza),
+                            stato: m.stato,
+                        })),
+                        pulizie: pulizieProssima.filter(x => x.centro_id === cid).map(p => ({
+                            titolo: p.titolo,
+                            prossima_scadenza: formatDate(p.prossima_scadenza),
+                            frequenza: p.frequenza,
+                        })),
+                        task: tasksProssima.filter(x => x.centro_id === cid).map(t => ({
+                            titolo: t.titolo,
+                            scadenza: formatDate(t.data_scadenza),
+                            priorita: t.priorita,
+                        })),
+                        ticket: ticketsProssima.filter(x => x.centro_id === cid).map(t => ({
+                            numero: t.numero_ticket || '-',
+                            descrizione: (t.descrizione || '').substring(0, 150),
+                            tipologia: t.tipologia,
+                            stato: t.stato,
+                            scadenza: formatDate(t.scadenza),
+                        })),
+                        capex: capexProssima.filter(x => x.centro_id === cid).map(c => ({
+                            titolo: c.titolo,
+                            data_inizio: formatDate(c.data_inizio),
+                            categoria: c.categoria,
+                        })),
+                        eventi: eventiProssima.filter(x => x.centro_id === cid).map(e => ({
+                            nome_evento: e.nome_evento || 'Senza nome',
+                            cliente: clienteMap[e.cliente_id]?.ragione_sociale || 'N/D',
+                            data_inizio: formatDate(e.data_inizio),
+                            data_fine: formatDate(e.data_fine),
+                        })),
+                        affitti: affittiProssima.filter(x => x.centro_id === cid).map(a => ({
+                            cliente: clienteMap[a.cliente_id]?.ragione_sociale || 'N/D',
+                            data_inizio: formatDate(a.data_inizio),
+                            data_fine: formatDate(a.data_fine),
+                            prezzo_totale: a.prezzo_totale || null,
+                        })),
+                    },
                 };
                 datiPerCentro.push(riepilogo);
             }
@@ -191,31 +277,42 @@ Deno.serve(async (req) => {
             const datiJson = JSON.stringify(datiPerCentro, null, 2);
 
             const prompt = `Sei un assistente che prepara il briefing del lunedì mattina per una riunione tra la direzione e i direttori di centri commerciali. 
-Devi produrre un riassunto qualitativo, chiaro e professionale in italiano, basato sui dati della settimana ${inizioFormattato} – ${fineFormattato}.
+Il briefing ha DUE parti: un CONSUNTIVO della settimana passata e un PREVISIONALE della settimana entrante.
 
-I dati sono in formato JSON. Per ogni centro commerciale, analizza e sintetizza:
+I dati sono in formato JSON. Ogni centro ha i campi per il consuntivo (report, controlli, ticketAperti, ticketChiusi, capex, pulizie, task, eventi, affitti) e un oggetto "prossimaSettimana" con le previsioni (controlli, pulizie, task, ticket, capex, eventi, affitti).
 
-1. 📋 REPORT DELLA SICUREZZA: riassumi il contenuto dei report, evidenzia eventuali furti o situazioni anomale. Non limitarti a contare, racconta cosa è successo.
-2. 🔧 CONTROLLI E MANUTENZIONI: quali controlli erano in scadenza, quali sono stati completati, quali sono ancora da fare. Segnala eventuali criticità.
-3. 🎫 TICKET: quanti ticket aperti, quali sono urgenti, quali in attesa di approvazione, quali chiusi nella settimana. Per quelli chiusi, indica se c'era un costo. Per quelli aperti, segnala se bloccati in attesa di qualcosa.
-4. 📈 CAPEX: stato dei progetti capex attivi, eventuali aggiornamenti, costi previsti vs effettivi.
-5. 🧹 PULIZIE: stato delle pulizie periodiche, cosa è stato fatto, cosa è in scadenza.
+PARTE 1 – CONSUNTIVO (${inizioFormattato} – ${fineFormattato}):
+1. 📋 REPORT DELLA SICUREZZA: riassumi il contenuto dei report, evidenzia eventuali furti o situazioni anomale.
+2. 🔧 CONTROLLI E MANUTENZIONI: quali controlli erano in scadenza, quali completati, quali ancora da fare.
+3. 🎫 TICKET: quanti aperti, quali urgenti, in attesa, chiusi nella settimana (con costi).
+4. 📈 CAPEX: stato progetti capex attivi, costi previsti vs effettivi.
+5. 🧹 PULIZIE: stato pulizie periodiche, cosa fatto, cosa in scadenza.
 6. ✅ TASK: task completati e in scadenza, con priorità.
-7. 🎪 EVENTI: eventi in corso nella settimana. Per ciascuno indica nome evento, cliente, date e prezzo.
-8. 🏬 NUOVI AFFITTI: nuovi contratti di affitto spazi expo creati o iniziati nella settimana. Indica cliente, date, prezzo e materiale dimostrativo.
+7. 🎪 EVENTI: eventi in corso nella settimana. Per ciascuno: nome, cliente, date, prezzo.
+8. 🏬 NUOVI AFFITTI: nuovi contratti di affitto spazi expo creati o iniziati. Cliente, date, prezzo, materiale.
+
+PARTE 2 – PREVISIONALE (${prossimoInizioFormattato} – ${prossimaFineFormattato}):
+Analizza "prossimaSettimana" per ogni centro e sintetizza cosa è previsto:
+A. 🔧 Controlli/manutenzioni in scadenza
+B. 🧹 Pulizie periodiche in scadenza
+C. ✅ Task in scadenza (con priorità)
+D. 🎫 Ticket in scadenza
+E. 📈 Capex con inizio lavori previsto
+F. 🎪 Eventi in corso
+G. 🏬 Affitti in partenza
 
 REGOLE:
-- NON elencare ogni singolo elemento. Fai una sintesi narrativa, come un briefing da leggere ad alta voce in riunione.
-- Se una sezione non ha dati, scrivi semplicemente "Nessuna attività da segnalare."
-- Evidenzia le URGENZE e le cose che richiedono attenzione immediata con un simbolo ⚠️.
-- Sii concreto: menziona numeri, costi, date quando sono rilevanti.
-- Organizza il testo per centro commerciale, con titoli chiari.
-- Massimo 2000 caratteri in totale.
+- NON elencare ogni singolo elemento. Fai una sintesi narrativa, da leggere ad alta voce in riunione.
+- Se una sezione non ha dati, scrivi "Nessuna attività da segnalare."
+- Evidenzia URGENZE con ⚠️.
+- Sii concreto: menziona numeri, costi, date rilevanti.
+- Organizza per centro commerciale, con titoli chiari (usa <h2> per centro, <h3> per "Consuntivo" / "Previsionale").
+- Massimo 3000 caratteri in totale.
 
 DATI:
 ${datiJson}
 
-Produci SOLO il corpo del riepilogo in HTML (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>), senza tag <html> o <body>.`;
+Produci SOLO il corpo in HTML (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>), senza tag <html> o <body>.`;
 
             const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
                 prompt,
