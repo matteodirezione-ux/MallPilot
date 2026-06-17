@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
 
         // Calcola la settimana scorsa (lunedì 00:00 – domenica 23:59:59)
         const oggi = new Date();
-        const giornoSettimana = oggi.getDay(); // 0=domenica, 1=lunedì...
+        const giornoSettimana = oggi.getDay();
         const giorniDalLunediScorso = giornoSettimana === 0 ? 13 : giornoSettimana + 6;
         const lunediScorso = new Date(oggi);
         lunediScorso.setDate(oggi.getDate() - giorniDalLunediScorso);
@@ -27,8 +27,7 @@ Deno.serve(async (req) => {
         const inizioFormattato = formatDate(inizio);
         const fineFormattato = formatDate(fine);
 
-        // Carica tutti i dati in parallelo
-        const [direttori, reports, manutenzioni, tickets, capexList, puliziePeriodiche, centri, assegnazioni] = await Promise.all([
+        const [direttori, reports, manutenzioni, tickets, capexList, puliziePeriodiche, centri, assegnazioni, tasks] = await Promise.all([
             base44.asServiceRole.entities.Direttore.list(),
             base44.asServiceRole.entities.Report.list(),
             base44.asServiceRole.entities.Manutenzione.list(),
@@ -37,9 +36,9 @@ Deno.serve(async (req) => {
             base44.asServiceRole.entities.PuliziaPeriodica.list(),
             base44.asServiceRole.entities.CentroCommerciale.list(),
             base44.asServiceRole.entities.Assegnazione.list(),
+            base44.asServiceRole.entities.Task.list(),
         ]);
 
-        // Mappa centri e assegnazioni
         const centroMap = {};
         centri.forEach(c => { centroMap[c.id] = c; });
         const assegnazioniPerUtente = {};
@@ -52,126 +51,156 @@ Deno.serve(async (req) => {
 
         for (const direttore of direttori) {
             const centriSet = assegnazioniPerUtente[direttore.email] || new Set();
+            if (centriSet.size === 0) continue;
 
-            // Filtra dati per i centri del direttore
-            const filtraPerCentri = (items) => {
-                if (centriSet.size === 0) return [];
-                return items.filter(item => centriSet.has(item.centro_id));
-            };
+            const filtraPerCentri = (items) =>
+                items.filter(item => centriSet.has(item.centro_id));
 
-            // Report della settimana scorsa
+            // Raccogli i dati grezzi con dettagli
             const reportsSettimana = filtraPerCentri(reports).filter(r => r.data >= inizio && r.data <= fine);
-
-            // Manutenzioni con scadenza nella settimana scorsa
-            const manutenzioniSettimana = filtraPerCentri(manutenzioni).filter(m => m.data_scadenza >= inizio && m.data_scadenza <= fine);
-
-            // Ticket aperti (non chiusi/rifiutati)
+            const manutenzioniSettimana = filtraPerCentri(manutenzioni).filter(m =>
+                (m.data_scadenza >= inizio && m.data_scadenza <= fine) ||
+                (m.stato === 'completato' && m.updated_date && m.updated_date >= inizio)
+            );
             const ticketsAperti = filtraPerCentri(tickets).filter(t => t.stato !== 'chiuso' && t.stato !== 'rifiutato');
+            const ticketsChiusiSettimana = filtraPerCentri(tickets).filter(t =>
+                t.stato === 'chiuso' && t.updated_date && t.updated_date >= inizio && t.updated_date <= fine + 'T23:59:59'
+            );
+            const capexFiltrati = filtraPerCentri(capexList).filter(cx =>
+                !cx.stato || cx.stato !== 'completato'
+            );
+            const pulizieSettimana = filtraPerCentri(puliziePeriodiche).filter(p =>
+                (p.prossima_scadenza >= inizio && p.prossima_scadenza <= fine) ||
+                (p.stato === 'completato' && p.updated_date && p.updated_date >= inizio)
+            );
+            const tasksSettimana = filtraPerCentri(tasks).filter(t =>
+                (t.data_scadenza >= inizio && t.data_scadenza <= fine) ||
+                (t.stato === 'completato' && t.updated_date && t.updated_date >= inizio)
+            );
 
-            // Capex
-            const capexFiltrati = filtraPerCentri(capexList);
-
-            // Pulizie periodiche con scadenza nella settimana scorsa
-            const pulizieSettimana = filtraPerCentri(puliziePeriodiche).filter(p => p.prossima_scadenza >= inizio && p.prossima_scadenza <= fine);
-
-            // Raggruppa per centro
+            // Costruisci un riepilogo strutturato per centro
+            const datiPerCentro = [];
             const centriConDati = new Set();
             reportsSettimana.forEach(r => centriConDati.add(r.centro_id));
             manutenzioniSettimana.forEach(m => centriConDati.add(m.centro_id));
             ticketsAperti.forEach(t => centriConDati.add(t.centro_id));
+            ticketsChiusiSettimana.forEach(t => centriConDati.add(t.centro_id));
             capexFiltrati.forEach(c => centriConDati.add(c.centro_id));
             pulizieSettimana.forEach(p => centriConDati.add(p.centro_id));
-
-            // Costruisci il corpo dell'email per centro
-            const sezioni = [];
+            tasksSettimana.forEach(t => centriConDati.add(t.centro_id));
 
             for (const cid of centriConDati) {
-                const nomeCentro = centroMap[cid]?.nome || cid;
-                const r = reportsSettimana.filter(x => x.centro_id === cid);
-                const m = manutenzioniSettimana.filter(x => x.centro_id === cid);
-                const t = ticketsAperti.filter(x => x.centro_id === cid);
-                const ca = capexFiltrati.filter(x => x.centro_id === cid);
-                const p = pulizieSettimana.filter(x => x.centro_id === cid);
+                const nome = centroMap[cid]?.nome || cid;
 
-                let html = `<h2 style="color:#1e3a5f;margin-top:20px;">📌 ${nomeCentro}</h2>`;
-
-                // Report
-                html += `<h3 style="margin-bottom:4px;">📋 Report (${r.length})</h3>`;
-                if (r.length === 0) {
-                    html += `<p style="color:#6b7280;">Nessun report nella settimana.</p>`;
-                } else {
-                    html += `<ul>`;
-                    for (const rep of r) {
-                        html += `<li><strong>${formatDate(rep.data)}</strong> – Operatore: ${rep.operatore || '-'} ${rep.furto ? '🔴 Furto segnalato' : ''}</li>`;
-                    }
-                    html += `</ul>`;
-                }
-
-                // Controlli (manutenzioni)
-                html += `<h3 style="margin-bottom:4px;">🔧 Controlli / Manutenzioni (${m.length})</h3>`;
-                if (m.length === 0) {
-                    html += `<p style="color:#6b7280;">Nessun controllo in scadenza nella settimana.</p>`;
-                } else {
-                    html += `<ul>`;
-                    for (const man of m) {
-                        html += `<li><strong>${man.titolo}</strong> – Scadenza: ${formatDate(man.data_scadenza)} – Stato: ${man.stato}</li>`;
-                    }
-                    html += `</ul>`;
-                }
-
-                // Ticket aperti
-                html += `<h3 style="margin-bottom:4px;">🎫 Ticket aperti (${t.length})</h3>`;
-                if (t.length === 0) {
-                    html += `<p style="color:#6b7280;">Nessun ticket aperto.</p>`;
-                } else {
-                    html += `<ul>`;
-                    for (const tk of t) {
-                        const urgenza = tk.tipologia === 'urgente' ? '🔴' : '';
-                        html += `<li>${urgenza} <strong>${tk.numero_ticket || '-'}</strong> – ${tk.operatore || 'N/D'} – Stato: ${tk.stato}</li>`;
-                    }
-                    html += `</ul>`;
-                }
-
-                // Capex
-                html += `<h3 style="margin-bottom:4px;">📈 Capex (${ca.length})</h3>`;
-                if (ca.length === 0) {
-                    html += `<p style="color:#6b7280;">Nessun Capex registrato.</p>`;
-                } else {
-                    html += `<ul>`;
-                    for (const cx of ca) {
-                        html += `<li><strong>${cx.titolo}</strong> – Stato: ${cx.stato} – Costo previsto: ${cx.costo_previsto ? '€' + cx.costo_previsto.toLocaleString('it-IT') : 'N/D'}</li>`;
-                    }
-                    html += `</ul>`;
-                }
-
-                // Pulizie periodiche
-                html += `<h3 style="margin-bottom:4px;">🧹 Pulizie periodiche (${p.length})</h3>`;
-                if (p.length === 0) {
-                    html += `<p style="color:#6b7280;">Nessuna pulizia in scadenza nella settimana.</p>`;
-                } else {
-                    html += `<ul>`;
-                    for (const pu of p) {
-                        html += `<li><strong>${pu.titolo}</strong> – Scadenza: ${formatDate(pu.prossima_scadenza)} – Frequenza: ${pu.frequenza} – Stato: ${pu.stato}</li>`;
-                    }
-                    html += `</ul>`;
-                }
-
-                sezioni.push(html);
+                const riepilogo = {
+                    centro: nome,
+                    report: reportsSettimana.filter(x => x.centro_id === cid).map(r => ({
+                        data: formatDate(r.data),
+                        operatore: r.operatore || 'N/D',
+                        furto: r.furto || false,
+                        contenuto: (r.contenuto || '').substring(0, 300),
+                    })),
+                    controlli: manutenzioniSettimana.filter(x => x.centro_id === cid).map(m => ({
+                        titolo: m.titolo,
+                        descrizione: (m.descrizione || '').substring(0, 200),
+                        scadenza: formatDate(m.data_scadenza),
+                        stato: m.stato,
+                        note: (m.note || '').substring(0, 200),
+                    })),
+                    ticketAperti: ticketsAperti.filter(x => x.centro_id === cid).map(t => ({
+                        numero: t.numero_ticket || '-',
+                        operatore: t.operatore || 'N/D',
+                        descrizione: (t.descrizione || '').substring(0, 200),
+                        tipologia: t.tipologia,
+                        stato: t.stato,
+                        scadenza: formatDate(t.scadenza),
+                        costo_stimato: t.costo_stimato || null,
+                    })),
+                    ticketChiusi: ticketsChiusiSettimana.filter(x => x.centro_id === cid).map(t => ({
+                        numero: t.numero_ticket || '-',
+                        operatore: t.operatore || 'N/D',
+                        descrizione: (t.descrizione || '').substring(0, 200),
+                        costo_stimato: t.costo_stimato || null,
+                    })),
+                    capex: capexFiltrati.filter(x => x.centro_id === cid).map(c => ({
+                        titolo: c.titolo,
+                        descrizione: (c.descrizione || '').substring(0, 200),
+                        stato: c.stato,
+                        costo_previsto: c.costo_previsto || null,
+                        costo_effettivo: c.costo_effettivo || null,
+                        categoria: c.categoria,
+                        data_inizio: c.data_inizio ? formatDate(c.data_inizio) : null,
+                    })),
+                    pulizie: pulizieSettimana.filter(x => x.centro_id === cid).map(p => ({
+                        titolo: p.titolo,
+                        stato: p.stato,
+                        frequenza: p.frequenza,
+                        prossima_scadenza: formatDate(p.prossima_scadenza),
+                        fornitore: p.fornitore || 'N/D',
+                    })),
+                    task: tasksSettimana.filter(x => x.centro_id === cid).map(t => ({
+                        titolo: t.titolo,
+                        descrizione: (t.descrizione || '').substring(0, 200),
+                        stato: t.stato,
+                        scadenza: formatDate(t.data_scadenza),
+                        priorita: t.priorita,
+                        assegnato_a: t.assegnato_a_nome || 'N/D',
+                    })),
+                };
+                datiPerCentro.push(riepilogo);
             }
 
-            const corpo = `
-<div style="font-family:Arial,sans-serif;max-width:700px;">
-  <h1 style="color:#1e3a5f;">📊 Riepilogo settimanale</h1>
-  <p>Ecco il riassunto della settimana <strong>${inizioFormattato} → ${fineFormattato}</strong> per i tuoi centri.</p>
-  ${sezioni.join('')}
-  <hr style="margin-top:24px;border:none;border-top:1px solid #e5e7eb;">
-  <p style="color:#9ca3af;font-size:12px;">Mall Pilot – Riepilogo automatico del lunedì</p>
+            // Nessun dato, salta
+            if (datiPerCentro.length === 0) continue;
+
+            const datiJson = JSON.stringify(datiPerCentro, null, 2);
+
+            const prompt = `Sei un assistente che prepara il briefing del lunedì mattina per una riunione tra la direzione e i direttori di centri commerciali. 
+Devi produrre un riassunto qualitativo, chiaro e professionale in italiano, basato sui dati della settimana ${inizioFormattato} – ${fineFormattato}.
+
+I dati sono in formato JSON. Per ogni centro commerciale, analizza e sintetizza:
+
+1. 📋 REPORT DELLA SICUREZZA: riassumi il contenuto dei report, evidenzia eventuali furti o situazioni anomale. Non limitarti a contare, racconta cosa è successo.
+2. 🔧 CONTROLLI E MANUTENZIONI: quali controlli erano in scadenza, quali sono stati completati, quali sono ancora da fare. Segnala eventuali criticità.
+3. 🎫 TICKET: quanti ticket aperti, quali sono urgenti, quali in attesa di approvazione, quali chiusi nella settimana. Per quelli chiusi, indica se c'era un costo. Per quelli aperti, segnala se bloccati in attesa di qualcosa.
+4. 📈 CAPEX: stato dei progetti capex attivi, eventuali aggiornamenti, costi previsti vs effettivi.
+5. 🧹 PULIZIE: stato delle pulizie periodiche, cosa è stato fatto, cosa è in scadenza.
+6. ✅ TASK: task completati e in scadenza, con priorità.
+
+REGOLE:
+- NON elencare ogni singolo elemento. Fai una sintesi narrativa, come un briefing da leggere ad alta voce in riunione.
+- Se una sezione non ha dati, scrivi semplicemente "Nessuna attività da segnalare."
+- Evidenzia le URGENZE e le cose che richiedono attenzione immediata con un simbolo ⚠️.
+- Sii concreto: menziona numeri, costi, date quando sono rilevanti.
+- Organizza il testo per centro commerciale, con titoli chiari.
+- Massimo 2000 caratteri in totale.
+
+DATI:
+${datiJson}
+
+Produci SOLO il corpo del riepilogo in HTML (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>), senza tag <html> o <body>.`;
+
+            const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                prompt,
+                model: 'gpt_5_mini',
+            });
+
+            const corpoHtml = `
+<div style="font-family:Arial,sans-serif;max-width:700px;color:#1f2937;">
+  <div style="background:#1e3a5f;color:white;padding:20px;border-radius:8px 8px 0 0;">
+    <h1 style="margin:0;font-size:22px;">📊 Briefing settimanale</h1>
+    <p style="margin:4px 0 0;opacity:0.85;font-size:14px;">${inizioFormattato} → ${fineFormattato}</p>
+  </div>
+  <div style="background:white;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;">
+    ${llmResponse}
+  </div>
+  <p style="color:#9ca3af;font-size:11px;margin-top:12px;text-align:center;">Mall Pilot – Briefing automatico del lunedì</p>
 </div>`.trim();
 
             await base44.asServiceRole.integrations.Core.SendEmail({
                 to: direttore.email,
-                subject: `Riepilogo settimanale ${inizioFormattato} – ${fineFormattato}`,
-                body: corpo,
+                subject: `Briefing settimanale ${inizioFormattato} – ${fineFormattato}`,
+                body: corpoHtml,
             });
             emailInviate++;
         }
