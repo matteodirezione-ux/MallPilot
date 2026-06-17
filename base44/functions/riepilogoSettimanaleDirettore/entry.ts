@@ -81,8 +81,10 @@ Deno.serve(async (req) => {
             const ticketsChiusiSettimana = filtraPerCentri(tickets).filter(t =>
                 t.stato === 'chiuso' && t.updated_date && t.updated_date >= inizio && t.updated_date <= fine + 'T23:59:59'
             );
+            // Capex programmati nella settimana (date sovrapposte)
             const capexFiltrati = filtraPerCentri(capexList).filter(cx =>
-                !cx.stato || cx.stato !== 'completato'
+                cx.data_inizio && cx.data_inizio <= fine && (cx.data_fine ? cx.data_fine >= inizio : true) &&
+                (!cx.stato || cx.stato !== 'completato')
             );
             const pulizieSettimana = filtraPerCentri(puliziePeriodiche).filter(p =>
                 (p.prossima_scadenza >= inizio && p.prossima_scadenza <= fine) ||
@@ -284,8 +286,8 @@ I dati sono in formato JSON. Ogni centro ha i campi per il consuntivo (report, c
 PARTE 1 – CONSUNTIVO (${inizioFormattato} – ${fineFormattato}):
 1. 📋 REPORT DELLA SICUREZZA: riassumi il contenuto dei report, evidenzia eventuali furti o situazioni anomale.
 2. 🔧 CONTROLLI E MANUTENZIONI: quali controlli erano in scadenza, quali completati, quali ancora da fare.
-3. 🎫 TICKET: quanti aperti, quali urgenti, in attesa, chiusi nella settimana (con costi).
-4. 📈 CAPEX: stato progetti capex attivi, costi previsti vs effettivi.
+3. 🎫 TICKET: per ogni ticket usa la descrizione (non il numero) per spiegare di cosa si tratta. Indica quanti aperti, urgenti, in attesa, chiusi nella settimana (con costi).
+4. 📈 CAPEX: solo i capex programmati in questa settimana. Indica titolo, stato, costi previsti/effettivi.
 5. 🧹 PULIZIE: stato pulizie periodiche, cosa fatto, cosa in scadenza.
 6. ✅ TASK: task completati e in scadenza, con priorità.
 7. 🎪 EVENTI: eventi in corso nella settimana. Per ciascuno: nome, cliente, date, prezzo.
@@ -296,8 +298,8 @@ Analizza "prossimaSettimana" per ogni centro e sintetizza cosa è previsto:
 A. 🔧 Controlli/manutenzioni in scadenza
 B. 🧹 Pulizie periodiche in scadenza
 C. ✅ Task in scadenza (con priorità)
-D. 🎫 Ticket in scadenza
-E. 📈 Capex con inizio lavori previsto
+D. 🎫 Ticket in scadenza (usa la descrizione, non il numero)
+E. 📈 Capex programmati nella settimana entrante (solo quelli con date in questo periodo)
 F. 🎪 Eventi in corso
 G. 🏬 Affitti in partenza
 
