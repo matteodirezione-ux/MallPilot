@@ -161,6 +161,7 @@ function PrenotazioneDetail({ item, isVigilanza }) {
   const fmtEur = (n) => n != null ? new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(n) : null;
   return (
     <>
+      {item.nome_evento && <Row label="Nome evento" value={item.nome_evento} />}
       <Row label="Cliente" value={item.cliente?.ragione_sociale} />
       <Row label="Spazio" value={item.spazio?.numero_spazio} />
       <Row label="Stato" value={<span className={`px-2 py-0.5 rounded text-xs font-medium ${statoConfig[item.stato]}`}>{item.stato}</span>} />
@@ -170,6 +171,7 @@ function PrenotazioneDetail({ item, isVigilanza }) {
       <Row label="Materiale" value={item.materiale_dimostrativo} />
       <Row label="Elettricità" value={item.necessita_elettricita ? 'Sì' : null} />
       <Row label="Note" value={item.note} />
+      <FotoGrid urls={item.foto_urls} />
     </>
   );
 }
@@ -181,13 +183,16 @@ const titleMap = {
   capex: 'Dettaglio Capex',
   pulizia_periodica: 'Dettaglio Pulizia Periodica',
   report: 'Dettaglio Report',
-  prenotazione: 'Dettaglio Affitto',
+  prenotazione: (item) => item?.is_event ? 'Dettaglio Evento' : 'Dettaglio Affitto',
 };
 
 const editRouteMap = {
   task: (id) => `/Task?edit=${id}`,
   manutenzione: (id) => `/CalendarioManutenzioni?edit=${id}`,
   ticket: (id) => `/Ticket?edit=${id}`,
+  capex: (id) => `/Capex?edit=${id}`,
+  pulizia_periodica: (id) => `/Pulizie?edit_periodica=${id}`,
+  prenotazione: (id) => `/Calendario?edit=${id}`,
 };
 
 export default function DashboardDetailModal({ open, onClose, type, item, user }) {
@@ -210,6 +215,7 @@ export default function DashboardDetailModal({ open, onClose, type, item, user }
   };
 
   const editRoute = editRouteMap[type];
+  const canEdit = user?.tipo_account === 'direttore' || user?.tipo_account === 'proprieta';
 
   const handleEdit = () => {
     onClose();
@@ -221,8 +227,8 @@ export default function DashboardDetailModal({ open, onClose, type, item, user }
       <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between pr-6">
-            <DialogTitle>{titleMap[type] || 'Dettaglio'}</DialogTitle>
-            {editRoute && (
+            <DialogTitle>{typeof titleMap[type] === 'function' ? titleMap[type](item) : (titleMap[type] || 'Dettaglio')}</DialogTitle>
+            {editRoute && canEdit && (
               <Button size="sm" variant="outline" className="gap-1.5" onClick={handleEdit}>
                 <Pencil className="w-3.5 h-3.5" />
                 Modifica

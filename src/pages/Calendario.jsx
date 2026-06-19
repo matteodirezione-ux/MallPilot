@@ -26,6 +26,7 @@ export default function Calendario({ centroSelezionato, user }) {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrenotazione, setEditingPrenotazione] = useState(null);
+  const [autoOpenDialog, setAutoOpenDialog] = useState(false);
   const [mappaOpen, setMappaOpen] = useState(false);
   const [uploadingMappa, setUploadingMappa] = useState(false);
   const [mappaUrl, setMappaUrl] = useState(null);
@@ -78,6 +79,16 @@ export default function Calendario({ centroSelezionato, user }) {
       setMappaUrl(centroSelezionato?.piantina_url || null);
     }
   }, [centroSelezionato]);
+
+  // Apri il form di modifica se arriva ?edit=id dalla dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && prenotazioni.length > 0 && !autoOpenDialog) {
+      const item = prenotazioni.find(p => p.id === editId);
+      if (item) { setEditingPrenotazione(item); setDialogOpen(true); setAutoOpenDialog(true); }
+    }
+  }, [prenotazioni]);
 
   const loadData = async () => {
     try {

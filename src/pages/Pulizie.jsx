@@ -29,10 +29,21 @@ export default function PuliziePage({ centroSelezionato, user }) {
   const [loadingPer, setLoadingPer] = useState(true);
   const [annoPeriodiche, setAnnoPeriodiche] = useState(new Date().getFullYear());
   const [showFormPeriodica, setShowFormPeriodica] = useState(false);
+  const [editingPeriodica, setEditingPeriodica] = useState(null);
 
   useEffect(() => {
     if (centroSelezionato?.id) { loadSegnalazioni(); loadPeriodiche(); }
   }, [centroSelezionato]);
+
+  // Apri il form pulizia periodica se arriva ?edit_periodica=id dalla dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit_periodica');
+    if (editId && listaPeriodiche.length > 0) {
+      const item = listaPeriodiche.find(p => p.id === editId);
+      if (item) { setTab('periodiche'); setEditingPeriodica(item); setShowFormPeriodica(true); }
+    }
+  }, [listaPeriodiche]);
 
   const loadSegnalazioni = async () => {
     setLoadingSeg(true);
@@ -223,7 +234,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
 
       {tab === 'periodiche' && (
         <>
-          <FormPuliziaPeriodica open={showFormPeriodica} onClose={() => setShowFormPeriodica(false)} pulizia={null} centroId={centroSelezionato?.id} onSave={() => { setShowFormPeriodica(false); loadPeriodiche(); }} />
+          <FormPuliziaPeriodica open={showFormPeriodica} onClose={() => { setShowFormPeriodica(false); setEditingPeriodica(null); }} pulizia={editingPeriodica} centroId={centroSelezionato?.id} onSave={() => { setShowFormPeriodica(false); setEditingPeriodica(null); loadPeriodiche(); }} />
           <ListaPuliziePeriodiche lista={listaPeriodiche} loading={loadingPer} centroId={centroSelezionato?.id} onReload={loadPeriodiche} anno={annoPeriodiche} />
         </>
       )}

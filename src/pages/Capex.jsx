@@ -53,6 +53,16 @@ export default function CapexPage({ centroSelezionato, user }) {
   const isVigilanza = user?.tipo_account === 'vigilanza';
   const canEdit = !isVigilanza;
 
+  // Apri il form di modifica se arriva ?edit=id dalla dashboard
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('edit');
+    if (editId && capexList.length > 0) {
+      const item = capexList.find(c => c.id === editId);
+      if (item) { setEditing(item); setShowForm(true); }
+    }
+  }, [capexList]);
+
   const handleExportPDF = async () => {
     const nomeCentro = centroSelezionato?.nome || 'Centro';
     const nomeFile = `${nomeCentro.toUpperCase()}_CAPEX_${annoSelezionato}`;
