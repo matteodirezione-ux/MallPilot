@@ -7,11 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X, AlertTriangle, Zap, Sparkles, Building2, Plus, Gift } from 'lucide-react';
+import { X, AlertTriangle, Zap, Sparkles, Building2, Plus, Gift, ImagePlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import { isWithinInterval, format } from 'date-fns';
 import DatePicker from '@/components/ui/DatePicker';
+import { compressImages } from '@/lib/compressImage';
 
 export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave, onCancel, isVigilanza, centroSelezionato, onClienteCreated }) {
   // Determina la tab iniziale in base alla prenotazione in modifica
@@ -54,8 +55,10 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     is_event: false,
     is_gratuito: false,
     stato: 'confermata',
-    note: ''
+    note: '',
+    foto_urls: []
   });
+  const [uploadingFoto, setUploadingFoto] = useState(false);
   const [conflittiDisponibilita, setConflittiDisponibilita] = useState({});
   const [allPrenotazioni, setAllPrenotazioni] = useState([]);
 
@@ -79,7 +82,8 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
         is_event: prenotazione.is_event || false,
         is_gratuito: prenotazione.is_gratuito || false,
         stato: prenotazione.stato,
-        note: prenotazione.note || ''
+        note: prenotazione.note || '',
+        foto_urls: prenotazione.foto_urls || []
       });
       setActiveTab(getInitialTab(prenotazione));
     }
@@ -187,6 +191,58 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     });
     setWizardStep(0);
   };
+
+  const handleFotoUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    setUploadingFoto(true);
+    try {
+      const compressed = await compressImages(files);
+      const urls = await Promise.all(
+        compressed.map(f => base44.integrations.Core.UploadFile({ file: f }).then(r => r.file_url))
+      );
+      setFormData(prev => ({ ...prev, foto_urls: [...(prev.foto_urls || []), ...urls] }));
+    } catch {
+      toast.error('Errore nel caricamento delle foto');
+    } finally {
+      setUploadingFoto(false);
+    }
+  };
+
+  const handleRemoveFoto = (url) => {
+    setFormData(prev => ({ ...prev, foto_urls: prev.foto_urls.filter(u => u !== url) }));
+  };
+
+  const FotoUploader = () => (
+    <div className={rowClass}>
+      <span className={labelClass}>Foto</span>
+      <div className={fieldClass}>
+        {formData.foto_urls?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {formData.foto_urls.map((url, i) => (
+              <div key={i} className="relative group">
+                <img src={url} alt="" className="w-16 h-16 object-cover rounded-lg border border-slate-200" />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFoto(url)}
+                  className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <label className="flex items-center gap-2 cursor-pointer w-fit">
+          <input type="file" accept="image/*" multiple className="hidden" onChange={handleFotoUpload} disabled={uploadingFoto} />
+          <span className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors ${uploadingFoto ? 'opacity-60 cursor-not-allowed' : ''}`}>
+            {uploadingFoto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
+            {uploadingFoto ? 'Caricamento...' : 'Aggiungi foto'}
+          </span>
+        </label>
+      </div>
+    </div>
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -486,6 +542,9 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
             </div>
           </div>
 
+          {/* Foto */}
+          <FotoUploader />
+
           {/* Note */}
           <div className={rowClass}>
             <label className={labelClass}>Note</label>
@@ -533,6 +592,9 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
               </label>
             </div>
           </div>
+
+          {/* Foto */}
+          <FotoUploader />
 
           {/* Note */}
           <div className={rowClass}>

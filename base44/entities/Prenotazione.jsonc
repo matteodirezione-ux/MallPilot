@@ -77,6 +77,13 @@
       "type": "string",
       "description": "Note sulla prenotazione"
     },
+    "foto_urls": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "URL delle foto allegate all'evento/prenotazione"
+    },
     "contratto_generato": {
       "type": "boolean",
       "default": false,
