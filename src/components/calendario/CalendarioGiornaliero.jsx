@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarDays, MapPin, FileText, Zap, User, Phone, Mail } from 'lucide-react';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 
 export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, onEdit, onDelete, isVigilanza }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const getSpazioById = (id) => spazi.find(s => s.id === id);
   const getClienteById = (id) => clienti.find(c => c.id === id);
@@ -236,6 +238,17 @@ export default function CalendarioGiornaliero({ prenotazioni, spazi, clienti, on
                     <p className="text-xs text-slate-500 font-medium">Note</p>
                     <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
                   </div>
+                </div>
+              )}
+              {selectedPrenotazione.prenotazione.foto_urls?.length > 0 && (
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 font-medium mb-2">Foto ({selectedPrenotazione.prenotazione.foto_urls.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedPrenotazione.prenotazione.foto_urls.map((url, i) => (
+                      <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxIndex(i)} />
+                    ))}
+                  </div>
+                  {lightboxIndex !== null && <ImageLightbox urls={selectedPrenotazione.prenotazione.foto_urls} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />}
                 </div>
               )}
               {!isVigilanza && (

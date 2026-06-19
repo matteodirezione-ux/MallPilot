@@ -6,9 +6,11 @@ import { ChevronLeft, ChevronRight, CalendarDays, MapPin, FileText, Zap, User, P
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isWithinInterval, addWeeks, subWeeks, isSameDay } from 'date-fns';
 import { Sparkles } from 'lucide-react';
 import { it } from 'date-fns/locale';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 
 export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, currentWeek, setCurrentWeek, onEdit, onDelete, isVigilanza, mostraDisponibili }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const giorni = useMemo(() => {
     const inizio = startOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -295,6 +297,17 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
                     <p className="text-xs text-slate-500 font-medium">Note</p>
                     <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
                   </div>
+                </div>
+              )}
+              {selectedPrenotazione.prenotazione.foto_urls?.length > 0 && (
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 font-medium mb-2">Foto ({selectedPrenotazione.prenotazione.foto_urls.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedPrenotazione.prenotazione.foto_urls.map((url, i) => (
+                      <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxIndex(i)} />
+                    ))}
+                  </div>
+                  {lightboxIndex !== null && <ImageLightbox urls={selectedPrenotazione.prenotazione.foto_urls} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />}
                 </div>
               )}
             {!isVigilanza && (

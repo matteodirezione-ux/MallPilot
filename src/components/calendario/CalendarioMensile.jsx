@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import ImageLightbox from '@/components/ui/ImageLightbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,6 +10,7 @@ import { it } from 'date-fns/locale';
 
 export default function CalendarioMensile({ prenotazioni, spazi, clienti, currentMonth, setCurrentMonth, onEdit, onDelete, isVigilanza, mostraDisponibili }) {
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const giorni = useMemo(() => {
     const inizio = startOfMonth(currentMonth);
@@ -378,6 +380,17 @@ export default function CalendarioMensile({ prenotazioni, spazi, clienti, curren
                     <p className="text-xs text-slate-500 font-medium">Note</p>
                     <p className="text-sm text-slate-700">{selectedPrenotazione.prenotazione.note}</p>
                   </div>
+                </div>
+              )}
+              {selectedPrenotazione.prenotazione.foto_urls?.length > 0 && (
+                <div className="p-3 bg-slate-50 rounded-lg">
+                  <p className="text-xs text-slate-500 font-medium mb-2">Foto ({selectedPrenotazione.prenotazione.foto_urls.length})</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedPrenotazione.prenotazione.foto_urls.map((url, i) => (
+                      <img key={i} src={url} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => setLightboxIndex(i)} />
+                    ))}
+                  </div>
+                  {lightboxIndex !== null && <ImageLightbox urls={selectedPrenotazione.prenotazione.foto_urls} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />}
                 </div>
               )}
               {!isVigilanza && (
