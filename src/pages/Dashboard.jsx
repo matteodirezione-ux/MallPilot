@@ -783,13 +783,20 @@ export default function Dashboard({ centroSelezionato, user }) {
                           <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${isProgrammato ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
                             {isProgrammato ? 'Programmato' : 'Da programmare'}
                           </span>
-                          {p.prossima_scadenza && (
-                            <p className="text-xs whitespace-nowrap mt-0.5">
-                              <span className="font-bold text-red-600">{giorniMancanti(p.prossima_scadenza)}</span>
-                              {' · '}
-                              <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
-                            </p>
-                          )}
+                          {p.prossima_scadenza && (() => {
+                            const oggi = new Date(); oggi.setHours(0,0,0,0);
+                            const scad = new Date(p.prossima_scadenza); scad.setHours(0,0,0,0);
+                            const diff = Math.round((scad - oggi) / (1000 * 60 * 60 * 24));
+                            const label = diff < 0 ? `scaduto da ${Math.abs(diff)}gg` : diff === 0 ? 'scade oggi' : diff === 1 ? 'scade domani' : `tra ${diff}gg`;
+                            const color = diff < 0 ? 'text-red-600' : diff <= 7 ? 'text-orange-500' : 'text-blue-600';
+                            return (
+                              <p className="text-xs whitespace-nowrap mt-0.5">
+                                <span className={`font-bold ${color}`}>{label}</span>
+                                {' · '}
+                                <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
+                              </p>
+                            );
+                          })()}
                         </div>
                       </div>
                     );
