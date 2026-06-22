@@ -392,6 +392,24 @@ export default function Dashboard({ centroSelezionato, user }) {
     return `tra ${diff}gg`;
   };
 
+  const giorniManantiCapex = (dataInizio, dataFine) => {
+    const oggi = new Date(); oggi.setHours(0,0,0,0);
+    const inizio = new Date(dataInizio); inizio.setHours(0,0,0,0);
+    const fine = dataFine ? new Date(dataFine) : null; if (fine) fine.setHours(0,0,0,0);
+    if (fine && fine < oggi) {
+      const diff = Math.round((oggi - fine) / (1000 * 60 * 60 * 24));
+      return { label: `scaduto da ${diff}gg`, color: 'text-red-600' };
+    }
+    if (inizio <= oggi && (!fine || fine >= oggi)) {
+      const diff = Math.round((oggi - inizio) / (1000 * 60 * 60 * 24));
+      return { label: diff === 0 ? 'in corso da oggi' : `in corso da ${diff}gg`, color: 'text-green-600' };
+    }
+    const diff = Math.round((inizio - oggi) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return { label: 'inizia oggi', color: 'text-blue-600' };
+    if (diff === 1) return { label: 'inizia domani', color: 'text-blue-600' };
+    return { label: `tra ${diff}gg`, color: 'text-blue-600' };
+  };
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('it-IT', { 
       style: 'currency', 
@@ -716,16 +734,19 @@ export default function Dashboard({ centroSelezionato, user }) {
                         {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
                       </div>
                       <div className="shrink-0 text-right">
-                        {c.data_inizio && (
-                          <p className="text-xs whitespace-nowrap">
-                            <span className="font-bold text-red-600">{giorniMancanti(c.data_inizio)}</span>
-                            {' · '}
-                            <span className="font-medium text-yellow-700">
-                              {format(new Date(c.data_inizio), 'dd MMM', { locale: it })}
-                              {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
-                            </span>
-                          </p>
-                        )}
+                        {c.data_inizio && (() => {
+                          const stato = giorniManantiCapex(c.data_inizio, c.data_fine);
+                          return (
+                            <p className="text-xs whitespace-nowrap">
+                              <span className={`font-bold ${stato.color}`}>{stato.label}</span>
+                              {' · '}
+                              <span className="font-medium text-yellow-700">
+                                {format(new Date(c.data_inizio), 'dd MMM', { locale: it })}
+                                {c.data_fine ? ` → ${format(new Date(c.data_fine), 'dd MMM', { locale: it })}` : ''}
+                              </span>
+                            </p>
+                          );
+                        })()}
                       </div>
                     </div>
                   ))}
