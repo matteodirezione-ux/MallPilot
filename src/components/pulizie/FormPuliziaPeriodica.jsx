@@ -78,9 +78,12 @@ export default function FormPuliziaPeriodica({ open, onClose, pulizia, centroId,
         const nuova = await base44.entities.PuliziaPeriodica.create(form);
         if (form.stato === 'programmato') await creaManutenzione(nuova.id, form);
       }
+      onSave();
+    } catch (err) {
+      console.error('Errore salvataggio:', err);
+      alert('Errore durante il salvataggio. Riprova tra qualche secondo.');
     } finally {
       setSaving(false);
-      onSave();
     }
   };
 
