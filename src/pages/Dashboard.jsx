@@ -804,7 +804,10 @@ export default function Dashboard({ centroSelezionato, user }) {
                               <p className="text-xs whitespace-nowrap mt-0.5">
                                 <span className={`font-bold ${color}`}>{label}</span>
                                 {' · '}
-                                <span className="text-slate-500">{format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}</span>
+                                <span className="text-slate-500">
+                                  {p.ultima_esecuzione ? `${format(new Date(p.ultima_esecuzione), 'dd MMM', { locale: it })} → ` : ''}
+                                  {format(new Date(p.prossima_scadenza), 'dd MMM', { locale: it })}
+                                </span>
                               </p>
                             );
                           })()}
