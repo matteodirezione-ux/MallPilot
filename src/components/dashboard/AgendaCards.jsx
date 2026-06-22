@@ -182,7 +182,7 @@ function AgendaCard({ title, bgHeader, borderColor, headerTextColor, dateLabel, 
                         <p className="font-medium text-slate-800 truncate">{c.titolo}</p>
                         {c.fornitore && <p className="text-xs text-slate-500 truncate">{c.fornitore}</p>}
                       </div>
-                      <span className="text-xs text-yellow-700 font-medium whitespace-nowrap shrink-0">{fmtDate(c.data_inizio)}</span>
+                      <span className="text-xs text-yellow-700 font-medium whitespace-nowrap shrink-0">{fmtDate(c.data_inizio)}{c.data_fine ? ` → ${fmtDate(c.data_fine)}` : ''}</span>
                     </div>
                   ))}
                 </div>
