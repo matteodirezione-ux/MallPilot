@@ -41,7 +41,13 @@ export default function PuliziePage({ centroSelezionato, user }) {
     const editId = params.get('edit_periodica');
     if (editId && listaPeriodiche.length > 0) {
       const item = listaPeriodiche.find(p => p.id === editId);
-      if (item) { setTab('periodiche'); setEditingPeriodica(item); setShowFormPeriodica(true); }
+      if (item) {
+        setTab('periodiche');
+        setEditingPeriodica(item);
+        setShowFormPeriodica(true);
+        // Rimuove il parametro URL per evitare che il form si riapra al prossimo reload
+        window.history.replaceState({}, '', window.location.pathname);
+      }
     }
   }, [listaPeriodiche]);
 
