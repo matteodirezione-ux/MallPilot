@@ -787,8 +787,19 @@ export default function Dashboard({ centroSelezionato, user }) {
                             const oggi = new Date(); oggi.setHours(0,0,0,0);
                             const scad = new Date(p.prossima_scadenza); scad.setHours(0,0,0,0);
                             const diff = Math.round((scad - oggi) / (1000 * 60 * 60 * 24));
-                            const label = diff < 0 ? `scaduto da ${Math.abs(diff)}gg` : diff === 0 ? 'scade oggi' : diff === 1 ? 'scade domani' : `tra ${diff}gg`;
-                            const color = diff < 0 ? 'text-red-600' : diff <= 7 ? 'text-orange-500' : 'text-blue-600';
+                            let label, color;
+                            if (diff < 0) {
+                              label = `scaduto da ${Math.abs(diff)}gg`; color = 'text-red-600';
+                            } else if (diff === 0) {
+                              label = 'in corso da oggi'; color = 'text-green-600';
+                            } else if (p.ultima_esecuzione) {
+                              const inizio = new Date(p.ultima_esecuzione); inizio.setHours(0,0,0,0);
+                              const giorniInCorso = Math.round((oggi - inizio) / (1000 * 60 * 60 * 24));
+                              label = giorniInCorso > 0 ? `in corso da ${giorniInCorso}gg` : `tra ${diff}gg`;
+                              color = giorniInCorso > 0 ? 'text-green-600' : 'text-blue-600';
+                            } else {
+                              label = `tra ${diff}gg`; color = diff <= 7 ? 'text-orange-500' : 'text-blue-600';
+                            }
                             return (
                               <p className="text-xs whitespace-nowrap mt-0.5">
                                 <span className={`font-bold ${color}`}>{label}</span>
