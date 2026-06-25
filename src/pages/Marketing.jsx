@@ -232,10 +232,11 @@ function SimpleRow({ row, onEdit, onDelete, isVigilanza }) {
 
 function TotaleRow({ label, rows, mesi, bold, isVigilanza }) {
   const cls = bold ? 'font-bold bg-slate-100' : 'font-medium bg-slate-50';
+  const totale = mesi.reduce((acc, m) => acc + sum(rows, m), 0);
   return (
     <tr className={`border-b border-slate-200 ${cls}`}>
       <td className="px-3 py-1.5 text-slate-700">{label}</td>
-      <td className="px-2 py-1.5 text-right">{totaleBudget(rows) ? totaleBudget(rows).toLocaleString('it-IT') : '–'}</td>
+      <td className="px-2 py-1.5 text-right">{totale ? totale.toLocaleString('it-IT') : '–'}</td>
       {mesi.map(m => { const v = sum(rows, m); return <td key={m} className="px-2 py-1.5 text-right">{v ? v.toLocaleString('it-IT') : ''}</td>; })}
       {!isVigilanza && <td></td>}
     </tr>
