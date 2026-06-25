@@ -139,69 +139,57 @@ const kpiDiffNegStyle = {
   fill: { fgColor: { rgb: 'FEF2F2' } },
 };
 
+// helpers per formule Excel
+const col = (c) => String.fromCharCode(65 + c); // 0→A, 1→B, ...
+const ref = (r, c) => `${col(c)}${r + 1}`; // 0-indexed → A1
+
 // ─── costruzione foglio ────────────────────────────────────────────────────
 async function buildWorkbook(rows, anno, centroNome, logoUrl, budgetSaved) {
   const NCols = 14; // voce + totale + 12 mesi
 
-  // Converti logo in base64 se disponibile
-  let logoBase64 = null;
-  if (logoUrl) {
-    try {
-      const resp = await fetch(logoUrl);
-      const blob = await resp.blob();
-      logoBase64 = await new Promise(res => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result.split(',')[1]);
-        reader.readAsDataURL(blob);
-      });
-    } catch {}
-  }
-
-  const wsData = [];
+  const ws = {};
   const merges = [];
   const rowHeights = [];
-  let R = 0; // riga corrente (0-indexed)
+  let R = 0;
 
-  const emptyRow = () => Array(NCols).fill(cell(''));
+  // Helper per scrivere una cella nel worksheet direttamente
+  const wc = (r, c, obj) => {
+    const addr = `${col(c)}${r + 1}`;
+    ws[addr] = obj;
+    if (!ws['!ref']) ws['!ref'] = `A1:${col(NCols - 1)}1`;
+  };
+  const emptyStyled = (r, c, s) => wc(r, c, { v: '', t: 's', s });
 
-  // ── Riga logo/titolo ──────────────────────────────────────────────────────
-  // Riga 0: titolo
-  const titleRow = emptyRow();
-  titleRow[0] = cell(`Piano Marketing ${anno}`, titleStyle);
-  titleRow[NCols - 1] = cell(centroNome || '', { font: { bold: true, sz: 12, color: { rgb: '64748B' } }, alignment: { horizontal: 'right' } });
-  wsData.push(titleRow); merges.push({ s:{r:R,c:0}, e:{r:R,c:9} }); rowHeights.push({ hpt: 30 }); R++;
+  // ── Titolo ────────────────────────────────────────────────────────────────
+  wc(R, 0, { v: `Piano Marketing ${anno}`, t: 's', s: titleStyle });
+  wc(R, NCols - 1, { v: centroNome || '', t: 's', s: { font: { bold: true, sz: 12, color: { rgb: '64748B' } }, alignment: { horizontal: 'right' } } });
+  merges.push({ s:{r:R,c:0}, e:{r:R,c:9} }); rowHeights.push({ hpt: 30 }); R++;
 
-  // Riga 1: sottotitolo
-  const subRow = emptyRow();
-  subRow[0] = cell(`Esportato il ${new Date().toLocaleDateString('it-IT')}`, subStyle);
-  wsData.push(subRow); rowHeights.push({ hpt: 16 }); R++;
-
-  // Riga 2: vuota
-  wsData.push(emptyRow()); rowHeights.push({ hpt: 8 }); R++;
+  wc(R, 0, { v: `Esportato il ${new Date().toLocaleDateString('it-IT')}`, t: 's', s: subStyle });
+  rowHeights.push({ hpt: 16 }); R++;
+  rowHeights.push({ hpt: 8 }); R++; // riga vuota
 
   // ── KPI ───────────────────────────────────────────────────────────────────
   const consuntivo = totaleBudget(rows);
   const diff = budgetSaved > 0 ? budgetSaved - consuntivo : null;
-
-  const kpiRow = emptyRow();
-  kpiRow[0]  = cell('Budget Pianificato', kpiLabelStyle);
-  kpiRow[1]  = { v: budgetSaved || 0, t: 'n', s: kpiValStyle };
-  kpiRow[3]  = cell('Consuntivo', kpiLabelStyle);
-  kpiRow[4]  = { v: consuntivo, t: 'n', s: kpiValStyle };
-  kpiRow[6]  = cell('Differenza', kpiLabelStyle);
-  kpiRow[7]  = { v: diff ?? 0, t: 'n', s: diff === null ? kpiValStyle : diff >= 0 ? kpiDiffPosStyle : kpiDiffNegStyle };
-  wsData.push(kpiRow); rowHeights.push({ hpt: 22 }); R++;
-
-  // Riga vuota
-  wsData.push(emptyRow()); rowHeights.push({ hpt: 10 }); R++;
+  wc(R, 0, { v: 'Budget Pianificato', t: 's', s: kpiLabelStyle });
+  wc(R, 1, { v: budgetSaved || 0, t: 'n', s: kpiValStyle, z: '€ #,##0' });
+  wc(R, 3, { v: 'Consuntivo', t: 's', s: kpiLabelStyle });
+  wc(R, 4, { v: consuntivo, t: 'n', s: kpiValStyle, z: '€ #,##0' });
+  wc(R, 6, { v: 'Differenza', t: 's', s: kpiLabelStyle });
+  wc(R, 7, { v: diff ?? 0, t: 'n', s: diff === null ? kpiValStyle : diff >= 0 ? kpiDiffPosStyle : kpiDiffNegStyle, z: '€ #,##0' });
+  rowHeights.push({ hpt: 22 }); R++;
+  rowHeights.push({ hpt: 10 }); R++; // riga vuota
 
   // ── Header tabella ────────────────────────────────────────────────────────
-  const hRow = [
-    cell('VOCE', headerFirstStyle),
-    cell('TOTALE', headerStyle),
-    ...MESI_LABEL.map(m => cell(m, headerStyle)),
-  ];
-  wsData.push(hRow); rowHeights.push({ hpt: 18 }); R++;
+  wc(R, 0, { v: 'VOCE', t: 's', s: headerFirstStyle });
+  wc(R, 1, { v: 'TOTALE', t: 's', s: headerStyle });
+  MESI_LABEL.forEach((m, i) => wc(R, 2 + i, { v: m, t: 's', s: headerStyle }));
+  rowHeights.push({ hpt: 18 }); R++;
+
+  // Teniamo traccia delle righe dati per costruire le formule SUM
+  const sectionDataRows = {}; // key → [firstRow, lastRow] (1-indexed)
+  const sectionTotaleRows = {}; // key → row index (1-indexed) della riga totale sezione
 
   // ── Sezioni ───────────────────────────────────────────────────────────────
   SEZIONI.forEach(s => {
@@ -209,81 +197,74 @@ async function buildWorkbook(rows, anno, centroNome, logoUrl, budgetSaved) {
     const { hex, label } = s;
 
     // Header sezione
-    const sHdr = emptyRow();
-    sHdr[0] = cell(label, sectionStyle(hex));
-    for (let c = 1; c < NCols; c++) sHdr[c] = cell('', sectionNumStyle(hex));
-    wsData.push(sHdr); rowHeights.push({ hpt: 16 }); R++;
+    wc(R, 0, { v: label, t: 's', s: sectionStyle(hex) });
+    for (let c = 1; c < NCols; c++) wc(R, c, { v: '', t: 's', s: sectionNumStyle(hex) });
+    rowHeights.push({ hpt: 16 }); R++;
 
-    // Righe dati
+    const dataFirstRow = R + 1; // 1-indexed
     sRows.forEach((r, idx) => {
       const alt = idx % 2 === 1;
       const dS = alt ? dataAltStyle : dataStyle;
       const nS = alt ? dataNumAltStyle : dataNumStyle;
-      const dRow = [
-        cell(r.nome, dS),
-        { v: r.budget_totale || 0, t: 'n', s: nS },
-        ...MESI.map(m => ({ v: r[m] || 0, t: 'n', s: nS })),
-      ];
-      wsData.push(dRow); rowHeights.push({ hpt: 15 }); R++;
+      wc(R, 0, { v: r.nome, t: 's', s: dS });
+      // colonna TOTALE: somma dei 12 mesi della riga stessa
+      const rowNum = R + 1;
+      wc(R, 1, { f: `SUM(C${rowNum}:N${rowNum})`, t: 'n', s: nS, z: '#,##0' });
+      MESI.forEach((m, mi) => wc(R, 2 + mi, { v: r[m] || 0, t: 'n', s: nS, z: '#,##0' }));
+      rowHeights.push({ hpt: 15 }); R++;
     });
+    const dataLastRow = R; // 1-indexed (esclusivo dell'header)
 
-    // Totale sezione
-    const tRow = [
-      cell(`Totale ${label}`, totaleStyle),
-      { v: totaleBudget(sRows), t: 'n', s: totaleNumStyle },
-      ...MESI.map(m => ({ v: sum(sRows, m), t: 'n', s: totaleNumStyle })),
-    ];
-    wsData.push(tRow); rowHeights.push({ hpt: 16 }); R++;
+    sectionDataRows[s.key] = { first: dataFirstRow, last: dataLastRow };
 
-    // Riga vuota separatore
-    wsData.push(emptyRow()); rowHeights.push({ hpt: 6 }); R++;
+    // Totale sezione con formule SUM sulle righe dati
+    wc(R, 0, { v: `Totale ${label}`, t: 's', s: totaleStyle });
+    if (sRows.length > 0) {
+      wc(R, 1, { f: `SUM(B${dataFirstRow}:B${dataLastRow})`, t: 'n', s: totaleNumStyle, z: '#,##0' });
+      for (let mi = 0; mi < 12; mi++) {
+        const colLetter = col(2 + mi);
+        wc(R, 2 + mi, { f: `SUM(${colLetter}${dataFirstRow}:${colLetter}${dataLastRow})`, t: 'n', s: totaleNumStyle, z: '#,##0' });
+      }
+    } else {
+      wc(R, 1, { v: 0, t: 'n', s: totaleNumStyle, z: '#,##0' });
+      for (let mi = 0; mi < 12; mi++) wc(R, 2 + mi, { v: 0, t: 'n', s: totaleNumStyle, z: '#,##0' });
+    }
+    sectionTotaleRows[s.key] = R + 1; // 1-indexed
+    rowHeights.push({ hpt: 16 }); R++;
+
+    rowHeights.push({ hpt: 6 }); R++; // separatore
   });
 
-  // Totale comunicazione
-  const commRows = [...rows.filter(r => r.sezione === 'comunicazione_online'), ...rows.filter(r => r.sezione === 'comunicazione_offline')];
-  wsData.push([
-    cell('TOTALE COMUNICAZIONE', totaleStyle),
-    { v: totaleBudget(commRows), t: 'n', s: totaleNumStyle },
-    ...MESI.map(m => ({ v: sum(commRows, m), t: 'n', s: totaleNumStyle })),
-  ]); rowHeights.push({ hpt: 16 }); R++;
+  // ── Totale Comunicazione (somma righe totale online + offline) ───────────
+  const rOnline  = sectionTotaleRows['comunicazione_online'];
+  const rOffline = sectionTotaleRows['comunicazione_offline'];
+  wc(R, 0, { v: 'TOTALE COMUNICAZIONE', t: 's', s: totaleStyle });
+  wc(R, 1, { f: `B${rOnline}+B${rOffline}`, t: 'n', s: totaleNumStyle, z: '#,##0' });
+  for (let mi = 0; mi < 12; mi++) {
+    const cl = col(2 + mi);
+    wc(R, 2 + mi, { f: `${cl}${rOnline}+${cl}${rOffline}`, t: 'n', s: totaleNumStyle, z: '#,##0' });
+  }
+  rowHeights.push({ hpt: 16 }); R++;
 
-  // TOTALE BUDGET
-  wsData.push([
-    cell('TOTALE BUDGET', grandTotaleStyle),
-    { v: totaleBudget(rows), t: 'n', s: grandTotaleNumStyle },
-    ...MESI.map(m => ({ v: sum(rows, m), t: 'n', s: grandTotaleNumStyle })),
-  ]); rowHeights.push({ hpt: 20 }); R++;
+  // ── TOTALE BUDGET (somma di tutti i totali sezione) ───────────────────────
+  const totRows = SEZIONI.map(s => sectionTotaleRows[s.key]);
+  const sumRef = (c) => totRows.map(r => `${c}${r}`).join('+');
+  wc(R, 0, { v: 'TOTALE BUDGET', t: 's', s: grandTotaleStyle });
+  wc(R, 1, { f: sumRef('B'), t: 'n', s: grandTotaleNumStyle, z: '#,##0' });
+  for (let mi = 0; mi < 12; mi++) {
+    const cl = col(2 + mi);
+    wc(R, 2 + mi, { f: sumRef(cl), t: 'n', s: grandTotaleNumStyle, z: '#,##0' });
+  }
+  rowHeights.push({ hpt: 20 }); R++;
 
-  // ── Costruzione worksheet ─────────────────────────────────────────────────
-  const ws = XLSXStyle.utils.aoa_to_sheet(wsData.map(r => r.map(c => c.v ?? c)));
-  // Inietta gli stili cella per cella
-  wsData.forEach((rowArr, ri) => {
-    rowArr.forEach((cellObj, ci) => {
-      if (!cellObj || cellObj.v === undefined) return;
-      const addr = XLSXStyle.utils.encode_cell({ r: ri, c: ci });
-      ws[addr] = { v: cellObj.v, t: cellObj.t || (typeof cellObj.v === 'number' ? 'n' : 's'), s: cellObj.s || {} };
-      if (cellObj.s?.numFmt) ws[addr].z = cellObj.s.numFmt;
-    });
-  });
-
-  ws['!cols'] = [
-    { wch: 38 }, // voce
-    { wch: 14 }, // totale
-    ...MESI.map(() => ({ wch: 9 })),
-  ];
+  // ── Dimensioni foglio ─────────────────────────────────────────────────────
+  ws['!ref'] = `A1:${col(NCols - 1)}${R}`;
+  ws['!cols'] = [{ wch: 38 }, { wch: 14 }, ...MESI.map(() => ({ wch: 9 }))];
   ws['!rows'] = rowHeights;
   ws['!merges'] = merges;
 
-  // Logo come immagine (solo se disponibile)
   const wb = XLSXStyle.utils.book_new();
   XLSXStyle.utils.book_append_sheet(wb, ws, `Marketing ${anno}`);
-
-  if (logoBase64) {
-    if (!wb.Workbook) wb.Workbook = {};
-    if (!wb.Workbook.Images) wb.Workbook.Images = [];
-    // xlsx-js-style non supporta immagini native; usiamo un workaround testuale
-  }
-
   return { wb, consuntivo };
 }
 
