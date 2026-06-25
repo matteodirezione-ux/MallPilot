@@ -289,14 +289,31 @@ async function exportExcel(rows, anno, centroNome, logoUrl, budgetSaved) {
     ws.getCell(R, 3 + mi).alignment = { horizontal: 'right', vertical: 'middle' }; ws.getCell(R, 3 + mi).border = medBorder;
   });
 
-  // ── Logo nell'header (colonne 13-14, righe 1-2) ────────────────────────
+  // ── Logo nell'header con proporzioni naturali ─────────────────────────
   if (logoUrl) {
     try {
       const { buffer, ext } = await fetchImageBuffer(logoUrl);
+
+      // Calcola dimensioni naturali via createImageBitmap
+      const blob = new Blob([buffer]);
+      const bitmap = await createImageBitmap(blob);
+      const natW = bitmap.width;
+      const natH = bitmap.height;
+      bitmap.close();
+
+      // Vogliamo altezza massima 2 righe (~36pt) e larghezza massima 2 colonne (~18 chars * ~7px)
+      // In ExcelJS le coordinate tl/br sono in unità colonna/riga (frazioni permesse)
+      // Calcoliamo la larghezza in EMU mantenendo le proporzioni
+      // Usiamo nativeSize: true e posizioniamo con tl + dimensioni in pixel
+      const maxH = 60; // pixel target altezza
+      const scale = maxH / natH;
+      const targetW = Math.round(natW * scale);
+      const targetH = maxH;
+
       const imgId = wb.addImage({ buffer, extension: ext });
       ws.addImage(imgId, {
-        tl: { col: 12, row: 0 },   // colonna 13 (0-indexed=12), riga 1 (0-indexed=0)
-        br: { col: 14, row: 2 },   // 2 colonne, 2 righe
+        tl: { col: 11.1, row: 0.1 },
+        ext: { width: targetW, height: targetH },
         editAs: 'oneCell',
       });
     } catch {}
@@ -348,8 +365,15 @@ export default function ExportMarketing({ rows, anno, centroNome, centroLogo, bu
       doc.text(`Piano Marketing ${anno}`, margin + 3, y + 7);
 
       if (logob64) {
-        // Logo su 2 "slot" di larghezza, proporzionato
-        doc.addImage(logob64, 'PNG', pw - margin - 40, y - 2, 40, 14, '', 'FAST');
+        // Calcola proporzioni naturali
+        const imgEl = new Image();
+        await new Promise(res => { imgEl.onload = res; imgEl.onerror = res; imgEl.src = logob64; });
+        const maxH = 14; // mm altezza fissa
+        const maxW = 50; // mm larghezza massima
+        const ratio = imgEl.naturalWidth / imgEl.naturalHeight || 1;
+        const h = maxH;
+        const w = Math.min(ratio * h, maxW);
+        doc.addImage(logob64, 'PNG', pw - margin - w, y - 2, w, h, '', 'FAST');
       } else {
         doc.setFontSize(9); doc.setFont('helvetica', 'normal');
         doc.text(centroNome || '', pw - margin - 3, y + 7, { align: 'right' });
