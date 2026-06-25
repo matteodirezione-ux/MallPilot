@@ -108,7 +108,7 @@ export default function Marketing({ centroSelezionato, user }) {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-          <ExportMarketing rows={rows} anno={anno} centroNome={centroSelezionato?.nome} budgetSaved={budgetSaved} />
+          <ExportMarketing rows={rows} anno={anno} centroNome={centroSelezionato?.nome} centroLogo={centroSelezionato?.logo_url} budgetSaved={budgetSaved} />
         </div>
       </div>
 
