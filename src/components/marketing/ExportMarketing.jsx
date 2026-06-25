@@ -162,7 +162,8 @@ async function buildWorkbook(rows, anno, centroNome, logoUrl, budgetSaved) {
 
   // ── Titolo ────────────────────────────────────────────────────────────────
   wc(R, 0, { v: `Piano Marketing ${anno}`, t: 's', s: titleStyle });
-  wc(R, NCols - 1, { v: centroNome || '', t: 's', s: { font: { bold: true, sz: 12, color: { rgb: '64748B' } }, alignment: { horizontal: 'right' } } });
+  // Nell'Excel il logo non è embeddabile nativamente: mostriamo solo il nome
+  wc(R, NCols - 1, { v: centroNome || '', t: 's', s: { font: { sz: 10, color: { rgb: '94A3B8' } }, alignment: { horizontal: 'right' } } });
   merges.push({ s:{r:R,c:0}, e:{r:R,c:9} }); rowHeights.push({ hpt: 30 }); R++;
 
   wc(R, 0, { v: `Esportato il ${new Date().toLocaleDateString('it-IT')}`, t: 's', s: subStyle });
@@ -291,17 +292,17 @@ export default function ExportMarketing({ rows, anno, centroNome, centroLogo, bu
       const margin = 12;
       let y = margin;
 
-      // Logo
+      // Carica logo
+      let logob64 = null;
       if (centroLogo) {
         try {
           const resp = await fetch(centroLogo);
           const blob = await resp.blob();
-          const b64 = await new Promise(res => {
+          logob64 = await new Promise(res => {
             const reader = new FileReader();
             reader.onload = () => res(reader.result);
             reader.readAsDataURL(blob);
           });
-          doc.addImage(b64, 'PNG', pw - margin - 30, y - 3, 30, 12, '', 'FAST');
         } catch {}
       }
 
@@ -312,9 +313,15 @@ export default function ExportMarketing({ rows, anno, centroNome, centroLogo, bu
       doc.setFontSize(13);
       doc.setTextColor(255, 255, 255);
       doc.text(`Piano Marketing ${anno}`, margin + 3, y + 6);
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.text(centroNome || '', pw - margin - 3, y + 6, { align: 'right' });
+
+      // Logo al posto del nome testuale
+      if (logob64) {
+        doc.addImage(logob64, 'PNG', pw - margin - 32, y - 2, 32, 11, '', 'FAST');
+      } else {
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.text(centroNome || '', pw - margin - 3, y + 6, { align: 'right' });
+      }
       y += 18;
 
       // KPI bar
