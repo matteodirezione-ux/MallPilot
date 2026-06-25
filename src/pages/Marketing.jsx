@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
+import ExportMarketing from '@/components/marketing/ExportMarketing';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -97,14 +98,17 @@ export default function Marketing({ centroSelezionato, user }) {
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Megaphone className="w-6 h-6" /> Piano Marketing</h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome} · Budget operativo {anno}</p>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={() => setAnno(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <span className="font-semibold px-3 text-slate-700">{anno}</span>
-          <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
-            <ChevronRight className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <button onClick={() => setAnno(a => a - 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <span className="font-semibold px-3 text-slate-700">{anno}</span>
+            <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700 transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+          <ExportMarketing rows={rows} anno={anno} centroNome={centroSelezionato?.nome} budgetSaved={budgetSaved} />
         </div>
       </div>
 
