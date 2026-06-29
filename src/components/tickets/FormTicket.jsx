@@ -49,12 +49,10 @@ const defaultForm = {
 
 const getMeseAbbr = (date) => format(date, 'MMM', { locale: it }).toUpperCase().replace('.', '');
 
-const getNextNumeroTicket = (allTickets) => {
-  const now = new Date();
-  const meseAbbr = getMeseAbbr(now);
-  const anno = now.getFullYear();
-  const mese = now.getMonth(); // 0-based
-  // Trova tutti i ticket del mese corrente con formato N-MMM
+const getNextNumeroTicket = (allTickets, scadenzaDate) => {
+  const ref = scadenzaDate ? new Date(scadenzaDate) : new Date();
+  const meseAbbr = getMeseAbbr(ref);
+  // Trova tutti i ticket del mese della scadenza con formato N-MMM
   const regex = new RegExp(`^(\\d+)-${meseAbbr}$`, 'i');
   const numeriMese = (allTickets || [])
     .map(t => {
@@ -82,14 +80,16 @@ export default function FormTicket({ open, onClose, onSave, ticket, user, allTic
     if (ticket) {
       setForm({ ...defaultForm, ...ticket, costo_stimato: ticket.costo_stimato ?? '' });
     } else {
-      setForm({ ...defaultForm, data_apertura: today(), scadenza: defaultScadenza('ordinario'), operatore: '', numero_ticket: getNextNumeroTicket(allTickets) });
+      const scadenza = defaultScadenza('ordinario');
+      setForm({ ...defaultForm, data_apertura: today(), scadenza, operatore: '', numero_ticket: getNextNumeroTicket(allTickets, scadenza) });
     }
   }, [ticket, open]);
 
   const set = (key, value) => setForm(f => ({ ...f, [key]: value }));
 
   const handleTipologiaChange = (value) => {
-    setForm(f => ({ ...f, tipologia: value, scadenza: defaultScadenza(value) }));
+    const scadenza = defaultScadenza(value);
+    setForm(f => ({ ...f, tipologia: value, scadenza, numero_ticket: getNextNumeroTicket(allTickets, scadenza) }));
   };
 
   const uploadFotos = async (e, field) => {
