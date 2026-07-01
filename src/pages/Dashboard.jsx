@@ -371,8 +371,8 @@ export default function Dashboard({ centroSelezionato, user }) {
         capexList: capexList || [],
         puliziePeriodiche: puliziePeriodiche || [],
         reportList: allReport?.slice(0, 5) || [],
-        reportDaLeggere: user ? allReport.filter(r => !(r.letto_da || []).includes(user.email)).length : 0,
-        pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => !(p.letto_da || []).includes(user.email)).length : 0,
+        reportDaLeggere: user ? allReport.filter(r => (r.letto_da || []).length === 0).length : 0,
+        pulizieDaLeggere: user ? allPulizieSegnalazioni.filter(p => (p.letto_da || []).length === 0).length : 0,
         fornitoriAlertCount,
         capexAlertCount
       });

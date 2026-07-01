@@ -73,7 +73,7 @@ export default function PuliziePage({ centroSelezionato, user }) {
   };
 
   const isDirettore = user?.tipo_account === 'direttore';
-  const isLetta = (p) => !isDirettore || (p.letto_da || []).includes(user.email);
+  const isLetta = (p) => !isDirettore || (p.letto_da || []).length > 0;
 
   const handleClickSegnalazione = async (p) => {
     setDettaglio(p);

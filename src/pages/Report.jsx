@@ -97,7 +97,7 @@ export default function Report({ centroSelezionato, user }) {
 
   const isLetto = (r) => {
     if (!isDirettore) return true;
-    return (r.letto_da || []).includes(user.email);
+    return (r.letto_da || []).length > 0;
   };
 
   const toggleEspanso = async (id) => {
