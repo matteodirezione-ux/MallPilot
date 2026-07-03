@@ -5,15 +5,16 @@ import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit, Za
 import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
 import FormRilevazione from '@/components/contatori/FormRilevazione';
+import GraficoContatori from '@/components/contatori/GraficoContatori';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 const TIPI = [
-  { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white' },
-  { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white' },
-  { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white' },
-  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun, activeColor: 'bg-yellow-500 text-white' },
+  { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white', chartColor: '#3b82f6' },
+  { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white', chartColor: '#9333ea' },
+  { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white', chartColor: '#ea580c' },
+  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun, activeColor: 'bg-yellow-500 text-white', chartColor: '#eab308' },
 ];
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
@@ -163,6 +164,15 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!loading && principali.length > 0 && (
+        <GraficoContatori
+          totaleMese={totaleMese}
+          totaleAnnuo={totaleAnnuo}
+          label={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'}
+          accentColor={TIPI.find(t => t.key === tab)?.chartColor}
+        />
       )}
 
       <FormContatore
