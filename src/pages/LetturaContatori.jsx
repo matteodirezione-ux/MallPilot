@@ -28,7 +28,7 @@ const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
 const fmtVal = (v, m) => v == null ? '—' : m === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 
 export default function LetturaContatori({ centroSelezionato, user }) {
-  const [tab, setTab] = useState('acqua');
+  const [tab, setTab] = useState(user?.tipo_account === 'vigilanza' ? 'acqua_giornaliera' : 'acqua');
   const [anno, setAnno] = useState(new Date().getFullYear());
   const [mode, setMode] = useState('consumi');
   const [contatori, setContatori] = useState([]);
