@@ -199,15 +199,26 @@ export default function Marketing({ centroSelezionato, user }) {
         return (
           <div className="bg-white rounded-xl border border-slate-200 p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-3">Distribuzione Budget per Sezione</h3>
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
-                  {data.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Pie>
-                <Tooltip formatter={(v) => fmtC(v)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <ResponsiveContainer width="100%" smWidth="60%" height={240}>
+                <PieChart>
+                  <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
+                    {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  </Pie>
+                  <Tooltip formatter={(v) => fmtC(v)} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[200px]">
+                {data.map((d, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: d.color }} />
+                    <span className="text-slate-600 flex-1">{d.name}</span>
+                    <span className="font-medium text-slate-800">{fmtC(d.value)}</span>
+                    <span className="text-slate-400 w-10 text-right">{((d.value / totale) * 100).toFixed(0)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         );
       })()}
