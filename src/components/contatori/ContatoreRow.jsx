@@ -63,9 +63,9 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
         {MESI.map((m, i) => (
-          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? valColor(mode) + ' font-semibold' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
+          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
         ))}
-        <td className={`px-2 py-2 text-center text-xs font-bold ${totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, true, mode), mode)}</td>
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? totColor(mode) + ' font-normal' : 'font-bold ' + totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, true, mode), mode)}</td>
         {azioni}
       </tr>
     );
@@ -75,18 +75,18 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
     <>
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
-        <td className="px-2 py-2 text-center text-xs font-bold text-slate-700">{fmt(c.lettura_iniziale)}</td>
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-600' : 'font-bold text-slate-700'}`}>{fmt(c.lettura_iniziale)}</td>
         {MESI.map(m => (
-          <td key={m} className="px-2 py-2 text-center text-xs font-bold text-slate-800">{fmt(c[m])}</td>
+          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-600' : 'font-bold text-slate-800'}`}>{fmt(c[m])}</td>
         ))}
-        <td className="px-2 py-2 text-center text-xs font-bold text-slate-900 border-l border-slate-200">{fmt(getTotale(c, false, 'consumi'))}</td>
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-700' : 'font-bold text-slate-900'} border-l border-slate-200`}>{fmt(getTotale(c, false, 'consumi'))}</td>
         {azioni}
       </tr>
       <tr className={isSub ? 'bg-amber-50 border-l-[6px] border-l-amber-500' : 'bg-blue-50/50 border-l-[6px] border-l-transparent'}>
         <td className={`px-2 py-1 text-xs italic ${isSub ? 'pl-6 text-amber-600 font-semibold' : mode === 'costi' ? 'text-emerald-500' : 'text-slate-400'}`}>↳ {mode === 'costi' ? 'Costo' : labelConsumo}</td>
         <td className="px-2 py-1"></td>
         {MESI.map((_, i) => (
-          <td key={i} className={`px-2 py-1 text-center text-xs font-medium ${isSub ? valColor(mode) + ' font-semibold' : valColor(mode)}`}>{fmtVal(getValore(c, i, false, mode), mode)}</td>
+          <td key={i} className={`px-2 py-1 text-center text-xs ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, false, mode), mode)}</td>
         ))}
         <td className={`px-2 py-1 text-center text-xs font-bold ${totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, false, mode), mode)}</td>
         <td className="px-2 py-1 border-l border-slate-200"></td>
