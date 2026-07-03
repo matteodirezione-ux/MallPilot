@@ -48,7 +48,7 @@ export default function FormRilevazioneGiornaliera({ open, onClose, onSave, cont
             <Select value={giorno} onValueChange={handleGiornoChange}>
               <SelectTrigger className="w-full"><SelectValue placeholder="Seleziona giorno..." /></SelectTrigger>
               <SelectContent>
-                {giorniArr.map(g => <SelectItem key={g} value={String(g)}>{g}</SelectItem>)}
+                {giorniArr.map(g => <SelectItem key={g} value={String(g)}>{g} {MESI_NOMI[mese - 1].toLowerCase()} {anno}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
