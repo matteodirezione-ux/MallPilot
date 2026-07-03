@@ -48,10 +48,29 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     if (centroSelezionato?.id && tab === 'acqua_giornaliera') loadDaily();
   }, [centroSelezionato?.id, anno, tab, dailyMese]);
 
+  const ensureDaily = async (centroId, anno, mese) => {
+    const every = await base44.entities.LetturaContatoreGiornaliero.filter({ centro_id: centroId });
+    const byNome = {};
+    every.forEach(c => {
+      const cur = byNome[c.nome];
+      if (!cur || (c.anno * 12 + c.mese) > (cur.anno * 12 + cur.mese)) byNome[c.nome] = c;
+    });
+    const currentNomi = new Set(every.filter(c => c.anno === anno && c.mese === mese).map(c => c.nome));
+    const missing = Object.values(byNome).filter(t => !currentNomi.has(t.nome));
+    if (missing.length === 0) return;
+    for (const t of missing) {
+      await base44.entities.LetturaContatoreGiornaliero.create({
+        centro_id: centroId, tipo: 'acqua', nome: t.nome, anno, mese,
+        costo_unitario: t.costo_unitario ?? null,
+      });
+    }
+  };
+
   const loadDaily = async () => {
     if (!centroSelezionato?.id) return;
     setDailyLoading(true);
     const isAll = centroSelezionato.id === 'tutti';
+    if (!isAll) await ensureDaily(centroSelezionato.id, anno, dailyMese);
     const data = isAll
       ? await base44.entities.LetturaContatoreGiornaliero.filter({ anno, mese: dailyMese })
       : await base44.entities.LetturaContatoreGiornaliero.filter({ centro_id: centroSelezionato.id, anno, mese: dailyMese });
@@ -59,9 +78,43 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     setDailyLoading(false);
   };
 
+  const ensureAnno = async (centroId, anno) => {
+    const every = await base44.entities.LetturaContatore.filter({ centro_id: centroId });
+    const parentOf = (c) => every.find(x => x.id === c.contatore_padre_id);
+    const key = (c) => c.tipo + '|' + c.nome + '|' + (parentOf(c)?.nome || '');
+    const byKey = {};
+    every.forEach(c => { const k = key(c); if (!byKey[k] || c.anno > byKey[k].anno) byKey[k] = c; });
+    const currentKeys = new Set(every.filter(c => c.anno === anno).map(key));
+    const missing = Object.values(byKey).filter(t => !currentKeys.has(key(t)));
+    if (missing.length === 0) return;
+    for (const t of missing.filter(m => !m.contatore_padre_id)) {
+      const direct = t.tipo === 'energia';
+      await base44.entities.LetturaContatore.create({
+        centro_id: centroId, tipo: t.tipo, nome: t.nome, anno,
+        contatore_padre_id: null,
+        costo_unitario: t.costo_unitario ?? null,
+        lettura_iniziale: direct ? null : (t.dic ?? t.lettura_iniziale ?? null),
+      });
+    }
+    const refreshed = await base44.entities.LetturaContatore.filter({ centro_id: centroId, anno });
+    for (const t of missing.filter(m => m.contatore_padre_id)) {
+      const pOld = parentOf(t);
+      const newParent = refreshed.find(x => x.nome === pOld.nome && x.tipo === pOld.tipo && !x.contatore_padre_id);
+      if (!newParent) continue;
+      const direct = t.tipo === 'energia';
+      await base44.entities.LetturaContatore.create({
+        centro_id: centroId, tipo: t.tipo, nome: t.nome, anno,
+        contatore_padre_id: newParent.id,
+        costo_unitario: t.costo_unitario ?? null,
+        lettura_iniziale: direct ? null : (t.dic ?? t.lettura_iniziale ?? null),
+      });
+    }
+  };
+
   const loadContatori = async () => {
     setLoading(true);
     const isAll = centroSelezionato.id === 'tutti';
+    if (!isAll) await ensureAnno(centroSelezionato.id, anno);
     const data = isAll
       ? await base44.entities.LetturaContatore.filter({ anno })
       : await base44.entities.LetturaContatore.filter({ centro_id: centroSelezionato.id, anno });
