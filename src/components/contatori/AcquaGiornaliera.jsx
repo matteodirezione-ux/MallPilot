@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Droplet } from 'lucide-react';
+import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Droplet, ClipboardEdit } from 'lucide-react';
 import FormContatoreGiornaliero from '@/components/contatori/FormContatoreGiornaliero';
+import FormRilevazioneGiornaliera from '@/components/contatori/FormRilevazioneGiornaliera';
 
 const MESI_NOMI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const MESI_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
@@ -46,6 +47,7 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showRilevazione, setShowRilevazione] = useState(false);
   const [editing, setEditing] = useState(null);
 
   useEffect(() => {
@@ -81,6 +83,14 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
     load();
   };
 
+  const handleSaveRilevazione = async ({ id, giorno, valore }) => {
+    const c = contatori.find(x => x.id === id);
+    if (!c) return;
+    await base44.entities.LetturaContatoreGiornaliero.update(id, { [`d${giorno}`]: valore });
+    setShowRilevazione(false);
+    load();
+  };
+
   const shiftMese = (delta) => {
     setMese(m => {
       let nm = m + delta;
@@ -102,9 +112,16 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-          <Plus className="w-4 h-4" /> Nuovo Contatore
-        </Button>
+        <div className="flex items-center gap-2">
+          {contatori.length > 0 && (
+            <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+              <ClipboardEdit className="w-4 h-4" /> Rilevazione
+            </Button>
+          )}
+          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+            <Plus className="w-4 h-4" /> Nuovo Contatore
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -162,6 +179,16 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
         contatore={editing}
         anno={anno}
         mese={mese}
+      />
+
+      <FormRilevazioneGiornaliera
+        open={showRilevazione}
+        onClose={() => setShowRilevazione(false)}
+        onSave={handleSaveRilevazione}
+        contatori={contatori}
+        mese={mese}
+        anno={anno}
+        giorni={N}
       />
     </div>
   );
