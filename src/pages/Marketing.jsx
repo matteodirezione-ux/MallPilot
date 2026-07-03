@@ -27,7 +27,7 @@ export default function Marketing({ centroSelezionato, user }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [budgetInput, setBudgetInput] = useState('');
   const [budgetSaved, setBudgetSaved] = useState(0);
-  const [collapsed, setCollapsed] = useState({ iniziativa: false, comunicazione_online: false, comunicazione_offline: false, costo_fisso: false });
+  const [collapsed, setCollapsed] = useState({ iniziativa: true, comunicazione_online: true, comunicazione_offline: true, costo_fisso: true });
 
   const centroId = centroSelezionato?.id;
 
