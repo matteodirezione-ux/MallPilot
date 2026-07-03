@@ -254,7 +254,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
                 return (
                   <SelectItem key={t.key} value={t.key} className="gap-2">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md ${t.activeColor}`}><Icon className="w-3.5 h-3.5" /></span>
-                    {t.label}
+                    <span className="ml-1.5">{t.label}</span>
                   </SelectItem>
                 );
               })}
