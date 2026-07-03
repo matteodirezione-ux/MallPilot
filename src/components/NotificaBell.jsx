@@ -29,16 +29,20 @@ export default function NotificaBell({ user }) {
     return () => unsubscribe();
   }, [user?.email]);
 
-  const loadNotifiche = async () => {
-    const data = await base44.entities.Notifica.filter(
-      { destinatario_email: user.email },
-      '-created_date',
-      50
-    );
-    const filtered = user?.tipo_account === 'manutentore'
-      ? data.filter(n => n.tipo === 'ticket')
-      : data;
-    setNotifiche(filtered);
+  const loadNotifiche = async (isRetry = false) => {
+    try {
+      const data = await base44.entities.Notifica.filter(
+        { destinatario_email: user.email },
+        '-created_date',
+        50
+      );
+      const filtered = user?.tipo_account === 'manutentore'
+        ? data.filter(n => n.tipo === 'ticket')
+        : data;
+      setNotifiche(filtered);
+    } catch (err) {
+      if (!isRetry) setTimeout(() => loadNotifiche(true), 3000);
+    }
   };
 
   const unreadCount = notifiche.filter(n => !n.letta).length;
@@ -46,7 +50,12 @@ export default function NotificaBell({ user }) {
   const markAllRead = async () => {
     const unread = notifiche.filter(n => !n.letta);
     if (!unread.length) return;
-    await Promise.all(unread.map(n => base44.entities.Notifica.update(n.id, { letta: true })));
+    try {
+      await base44.entities.Notifica.updateMany(
+        { destinatario_email: user.email, letta: false },
+        { $set: { letta: true } }
+      );
+    } catch (err) { /* ignore - UI already updated */ }
     setNotifiche(prev => prev.map(n => ({ ...n, letta: true })));
   };
 
