@@ -98,10 +98,14 @@ export default function LetturaContatori({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1">
-            <button onClick={() => setAnno(a => a - 1)} className="text-slate-400 hover:text-slate-700"><ChevronLeft className="w-5 h-5" /></button>
-            <span className="font-semibold px-2 text-sm text-slate-700">{anno}</span>
-            <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700"><ChevronRight className="w-5 h-5" /></button>
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a - 1)}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{anno}</span>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a + 1)}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
           <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
             <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
