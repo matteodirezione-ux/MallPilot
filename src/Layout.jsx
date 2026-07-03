@@ -336,7 +336,7 @@ export default function Layout({ children, currentPageName }) {
               {centroSelezionato ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
                   {centroSelezionato.id === 'tutti' ? (
-                    <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
+                    <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/3262ab8d9_image.png" alt="Mall Pilot" className="h-10 w-full object-contain flex-shrink-0" style={{maxWidth: '160px'}} />
                   ) : centroSelezionato.logo_url ? (
                     <SafeImage
                       src={centroSelezionato.logo_url}
