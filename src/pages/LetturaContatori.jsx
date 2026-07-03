@@ -20,10 +20,12 @@ const TIPI = [
 ];
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
+const fmtVal = (v, m) => v == null ? '—' : m === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 
 export default function LetturaContatori({ centroSelezionato, user }) {
   const [tab, setTab] = useState('acqua');
   const [anno, setAnno] = useState(new Date().getFullYear());
+  const [mode, setMode] = useState('consumi');
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -86,14 +88,16 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const totaleMese = MESI.map((_, i) => {
     let tot = 0, has = false;
     principali.forEach(c => {
+      let cons = null;
       if (directConsumo) {
         const val = c[MESI[i]];
-        if (val != null) { tot += val; has = true; }
+        if (val != null) cons = val;
       } else {
         const val = c[MESI[i]];
         const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
-        if (val != null && prev != null) { tot += val - prev; has = true; }
+        if (val != null && prev != null) cons = val - prev;
       }
+      if (cons != null) { tot += mode === 'costi' ? cons * (c.costo_unitario || 0) : cons; has = true; }
     });
     return has ? tot : null;
   });
@@ -109,6 +113,10 @@ export default function LetturaContatori({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+            <button onClick={() => setMode('consumi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
+            <button onClick={() => setMode('costi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
+          </div>
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a - 1)}>
               <ChevronLeft className="w-4 h-4" />
@@ -145,7 +153,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
       </div>
 
       {tab === 'acqua_giornaliera' ? (
-        <AcquaGiornaliera centroSelezionato={centroSelezionato} anno={anno} />
+        <AcquaGiornaliera centroSelezionato={centroSelezionato} anno={anno} mode={mode} />
       ) : loading ? (
         <div className="text-center py-8 text-slate-400">Caricamento...</div>
       ) : principali.length === 0 ? (
@@ -165,15 +173,15 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
-                <td className="px-2 py-2 text-xs font-bold">TOTALE {tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
+                <td className="px-2 py-2 text-xs font-bold">TOTALE {mode === 'costi' ? 'COSTO' : tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
                 {!directConsumo && <td className="px-2 py-2"></td>}
-                {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmt(v)}</td>)}
-                <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmt(totaleAnnuo)}</td>
+                {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(v, mode)}</td>)}
+                <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmtVal(totaleAnnuo, mode)}</td>
                 <td className="px-2 py-2 border-l border-slate-600"></td>
               </tr>
             </tbody>

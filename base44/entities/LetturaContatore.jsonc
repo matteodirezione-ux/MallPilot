@@ -28,6 +28,10 @@
       "type": "number",
       "description": "Anno di riferimento"
     },
+    "costo_unitario": {
+      "type": "number",
+      "description": "Costo unitario per unita di consumo (es. \u20ac/m\u00b3, \u20ac/kWh)"
+    },
     "lettura_iniziale": {
       "type": "number",
       "description": "Lettura iniziale (fine anno precedente)"

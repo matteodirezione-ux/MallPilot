@@ -41,13 +41,12 @@ const fmtVal = (v, mode) => {
   return mode === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 };
 
-export default function AcquaGiornaliera({ centroSelezionato, anno }) {
+export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'consumi' }) {
   const [mese, setMese] = useState(new Date().getMonth() + 1);
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [mode, setMode] = useState('consumi');
 
   useEffect(() => {
     if (centroSelezionato?.id) load();
@@ -103,15 +102,9 @@ export default function AcquaGiornaliera({ centroSelezionato, anno }) {
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-            <button onClick={() => setMode('consumi')} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
-            <button onClick={() => setMode('costi')} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
-          </div>
-          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Contatore
-          </Button>
-        </div>
+        <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Plus className="w-4 h-4" /> Nuovo Contatore
+        </Button>
       </div>
 
       {loading ? (

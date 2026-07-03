@@ -10,7 +10,7 @@ const MESI = [
   { key: 'ott', label: 'Ottobre' }, { key: 'nov', label: 'Novembre' }, { key: 'dic', label: 'Dicembre' },
 ];
 
-const empty = { nome: '', lettura_iniziale: '', gen: '', feb: '', mar: '', apr: '', mag: '', giu: '', lug: '', ago: '', set: '', ott: '', nov: '', dic: '' };
+const empty = { nome: '', lettura_iniziale: '', costo_unitario: '', gen: '', feb: '', mar: '', apr: '', mag: '', giu: '', lug: '', ago: '', set: '', ott: '', nov: '', dic: '' };
 
 export default function FormContatore({ open, onClose, onSave, contatore, tipo, anno, isSub, padreNome }) {
   const [form, setForm] = useState(empty);
@@ -19,6 +19,7 @@ export default function FormContatore({ open, onClose, onSave, contatore, tipo, 
     if (contatore) {
       setForm({
         nome: contatore.nome || '', lettura_iniziale: contatore.lettura_iniziale ?? '',
+        costo_unitario: contatore.costo_unitario ?? '',
         gen: contatore.gen ?? '', feb: contatore.feb ?? '', mar: contatore.mar ?? '',
         apr: contatore.apr ?? '', mag: contatore.mag ?? '', giu: contatore.giu ?? '',
         lug: contatore.lug ?? '', ago: contatore.ago ?? '', set: contatore.set ?? '',
@@ -37,6 +38,7 @@ export default function FormContatore({ open, onClose, onSave, contatore, tipo, 
       nome: form.nome.trim(),
       tipo, anno,
       lettura_iniziale: form.lettura_iniziale === '' ? null : Number(form.lettura_iniziale),
+      costo_unitario: form.costo_unitario === '' ? null : Number(form.costo_unitario),
     };
     MESI.forEach(m => { data[m.key] = form[m.key] === '' ? null : Number(form[m.key]); });
     onSave(data);
@@ -55,7 +57,7 @@ export default function FormContatore({ open, onClose, onSave, contatore, tipo, 
             <label className="text-sm font-medium text-slate-700 mb-1 block">Nome contatore</label>
             <Input value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="es. Contatore generale, Negozio 12..." />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Tipo</label>
               <Input value={tipo} disabled className="bg-slate-50 capitalize" />
@@ -63,6 +65,10 @@ export default function FormContatore({ open, onClose, onSave, contatore, tipo, 
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Anno</label>
               <Input value={anno} disabled className="bg-slate-50" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">Costo unitario (€)</label>
+              <Input type="number" step="0.01" value={form.costo_unitario} onChange={e => set('costo_unitario', e.target.value)} placeholder="es. 2.50" />
             </div>
           </div>
           {tipo !== 'energia' && (
