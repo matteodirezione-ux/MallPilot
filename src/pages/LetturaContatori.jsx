@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit } from 'lucide-react';
 import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
+import FormRilevazione from '@/components/contatori/FormRilevazione';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
@@ -22,6 +23,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showRilevazione, setShowRilevazione] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formPadre, setFormPadre] = useState(null);
 
@@ -68,6 +70,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const onEdit = (c) => { setFormPadre(null); setEditing(c); setShowForm(true); };
   const onAddSub = (c) => { setFormPadre(c); setEditing(null); setShowForm(true); };
 
+  const handleSaveRilevazione = async ({ id, mese, valore }) => {
+    await base44.entities.LetturaContatore.update(id, { [mese]: valore });
+    setShowRilevazione(false);
+    loadContatori();
+  };
+
   // Totale consumo mensile (solo contatori principali)
   const totaleMese = MESI.map((_, i) => {
     let tot = 0, has = false;
@@ -95,9 +103,14 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <span className="font-semibold px-2 text-sm text-slate-700">{anno}</span>
             <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700"><ChevronRight className="w-5 h-5" /></button>
           </div>
-          <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Contatore
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setShowRilevazione(true)} className="gap-2">
+              <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
+            </Button>
+            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+              <Plus className="w-4 h-4" /> Nuovo Contatore
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -156,6 +169,13 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         anno={anno}
         isSub={!!formPadre}
         padreNome={formPadre?.nome}
+      />
+
+      <FormRilevazione
+        open={showRilevazione}
+        onClose={() => setShowRilevazione(false)}
+        onSave={handleSaveRilevazione}
+        contatori={contatoriTipo}
       />
     </div>
   );
