@@ -21,11 +21,12 @@ const consumoGiorno = (c, d) => {
   return v - prev;
 };
 
-const totaleContatore = (c, N, mode) => {
-  let tot = 0, has = false;
-  for (let i = 1; i <= N; i++) { const v = c[`d${i}`]; if (v != null) { tot += v; has = true; } }
-  if (!has) return null;
-  return mode === 'costi' ? tot * (c.costo_unitario || 0) : tot;
+const totaleConsumo = (c, N, mode) => {
+  const vals = [];
+  for (let i = 1; i <= N; i++) { const v = c[`d${i}`]; if (v != null) vals.push(v); }
+  if (vals.length < 2) return null;
+  const cons = vals[vals.length - 1] - vals[0];
+  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
 };
 
 const fmtVal = (v, mode) => {
@@ -90,18 +91,21 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
               <tr className="bg-slate-100 border-b border-slate-200">
                 <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 min-w-[60px] sticky left-0 bg-slate-100">Giorno</th>
                 {contatori.map(c => (
-                  <th key={c.id} className="px-2 py-2 text-center text-xs font-semibold text-slate-700 min-w-[90px]">
-                    <div className="flex items-center justify-center gap-1">
-                      <Droplet className="w-3 h-3 text-blue-400" />
-                      <button onClick={() => { setEditing(c); setShowForm(true); }} className="hover:text-blue-600 flex items-center gap-1">
-                        <span className="truncate max-w-[100px]">{c.nome}</span>
-                        <Pencil className="w-3 h-3 text-slate-400" />
-                      </button>
-                      <button onClick={() => handleDelete(c)} className="p-0.5 rounded hover:bg-red-50">
-                        <Trash2 className="w-3 h-3 text-red-400" />
-                      </button>
-                    </div>
-                  </th>
+                  <React.Fragment key={c.id}>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-slate-700 min-w-[90px]">
+                      <div className="flex items-center justify-center gap-1">
+                        <Droplet className="w-3 h-3 text-blue-400" />
+                        <button onClick={() => { setEditing(c); setShowForm(true); }} className="hover:text-blue-600 flex items-center gap-1">
+                          <span className="truncate max-w-[100px]">{c.nome}</span>
+                          <Pencil className="w-3 h-3 text-slate-400" />
+                        </button>
+                        <button onClick={() => handleDelete(c)} className="p-0.5 rounded hover:bg-red-50">
+                          <Trash2 className="w-3 h-3 text-red-400" />
+                        </button>
+                      </div>
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-slate-500 border-l border-slate-200 min-w-[70px]">Consumi</th>
+                  </React.Fragment>
                 ))}
                 <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
                   <Button onClick={() => { setEditing(null); setShowForm(true); }} size="sm" className="bg-blue-600 hover:bg-blue-700 h-7 px-2 gap-1">
@@ -117,18 +121,14 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                   {contatori.map(c => {
                     const reading = c[`d${d}`];
                     const cons = consumoGiorno(c, d);
-                    const consLabel = cons == null ? null : mode === 'costi'
+                    const consLabel = cons == null ? '' : mode === 'costi'
                       ? '€ ' + (cons * (c.costo_unitario || 0)).toLocaleString('it-IT', { maximumFractionDigits: 2 })
                       : (cons >= 0 ? '+' : '') + cons.toLocaleString('it-IT');
                     return (
-                      <td key={c.id} className="px-2 py-1.5 text-center text-xs">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <span className="font-medium text-slate-700">{fmt(reading)}</span>
-                          {consLabel != null && (
-                            <span className={`text-[10px] ${mode === 'costi' ? 'text-emerald-600' : 'text-slate-400'}`}>{consLabel}</span>
-                          )}
-                        </div>
-                      </td>
+                      <React.Fragment key={c.id}>
+                        <td className="px-2 py-1.5 text-center text-xs font-bold text-slate-800">{fmt(reading)}</td>
+                        <td className={`px-2 py-1.5 text-center text-xs border-l border-slate-100 ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-500'}`}>{consLabel}</td>
+                      </React.Fragment>
                     );
                   })}
                   <td className="px-2 py-1.5 border-l border-slate-200"></td>
@@ -139,7 +139,10 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
               <tr className="bg-blue-600 text-white border-t-2 border-slate-300">
                 <td className={`px-2 py-2 text-xs font-bold sticky left-0 ${mode === 'costi' ? 'bg-emerald-600' : 'bg-blue-600'}`}>{mode === 'costi' ? 'COSTO' : 'CONSUMO'}</td>
                 {contatori.map(c => (
-                  <td key={c.id} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(totaleContatore(c, N, mode), mode)}</td>
+                  <React.Fragment key={c.id}>
+                    <td className="px-2 py-2"></td>
+                    <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmtVal(totaleConsumo(c, N, mode), mode)}</td>
+                  </React.Fragment>
                 ))}
                 <td className="px-2 py-2 border-l border-slate-600"></td>
               </tr>
