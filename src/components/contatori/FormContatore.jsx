@@ -65,12 +65,14 @@ export default function FormContatore({ open, onClose, onSave, contatore, tipo, 
               <Input value={anno} disabled className="bg-slate-50" />
             </div>
           </div>
+          {tipo !== 'energia' && (
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">Lettura iniziale (31/12 anno prec.)</label>
+              <Input type="number" value={form.lettura_iniziale} onChange={e => set('lettura_iniziale', e.target.value)} placeholder="es. 3881" />
+            </div>
+          )}
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Lettura iniziale (31/12 anno prec.)</label>
-            <Input type="number" value={form.lettura_iniziale} onChange={e => set('lettura_iniziale', e.target.value)} placeholder="es. 3881" />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-2 block">Rilevazioni mensili (letture cumulative)</label>
+            <label className="text-sm font-medium text-slate-700 mb-2 block">{tipo === 'energia' ? 'Consumi mensili diretti' : 'Rilevazioni mensili (letture cumulative)'}</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {MESI.map(m => (
                 <div key={m.key}>

@@ -78,13 +78,20 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     loadContatori();
   };
 
+  // Per energia i valori sono consumi diretti, non letture cumulative
+  const directConsumo = tab === 'energia';
   // Totale consumo mensile (solo contatori principali)
   const totaleMese = MESI.map((_, i) => {
     let tot = 0, has = false;
     principali.forEach(c => {
-      const val = c[MESI[i]];
-      const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
-      if (val != null && prev != null) { tot += val - prev; has = true; }
+      if (directConsumo) {
+        const val = c[MESI[i]];
+        if (val != null) { tot += val; has = true; }
+      } else {
+        const val = c[MESI[i]];
+        const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
+        if (val != null && prev != null) { tot += val - prev; has = true; }
+      }
     });
     return has ? tot : null;
   });
@@ -141,7 +148,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <thead>
               <tr className="bg-slate-100 border-b border-slate-200">
                 <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 min-w-[160px]">Contatore</th>
-                <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>
+                {!directConsumo && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
                 {MESI_LABEL.map(l => <th key={l} className="px-2 py-2 text-center text-xs font-semibold text-slate-600 min-w-[60px]">{l}</th>)}
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[70px]">Totale</th>
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[90px]">Azioni</th>
@@ -150,13 +157,13 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
                 <td className="px-2 py-2 text-xs font-bold">TOTALE {tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
-                <td className="px-2 py-2"></td>
+                {!directConsumo && <td className="px-2 py-2"></td>}
                 {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmt(v)}</td>)}
                 <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmt(totaleAnnuo)}</td>
                 <td className="px-2 py-2 border-l border-slate-600"></td>
