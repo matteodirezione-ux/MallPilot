@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit, Zap } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
 import FormRilevazione from '@/components/contatori/FormRilevazione';
@@ -210,7 +211,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             </Button>
           </div>
           {tab !== 'acqua_giornaliera' && (
-            <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+            <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2 hidden md:inline-flex">
               <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
             </Button>
           )}
@@ -218,7 +219,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
       </div>
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+        {/* Desktop: tab bar orizzontale */}
+        <div className="hidden md:flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
           {TIPI.map(t => {
             const Icon = t.icon;
             return (
@@ -228,7 +230,35 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             );
           })}
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Mobile: Rilevazione + tendina sezioni + nuovo contatore */}
+        <div className="flex items-center gap-2 w-full md:hidden">
+          {tab === 'acqua_giornaliera' ? (
+            dailyContatori.length > 0 && (
+              <Button onClick={() => setShowRilevazioneGiornaliera(true)} size="sm" className="bg-orange-600 hover:bg-orange-700 gap-1.5 shrink-0">
+                <ClipboardEdit className="w-4 h-4" /> Rilevazione
+              </Button>
+            )
+          ) : (
+            <Button onClick={() => setShowRilevazione(true)} size="sm" className="bg-orange-600 hover:bg-orange-700 gap-1.5 shrink-0">
+              <ClipboardEdit className="w-4 h-4" /> Rilevazione
+            </Button>
+          )}
+          <Select value={tab} onValueChange={setTab}>
+            <SelectTrigger className="flex-1 min-w-0"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {TIPI.map(t => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          {tab !== 'acqua_giornaliera' && (
+            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0">
+              <Plus className="w-4 h-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Desktop: azione destra */}
+        <div className="hidden md:flex items-center gap-2">
           {tab === 'acqua_giornaliera' ? (
             dailyContatori.length > 0 && (
               <Button onClick={() => setShowRilevazioneGiornaliera(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
