@@ -103,26 +103,26 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <span className="font-semibold px-2 text-sm text-slate-700">{anno}</span>
             <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700"><ChevronRight className="w-5 h-5" /></button>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setShowRilevazione(true)} className="gap-2">
-              <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
-            </Button>
-            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-              <Plus className="w-4 h-4" /> Nuovo Contatore
-            </Button>
-          </div>
+          <Button variant="outline" onClick={() => setShowRilevazione(true)} className="gap-2">
+            <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
+          </Button>
         </div>
       </div>
 
-      <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
-        {TIPI.map(t => {
-          const Icon = t.icon;
-          return (
-            <button key={t.key} onClick={() => setTab(t.key)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === t.key ? `${t.activeColor} shadow-sm` : 'text-slate-500 hover:text-slate-700'}`}>
-              <Icon className="w-4 h-4" /> {t.label}
-            </button>
-          );
-        })}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-1 bg-slate-100 p-1 rounded-lg w-fit">
+          {TIPI.map(t => {
+            const Icon = t.icon;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)} className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${tab === t.key ? `${t.activeColor} shadow-sm` : 'text-slate-500 hover:text-slate-700'}`}>
+                <Icon className="w-4 h-4" /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Plus className="w-4 h-4" /> Nuovo Contatore
+        </Button>
       </div>
 
       {loading ? (
