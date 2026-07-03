@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
 import ExportMarketing from '@/components/marketing/ExportMarketing';
+import FormValoreMese from '@/components/contatori/FormValoreMese';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -82,6 +83,16 @@ export default function Marketing({ centroSelezionato, user }) {
   const totaleComunicazioneMese = (m) => sum(online, m) + sum(offline, m);
   const totaleBudgetMese = (m) => sum(iniziative, m) + totaleComunicazioneMese(m) + sum(fissi, m);
 
+  const [quick, setQuick] = useState(null);
+  const handleQuickSave = async (valore) => {
+    if (!quick) return;
+    const row = quick.row;
+    const somma = MESI.reduce((acc, m) => acc + (parseFloat(String(m === quick.field ? valore : row[m])) || 0), 0);
+    await base44.entities.Marketing.update(row.id, { [quick.field]: valore, budget_totale: somma > 0 ? somma : null });
+    setQuick(null);
+    loadData();
+  };
+
   const openEdit = (row) => { setEditRow(row); setFormOpen(true); };
   const openNew = (sezione) => { setEditRow({ sezione }); setFormOpen(true); };
   const toggleCollapse = (key) => setCollapsed(prev => ({ ...prev, [key]: !prev[key] }));
@@ -152,19 +163,19 @@ export default function Marketing({ centroSelezionato, user }) {
             </thead>
             <tbody>
               <SectionHeader label="INIZIATIVE" onAdd={!isVigilanza ? () => openNew('iniziativa') : null} colSpan={15} color="bg-blue-700" collapsed={collapsed.iniziativa} onToggle={() => toggleCollapse('iniziativa')} />
-              {!collapsed.iniziativa && iniziative.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.iniziativa && iniziative.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} onQuickEdit={(r, f, l) => setQuick({ row: r, field: f, label: l })} isVigilanza={isVigilanza} />)}
               <TotaleRow label="TOTALE INIZIATIVE" rows={iniziative} mesi={MESI} bold isVigilanza={isVigilanza} />
 
               <SectionHeader label="COMUNICAZIONE ONLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_online') : null} colSpan={15} color="bg-emerald-700" collapsed={collapsed.comunicazione_online} onToggle={() => toggleCollapse('comunicazione_online')} />
-              {!collapsed.comunicazione_online && online.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.comunicazione_online && online.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} onQuickEdit={(r, f, l) => setQuick({ row: r, field: f, label: l })} isVigilanza={isVigilanza} />)}
 
               <SectionHeader label="COMUNICAZIONE OFFLINE" onAdd={!isVigilanza ? () => openNew('comunicazione_offline') : null} colSpan={15} color="bg-amber-700" collapsed={collapsed.comunicazione_offline} onToggle={() => toggleCollapse('comunicazione_offline')} />
-              {!collapsed.comunicazione_offline && offline.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.comunicazione_offline && offline.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} onQuickEdit={(r, f, l) => setQuick({ row: r, field: f, label: l })} isVigilanza={isVigilanza} />)}
 
               <TotaleRow label="TOTALE COMUNICAZIONE" rows={[...online, ...offline]} mesi={MESI} isVigilanza={isVigilanza} />
 
               <SectionHeader label="COSTI FISSI" onAdd={!isVigilanza ? () => openNew('costo_fisso') : null} colSpan={15} color="bg-rose-700" collapsed={collapsed.costo_fisso} onToggle={() => toggleCollapse('costo_fisso')} />
-              {!collapsed.costo_fisso && fissi.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} isVigilanza={isVigilanza} />)}
+              {!collapsed.costo_fisso && fissi.map(row => <SimpleRow key={row.id} row={row} onEdit={() => openEdit(row)} onDelete={() => setDeleteConfirm(row.id)} onQuickEdit={(r, f, l) => setQuick({ row: r, field: f, label: l })} isVigilanza={isVigilanza} />)}
               <TotaleRow label="TOTALE COSTI FISSI" rows={fissi} mesi={MESI} isVigilanza={isVigilanza} />
 
               <TotaleRow label="TOTALE BUDGET" rows={rows} mesi={MESI} bold isVigilanza={isVigilanza} />
@@ -191,6 +202,15 @@ export default function Marketing({ centroSelezionato, user }) {
           </DialogContent>
         </Dialog>
       )}
+
+      <FormValoreMese
+        open={!!quick}
+        contatore={quick?.row}
+        field={quick?.field}
+        meseLabel={quick?.label}
+        onClose={() => setQuick(null)}
+        onSave={handleQuickSave}
+      />
     </div>
   );
 }
@@ -212,12 +232,12 @@ function SectionHeader({ label, onAdd, colSpan, color, collapsed, onToggle }) {
   );
 }
 
-function SimpleRow({ row, onEdit, onDelete, isVigilanza }) {
+function SimpleRow({ row, onEdit, onDelete, onQuickEdit, isVigilanza }) {
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50">
       <td className="px-3 py-1.5 text-slate-700">{row.nome}</td>
       <td className="px-2 py-1.5 text-right text-slate-600">{row.budget_totale ? row.budget_totale.toLocaleString('it-IT') : '–'}</td>
-      {MESI.map(m => <td key={m} className="px-2 py-1.5 text-right text-slate-500">{row[m] ? row[m].toLocaleString('it-IT') : ''}</td>)}
+      {MESI.map((m, i) => <td key={m} onClick={() => onQuickEdit(row, m, MESI_LABEL[i])} className="px-2 py-1.5 text-right text-slate-500 cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors">{row[m] ? row[m].toLocaleString('it-IT') : ''}</td>)}
       {!isVigilanza && (
         <td className="px-2 py-1.5">
           <div className="flex gap-1 justify-end">
