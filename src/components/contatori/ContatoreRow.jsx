@@ -49,7 +49,7 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
   );
 
   const nomeCell = (
-    <td className={`px-2 py-2 text-xs font-medium ${isSub ? 'pl-6 text-amber-800 italic font-semibold' : 'text-slate-800'}`}>
+    <td className={`px-2 py-2 text-xs ${isSub ? 'pl-6 text-amber-800 italic font-semibold' : 'font-bold text-slate-900'}`}>
       <div className="flex items-center gap-1.5">
         {isSub && <GitBranch className="w-3.5 h-3.5 text-amber-600" />}
         {isSub && <span className="px-1.5 py-0.5 rounded bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wide shadow-sm">Sub</span>}
