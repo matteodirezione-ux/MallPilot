@@ -245,8 +245,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             </Button>
           )}
           <Select value={tab} onValueChange={setTab}>
-            <SelectTrigger className={`flex-1 min-w-0 gap-2 border-0 ${TIPI.find(t => t.key === tab)?.activeColor}`}>
-              {(() => { const Cur = TIPI.find(t => t.key === tab); const Icon = Cur?.icon; return Icon ? <Icon className="w-4 h-4" /> : null; })()}
+            <SelectTrigger className={`flex-1 min-w-0 border-0 ${TIPI.find(t => t.key === tab)?.activeColor}`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
