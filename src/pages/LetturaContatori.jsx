@@ -103,7 +103,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <span className="font-semibold px-2 text-sm text-slate-700">{anno}</span>
             <button onClick={() => setAnno(a => a + 1)} className="text-slate-400 hover:text-slate-700"><ChevronRight className="w-5 h-5" /></button>
           </div>
-          <Button variant="outline" onClick={() => setShowRilevazione(true)} className="gap-2">
+          <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
             <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
           </Button>
         </div>
