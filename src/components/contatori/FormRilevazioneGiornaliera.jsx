@@ -13,8 +13,10 @@ export default function FormRilevazioneGiornaliera({ open, onClose, onSave, cont
 
   useEffect(() => {
     if (open) {
+      const now = new Date();
+      const todayGiorno = (now.getMonth() + 1 === mese && now.getFullYear() === anno) ? now.getDate() : '';
+      setGiorno(todayGiorno ? String(todayGiorno) : '');
       setContatoreId('');
-      setGiorno('');
       setValore('');
     }
   }, [open]);
@@ -42,20 +44,20 @@ export default function FormRilevazioneGiornaliera({ open, onClose, onSave, cont
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Contatore</label>
-            <Select value={contatoreId} onValueChange={handleContatoreChange}>
-              <SelectTrigger className="w-full"><SelectValue placeholder="Seleziona contatore..." /></SelectTrigger>
-              <SelectContent>
-                {contatori.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">Giorno</label>
             <Select value={giorno} onValueChange={handleGiornoChange}>
               <SelectTrigger className="w-full"><SelectValue placeholder="Seleziona giorno..." /></SelectTrigger>
               <SelectContent>
                 {giorniArr.map(g => <SelectItem key={g} value={String(g)}>{g}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700 mb-1 block">Contatore</label>
+            <Select value={contatoreId} onValueChange={handleContatoreChange}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Seleziona contatore..." /></SelectTrigger>
+              <SelectContent>
+                {contatori.map(c => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
