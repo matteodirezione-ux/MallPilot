@@ -14,6 +14,13 @@ const valoreCella = (c, d, mode) => {
   return mode === 'costi' ? v * (c.costo_unitario || 0) : v;
 };
 
+const consumoGiorno = (c, d) => {
+  if (d === 1) return null;
+  const v = c[`d${d}`], prev = c[`d${d - 1}`];
+  if (v == null || prev == null) return null;
+  return v - prev;
+};
+
 const totaleContatore = (c, N, mode) => {
   let tot = 0, has = false;
   for (let i = 1; i <= N; i++) { const v = c[`d${i}`]; if (v != null) { tot += v; has = true; } }
@@ -107,9 +114,23 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
               {Array.from({ length: N }, (_, i) => i + 1).map(d => (
                 <tr key={d} className={d % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'}>
                   <td className="px-2 py-1.5 text-xs font-medium text-slate-600 text-center sticky left-0 bg-inherit">{d}</td>
-                  {contatori.map(c => (
-                    <td key={c.id} className={`px-2 py-1.5 text-center text-xs ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-700'}`}>{fmtVal(valoreCella(c, d, mode), mode)}</td>
-                  ))}
+                  {contatori.map(c => {
+                    const reading = c[`d${d}`];
+                    const cons = consumoGiorno(c, d);
+                    const consLabel = cons == null ? null : mode === 'costi'
+                      ? '€ ' + (cons * (c.costo_unitario || 0)).toLocaleString('it-IT', { maximumFractionDigits: 2 })
+                      : (cons >= 0 ? '+' : '') + cons.toLocaleString('it-IT');
+                    return (
+                      <td key={c.id} className="px-2 py-1.5 text-center text-xs">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className="font-medium text-slate-700">{fmt(reading)}</span>
+                          {consLabel != null && (
+                            <span className={`text-[10px] ${mode === 'costi' ? 'text-emerald-600' : 'text-slate-400'}`}>{consLabel}</span>
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
                   <td className="px-2 py-1.5 border-l border-slate-200"></td>
                 </tr>
               ))}
