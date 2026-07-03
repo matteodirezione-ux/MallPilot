@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Droplet, ClipboardEdit } from 'lucide-react';
+import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Droplet } from 'lucide-react';
 import FormContatoreGiornaliero from '@/components/contatori/FormContatoreGiornaliero';
-import FormRilevazioneGiornaliera from '@/components/contatori/FormRilevazioneGiornaliera';
 
 const MESI_NOMI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-const MESI_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 const fmt = (v) => v == null ? '' : v.toLocaleString('it-IT');
 
@@ -17,7 +15,6 @@ const consumoContatore = (c, N) => {
   return vals[vals.length - 1] - vals[0];
 };
 
-// Consumo del singolo giorno = differenza dalla lettura del giorno precedente
 const consumoGiorno = (c, d) => {
   if (d === 1) return null;
   const v = c[`d${d}`], prev = c[`d${d - 1}`];
@@ -42,27 +39,9 @@ const fmtVal = (v, mode) => {
   return mode === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 };
 
-export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'consumi' }) {
-  const [mese, setMese] = useState(new Date().getMonth() + 1);
-  const [contatori, setContatori] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'consumi', mese, setMese, contatori, loading, onReload }) {
   const [showForm, setShowForm] = useState(false);
-  const [showRilevazione, setShowRilevazione] = useState(false);
   const [editing, setEditing] = useState(null);
-
-  useEffect(() => {
-    if (centroSelezionato?.id) load();
-  }, [centroSelezionato?.id, anno, mese]);
-
-  const load = async () => {
-    setLoading(true);
-    const isAll = centroSelezionato.id === 'tutti';
-    const data = isAll
-      ? await base44.entities.LetturaContatoreGiornaliero.filter({ anno, mese })
-      : await base44.entities.LetturaContatoreGiornaliero.filter({ centro_id: centroSelezionato.id, anno, mese });
-    setContatori(data);
-    setLoading(false);
-  };
 
   const N = daysInMonth(anno, mese);
 
@@ -74,21 +53,13 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
       await base44.entities.LetturaContatoreGiornaliero.create(payload);
     }
     setShowForm(false); setEditing(null);
-    load();
+    onReload();
   };
 
   const handleDelete = async (c) => {
     if (!confirm(`Eliminare il contatore "${c.nome}"?`)) return;
     await base44.entities.LetturaContatoreGiornaliero.delete(c.id);
-    load();
-  };
-
-  const handleSaveRilevazione = async ({ id, giorno, valore }) => {
-    const c = contatori.find(x => x.id === id);
-    if (!c) return;
-    await base44.entities.LetturaContatoreGiornaliero.update(id, { [`d${giorno}`]: valore });
-    setShowRilevazione(false);
-    load();
+    onReload();
   };
 
   const shiftMese = (delta) => {
@@ -112,16 +83,9 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <div className="flex items-center gap-2">
-          {contatori.length > 0 && (
-            <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
-              <ClipboardEdit className="w-4 h-4" /> Rilevazione
-            </Button>
-          )}
-          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Contatore
-          </Button>
-        </div>
+        <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Plus className="w-4 h-4" /> Nuovo Contatore
+        </Button>
       </div>
 
       {loading ? (
@@ -179,16 +143,6 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
         contatore={editing}
         anno={anno}
         mese={mese}
-      />
-
-      <FormRilevazioneGiornaliera
-        open={showRilevazione}
-        onClose={() => setShowRilevazione(false)}
-        onSave={handleSaveRilevazione}
-        contatori={contatori}
-        mese={mese}
-        anno={anno}
-        giorni={N}
       />
     </div>
   );

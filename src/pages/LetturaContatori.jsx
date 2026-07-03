@@ -5,8 +5,11 @@ import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit, Za
 import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
 import FormRilevazione from '@/components/contatori/FormRilevazione';
+import FormRilevazioneGiornaliera from '@/components/contatori/FormRilevazioneGiornaliera';
 import GraficoContatori from '@/components/contatori/GraficoContatori';
 import AcquaGiornaliera from '@/components/contatori/AcquaGiornaliera';
+
+const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
@@ -32,10 +35,29 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const [showRilevazione, setShowRilevazione] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formPadre, setFormPadre] = useState(null);
+  const [dailyMese, setDailyMese] = useState(new Date().getMonth() + 1);
+  const [dailyContatori, setDailyContatori] = useState([]);
+  const [dailyLoading, setDailyLoading] = useState(true);
+  const [showRilevazioneGiornaliera, setShowRilevazioneGiornaliera] = useState(false);
 
   useEffect(() => {
     if (centroSelezionato?.id && tab !== 'acqua_giornaliera') loadContatori();
   }, [centroSelezionato?.id, anno, tab]);
+
+  useEffect(() => {
+    if (centroSelezionato?.id && tab === 'acqua_giornaliera') loadDaily();
+  }, [centroSelezionato?.id, anno, tab, dailyMese]);
+
+  const loadDaily = async () => {
+    if (!centroSelezionato?.id) return;
+    setDailyLoading(true);
+    const isAll = centroSelezionato.id === 'tutti';
+    const data = isAll
+      ? await base44.entities.LetturaContatoreGiornaliero.filter({ anno, mese: dailyMese })
+      : await base44.entities.LetturaContatoreGiornaliero.filter({ centro_id: centroSelezionato.id, anno, mese: dailyMese });
+    setDailyContatori(data);
+    setDailyLoading(false);
+  };
 
   const loadContatori = async () => {
     setLoading(true);
@@ -80,6 +102,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     await base44.entities.LetturaContatore.update(id, { [mese]: valore });
     setShowRilevazione(false);
     loadContatori();
+  };
+
+  const handleSaveRilevazioneGiornaliera = async ({ id, giorno, valore }) => {
+    await base44.entities.LetturaContatoreGiornaliero.update(id, { [`d${giorno}`]: valore });
+    setShowRilevazioneGiornaliera(false);
+    loadDaily();
   };
 
   // Per energia i valori sono consumi diretti, non letture cumulative
@@ -147,15 +175,32 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             );
           })}
         </div>
-        {tab !== 'acqua_giornaliera' && (
-          <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-            <Plus className="w-4 h-4" /> Nuovo Contatore
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {tab === 'acqua_giornaliera' ? (
+            dailyContatori.length > 0 && (
+              <Button onClick={() => setShowRilevazioneGiornaliera(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+                <ClipboardEdit className="w-4 h-4" /> Rilevazione
+              </Button>
+            )
+          ) : (
+            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+              <Plus className="w-4 h-4" /> Nuovo Contatore
+            </Button>
+          )}
+        </div>
       </div>
 
       {tab === 'acqua_giornaliera' ? (
-        <AcquaGiornaliera centroSelezionato={centroSelezionato} anno={anno} mode={mode} />
+        <AcquaGiornaliera
+          centroSelezionato={centroSelezionato}
+          anno={anno}
+          mode={mode}
+          mese={dailyMese}
+          setMese={setDailyMese}
+          contatori={dailyContatori}
+          loading={dailyLoading}
+          onReload={loadDaily}
+        />
       ) : loading ? (
         <div className="text-center py-8 text-slate-400">Caricamento...</div>
       ) : principali.length === 0 ? (
@@ -216,6 +261,16 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         onClose={() => setShowRilevazione(false)}
         onSave={handleSaveRilevazione}
         contatori={contatoriTipo}
+      />
+
+      <FormRilevazioneGiornaliera
+        open={showRilevazioneGiornaliera}
+        onClose={() => setShowRilevazioneGiornaliera(false)}
+        onSave={handleSaveRilevazioneGiornaliera}
+        contatori={dailyContatori}
+        mese={dailyMese}
+        anno={anno}
+        giorni={daysInMonth(anno, dailyMese)}
       />
     </div>
   );
