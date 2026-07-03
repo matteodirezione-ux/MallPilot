@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import ExportMarketing from '@/components/marketing/ExportMarketing';
 import FormValoreMese from '@/components/contatori/FormValoreMese';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -197,7 +197,20 @@ export default function Marketing({ centroSelezionato, user }) {
         if (totale === 0) return null;
         const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
         return (
-          <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">Spesa Mensile</h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={MESI.map((m, i) => ({ mese: MESI_LABEL[i], importo: totaleBudgetMese(m) }))}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                  <XAxis dataKey="mese" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                  <Tooltip formatter={(v) => fmtC(v)} />
+                  <Bar dataKey="importo" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-3">Distribuzione Budget per Sezione</h3>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <ResponsiveContainer width="100%" smWidth="60%" height={240}>
@@ -218,6 +231,7 @@ export default function Marketing({ centroSelezionato, user }) {
                   </div>
                 ))}
               </div>
+            </div>
             </div>
           </div>
         );
