@@ -250,24 +250,13 @@ export default function LetturaContatori({ centroSelezionato, user }) {
               {TIPI.map(t => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}
             </SelectContent>
           </Select>
-          {tab !== 'acqua_giornaliera' && (
-            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} size="sm" className="bg-blue-600 hover:bg-blue-700 shrink-0">
-              <Plus className="w-4 h-4" />
-            </Button>
-          )}
         </div>
 
         {/* Desktop: azione destra */}
         <div className="hidden md:flex items-center gap-2">
-          {tab === 'acqua_giornaliera' ? (
-            dailyContatori.length > 0 && (
-              <Button onClick={() => setShowRilevazioneGiornaliera(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
-                <ClipboardEdit className="w-4 h-4" /> Rilevazione
-              </Button>
-            )
-          ) : (
-            <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-              <Plus className="w-4 h-4" /> Nuovo Contatore
+          {tab === 'acqua_giornaliera' && dailyContatori.length > 0 && (
+            <Button onClick={() => setShowRilevazioneGiornaliera(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+              <ClipboardEdit className="w-4 h-4" /> Rilevazione
             </Button>
           )}
         </div>
@@ -297,7 +286,11 @@ export default function LetturaContatori({ centroSelezionato, user }) {
                 {!directConsumo && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
                 {MESI_LABEL.map(l => <th key={l} className="px-2 py-2 text-center text-xs font-semibold text-slate-600 min-w-[60px]">{l}</th>)}
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[70px]">Totale</th>
-                <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[90px]">Azioni</th>
+                <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
+                  <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} size="sm" className="bg-blue-600 hover:bg-blue-700 h-7 px-2 gap-1">
+                    <Plus className="w-3.5 h-3.5" /> Nuovo
+                  </Button>
+                </th>
               </tr>
             </thead>
             <tbody>
