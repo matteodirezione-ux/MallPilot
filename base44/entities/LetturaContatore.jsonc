@@ -1,0 +1,89 @@
+{
+  "name": "LetturaContatore",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "acqua",
+        "gas",
+        "fotovoltaico"
+      ],
+      "description": "Tipo di contatore"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome del contatore o sottocontatore"
+    },
+    "contatore_padre_id": {
+      "type": "string",
+      "description": "ID del contatore padre (null se contatore principale)"
+    },
+    "anno": {
+      "type": "number",
+      "description": "Anno di riferimento"
+    },
+    "lettura_iniziale": {
+      "type": "number",
+      "description": "Lettura iniziale (fine anno precedente)"
+    },
+    "gen": {
+      "type": "number",
+      "description": "Lettura Gennaio"
+    },
+    "feb": {
+      "type": "number",
+      "description": "Lettura Febbraio"
+    },
+    "mar": {
+      "type": "number",
+      "description": "Lettura Marzo"
+    },
+    "apr": {
+      "type": "number",
+      "description": "Lettura Aprile"
+    },
+    "mag": {
+      "type": "number",
+      "description": "Lettura Maggio"
+    },
+    "giu": {
+      "type": "number",
+      "description": "Lettura Giugno"
+    },
+    "lug": {
+      "type": "number",
+      "description": "Lettura Luglio"
+    },
+    "ago": {
+      "type": "number",
+      "description": "Lettura Agosto"
+    },
+    "set": {
+      "type": "number",
+      "description": "Lettura Settembre"
+    },
+    "ott": {
+      "type": "number",
+      "description": "Lettura Ottobre"
+    },
+    "nov": {
+      "type": "number",
+      "description": "Lettura Novembre"
+    },
+    "dic": {
+      "type": "number",
+      "description": "Lettura Dicembre"
+    }
+  },
+  "required": [
+    "centro_id",
+    "tipo",
+    "nome",
+    "anno"
+  ]
+}
