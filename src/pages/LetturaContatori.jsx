@@ -9,6 +9,7 @@ import FormRilevazione from '@/components/contatori/FormRilevazione';
 import FormRilevazioneGiornaliera from '@/components/contatori/FormRilevazioneGiornaliera';
 import GraficoContatori from '@/components/contatori/GraficoContatori';
 import AcquaGiornaliera from '@/components/contatori/AcquaGiornaliera';
+import FormValoreMese from '@/components/contatori/FormValoreMese';
 
 const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 
@@ -164,6 +165,14 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     loadDaily();
   };
 
+  const [quick, setQuick] = useState(null);
+  const handleQuickSave = async (valore) => {
+    if (!quick) return;
+    await base44.entities.LetturaContatore.update(quick.contatore.id, { [quick.field]: valore });
+    setQuick(null);
+    loadContatori();
+  };
+
   // Per energia i valori sono consumi diretti, non letture cumulative
   const directConsumo = tab === 'energia';
   // Totale consumo mensile (solo contatori principali)
@@ -306,8 +315,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
@@ -357,6 +366,15 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         mese={dailyMese}
         anno={anno}
         giorni={daysInMonth(anno, dailyMese)}
+      />
+
+      <FormValoreMese
+        open={!!quick}
+        contatore={quick?.contatore}
+        field={quick?.field}
+        meseLabel={quick?.label}
+        onClose={() => setQuick(null)}
+        onSave={handleQuickSave}
       />
     </div>
   );

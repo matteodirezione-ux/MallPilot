@@ -2,6 +2,7 @@ import React from 'react';
 import { Pencil, Plus, Trash2, GitBranch } from 'lucide-react';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
 const fmtVal = (v, mode) => v == null ? '—' : mode === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
@@ -35,7 +36,7 @@ const getTotale = (c, direct, mode) => {
 const valColor = (mode) => mode === 'costi' ? 'text-emerald-700' : 'text-blue-700';
 const totColor = (mode) => mode === 'costi' ? 'text-emerald-800' : 'text-blue-800';
 
-export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, labelConsumo = 'Consumo', directConsumo = false, mode = 'consumi' }) {
+export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQuickEdit = () => {}, labelConsumo = 'Consumo', directConsumo = false, mode = 'consumi' }) {
   const azioni = (
     <td className="px-2 py-2 text-center border-l border-slate-100">
       <div className="flex items-center justify-center gap-1">
@@ -63,7 +64,7 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
         {MESI.map((m, i) => (
-          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
+          <td key={m} onClick={() => onQuickEdit(c, m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
         ))}
         <td className={`px-2 py-2 text-center text-xs ${isSub ? totColor(mode) + ' font-normal' : 'font-bold ' + totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, true, mode), mode)}</td>
         {azioni}
@@ -75,9 +76,9 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
     <>
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
-        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-600' : 'font-bold text-slate-700'}`}>{fmt(c.lettura_iniziale)}</td>
-        {MESI.map(m => (
-          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-600' : 'font-bold text-slate-800'}`}>{fmt(c[m])}</td>
+        <td onClick={() => onQuickEdit(c, 'lettura_iniziale', 'Lettura Iniz.')} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? 'text-slate-600' : 'font-bold text-slate-700'}`}>{fmt(c.lettura_iniziale)}</td>
+        {MESI.map((m, i) => (
+          <td key={m} onClick={() => onQuickEdit(c, m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? 'text-slate-600' : 'font-bold text-slate-800'}`}>{fmt(c[m])}</td>
         ))}
         <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-700' : 'font-bold text-slate-900'} border-l border-slate-200`}>{fmt(getTotale(c, false, 'consumi'))}</td>
         {azioni}
