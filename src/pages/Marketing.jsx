@@ -208,6 +208,7 @@ export default function Marketing({ centroSelezionato, user }) {
         contatore={quick?.row}
         field={quick?.field}
         meseLabel={quick?.label}
+        placeholder="Valore"
         onClose={() => setQuick(null)}
         onSave={handleQuickSave}
       />

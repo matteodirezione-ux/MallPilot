@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function FormValoreMese({ open, contatore, field, meseLabel, onClose, onSave }) {
+export default function FormValoreMese({ open, contatore, field, meseLabel, placeholder = 'Lettura', onClose, onSave }) {
   const [val, setVal] = useState('');
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export default function FormValoreMese({ open, contatore, field, meseLabel, onCl
             step="any"
             value={val}
             onChange={e => setVal(e.target.value)}
-            placeholder="Lettura"
+            placeholder={placeholder}
             autoFocus
             onKeyDown={e => e.key === 'Enter' && submit()}
           />
