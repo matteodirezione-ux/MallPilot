@@ -16,12 +16,38 @@ const consumoContatore = (c, N) => {
   return vals[vals.length - 1] - vals[0];
 };
 
+// Consumo del singolo giorno = differenza dalla lettura del giorno precedente
+const consumoGiorno = (c, d) => {
+  if (d === 1) return null;
+  const v = c[`d${d}`], prev = c[`d${d - 1}`];
+  if (v == null || prev == null) return null;
+  return v - prev;
+};
+
+const valoreCella = (c, d, mode) => {
+  const cons = consumoGiorno(c, d);
+  if (cons == null) return null;
+  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
+};
+
+const totaleContatore = (c, N, mode) => {
+  const cons = consumoContatore(c, N);
+  if (cons == null) return null;
+  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
+};
+
+const fmtVal = (v, mode) => {
+  if (v == null) return '';
+  return mode === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
+};
+
 export default function AcquaGiornaliera({ centroSelezionato, anno }) {
   const [mese, setMese] = useState(new Date().getMonth() + 1);
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [mode, setMode] = useState('consumi');
 
   useEffect(() => {
     if (centroSelezionato?.id) load();
@@ -77,9 +103,15 @@ export default function AcquaGiornaliera({ centroSelezionato, anno }) {
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-          <Plus className="w-4 h-4" /> Nuovo Contatore
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+            <button onClick={() => setMode('consumi')} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
+            <button onClick={() => setMode('costi')} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
+          </div>
+          <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+            <Plus className="w-4 h-4" /> Nuovo Contatore
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -113,16 +145,16 @@ export default function AcquaGiornaliera({ centroSelezionato, anno }) {
                 <tr key={d} className={d % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'}>
                   <td className="px-2 py-1.5 text-xs font-medium text-slate-600 text-center sticky left-0 bg-inherit">{d}</td>
                   {contatori.map(c => (
-                    <td key={c.id} className="px-2 py-1.5 text-center text-xs text-slate-700">{fmt(c[`d${d}`])}</td>
+                    <td key={c.id} className={`px-2 py-1.5 text-center text-xs ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-700'}`}>{fmtVal(valoreCella(c, d, mode), mode)}</td>
                   ))}
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr className="bg-blue-600 text-white border-t-2 border-slate-300">
-                <td className="px-2 py-2 text-xs font-bold sticky left-0 bg-blue-600">CONSUMO</td>
+                <td className={`px-2 py-2 text-xs font-bold sticky left-0 ${mode === 'costi' ? 'bg-emerald-600' : 'bg-blue-600'}`}>{mode === 'costi' ? 'COSTO' : 'CONSUMO'}</td>
                 {contatori.map(c => (
-                  <td key={c.id} className="px-2 py-2 text-center text-xs font-bold">{fmt(consumoContatore(c, N))}</td>
+                  <td key={c.id} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(totaleContatore(c, N, mode), mode)}</td>
                 ))}
               </tr>
             </tfoot>

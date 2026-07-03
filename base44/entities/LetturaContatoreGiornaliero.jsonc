@@ -26,6 +26,10 @@
       "type": "number",
       "description": "Mese di riferimento (1-12)"
     },
+    "costo_unitario": {
+      "type": "number",
+      "description": "Costo unitario per unita di consumo (\u20ac/m\u00b3)"
+    },
     "d1": {
       "type": "number",
       "description": "Giorno 1"

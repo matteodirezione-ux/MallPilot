@@ -7,7 +7,7 @@ const MESI_NOMI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Lugl
 const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 
 const empty = () => {
-  const o = { nome: '' };
+  const o = { nome: '', costo_unitario: '' };
   for (let i = 1; i <= 31; i++) o[`d${i}`] = '';
   return o;
 };
@@ -18,7 +18,7 @@ export default function FormContatoreGiornaliero({ open, onClose, onSave, contat
 
   useEffect(() => {
     if (contatore) {
-      const o = { nome: contatore.nome || '' };
+      const o = { nome: contatore.nome || '', costo_unitario: contatore.costo_unitario ?? '' };
       for (let i = 1; i <= 31; i++) o[`d${i}`] = contatore[`d${i}`] ?? '';
       setForm(o);
     } else {
@@ -30,7 +30,7 @@ export default function FormContatoreGiornaliero({ open, onClose, onSave, contat
 
   const handleSave = () => {
     if (!form.nome.trim()) return;
-    const data = { nome: form.nome.trim(), anno, mese };
+    const data = { nome: form.nome.trim(), anno, mese, costo_unitario: form.costo_unitario === '' ? null : Number(form.costo_unitario) };
     for (let i = 1; i <= 31; i++) {
       data[`d${i}`] = form[`d${i}`] === '' ? null : Number(form[`d${i}`]);
     }
@@ -52,6 +52,10 @@ export default function FormContatoreGiornaliero({ open, onClose, onSave, contat
             <div>
               <label className="text-sm font-medium text-slate-700 mb-1 block">Mese</label>
               <Input value={`${MESI_NOMI[mese - 1]} ${anno}`} disabled className="bg-slate-50" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 mb-1 block">Costo unitario (€/m³)</label>
+              <Input type="number" step="0.01" value={form.costo_unitario} onChange={e => set('costo_unitario', e.target.value)} placeholder="es. 2.50" />
             </div>
           </div>
           <div>
