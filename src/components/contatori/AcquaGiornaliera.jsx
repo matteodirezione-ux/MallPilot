@@ -8,30 +8,17 @@ const MESI_NOMI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Lugl
 const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 const fmt = (v) => v == null ? '' : v.toLocaleString('it-IT');
 
-const consumoContatore = (c, N) => {
-  const vals = [];
-  for (let i = 1; i <= N; i++) { const v = c[`d${i}`]; if (v != null) vals.push(v); }
-  if (vals.length < 2) return null;
-  return vals[vals.length - 1] - vals[0];
-};
-
-const consumoGiorno = (c, d) => {
-  if (d === 1) return null;
-  const v = c[`d${d}`], prev = c[`d${d - 1}`];
-  if (v == null || prev == null) return null;
-  return v - prev;
-};
-
 const valoreCella = (c, d, mode) => {
-  const cons = consumoGiorno(c, d);
-  if (cons == null) return null;
-  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
+  const v = c[`d${d}`];
+  if (v == null) return null;
+  return mode === 'costi' ? v * (c.costo_unitario || 0) : v;
 };
 
 const totaleContatore = (c, N, mode) => {
-  const cons = consumoContatore(c, N);
-  if (cons == null) return null;
-  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
+  let tot = 0, has = false;
+  for (let i = 1; i <= N; i++) { const v = c[`d${i}`]; if (v != null) { tot += v; has = true; } }
+  if (!has) return null;
+  return mode === 'costi' ? tot * (c.costo_unitario || 0) : tot;
 };
 
 const fmtVal = (v, mode) => {
