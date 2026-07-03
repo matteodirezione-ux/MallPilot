@@ -63,7 +63,7 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
         {MESI.map((m, i) => (
-          <td key={m} className={`px-2 py-2 text-center text-xs font-medium ${isSub ? valColor(mode) + ' font-semibold' : valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
+          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? valColor(mode) + ' font-semibold' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
         ))}
         <td className={`px-2 py-2 text-center text-xs font-bold ${totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, true, mode), mode)}</td>
         {azioni}
@@ -75,11 +75,11 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, lab
     <>
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
-        <td className="px-2 py-2 text-center text-xs text-slate-600">{fmt(c.lettura_iniziale)}</td>
+        <td className="px-2 py-2 text-center text-xs font-bold text-slate-700">{fmt(c.lettura_iniziale)}</td>
         {MESI.map(m => (
-          <td key={m} className="px-2 py-2 text-center text-xs text-slate-700">{fmt(c[m])}</td>
+          <td key={m} className="px-2 py-2 text-center text-xs font-bold text-slate-800">{fmt(c[m])}</td>
         ))}
-        <td className="px-2 py-2 text-center text-xs font-medium text-slate-800 border-l border-slate-200">{fmt(getTotale(c, false, 'consumi'))}</td>
+        <td className="px-2 py-2 text-center text-xs font-bold text-slate-900 border-l border-slate-200">{fmt(getTotale(c, false, 'consumi'))}</td>
         {azioni}
       </tr>
       <tr className={isSub ? 'bg-amber-50 border-l-[6px] border-l-amber-500' : 'bg-blue-50/50 border-l-[6px] border-l-transparent'}>
