@@ -282,8 +282,8 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
         { name: 'Tenant', page: 'Tenant', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['proprieta', 'direttore', 'tenant'] },
-        { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
         { name: 'Contatori', page: 'LetturaContatori', icon: Gauge, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
         { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
       ]
     },
