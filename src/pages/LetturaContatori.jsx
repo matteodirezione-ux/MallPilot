@@ -131,12 +131,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
-                <td className="px-2 py-2 text-xs font-bold">TOTALE CONSUMO</td>
+                <td className="px-2 py-2 text-xs font-bold">TOTALE {tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
                 <td className="px-2 py-2"></td>
                 {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmt(v)}</td>)}
                 <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmt(totaleAnnuo)}</td>

@@ -22,7 +22,7 @@ const getTotale = (c) => {
   return has ? tot : null;
 };
 
-export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete }) {
+export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, labelConsumo = 'Consumo' }) {
   return (
     <>
       <tr className={isSub ? 'bg-slate-50/50' : 'bg-white'}>
@@ -48,7 +48,7 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete }) {
         </td>
       </tr>
       <tr className={isSub ? 'bg-blue-50/30' : 'bg-blue-50/50'}>
-        <td className={`px-2 py-1 text-xs text-slate-400 italic ${isSub ? 'pl-8' : ''}`}>↳ Consumo</td>
+        <td className={`px-2 py-1 text-xs text-slate-400 italic ${isSub ? 'pl-8' : ''}`}>↳ {labelConsumo}</td>
         <td className="px-2 py-1"></td>
         {MESI.map((_, i) => (
           <td key={i} className="px-2 py-1 text-center text-xs font-medium text-blue-700">{fmt(calcConsumo(c, i))}</td>
