@@ -83,9 +83,6 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
-        <Button onClick={() => { setEditing(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-          <Plus className="w-4 h-4" /> Nuovo Contatore
-        </Button>
       </div>
 
       {loading ? (
@@ -112,6 +109,11 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                     </div>
                   </th>
                 ))}
+                <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
+                  <Button onClick={() => { setEditing(null); setShowForm(true); }} size="sm" className="bg-blue-600 hover:bg-blue-700 h-7 px-2 gap-1">
+                    <Plus className="w-3.5 h-3.5" /> Nuovo
+                  </Button>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -121,6 +123,7 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                   {contatori.map(c => (
                     <td key={c.id} className={`px-2 py-1.5 text-center text-xs ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-700'}`}>{fmtVal(valoreCella(c, d, mode), mode)}</td>
                   ))}
+                  <td className="px-2 py-1.5 border-l border-slate-200"></td>
                 </tr>
               ))}
             </tbody>
@@ -130,6 +133,7 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                 {contatori.map(c => (
                   <td key={c.id} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(totaleContatore(c, N, mode), mode)}</td>
                 ))}
+                <td className="px-2 py-2 border-l border-slate-600"></td>
               </tr>
             </tfoot>
           </table>
