@@ -10,6 +10,7 @@
       "type": "string",
       "enum": [
         "acqua",
+        "energia",
         "gas",
         "fotovoltaico"
       ],

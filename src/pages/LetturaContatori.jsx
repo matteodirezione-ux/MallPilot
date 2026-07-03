@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit, Zap } from 'lucide-react';
 import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
 import FormRilevazione from '@/components/contatori/FormRilevazione';
@@ -11,6 +11,7 @@ const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott',
 
 const TIPI = [
   { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white' },
+  { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white' },
   { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white' },
   { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun, activeColor: 'bg-yellow-500 text-white' },
 ];
