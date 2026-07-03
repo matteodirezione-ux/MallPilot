@@ -1,0 +1,160 @@
+{
+  "name": "LetturaContatoreGiornaliero",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "tipo": {
+      "type": "string",
+      "enum": [
+        "acqua"
+      ],
+      "default": "acqua",
+      "description": "Tipo (riservato acqua giornaliera)"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome del contatore"
+    },
+    "anno": {
+      "type": "number",
+      "description": "Anno di riferimento"
+    },
+    "mese": {
+      "type": "number",
+      "description": "Mese di riferimento (1-12)"
+    },
+    "d1": {
+      "type": "number",
+      "description": "Giorno 1"
+    },
+    "d2": {
+      "type": "number",
+      "description": "Giorno 2"
+    },
+    "d3": {
+      "type": "number",
+      "description": "Giorno 3"
+    },
+    "d4": {
+      "type": "number",
+      "description": "Giorno 4"
+    },
+    "d5": {
+      "type": "number",
+      "description": "Giorno 5"
+    },
+    "d6": {
+      "type": "number",
+      "description": "Giorno 6"
+    },
+    "d7": {
+      "type": "number",
+      "description": "Giorno 7"
+    },
+    "d8": {
+      "type": "number",
+      "description": "Giorno 8"
+    },
+    "d9": {
+      "type": "number",
+      "description": "Giorno 9"
+    },
+    "d10": {
+      "type": "number",
+      "description": "Giorno 10"
+    },
+    "d11": {
+      "type": "number",
+      "description": "Giorno 11"
+    },
+    "d12": {
+      "type": "number",
+      "description": "Giorno 12"
+    },
+    "d13": {
+      "type": "number",
+      "description": "Giorno 13"
+    },
+    "d14": {
+      "type": "number",
+      "description": "Giorno 14"
+    },
+    "d15": {
+      "type": "number",
+      "description": "Giorno 15"
+    },
+    "d16": {
+      "type": "number",
+      "description": "Giorno 16"
+    },
+    "d17": {
+      "type": "number",
+      "description": "Giorno 17"
+    },
+    "d18": {
+      "type": "number",
+      "description": "Giorno 18"
+    },
+    "d19": {
+      "type": "number",
+      "description": "Giorno 19"
+    },
+    "d20": {
+      "type": "number",
+      "description": "Giorno 20"
+    },
+    "d21": {
+      "type": "number",
+      "description": "Giorno 21"
+    },
+    "d22": {
+      "type": "number",
+      "description": "Giorno 22"
+    },
+    "d23": {
+      "type": "number",
+      "description": "Giorno 23"
+    },
+    "d24": {
+      "type": "number",
+      "description": "Giorno 24"
+    },
+    "d25": {
+      "type": "number",
+      "description": "Giorno 25"
+    },
+    "d26": {
+      "type": "number",
+      "description": "Giorno 26"
+    },
+    "d27": {
+      "type": "number",
+      "description": "Giorno 27"
+    },
+    "d28": {
+      "type": "number",
+      "description": "Giorno 28"
+    },
+    "d29": {
+      "type": "number",
+      "description": "Giorno 29"
+    },
+    "d30": {
+      "type": "number",
+      "description": "Giorno 30"
+    },
+    "d31": {
+      "type": "number",
+      "description": "Giorno 31"
+    }
+  },
+  "required": [
+    "centro_id",
+    "nome",
+    "anno",
+    "mese"
+  ]
+}

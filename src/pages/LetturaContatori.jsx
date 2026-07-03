@@ -6,11 +6,13 @@ import FormContatore from '@/components/contatori/FormContatore';
 import ContatoreRow from '@/components/contatori/ContatoreRow';
 import FormRilevazione from '@/components/contatori/FormRilevazione';
 import GraficoContatori from '@/components/contatori/GraficoContatori';
+import AcquaGiornaliera from '@/components/contatori/AcquaGiornaliera';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 const TIPI = [
+  { key: 'acqua_giornaliera', label: 'Acqua Giorn.', icon: Droplet, activeColor: 'bg-cyan-600 text-white', chartColor: '#0891b2' },
   { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white', chartColor: '#3b82f6' },
   { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white', chartColor: '#9333ea' },
   { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white', chartColor: '#ea580c' },
@@ -30,8 +32,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const [formPadre, setFormPadre] = useState(null);
 
   useEffect(() => {
-    if (centroSelezionato?.id) loadContatori();
-  }, [centroSelezionato?.id, anno]);
+    if (centroSelezionato?.id && tab !== 'acqua_giornaliera') loadContatori();
+  }, [centroSelezionato?.id, anno, tab]);
 
   const loadContatori = async () => {
     setLoading(true);
@@ -116,9 +118,11 @@ export default function LetturaContatori({ centroSelezionato, user }) {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
-          <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
-            <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
-          </Button>
+          {tab !== 'acqua_giornaliera' && (
+            <Button onClick={() => setShowRilevazione(true)} className="bg-orange-600 hover:bg-orange-700 gap-2">
+              <ClipboardEdit className="w-4 h-4" /> Nuova Rilevazione
+            </Button>
+          )}
         </div>
       </div>
 
@@ -133,12 +137,16 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             );
           })}
         </div>
-        <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
-          <Plus className="w-4 h-4" /> Nuovo Contatore
-        </Button>
+        {tab !== 'acqua_giornaliera' && (
+          <Button onClick={() => { setEditing(null); setFormPadre(null); setShowForm(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">
+            <Plus className="w-4 h-4" /> Nuovo Contatore
+          </Button>
+        )}
       </div>
 
-      {loading ? (
+      {tab === 'acqua_giornaliera' ? (
+        <AcquaGiornaliera centroSelezionato={centroSelezionato} anno={anno} />
+      ) : loading ? (
         <div className="text-center py-8 text-slate-400">Caricamento...</div>
       ) : principali.length === 0 ? (
         <div className="text-center py-8 text-slate-400">Nessun contatore {tab} per il {anno}</div>
