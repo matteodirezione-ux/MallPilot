@@ -336,7 +336,7 @@ export default function Layout({ children, currentPageName }) {
               {centroSelezionato ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
                   {centroSelezionato.id === 'tutti' ? (
-                    <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="h-9 w-9 rounded-lg object-cover flex-shrink-0" />
+                    <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
                   ) : centroSelezionato.logo_url ? (
                     <SafeImage
                       src={centroSelezionato.logo_url}
@@ -349,9 +349,6 @@ export default function Layout({ children, currentPageName }) {
                     <div className="flex-1 min-w-0">
                       <p className="font-bold text-slate-800 text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
                     </div>
-                  )}
-                  {centroSelezionato.id === 'tutti' && (
-                    <span className="font-bold text-slate-800 text-sm leading-tight truncate">Tutti i Centri</span>
                   )}
                   {centri.length > 1 && <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
                   {centri.length > 1 && (
