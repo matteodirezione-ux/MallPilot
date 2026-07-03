@@ -333,9 +333,11 @@ export default function Layout({ children, currentPageName }) {
           {/* Header */}
           <div className="p-4 border-b border-slate-700 bg-white">
             <div className="flex items-center justify-between gap-2">
-              {centroSelezionato && centroSelezionato.id !== 'tutti' ? (
+              {centroSelezionato ? (
                 <div className="relative flex items-center gap-2 flex-1 min-w-0">
-                  {centroSelezionato.logo_url ? (
+                  {centroSelezionato.id === 'tutti' ? (
+                    <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="h-9 w-9 rounded-lg object-cover flex-shrink-0" />
+                  ) : centroSelezionato.logo_url ? (
                     <SafeImage
                       src={centroSelezionato.logo_url}
                       alt={centroSelezionato.nome}
@@ -345,8 +347,11 @@ export default function Layout({ children, currentPageName }) {
                     />
                   ) : (
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
+                      <p className="font-bold text-slate-800 text-sm leading-tight truncate">{centroSelezionato.nome || 'Mall Pilot'}</p>
                     </div>
+                  )}
+                  {centroSelezionato.id === 'tutti' && (
+                    <span className="font-bold text-slate-800 text-sm leading-tight truncate">Tutti i Centri</span>
                   )}
                   {centri.length > 1 && <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />}
                   {centri.length > 1 && (
@@ -372,7 +377,7 @@ export default function Layout({ children, currentPageName }) {
               ) : (
                 <div className="flex items-center gap-2">
                   <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="w-9 h-9 rounded-lg object-cover" />
-                  <span className="font-bold text-lg text-white">Mall Pilot</span>
+                  <span className="font-bold text-lg text-slate-800">Mall Pilot</span>
                 </div>
               )}
               <NotificaBell user={user} />
