@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, ChevronDown, ChevronUp, TrendingUp, Megaphone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import ExportMarketing from '@/components/marketing/ExportMarketing';
 import FormValoreMese from '@/components/contatori/FormValoreMese';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -183,6 +184,33 @@ export default function Marketing({ centroSelezionato, user }) {
           </table>
         </div>
       )}
+
+      {/* Grafico a torta pesi sezioni */}
+      {(() => {
+        const data = [
+          { name: 'Iniziative', value: iniziative.reduce((a, r) => a + (r.budget_totale || 0), 0), color: '#1d4ed8' },
+          { name: 'Comunicazione Online', value: online.reduce((a, r) => a + (r.budget_totale || 0), 0), color: '#047857' },
+          { name: 'Comunicazione Offline', value: offline.reduce((a, r) => a + (r.budget_totale || 0), 0), color: '#b45309' },
+          { name: 'Costi Fissi', value: fissi.reduce((a, r) => a + (r.budget_totale || 0), 0), color: '#be123c' },
+        ].filter(d => d.value > 0);
+        const totale = data.reduce((a, d) => a + d.value, 0);
+        if (totale === 0) return null;
+        const fmtC = (v) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(v);
+        return (
+          <div className="bg-white rounded-xl border border-slate-200 p-4">
+            <h3 className="text-sm font-semibold text-slate-700 mb-3">Distribuzione Budget per Sezione</h3>
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
+                  {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+                </Pie>
+                <Tooltip formatter={(v) => fmtC(v)} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        );
+      })()}
 
       {/* Form modal */}
       {formOpen && (
