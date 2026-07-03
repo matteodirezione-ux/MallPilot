@@ -371,7 +371,7 @@ export default function Layout({ children, currentPageName }) {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/7dd144918_image.png" alt="Mall Pilot" className="w-8 h-8 rounded-lg object-cover" />
+                  <img src="https://media.base44.com/images/public/698c37dd48531465480aa3ae/bcb44468b_image.png" alt="Mall Pilot" className="w-9 h-9 rounded-lg object-cover" />
                   <span className="font-bold text-lg text-white">Mall Pilot</span>
                 </div>
               )}
