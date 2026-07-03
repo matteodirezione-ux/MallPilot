@@ -113,10 +113,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-            <button onClick={() => setMode('consumi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
-            <button onClick={() => setMode('costi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
-          </div>
+          {user?.tipo_account !== 'vigilanza' && (
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+              <button onClick={() => setMode('consumi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
+              <button onClick={() => setMode('costi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
+            </div>
+          )}
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a - 1)}>
               <ChevronLeft className="w-4 h-4" />
