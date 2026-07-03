@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, Pencil, ChevronLeft, ChevronRight, Droplet } from 'lucide-react';
 import FormContatoreGiornaliero from '@/components/contatori/FormContatoreGiornaliero';
+import FormValoreCella from '@/components/contatori/FormValoreCella';
 
 const MESI_NOMI = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
@@ -37,8 +38,16 @@ const fmtVal = (v, mode) => {
 export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'consumi', mese, setMese, contatori, loading, onReload }) {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [quick, setQuick] = useState(null);
 
   const N = daysInMonth(anno, mese);
+
+  const handleQuickSave = async (num) => {
+    if (!quick) return;
+    await base44.entities.LetturaContatoreGiornaliero.update(quick.contatore.id, { [`d${quick.day}`]: num });
+    setQuick(null);
+    onReload();
+  };
 
   const handleSave = async (data) => {
     const payload = { ...data, centro_id: centroSelezionato.id !== 'tutti' ? centroSelezionato.id : '', tipo: 'acqua' };
@@ -126,7 +135,11 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                       : (cons >= 0 ? '+' : '') + cons.toLocaleString('it-IT');
                     return (
                       <React.Fragment key={c.id}>
-                        <td className="px-2 py-1.5 text-center text-xs font-bold text-slate-800">{fmt(reading)}</td>
+                        <td
+                          onClick={() => setQuick({ contatore: c, day: d })}
+                          className="px-2 py-1.5 text-center text-xs font-bold text-slate-800 cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                          title="Clicca per inserire il valore"
+                        >{fmt(reading)}</td>
                         <td className={`px-2 py-1.5 text-center text-xs border-l border-slate-100 ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-500'}`}>{consLabel}</td>
                       </React.Fragment>
                     );
@@ -158,6 +171,16 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
         contatore={editing}
         anno={anno}
         mese={mese}
+      />
+
+      <FormValoreCella
+        open={!!quick}
+        contatore={quick?.contatore}
+        day={quick?.day}
+        mese={mese}
+        anno={anno}
+        onClose={() => setQuick(null)}
+        onSave={handleQuickSave}
       />
     </div>
   );
