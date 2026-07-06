@@ -3,15 +3,30 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function FormValoreMese({ open, contatore, field, meseLabel, placeholder = 'Lettura', onClose, onSave }) {
+export default function FormValoreMese({ open, contatore, field, meseLabel, placeholder = 'Lettura', mode = 'consumi', directConsumo = false, prevValue, costoUnitario, onClose, onSave }) {
   const [val, setVal] = useState('');
 
   useEffect(() => {
     if (open && contatore && field) {
-      const current = contatore[field];
-      setVal(current != null ? String(current) : '');
+      if (mode === 'costi') {
+        const stored = contatore[field];
+        if (stored == null) { setVal(''); return; }
+        let cons;
+        if (directConsumo) {
+          cons = stored;
+        } else {
+          const prev = prevValue;
+          if (prev == null) { setVal(''); return; }
+          cons = stored - prev;
+        }
+        const cost = cons * (costoUnitario || 0);
+        setVal(String(Number(cost.toFixed(2))));
+      } else {
+        const current = contatore[field];
+        setVal(current != null ? String(current) : '');
+      }
     }
-  }, [open, contatore, field]);
+  }, [open, contatore, field, mode, directConsumo, prevValue, costoUnitario]);
 
   const submit = () => {
     const trimmed = val.trim();
@@ -21,6 +36,7 @@ export default function FormValoreMese({ open, contatore, field, meseLabel, plac
   };
 
   const title = contatore?.nome ? `${contatore.nome} — ${meseLabel || field}` : (meseLabel || field);
+  const isCosti = mode === 'costi';
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -34,7 +50,7 @@ export default function FormValoreMese({ open, contatore, field, meseLabel, plac
             step="any"
             value={val}
             onChange={e => setVal(e.target.value)}
-            placeholder={placeholder}
+            placeholder={isCosti ? 'Costo (€)' : placeholder}
             autoFocus
             onKeyDown={e => e.key === 'Enter' && submit()}
           />

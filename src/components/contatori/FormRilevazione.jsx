@@ -11,7 +11,7 @@ const MESI = [
   { key: 'ott', label: 'Ottobre' }, { key: 'nov', label: 'Novembre' }, { key: 'dic', label: 'Dicembre' },
 ];
 
-export default function FormRilevazione({ open, onClose, onSave, contatori }) {
+export default function FormRilevazione({ open, onClose, onSave, contatori, mode = 'consumi', directConsumo = false }) {
   const [mese, setMese] = useState(MESI[new Date().getMonth()].key);
   const [contatoreId, setContatoreId] = useState('');
   const [valore, setValore] = useState('');
@@ -26,7 +26,22 @@ export default function FormRilevazione({ open, onClose, onSave, contatori }) {
 
   const prefill = (id, m) => {
     const c = contatori.find(x => x.id === id);
-    setValore(c && c[m] != null ? String(c[m]) : '');
+    if (!c || c[m] == null) { setValore(''); return; }
+    if (mode === 'costi') {
+      const idx = MESI.findIndex(x => x.key === m);
+      let cons;
+      if (directConsumo) {
+        cons = c[m];
+      } else {
+        const prev = idx === 0 ? c.lettura_iniziale : c[MESI[idx - 1].key];
+        if (prev == null) { setValore(''); return; }
+        cons = c[m] - prev;
+      }
+      const cost = cons * (c.costo_unitario || 0);
+      setValore(String(Number(cost.toFixed(2))));
+    } else {
+      setValore(String(c[m]));
+    }
   };
 
   const handleContatoreChange = (id) => { setContatoreId(id); prefill(id, mese); };
@@ -45,11 +60,13 @@ export default function FormRilevazione({ open, onClose, onSave, contatori }) {
     });
   });
 
+  const isCosti = mode === 'costi';
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nuova Rilevazione</DialogTitle>
+          <DialogTitle>Nuova Rilevazione{isCosti ? ' · Costo' : ''}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 mt-2">
           <div>
@@ -71,8 +88,8 @@ export default function FormRilevazione({ open, onClose, onSave, contatori }) {
             </Select>
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Valore lettura</label>
-            <Input type="number" value={valore} onChange={e => setValore(e.target.value)} placeholder="es. 3908" />
+            <label className="text-sm font-medium text-slate-700 mb-1 block">{isCosti ? 'Costo (€)' : 'Valore lettura'}</label>
+            <Input type="number" step="any" value={valore} onChange={e => setValore(e.target.value)} placeholder={isCosti ? 'es. 150' : 'es. 3908'} />
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={onClose}>Annulla</Button>

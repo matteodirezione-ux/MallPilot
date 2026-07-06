@@ -27,6 +27,25 @@ const TIPI = [
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
 const fmtVal = (v, m) => v == null ? '—' : m === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 
+// Valore del mese precedente (o lettura_iniziale per gen) serve per convertire costo <-> lettura
+const getPrevValue = (c, field) => {
+  if (field === 'lettura_iniziale') return null;
+  const idx = MESI.indexOf(field);
+  if (idx === 0) return c.lettura_iniziale;
+  if (idx > 0) return c[MESI[idx - 1]];
+  return null;
+};
+
+// Converte un costo (€) inserito in modalità costi nel valore da salvare (lettura o consumo)
+const costToStored = (cost, c, field, directConsumo) => {
+  const costo = c.costo_unitario || 0;
+  if (!costo) return null;
+  if (directConsumo) return cost / costo;
+  const prev = getPrevValue(c, field);
+  if (prev == null) return null;
+  return prev + (cost / costo);
+};
+
 export default function LetturaContatori({ centroSelezionato, user }) {
   const [tab, setTab] = useState(user?.tipo_account === 'vigilanza' ? 'acqua_giornaliera' : 'acqua');
   const [anno, setAnno] = useState(new Date().getFullYear());
@@ -154,7 +173,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const onAddSub = (c) => { setFormPadre(c); setEditing(null); setShowForm(true); };
 
   const handleSaveRilevazione = async ({ id, mese, valore }) => {
-    await base44.entities.LetturaContatore.update(id, { [mese]: valore });
+    const c = contatori.find(x => x.id === id);
+    let stored = valore;
+    if (mode === 'costi' && c && valore != null) {
+      stored = costToStored(valore, c, mese, directConsumo);
+    }
+    await base44.entities.LetturaContatore.update(id, { [mese]: stored });
     setShowRilevazione(false);
     loadContatori();
   };
@@ -168,7 +192,12 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const [quick, setQuick] = useState(null);
   const handleQuickSave = async (valore) => {
     if (!quick) return;
-    await base44.entities.LetturaContatore.update(quick.contatore.id, { [quick.field]: valore });
+    const c = quick.contatore;
+    let stored = valore;
+    if (mode === 'costi' && quick.field !== 'lettura_iniziale' && valore != null) {
+      stored = costToStored(valore, c, quick.field, directConsumo);
+    }
+    await base44.entities.LetturaContatore.update(c.id, { [quick.field]: stored });
     setQuick(null);
     loadContatori();
   };
@@ -315,8 +344,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label, prevValue: getPrevValue(contatore, field) })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label, prevValue: getPrevValue(contatore, field) })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
@@ -356,6 +385,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         onClose={() => setShowRilevazione(false)}
         onSave={handleSaveRilevazione}
         contatori={contatoriTipo}
+        mode={mode}
+        directConsumo={directConsumo}
       />
 
       <FormRilevazioneGiornaliera
@@ -373,6 +404,10 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         contatore={quick?.contatore}
         field={quick?.field}
         meseLabel={quick?.label}
+        mode={quick?.field === 'lettura_iniziale' ? 'consumi' : mode}
+        directConsumo={directConsumo}
+        prevValue={quick?.prevValue}
+        costoUnitario={quick?.contatore?.costo_unitario}
         onClose={() => setQuick(null)}
         onSave={handleQuickSave}
       />
