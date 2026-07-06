@@ -20,7 +20,9 @@ const getConsumo = (c, i, direct) => direct ? c[MESI[i]] : calcConsumo(c, i);
 const getValore = (c, i, direct, mode) => {
   const cons = getConsumo(c, i, direct);
   if (cons == null) return null;
-  return mode === 'costi' ? cons * (c.costo_unitario || 0) : cons;
+  if (mode !== 'costi') return cons;
+  const costo = c.costo_unitario || 0;
+  return costo ? cons * costo : cons;
 };
 
 const getTotale = (c, direct, mode) => {
@@ -30,7 +32,9 @@ const getTotale = (c, direct, mode) => {
     if (v != null) { tot += v; has = true; }
   }
   if (!has) return null;
-  return mode === 'costi' ? tot * (c.costo_unitario || 0) : tot;
+  if (mode !== 'costi') return tot;
+  const costo = c.costo_unitario || 0;
+  return costo ? tot * costo : tot;
 };
 
 const valColor = (mode) => mode === 'costi' ? 'text-emerald-700' : 'text-blue-700';

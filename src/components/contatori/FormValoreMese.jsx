@@ -19,7 +19,8 @@ export default function FormValoreMese({ open, contatore, field, meseLabel, plac
           if (prev == null) { setVal(''); return; }
           cons = stored - prev;
         }
-        const cost = cons * (costoUnitario || 0);
+        const costo = costoUnitario || 0;
+        const cost = costo ? cons * costo : cons;
         setVal(String(Number(cost.toFixed(2))));
       } else {
         const current = contatore[field];

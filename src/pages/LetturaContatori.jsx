@@ -39,8 +39,8 @@ const getPrevValue = (c, field) => {
 // Converte un costo (€) inserito in modalità costi nel valore da salvare (lettura o consumo)
 const costToStored = (cost, c, field, directConsumo) => {
   const costo = c.costo_unitario || 0;
+  if (directConsumo) return costo ? cost / costo : cost;
   if (!costo) return null;
-  if (directConsumo) return cost / costo;
   const prev = getPrevValue(c, field);
   if (prev == null) return null;
   return prev + (cost / costo);
@@ -217,7 +217,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
         if (val != null && prev != null) cons = val - prev;
       }
-      if (cons != null) { tot += mode === 'costi' ? cons * (c.costo_unitario || 0) : cons; has = true; }
+      if (cons != null) { tot += mode === 'costi' ? (c.costo_unitario ? cons * c.costo_unitario : cons) : cons; has = true; }
     });
     return has ? tot : null;
   });

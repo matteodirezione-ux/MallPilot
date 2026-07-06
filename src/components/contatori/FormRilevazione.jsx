@@ -37,7 +37,8 @@ export default function FormRilevazione({ open, onClose, onSave, contatori, mode
         if (prev == null) { setValore(''); return; }
         cons = c[m] - prev;
       }
-      const cost = cons * (c.costo_unitario || 0);
+      const costo = c.costo_unitario || 0;
+      const cost = costo ? cons * costo : cons;
       setValore(String(Number(cost.toFixed(2))));
     } else {
       setValore(String(c[m]));
