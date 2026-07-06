@@ -19,6 +19,15 @@ const formatData = (d) => {
   try { return format(new Date(d + 'T00:00:00'), 'dd/MM/yyyy'); } catch { return d; }
 };
 
+// Per i ticket chiusi la data di riferimento mensiale è la data di chiusura (updated_date);
+// per gli altri si usa la scadenza (o data_apertura come fallback).
+const getTicketDataMese = (t) => {
+  if (t.stato === 'chiuso' && t.updated_date) {
+    return new Date(t.updated_date);
+  }
+  return t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
+};
+
 // Dialog dettaglio completo (read-only view)
 function DettaglioTicketDialog({ ticket, onClose, onEdit, userRole }) {
   const [lightbox, setLightbox] = useState(null);
@@ -242,12 +251,12 @@ export default function Ticket({ centroSelezionato, user }) {
     const chiusi = tickets
       .filter(t => {
         if (t.stato !== 'chiuso') return false;
-        const d = t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null;
+        const d = getTicketDataMese(t);
         return d && d >= inizio && d <= fine;
       })
       .sort((a, b) => {
-        const da = a.data_apertura ? new Date(a.data_apertura) : 0;
-        const db = b.data_apertura ? new Date(b.data_apertura) : 0;
+        const da = getTicketDataMese(a) || 0;
+        const db = getTicketDataMese(b) || 0;
         return da - db;
       });
 
@@ -395,7 +404,7 @@ export default function Ticket({ centroSelezionato, user }) {
       t.operatore?.toLowerCase().includes(search.toLowerCase()) ||
       t.descrizione?.toLowerCase().includes(search.toLowerCase());
 
-    const dataFiltro = t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
+    const dataFiltro = getTicketDataMese(t);
     const matchMese = dataFiltro && dataFiltro >= inizio && dataFiltro <= fine;
 
     let matchStato = true;
@@ -409,7 +418,7 @@ export default function Ticket({ centroSelezionato, user }) {
 
   // KPI sul totale del mese
   const ticketsMese = ticketsVisibili.filter(t => {
-    const d = t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
+    const d = getTicketDataMese(t);
     return d && d >= inizio && d <= fine;
   });
   const counts = {
