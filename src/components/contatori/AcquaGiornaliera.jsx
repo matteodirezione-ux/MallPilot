@@ -130,17 +130,18 @@ export default function AcquaGiornaliera({ centroSelezionato, anno, mode = 'cons
                   {contatori.map(c => {
                     const reading = c[`d${d}`];
                     const cons = consumoGiorno(c, d);
-                    const consLabel = cons == null ? '' : mode === 'costi'
-                      ? '€ ' + (cons * (c.costo_unitario || 0)).toLocaleString('it-IT', { maximumFractionDigits: 2 })
-                      : (cons >= 0 ? '+' : '') + cons.toLocaleString('it-IT');
+                    const cellVal = mode === 'costi'
+                      ? (cons != null ? cons * (c.costo_unitario || 0) : null)
+                      : reading;
+                    const consLabel = cons == null ? '' : (cons >= 0 ? '+' : '') + cons.toLocaleString('it-IT');
                     return (
                       <React.Fragment key={c.id}>
                         <td
                           onClick={() => setQuick({ contatore: c, day: d })}
-                          className="px-2 py-1.5 text-center text-xs font-bold text-slate-800 cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                          className={`px-2 py-1.5 text-center text-xs font-bold cursor-pointer hover:bg-blue-50 transition-colors ${mode === 'costi' ? 'text-emerald-700 hover:text-emerald-800' : 'text-slate-800 hover:text-blue-700'}`}
                           title="Clicca per inserire il valore"
-                        >{fmt(reading)}</td>
-                        <td className={`px-2 py-1.5 text-center text-xs border-l border-slate-100 ${mode === 'costi' ? 'text-emerald-700' : 'text-slate-500'}`}>{consLabel}</td>
+                        >{fmtVal(cellVal, mode)}</td>
+                        <td className="px-2 py-1.5 text-center text-xs border-l border-slate-100 text-slate-500">{consLabel}</td>
                       </React.Fragment>
                     );
                   })}
