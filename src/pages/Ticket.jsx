@@ -28,6 +28,16 @@ const getTicketDataMese = (t) => {
   return t.scadenza ? new Date(t.scadenza + 'T00:00:00') : (t.data_apertura ? new Date(t.data_apertura + 'T00:00:00') : null);
 };
 
+// Un ticket chiuso appartiene al mese di chiusura.
+// Un ticket ancora aperto appartiene al proprio mese di origine e a tutti i mesi successivi
+// finché rimane aperto (si trascina nel mese corrente).
+const isTicketInMese = (t, inizio, fine) => {
+  const d = getTicketDataMese(t);
+  if (!d) return false;
+  if (t.stato === 'chiuso') return d >= inizio && d <= fine;
+  return d <= fine;
+};
+
 // Dialog dettaglio completo (read-only view)
 function DettaglioTicketDialog({ ticket, onClose, onEdit, userRole }) {
   const [lightbox, setLightbox] = useState(null);
@@ -404,8 +414,7 @@ export default function Ticket({ centroSelezionato, user }) {
       t.operatore?.toLowerCase().includes(search.toLowerCase()) ||
       t.descrizione?.toLowerCase().includes(search.toLowerCase());
 
-    const dataFiltro = getTicketDataMese(t);
-    const matchMese = dataFiltro && dataFiltro >= inizio && dataFiltro <= fine;
+    const matchMese = isTicketInMese(t, inizio, fine);
 
     let matchStato = true;
     if (filtroStato === 'attivi') matchStato = !['chiuso', 'rifiutato'].includes(t.stato);
@@ -417,10 +426,7 @@ export default function Ticket({ centroSelezionato, user }) {
   });
 
   // KPI sul totale del mese
-  const ticketsMese = ticketsVisibili.filter(t => {
-    const d = getTicketDataMese(t);
-    return d && d >= inizio && d <= fine;
-  });
+  const ticketsMese = ticketsVisibili.filter(t => isTicketInMese(t, inizio, fine));
   const counts = {
     attesa: ticketsMese.filter(t => ['in_attesa_approvazione', 'preventivo_inserito'].includes(t.stato)).length,
     approvati: ticketsMese.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito'].includes(t.stato)).length,
