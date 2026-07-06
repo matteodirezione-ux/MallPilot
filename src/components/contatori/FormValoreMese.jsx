@@ -3,31 +3,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function FormValoreMese({ open, contatore, field, meseLabel, placeholder = 'Lettura', mode = 'consumi', directConsumo = false, prevValue, costoUnitario, onClose, onSave }) {
+export default function FormValoreMese({ open, contatore, field, meseLabel, placeholder = 'Lettura', mode, onClose, onSave }) {
   const [val, setVal] = useState('');
 
   useEffect(() => {
     if (open && contatore && field) {
-      if (mode === 'costi') {
-        const stored = contatore[field];
-        if (stored == null) { setVal(''); return; }
-        let cons;
-        if (directConsumo) {
-          cons = stored;
-        } else {
-          const prev = prevValue;
-          if (prev == null) { setVal(''); return; }
-          cons = stored - prev;
-        }
-        const costo = costoUnitario || 0;
-        const cost = costo ? cons * costo : cons;
-        setVal(String(Number(cost.toFixed(2))));
-      } else {
-        const current = contatore[field];
-        setVal(current != null ? String(current) : '');
-      }
+      const current = contatore[field];
+      setVal(current != null ? String(current) : '');
     }
-  }, [open, contatore, field, mode, directConsumo, prevValue, costoUnitario]);
+  }, [open, contatore, field]);
 
   const submit = () => {
     const trimmed = val.trim();

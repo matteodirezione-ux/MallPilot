@@ -5,7 +5,7 @@ const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov',
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
-const fmtVal = (v, mode) => v == null ? '—' : mode === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
+const fmtCost = (v) => v == null ? '—' : '€ ' + Number(v).toLocaleString('it-IT', { maximumFractionDigits: 2 });
 
 const calcConsumo = (c, idx) => {
   const val = c[MESI[idx]];
@@ -14,27 +14,23 @@ const calcConsumo = (c, idx) => {
   if (prev == null) return null;
   return val - prev;
 };
-
 const getConsumo = (c, i, direct) => direct ? c[MESI[i]] : calcConsumo(c, i);
-
-const getValore = (c, i, direct, mode) => {
-  const cons = getConsumo(c, i, direct);
-  if (cons == null) return null;
-  if (mode !== 'costi') return cons;
-  const costo = c.costo_unitario || 0;
-  return costo ? cons * costo : cons;
-};
-
-const getTotale = (c, direct, mode) => {
+const getTotaleConsumo = (c, direct) => {
   let tot = 0, has = false;
   for (let i = 0; i < 12; i++) {
     const v = getConsumo(c, i, direct);
     if (v != null) { tot += v; has = true; }
   }
-  if (!has) return null;
-  if (mode !== 'costi') return tot;
-  const costo = c.costo_unitario || 0;
-  return costo ? tot * costo : tot;
+  return has ? tot : null;
+};
+const getCosto = (c, i) => c['costo_' + MESI[i]];
+const getTotaleCosto = (c) => {
+  let tot = 0, has = false;
+  for (let i = 0; i < 12; i++) {
+    const v = getCosto(c, i);
+    if (v != null) { tot += v; has = true; }
+  }
+  return has ? tot : null;
 };
 
 const valColor = (mode) => mode === 'costi' ? 'text-emerald-700' : 'text-blue-700';
@@ -63,14 +59,29 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQ
     </td>
   );
 
+  // Modalità costi: tabella indipendente, valori € inseriti manualmente (slegati dai consumi)
+  if (mode === 'costi') {
+    return (
+      <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
+        {nomeCell}
+        {MESI.map((m, i) => (
+          <td key={m} onClick={() => onQuickEdit(c, 'costo_' + m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-emerald-50 transition-colors ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtCost(getCosto(c, i))}</td>
+        ))}
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? totColor(mode) + ' font-normal' : 'font-bold ' + totColor(mode)} border-l border-slate-200`}>{fmtCost(getTotaleCosto(c))}</td>
+        {azioni}
+      </tr>
+    );
+  }
+
+  // Modalità consumi (letture/consumi)
   if (directConsumo) {
     return (
       <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
         {nomeCell}
         {MESI.map((m, i) => (
-          <td key={m} onClick={() => onQuickEdit(c, m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, true, mode), mode)}</td>
+          <td key={m} onClick={() => onQuickEdit(c, m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmt(getConsumo(c, i, true))}</td>
         ))}
-        <td className={`px-2 py-2 text-center text-xs ${isSub ? totColor(mode) + ' font-normal' : 'font-bold ' + totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, true, mode), mode)}</td>
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? totColor(mode) + ' font-normal' : 'font-bold ' + totColor(mode)} border-l border-slate-200`}>{fmt(getTotaleConsumo(c, true))}</td>
         {azioni}
       </tr>
     );
@@ -84,16 +95,16 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQ
         {MESI.map((m, i) => (
           <td key={m} onClick={() => onQuickEdit(c, m, MESI_LABEL[i])} className={`px-2 py-2 text-center text-xs cursor-pointer hover:bg-blue-50 transition-colors ${isSub ? 'text-slate-600' : 'font-bold text-slate-800'}`}>{fmt(c[m])}</td>
         ))}
-        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-700' : 'font-bold text-slate-900'} border-l border-slate-200`}>{fmt(getTotale(c, false, 'consumi'))}</td>
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-slate-700' : 'font-bold text-slate-900'} border-l border-slate-200`}>{fmt(getTotaleConsumo(c, false))}</td>
         {azioni}
       </tr>
       <tr className={isSub ? 'bg-amber-50 border-l-[6px] border-l-amber-500' : 'bg-blue-50/50 border-l-[6px] border-l-transparent'}>
-        <td className={`px-2 py-1 text-xs italic ${isSub ? 'pl-6 text-amber-600 font-semibold' : mode === 'costi' ? 'text-emerald-500' : 'text-slate-400'}`}>↳ {mode === 'costi' ? 'Costo' : labelConsumo}</td>
+        <td className={`px-2 py-1 text-xs italic ${isSub ? 'pl-6 text-amber-600 font-semibold' : 'text-slate-400'}`}>↳ {labelConsumo}</td>
         <td className="px-2 py-1"></td>
         {MESI.map((_, i) => (
-          <td key={i} className={`px-2 py-1 text-center text-xs ${isSub ? valColor(mode) + ' font-normal' : 'font-bold ' + valColor(mode)}`}>{fmtVal(getValore(c, i, false, mode), mode)}</td>
+          <td key={i} className={`px-2 py-1 text-center text-xs ${isSub ? valColor('consumi') + ' font-normal' : 'font-bold ' + valColor('consumi')}`}>{fmt(getConsumo(c, i, false))}</td>
         ))}
-        <td className={`px-2 py-1 text-center text-xs font-bold ${totColor(mode)} border-l border-slate-200`}>{fmtVal(getTotale(c, false, mode), mode)}</td>
+        <td className={`px-2 py-1 text-center text-xs font-bold ${totColor('consumi')} border-l border-slate-200`}>{fmt(getTotaleConsumo(c, false))}</td>
         <td className="px-2 py-1 border-l border-slate-200"></td>
       </tr>
     </>

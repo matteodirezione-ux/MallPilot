@@ -27,25 +27,6 @@ const TIPI = [
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
 const fmtVal = (v, m) => v == null ? '—' : m === 'costi' ? '€ ' + v.toLocaleString('it-IT', { maximumFractionDigits: 2 }) : v.toLocaleString('it-IT');
 
-// Valore del mese precedente (o lettura_iniziale per gen) serve per convertire costo <-> lettura
-const getPrevValue = (c, field) => {
-  if (field === 'lettura_iniziale') return null;
-  const idx = MESI.indexOf(field);
-  if (idx === 0) return c.lettura_iniziale;
-  if (idx > 0) return c[MESI[idx - 1]];
-  return null;
-};
-
-// Converte un costo (€) inserito in modalità costi nel valore da salvare (lettura o consumo)
-const costToStored = (cost, c, field, directConsumo) => {
-  const costo = c.costo_unitario || 0;
-  if (directConsumo) return costo ? cost / costo : cost;
-  if (!costo) return null;
-  const prev = getPrevValue(c, field);
-  if (prev == null) return null;
-  return prev + (cost / costo);
-};
-
 export default function LetturaContatori({ centroSelezionato, user }) {
   const [tab, setTab] = useState(user?.tipo_account === 'vigilanza' ? 'acqua_giornaliera' : 'acqua');
   const [anno, setAnno] = useState(new Date().getFullYear());
@@ -173,12 +154,8 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const onAddSub = (c) => { setFormPadre(c); setEditing(null); setShowForm(true); };
 
   const handleSaveRilevazione = async ({ id, mese, valore }) => {
-    const c = contatori.find(x => x.id === id);
-    let stored = valore;
-    if (mode === 'costi' && c && valore != null) {
-      stored = costToStored(valore, c, mese, directConsumo);
-    }
-    await base44.entities.LetturaContatore.update(id, { [mese]: stored });
+    const field = mode === 'costi' ? 'costo_' + mese : mese;
+    await base44.entities.LetturaContatore.update(id, { [field]: valore });
     setShowRilevazione(false);
     loadContatori();
   };
@@ -192,12 +169,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const [quick, setQuick] = useState(null);
   const handleQuickSave = async (valore) => {
     if (!quick) return;
-    const c = quick.contatore;
-    let stored = valore;
-    if (mode === 'costi' && quick.field !== 'lettura_iniziale' && valore != null) {
-      stored = costToStored(valore, c, quick.field, directConsumo);
-    }
-    await base44.entities.LetturaContatore.update(c.id, { [quick.field]: stored });
+    await base44.entities.LetturaContatore.update(quick.contatore.id, { [quick.field]: valore });
     setQuick(null);
     loadContatori();
   };
@@ -208,16 +180,17 @@ export default function LetturaContatori({ centroSelezionato, user }) {
   const totaleMese = MESI.map((_, i) => {
     let tot = 0, has = false;
     principali.forEach(c => {
-      let cons = null;
-      if (directConsumo) {
-        const val = c[MESI[i]];
-        if (val != null) cons = val;
+      let v = null;
+      if (mode === 'costi') {
+        v = c['costo_' + MESI[i]];
+      } else if (directConsumo) {
+        v = c[MESI[i]];
       } else {
         const val = c[MESI[i]];
         const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
-        if (val != null && prev != null) cons = val - prev;
+        if (val != null && prev != null) v = val - prev;
       }
-      if (cons != null) { tot += mode === 'costi' ? (c.costo_unitario ? cons * c.costo_unitario : cons) : cons; has = true; }
+      if (v != null) { tot += v; has = true; }
     });
     return has ? tot : null;
   });
@@ -331,7 +304,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <thead>
               <tr className="bg-slate-100 border-b border-slate-200">
                 <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 min-w-[160px]">Contatore</th>
-                {!directConsumo && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
+                {!directConsumo && mode === 'consumi' && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
                 {MESI_LABEL.map(l => <th key={l} className="px-2 py-2 text-center text-xs font-semibold text-slate-600 min-w-[60px]">{l}</th>)}
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[70px]">Totale</th>
                 <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
@@ -344,13 +317,13 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label, prevValue: getPrevValue(contatore, field) })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label, prevValue: getPrevValue(contatore, field) })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
                 </React.Fragment>
               ))}
               <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
                 <td className="px-2 py-2 text-xs font-bold">TOTALE {mode === 'costi' ? 'COSTO' : tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
-                {!directConsumo && <td className="px-2 py-2"></td>}
+                {!directConsumo && mode === 'consumi' && <td className="px-2 py-2"></td>}
                 {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(v, mode)}</td>)}
                 <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmtVal(totaleAnnuo, mode)}</td>
                 <td className="px-2 py-2 border-l border-slate-600"></td>
@@ -386,7 +359,6 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         onSave={handleSaveRilevazione}
         contatori={contatoriTipo}
         mode={mode}
-        directConsumo={directConsumo}
       />
 
       <FormRilevazioneGiornaliera
@@ -404,10 +376,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         contatore={quick?.contatore}
         field={quick?.field}
         meseLabel={quick?.label}
-        mode={quick?.field === 'lettura_iniziale' ? 'consumi' : mode}
-        directConsumo={directConsumo}
-        prevValue={quick?.prevValue}
-        costoUnitario={quick?.contatore?.costo_unitario}
+        mode={quick?.field?.startsWith('costo_') ? 'costi' : 'consumi'}
         onClose={() => setQuick(null)}
         onSave={handleQuickSave}
       />

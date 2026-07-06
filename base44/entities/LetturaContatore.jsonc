@@ -83,6 +83,54 @@
     "dic": {
       "type": "number",
       "description": "Lettura Dicembre"
+    },
+    "costo_gen": {
+      "type": "number",
+      "description": "Costo Gennaio (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_feb": {
+      "type": "number",
+      "description": "Costo Febbraio (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_mar": {
+      "type": "number",
+      "description": "Costo Marzo (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_apr": {
+      "type": "number",
+      "description": "Costo Aprile (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_mag": {
+      "type": "number",
+      "description": "Costo Maggio (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_giu": {
+      "type": "number",
+      "description": "Costo Giugno (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_lug": {
+      "type": "number",
+      "description": "Costo Luglio (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_ago": {
+      "type": "number",
+      "description": "Costo Agosto (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_set": {
+      "type": "number",
+      "description": "Costo Settembre (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_ott": {
+      "type": "number",
+      "description": "Costo Ottobre (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_nov": {
+      "type": "number",
+      "description": "Costo Novembre (inserito manualmente, indipendente dai consumi)"
+    },
+    "costo_dic": {
+      "type": "number",
+      "description": "Costo Dicembre (inserito manualmente, indipendente dai consumi)"
     }
   },
   "required": [

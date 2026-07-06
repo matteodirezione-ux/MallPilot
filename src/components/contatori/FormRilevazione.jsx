@@ -11,7 +11,7 @@ const MESI = [
   { key: 'ott', label: 'Ottobre' }, { key: 'nov', label: 'Novembre' }, { key: 'dic', label: 'Dicembre' },
 ];
 
-export default function FormRilevazione({ open, onClose, onSave, contatori, mode = 'consumi', directConsumo = false }) {
+export default function FormRilevazione({ open, onClose, onSave, contatori, mode = 'consumi' }) {
   const [mese, setMese] = useState(MESI[new Date().getMonth()].key);
   const [contatoreId, setContatoreId] = useState('');
   const [valore, setValore] = useState('');
@@ -24,25 +24,12 @@ export default function FormRilevazione({ open, onClose, onSave, contatori, mode
     }
   }, [open]);
 
+  const fieldFor = (m) => mode === 'costi' ? 'costo_' + m : m;
+
   const prefill = (id, m) => {
     const c = contatori.find(x => x.id === id);
-    if (!c || c[m] == null) { setValore(''); return; }
-    if (mode === 'costi') {
-      const idx = MESI.findIndex(x => x.key === m);
-      let cons;
-      if (directConsumo) {
-        cons = c[m];
-      } else {
-        const prev = idx === 0 ? c.lettura_iniziale : c[MESI[idx - 1].key];
-        if (prev == null) { setValore(''); return; }
-        cons = c[m] - prev;
-      }
-      const costo = c.costo_unitario || 0;
-      const cost = costo ? cons * costo : cons;
-      setValore(String(Number(cost.toFixed(2))));
-    } else {
-      setValore(String(c[m]));
-    }
+    const f = fieldFor(m);
+    setValore(c && c[f] != null ? String(c[f]) : '');
   };
 
   const handleContatoreChange = (id) => { setContatoreId(id); prefill(id, mese); };
