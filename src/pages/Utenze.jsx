@@ -52,6 +52,24 @@ const unitCostMese = (contatori, idx, direct) => {
   return count > 0 ? sum / count : null;
 };
 
+// Somma/media solo sui mesi in cui ENTRAMBE le funzioni hanno un valore non nullo
+const totaleComune = (fnCurr, fnPrev) => {
+  let totC = 0, totP = 0, has = false;
+  MESI.forEach((_, i) => {
+    const c = fnCurr(i), p = fnPrev(i);
+    if (c != null && p != null) { totC += c; totP += p; has = true; }
+  });
+  return has ? { curr: totC, prev: totP } : { curr: null, prev: null };
+};
+const mediaComune = (fnCurr, fnPrev) => {
+  let sumC = 0, sumP = 0, count = 0;
+  MESI.forEach((_, i) => {
+    const c = fnCurr(i), p = fnPrev(i);
+    if (c != null && p != null) { sumC += c; sumP += p; count++; }
+  });
+  return count > 0 ? { curr: sumC / count, prev: sumP / count } : { curr: null, prev: null };
+};
+// Per i totali di singolo anno (usati nel grafico) manteniamo quello che c'è
 const totaleAnno = (fn) => {
   const vals = MESI.map((_, i) => fn(i)).filter(v => v != null);
   return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) : null;
@@ -105,9 +123,8 @@ function CardUtenza({ tipo, curr, prev, mode }) {
     aggLabel = '€/' + unit;
   }
 
-  const aggFn   = mode === 'costo_unitario' ? mediaAnno : totaleAnno;
-  const totCurr = aggFn(getCurr);
-  const totPrev = aggFn(getPrev);
+  const aggFn = mode === 'costo_unitario' ? mediaComune : totaleComune;
+  const { curr: totCurr, prev: totPrev } = aggFn(getCurr, getPrev);
 
   const chartData = MESI_LABEL.map((m, i) => ({
     mese: m,
