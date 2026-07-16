@@ -17,11 +17,11 @@ const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov',
 const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
 
 const TIPI = [
-  { key: 'acqua_giornaliera', label: 'Acqua Giorn.', icon: Droplet, activeColor: 'bg-cyan-600 text-white', chartColor: '#0891b2' },
-  { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white', chartColor: '#3b82f6' },
-  { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white', chartColor: '#9333ea' },
-  { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white', chartColor: '#ea580c' },
-  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun, activeColor: 'bg-yellow-500 text-white', chartColor: '#eab308' },
+  { key: 'acqua_giornaliera', label: 'Acqua Giorn.', icon: Droplet, activeColor: 'bg-cyan-600 text-white', chartColor: '#0891b2', unitLabel: '€/m³' },
+  { key: 'acqua', label: 'Acqua', icon: Droplet, activeColor: 'bg-blue-600 text-white', chartColor: '#3b82f6', unitLabel: '€/m³' },
+  { key: 'energia', label: 'Energia', icon: Zap, activeColor: 'bg-purple-600 text-white', chartColor: '#9333ea', unitLabel: '€/kWh' },
+  { key: 'gas', label: 'Gas', icon: Flame, activeColor: 'bg-orange-600 text-white', chartColor: '#ea580c', unitLabel: '€/m³' },
+  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun, activeColor: 'bg-yellow-500 text-white', chartColor: '#eab308', unitLabel: '€/kWh' },
 ];
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
@@ -30,7 +30,7 @@ const fmtVal = (v, m) => v == null ? '—' : m === 'costi' ? '€ ' + v.toLocale
 export default function LetturaContatori({ centroSelezionato, user }) {
   const [tab, setTab] = useState(user?.tipo_account === 'vigilanza' ? 'acqua_giornaliera' : 'acqua');
   const [anno, setAnno] = useState(new Date().getFullYear());
-  const [mode, setMode] = useState('consumi');
+  const [mode, setMode] = useState('consumi'); // 'consumi' | 'costi' | 'costo_unitario'
   const [contatori, setContatori] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -194,7 +194,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     });
     return has ? tot : null;
   });
-  const totaleAnnuo = totaleMese.some(v => v != null) ? totaleMese.reduce((s, v) => s + (v || 0), 0) : null;
+  const totaleAnnuo = mode === 'costo_unitario' ? null : (totaleMese.some(v => v != null) ? totaleMese.reduce((s, v) => s + (v || 0), 0) : null);
 
   if (!centroSelezionato?.id) return <div className="p-8 text-center text-slate-500">Seleziona un centro commerciale</div>;
 
@@ -210,6 +210,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
               <button onClick={() => setMode('consumi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'consumi' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Consumi</button>
               <button onClick={() => setMode('costi')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'costi' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Costi</button>
+              <button onClick={() => setMode('costo_unitario')} className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${mode === 'costo_unitario' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>€/Unità</button>
             </div>
           )}
           <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
@@ -305,6 +306,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
               <tr className="bg-slate-100 border-b border-slate-200">
                 <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 min-w-[160px]">Contatore</th>
                 {!directConsumo && mode === 'consumi' && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
+                {mode === 'costo_unitario' && <th className="px-2 py-2 text-center text-xs font-semibold text-amber-700">Unità</th>}
                 {MESI_LABEL.map(l => <th key={l} className="px-2 py-2 text-center text-xs font-semibold text-slate-600 min-w-[60px]">{l}</th>)}
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[70px]">Totale</th>
                 <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
@@ -317,17 +319,19 @@ export default function LetturaContatori({ centroSelezionato, user }) {
             <tbody>
               {principali.map(c => (
                 <React.Fragment key={c.id}>
-                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />
-                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} />)}
+                  <ContatoreRow c={c} isSub={false} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} unitLabel={TIPI.find(t => t.key === tab)?.unitLabel || ''} />
+                  {getSub(c.id).map(s => <ContatoreRow key={s.id} c={s} isSub={true} onEdit={onEdit} onAddSub={onAddSub} onDelete={handleDelete} onQuickEdit={(contatore, field, label) => setQuick({ contatore, field, label })} labelConsumo={tab === 'fotovoltaico' ? 'Produzione' : 'Consumo'} directConsumo={directConsumo} mode={mode} unitLabel={TIPI.find(t => t.key === tab)?.unitLabel || ''} />)}
                 </React.Fragment>
               ))}
-              <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
-                <td className="px-2 py-2 text-xs font-bold">TOTALE {mode === 'costi' ? 'COSTO' : tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
-                {!directConsumo && mode === 'consumi' && <td className="px-2 py-2"></td>}
-                {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(v, mode)}</td>)}
-                <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmtVal(totaleAnnuo, mode)}</td>
-                <td className="px-2 py-2 border-l border-slate-600"></td>
-              </tr>
+              {mode !== 'costo_unitario' && (
+                <tr className="bg-slate-800 text-white border-t-2 border-slate-300">
+                  <td className="px-2 py-2 text-xs font-bold">TOTALE {mode === 'costi' ? 'COSTO' : tab === 'fotovoltaico' ? 'PRODUZIONE' : 'CONSUMO'}</td>
+                  {!directConsumo && mode === 'consumi' && <td className="px-2 py-2"></td>}
+                  {totaleMese.map((v, i) => <td key={i} className="px-2 py-2 text-center text-xs font-bold">{fmtVal(v, mode)}</td>)}
+                  <td className="px-2 py-2 text-center text-xs font-bold border-l border-slate-600">{fmtVal(totaleAnnuo, mode)}</td>
+                  <td className="px-2 py-2 border-l border-slate-600"></td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

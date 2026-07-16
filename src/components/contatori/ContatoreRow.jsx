@@ -6,6 +6,7 @@ const MESI_LABEL = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott',
 
 const fmt = (v) => v == null ? '—' : v.toLocaleString('it-IT');
 const fmtCost = (v) => v == null ? '—' : '€ ' + Number(v).toLocaleString('it-IT', { maximumFractionDigits: 2 });
+const fmtUnit = (v) => v == null ? '—' : '€ ' + Number(v).toLocaleString('it-IT', { minimumFractionDigits: 3, maximumFractionDigits: 4 });
 
 const calcConsumo = (c, idx) => {
   const val = c[MESI[idx]];
@@ -33,10 +34,28 @@ const getTotaleCosto = (c) => {
   return has ? tot : null;
 };
 
+// Costo unitario calcolato: costo_mese / consumo_mese
+const getCostoUnitarioCalc = (c, i, direct) => {
+  const costo = getCosto(c, i);
+  const cons = getConsumo(c, i, direct);
+  if (costo == null || cons == null || cons === 0) return null;
+  return costo / cons;
+};
+// Media annua ponderata
+const getMediaCostoUnitario = (c, direct) => {
+  let totCosto = 0, totCons = 0, has = false;
+  for (let i = 0; i < 12; i++) {
+    const costo = getCosto(c, i);
+    const cons = getConsumo(c, i, direct);
+    if (costo != null && cons != null && cons !== 0) { totCosto += costo; totCons += cons; has = true; }
+  }
+  return has && totCons > 0 ? totCosto / totCons : null;
+};
+
 const valColor = (mode) => mode === 'costi' ? 'text-emerald-700' : 'text-blue-700';
 const totColor = (mode) => mode === 'costi' ? 'text-emerald-800' : 'text-blue-800';
 
-export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQuickEdit = () => {}, labelConsumo = 'Consumo', directConsumo = false, mode = 'consumi' }) {
+export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQuickEdit = () => {}, labelConsumo = 'Consumo', directConsumo = false, mode = 'consumi', unitLabel = '' }) {
   const azioni = (
     <td className="px-2 py-2 text-center border-l border-slate-100">
       <div className="flex items-center justify-center gap-1">
@@ -58,6 +77,21 @@ export default function ContatoreRow({ c, isSub, onEdit, onAddSub, onDelete, onQ
       </div>
     </td>
   );
+
+  // Modalità costo_unitario: calcolato = costo / consumo per ogni mese
+  if (mode === 'costo_unitario') {
+    return (
+      <tr className={isSub ? 'bg-amber-100 border-l-[6px] border-l-amber-500 border-t border-t-amber-200' : 'bg-white border-l-[6px] border-l-transparent border-t border-t-slate-100'}>
+        {nomeCell}
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-amber-700 italic' : 'font-bold text-amber-800'}`}>{unitLabel}</td>
+        {MESI.map((m, i) => (
+          <td key={m} className={`px-2 py-2 text-center text-xs ${isSub ? 'text-amber-700' : 'font-bold text-amber-800'}`}>{fmtUnit(getCostoUnitarioCalc(c, i, directConsumo))}</td>
+        ))}
+        <td className={`px-2 py-2 text-center text-xs ${isSub ? 'text-amber-700' : 'font-bold text-amber-900'} border-l border-slate-200`}>{fmtUnit(getMediaCostoUnitario(c, directConsumo))}</td>
+        {azioni}
+      </tr>
+    );
+  }
 
   // Modalità costi: tabella indipendente, valori € inseriti manualmente (slegati dai consumi)
   if (mode === 'costi') {
