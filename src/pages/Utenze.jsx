@@ -100,7 +100,7 @@ function DeltaBadge({ curr, prev, invertPositive }) {
 }
 
 // ── CardUtenza ────────────────────────────────────────────────────────────────
-function CardUtenza({ tipo, curr, prev, mode }) {
+function CardUtenza({ tipo, curr, prev, mode, anno }) {
   const { label, icon: Icon, color, unit, direct } = tipo;
   const isFoto = tipo.key === 'fotovoltaico';
 
@@ -167,6 +167,43 @@ function CardUtenza({ tipo, curr, prev, mode }) {
             </>
           ) : <p className="text-base font-bold text-slate-400">—</p>}
         </div>
+      </div>
+
+      {/* Tabella mensile */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-slate-100">
+              <th className="text-left py-1.5 pr-2 text-slate-400 font-medium">Mese</th>
+              <th className="text-right py-1.5 px-2 text-slate-400 font-medium">{anno - 1}</th>
+              <th className="text-right py-1.5 px-2 text-slate-400 font-medium">{anno}</th>
+              <th className="text-right py-1.5 pl-2 text-slate-400 font-medium">Var %</th>
+            </tr>
+          </thead>
+          <tbody>
+            {MESI_LABEL.map((m, i) => {
+              const c = getCurr(i), p = getPrev(i);
+              const delta = pct(c, p);
+              const hasData = c != null || p != null;
+              if (!hasData) return null;
+              const isGood = delta == null ? null : (isFoto && mode !== 'costi') ? delta > 0 : delta < 0;
+              return (
+                <tr key={m} className="border-b border-slate-50 hover:bg-slate-50">
+                  <td className="py-1 pr-2 text-slate-600 font-medium">{m}</td>
+                  <td className="py-1 px-2 text-right text-slate-400">{fmtVal(p)}</td>
+                  <td className="py-1 px-2 text-right font-semibold text-slate-700">{fmtVal(c)}</td>
+                  <td className="py-1 pl-2 text-right">
+                    {delta == null ? <span className="text-slate-300">—</span> : (
+                      <span className={`font-semibold ${isGood ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {delta > 0 ? '+' : ''}{delta.toFixed(1)}%
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       <ResponsiveContainer width="100%" height={200}>
@@ -246,10 +283,11 @@ export default function Utenze({ centroSelezionato }) {
           {TIPI_UTENZE.map(tipo => (
             <CardUtenza
               key={tipo.key + mode}
-              tipo={tipo}
-              curr={contatoriAnno.filter(c => c.tipo === tipo.key)}
-              prev={contatoriPrev.filter(c => c.tipo === tipo.key)}
-              mode={mode}
+               tipo={tipo}
+               curr={contatoriAnno.filter(c => c.tipo === tipo.key)}
+               prev={contatoriPrev.filter(c => c.tipo === tipo.key)}
+               mode={mode}
+               anno={anno}
             />
           ))}
         </div>
