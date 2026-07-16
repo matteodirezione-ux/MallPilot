@@ -127,17 +127,10 @@ function CardUtenza({ tipo, curr, prev, mode }) {
             <p className="text-xs text-slate-400">{aggLabel}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {totCurr != null && totPrev != null && (
-            <span className={`text-sm font-bold ${totCurr - totPrev > 0 ? (isFoto && mode !== 'costi' ? 'text-emerald-600' : 'text-red-600') : (isFoto && mode !== 'costi' ? 'text-red-600' : 'text-emerald-600')}`}>
-              {totCurr - totPrev > 0 ? '+' : ''}{fmtVal(totCurr - totPrev)}
-            </span>
-          )}
-          <DeltaBadge curr={totCurr} prev={totPrev} invertPositive={isFoto && mode !== 'costi'} />
-        </div>
+        <DeltaBadge curr={totCurr} prev={totPrev} invertPositive={isFoto && mode !== 'costi'} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <div className="bg-slate-50 rounded-lg p-3">
           <p className="text-xs text-slate-500 mb-1">Anno corrente</p>
           <p className="text-lg font-bold text-slate-800">{fmtVal(totCurr)}</p>
@@ -145,6 +138,17 @@ function CardUtenza({ tipo, curr, prev, mode }) {
         <div className="bg-slate-50 rounded-lg p-3">
           <p className="text-xs text-slate-500 mb-1">Anno precedente</p>
           <p className="text-lg font-bold text-slate-500">{fmtVal(totPrev)}</p>
+        </div>
+        <div className="bg-slate-50 rounded-lg p-3">
+          <p className="text-xs text-slate-500 mb-1">Variazione</p>
+          {totCurr != null && totPrev != null ? (
+            <>
+              <p className={`text-base font-bold ${totCurr - totPrev > 0 ? (isFoto && mode !== 'costi' ? 'text-emerald-600' : 'text-red-600') : (isFoto && mode !== 'costi' ? 'text-red-600' : 'text-emerald-600')}`}>
+                {totCurr - totPrev > 0 ? '+' : ''}{fmtVal(totCurr - totPrev)}
+              </p>
+              <DeltaBadge curr={totCurr} prev={totPrev} invertPositive={isFoto && mode !== 'costi'} />
+            </>
+          ) : <p className="text-base font-bold text-slate-400">—</p>}
         </div>
       </div>
 
