@@ -306,7 +306,6 @@ export default function LetturaContatori({ centroSelezionato, user }) {
               <tr className="bg-slate-100 border-b border-slate-200">
                 <th className="px-2 py-2 text-left text-xs font-semibold text-slate-600 min-w-[160px]">Contatore</th>
                 {!directConsumo && mode === 'consumi' && <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600">Lettura Iniz.</th>}
-                {mode === 'costo_unitario' && <th className="px-2 py-2 text-center text-xs font-semibold text-amber-700">Unità</th>}
                 {MESI_LABEL.map(l => <th key={l} className="px-2 py-2 text-center text-xs font-semibold text-slate-600 min-w-[60px]">{l}</th>)}
                 <th className="px-2 py-2 text-center text-xs font-semibold text-slate-600 border-l border-slate-200 min-w-[70px]">Totale</th>
                 <th className="px-2 py-2 text-center border-l border-slate-200 min-w-[90px]">
@@ -337,7 +336,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
         </div>
       )}
 
-      {!loading && principali.length > 0 && (
+      {!loading && principali.length > 0 && mode !== 'costo_unitario' && (
         <GraficoContatori
           totaleMese={totaleMese}
           totaleAnnuo={totaleAnnuo}
@@ -345,6 +344,33 @@ export default function LetturaContatori({ centroSelezionato, user }) {
           accentColor={TIPI.find(t => t.key === tab)?.chartColor}
         />
       )}
+      {!loading && principali.length > 0 && mode === 'costo_unitario' && (() => {
+        const getCostoUnitarioMese = (i) => {
+          let sum = 0, count = 0;
+          principali.forEach(c => {
+            const costo = c['costo_' + MESI[i]];
+            const cons = directConsumo ? c[MESI[i]] : (() => {
+              const val = c[MESI[i]];
+              const prev = i === 0 ? c.lettura_iniziale : c[MESI[i - 1]];
+              return val != null && prev != null ? val - prev : null;
+            })();
+            if (costo != null && cons != null && cons !== 0) { sum += costo / cons; count++; }
+          });
+          return count > 0 ? sum / count : null;
+        };
+        const mediaPerMese = MESI.map((_, i) => getCostoUnitarioMese(i));
+        const mediaValidi = mediaPerMese.filter(v => v != null);
+        const mediaAnnua = mediaValidi.length > 0 ? mediaValidi.reduce((s, v) => s + v, 0) / mediaValidi.length : null;
+        return (
+          <GraficoContatori
+            totaleMese={mediaPerMese}
+            totaleAnnuo={mediaAnnua}
+            label={`${TIPI.find(t => t.key === tab)?.unitLabel || '€/Unità'} (media)`}
+            accentColor="#d97706"
+            formatValue={(v) => v == null ? '—' : '€ ' + v.toLocaleString('it-IT', { minimumFractionDigits: 3, maximumFractionDigits: 4 })}
+          />
+        );
+      })()}
 
       <FormContatore
         open={showForm}
