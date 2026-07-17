@@ -242,9 +242,20 @@ function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
 
 // ── fetchMonthlyTemps: Open-Meteo historical monthly means ───────────────────
 async function fetchMonthlyTemps(lat, lon, year) {
+  const now = new Date();
+  const isCurrentYear = year === now.getFullYear();
   const start = `${year}-01-01`;
-  const end   = `${year}-12-31`;
-  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&daily=temperature_2m_mean&timezone=Europe%2FRome`;
+  // For current year, cap at yesterday; for past years cap at Dec 31
+  const endDate = isCurrentYear
+    ? new Date(now - 86400000).toISOString().slice(0, 10)
+    : `${year}-12-31`;
+
+  // Use forecast API for recent/current year, archive for past years
+  const baseUrl = isCurrentYear
+    ? 'https://api.open-meteo.com/v1/forecast'
+    : 'https://archive-api.open-meteo.com/v1/archive';
+
+  const url = `${baseUrl}?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${endDate}&daily=temperature_2m_mean&timezone=Europe%2FRome`;
   const res = await fetch(url);
   if (!res.ok) return Array(12).fill(null);
   const data = await res.json();
