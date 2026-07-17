@@ -201,7 +201,7 @@ function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
                   <td className="py-1 pl-2 text-right">
                     {delta == null ? <span className="text-slate-300">—</span> : (
                       <span className={`font-semibold ${isGood ? 'text-emerald-600' : 'text-red-600'}`}>
-                        {delta > 0 ? '+' : ''}{delta.toFixed(1)}%
+                        {c - p > 0 ? '+' : ''}{fmtVal(c - p)} ({delta > 0 ? '+' : ''}{delta.toFixed(1)}%)
                       </span>
                     )}
                   </td>
