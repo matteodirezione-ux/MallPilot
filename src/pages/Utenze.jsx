@@ -100,7 +100,7 @@ function DeltaBadge({ curr, prev, invertPositive }) {
 }
 
 // ── CardUtenza ────────────────────────────────────────────────────────────────
-function CardUtenza({ tipo, curr, prev, mode, anno }) {
+function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
   const { label, icon: Icon, color, unit, direct } = tipo;
   const isFoto = tipo.key === 'fotovoltaico';
 
@@ -178,6 +178,9 @@ function CardUtenza({ tipo, curr, prev, mode, anno }) {
               <th className="text-right py-1.5 px-2 text-slate-400 font-medium">{anno - 1}</th>
               <th className="text-right py-1.5 px-2 text-slate-400 font-medium">{anno}</th>
               <th className="text-right py-1.5 pl-2 text-slate-400 font-medium">Var %</th>
+              <th className="text-right py-1.5 px-2 text-orange-300 font-medium">°C {anno-1}</th>
+              <th className="text-right py-1.5 px-2 text-orange-400 font-medium">°C {anno}</th>
+              <th className="text-right py-1.5 pl-2 text-orange-300 font-medium">Δ°C</th>
             </tr>
           </thead>
           <tbody>
@@ -187,6 +190,9 @@ function CardUtenza({ tipo, curr, prev, mode, anno }) {
               const hasData = c != null || p != null;
               if (!hasData) return null;
               const isGood = delta == null ? null : (isFoto && mode !== 'costi') ? delta > 0 : delta < 0;
+              const tc = tempsCurr?.[i], tp = tempsPrev?.[i];
+              const deltaTemp = tc != null && tp != null ? tc - tp : null;
+              const deltaTempPct = pct(tc, tp);
               return (
                 <tr key={m} className="border-b border-slate-50 hover:bg-slate-50">
                   <td className="py-1 pr-2 text-slate-600 font-medium">{m}</td>
@@ -196,6 +202,15 @@ function CardUtenza({ tipo, curr, prev, mode, anno }) {
                     {delta == null ? <span className="text-slate-300">—</span> : (
                       <span className={`font-semibold ${isGood ? 'text-emerald-600' : 'text-red-600'}`}>
                         {delta > 0 ? '+' : ''}{delta.toFixed(1)}%
+                      </span>
+                    )}
+                  </td>
+                  <td className="py-1 px-2 text-right text-slate-400">{tp != null ? tp.toFixed(1) + '°' : '—'}</td>
+                  <td className="py-1 px-2 text-right text-slate-500">{tc != null ? tc.toFixed(1) + '°' : '—'}</td>
+                  <td className="py-1 pl-2 text-right">
+                    {deltaTemp == null ? <span className="text-slate-300">—</span> : (
+                      <span className={`font-semibold ${deltaTemp > 0 ? 'text-orange-500' : 'text-blue-500'}`}>
+                        {deltaTemp > 0 ? '+' : ''}{deltaTemp.toFixed(1)}° ({deltaTempPct != null ? (deltaTempPct > 0 ? '+' : '') + deltaTempPct.toFixed(1) + '%' : '—'})
                       </span>
                     )}
                   </td>
@@ -225,6 +240,34 @@ function CardUtenza({ tipo, curr, prev, mode, anno }) {
   );
 }
 
+// ── fetchMonthlyTemps: Open-Meteo historical monthly means ───────────────────
+async function fetchMonthlyTemps(lat, lon, year) {
+  const start = `${year}-01-01`;
+  const end   = `${year}-12-31`;
+  const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${start}&end_date=${end}&daily=temperature_2m_mean&timezone=Europe%2FRome`;
+  const res = await fetch(url);
+  if (!res.ok) return Array(12).fill(null);
+  const data = await res.json();
+  // Aggregate daily → monthly mean
+  const sums = Array(12).fill(0), counts = Array(12).fill(0);
+  (data.daily?.time || []).forEach((dateStr, i) => {
+    const m = new Date(dateStr).getMonth();
+    const v = data.daily.temperature_2m_mean[i];
+    if (v != null) { sums[m] += v; counts[m]++; }
+  });
+  return sums.map((s, i) => counts[i] > 0 ? s / counts[i] : null);
+}
+
+// ── geocode city via Open-Meteo geocoding ─────────────────────────────────────
+async function geocodeCity(city) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=it&format=json`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data.results?.length) return null;
+  return { lat: data.results[0].latitude, lon: data.results[0].longitude };
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function Utenze({ centroSelezionato }) {
   const [anno, setAnno] = useState(new Date().getFullYear());
@@ -232,6 +275,8 @@ export default function Utenze({ centroSelezionato }) {
   const [contatoriAnno, setContatoriAnno] = useState([]);
   const [contatoriPrev, setContatoriPrev] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tempsCurr, setTempsCurr] = useState(Array(12).fill(null));
+  const [tempsPrev, setTempsPrev] = useState(Array(12).fill(null));
 
   useEffect(() => {
     if (centroSelezionato?.id) loadData();
@@ -248,6 +293,27 @@ export default function Utenze({ centroSelezionato }) {
     ]);
     setContatoriAnno(curr);
     setContatoriPrev(prev);
+
+    // Fetch temperature data
+    const city = centroSelezionato?.citta || centroSelezionato?.nome;
+    if (city && centroSelezionato.id !== 'tutti') {
+      const coords = await geocodeCity(city);
+      if (coords) {
+        const [tc, tp] = await Promise.all([
+          fetchMonthlyTemps(coords.lat, coords.lon, anno),
+          fetchMonthlyTemps(coords.lat, coords.lon, anno - 1),
+        ]);
+        setTempsCurr(tc);
+        setTempsPrev(tp);
+      } else {
+        setTempsCurr(Array(12).fill(null));
+        setTempsPrev(Array(12).fill(null));
+      }
+    } else {
+      setTempsCurr(Array(12).fill(null));
+      setTempsPrev(Array(12).fill(null));
+    }
+
     setLoading(false);
   };
 
@@ -288,6 +354,8 @@ export default function Utenze({ centroSelezionato }) {
                prev={contatoriPrev.filter(c => c.tipo === tipo.key)}
                mode={mode}
                anno={anno}
+               tempsCurr={tempsCurr}
+               tempsPrev={tempsPrev}
             />
           ))}
         </div>
