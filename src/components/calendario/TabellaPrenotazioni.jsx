@@ -62,6 +62,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     return [...filtrate].sort((a, b) => {
       let va, vb;
       switch (sortConfig.key) {
+        case 'tipo':      va = getTipo(a);                vb = getTipo(b);                break;
         case 'nome':      va = getNome(a).toLowerCase(); vb = getNome(b).toLowerCase(); break;
         case 'costo':     va = a.prezzo_totale ?? 0;     vb = b.prezzo_totale ?? 0;     break;
         case 'durata':    va = getDurata(a);              vb = getDurata(b);              break;
@@ -337,7 +338,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 whitespace-nowrap">Tipo</th>
+              <Th col="tipo" label="Tipo" />
               <Th col="nome"       label="Nome / Cliente" />
               <Th col="data_inizio" label="Data inizio" />
               <Th col="durata"     label="Durata" />
