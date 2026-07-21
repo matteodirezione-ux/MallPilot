@@ -93,54 +93,84 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
   const getTipo = (p) => p.is_gratuito ? 'Gratuito' : p.is_event ? 'Evento' : 'Affitto';
 
+  const SEZIONI = [
+    { tipo: 'Affitto',  label: 'AFFITTI',        bg: 'DBEAFE', headerBg: '1E40AF', headerText: 'FFFFFF' },
+    { tipo: 'Evento',   label: 'EVENTI',          bg: 'EDE9FE', headerBg: '6D28D9', headerText: 'FFFFFF' },
+    { tipo: 'Gratuito', label: 'SPAZI GRATUITI',  bg: 'D1FAE5', headerBg: '065F46', headerText: 'FFFFFF' },
+  ];
+
+  const sortByDate = (arr) => [...arr].sort((a, b) => (a.data_inizio ?? '') < (b.data_inizio ?? '') ? -1 : 1);
+
   const handleExportExcel = () => {
     const nomeCentro = centroSelezionato?.nome?.toUpperCase() || 'CENTRO';
     const nomeFile = `${nomeCentro}_PRENOTAZIONI_${annoFiltro}`;
     const titolo = `${nomeCentro} - PRENOTAZIONI ${annoFiltro}`;
-    const borderStyle = {
-      top: { style: 'thin', color: { rgb: '94A3B8' } },
-      bottom: { style: 'thin', color: { rgb: '94A3B8' } },
-      left: { style: 'thin', color: { rgb: '94A3B8' } },
-      right: { style: 'thin', color: { rgb: '94A3B8' } },
-    };
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    const ws = {
-      '!ref': '',
-      '!cols': [{ wch: 35 }, { wch: 12 }, { wch: 12 }, { wch: 8 }, { wch: 14 }, { wch: 18 }, { wch: 14 }],
-    };
+    const border = { top: { style: 'thin', color: { rgb: '94A3B8' } }, bottom: { style: 'thin', color: { rgb: '94A3B8' } }, left: { style: 'thin', color: { rgb: '94A3B8' } }, right: { style: 'thin', color: { rgb: '94A3B8' } } };
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 16 }, { wch: 20 }] };
     ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
-    const headers = ['Nome / Cliente', 'Tipo', 'Data Inizio', 'Durata', 'Costo', 'Spazio', 'Stato'];
+    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Costo', 'Spazio'];
+    let row = 3;
+    let totaleGenerale = 0;
+
+    SEZIONI.forEach(({ tipo, label, bg, headerBg, headerText }) => {
+      const items = sortByDate(filtrate.filter(p => getTipo(p) === tipo));
+      if (items.length === 0) return;
+
+      // Intestazione sezione
+      cols.forEach((col, i) => {
+        ws[`${col}${row}`] = {
+          v: i === 0 ? label : '',
+          t: 's',
+          s: { font: { bold: true, sz: 10, color: { rgb: headerText } }, fill: { fgColor: { rgb: headerBg } }, alignment: { horizontal: i === 0 ? 'left' : 'center' }, border },
+        };
+      });
+      row++;
+
+      // Header colonne
+      cols.forEach((col, i) => {
+        ws[`${col}${row}`] = {
+          v: headers[i], t: 's',
+          s: { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, alignment: { horizontal: 'center' }, border },
+        };
+      });
+      row++;
+
+      // Righe dati
+      let totaleSez = 0;
+      items.forEach(p => {
+        totaleSez += p.prezzo_totale || 0;
+        const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
+        const rowData = [
+          { v: getNome(p), t: 's' },
+          { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
+          { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
+          { v: getDurata(p) + ' gg', t: 's' },
+          p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+          { v: getSpazio(p), t: 's' },
+        ];
+        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: rowStyle }; });
+        row++;
+      });
+
+      // Totale sezione
+      const sezStyle = { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border };
+      ws[`A${row}`] = { v: `Totale ${label.toLowerCase()}`, t: 's', s: { ...sezStyle, alignment: { horizontal: 'left' } } };
+      ['B', 'C', 'D', 'F'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
+      ws[`E${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      totaleGenerale += totaleSez;
+      row += 2; // riga vuota tra sezioni
+    });
+
+    // Totale generale
+    const totStyle = { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E3A5F' } }, border };
     cols.forEach((col, i) => {
-      ws[`${col}3`] = {
-        v: headers[i], t: 's',
-        s: { font: { bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } }, alignment: { horizontal: 'center' }, border: borderStyle },
-      };
+      if (i === 0) ws[`${col}${row}`] = { v: 'TOTALE GENERALE', t: 's', s: { ...totStyle, alignment: { horizontal: 'left' } } };
+      else if (i === 4) ws[`${col}${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...totStyle, alignment: { horizontal: 'right' } } };
+      else ws[`${col}${row}`] = { v: '', t: 's', s: totStyle };
     });
-    const tipoBg = { Gratuito: 'D1FAE5', Evento: 'EDE9FE', Affitto: 'DBEAFE' };
-    let totale = 0;
-    sorted.forEach((p, idx) => {
-      const row = idx + 4;
-      const tipo = getTipo(p);
-      const bg = tipoBg[tipo] || 'FFFFFF';
-      const rowStyle = { border: borderStyle, fill: { fgColor: { rgb: bg } } };
-      totale += p.prezzo_totale || 0;
-      const rowData = [
-        { v: getNome(p), t: 's' },
-        { v: tipo, t: 's' },
-        { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
-        { v: getDurata(p) + ' gg', t: 's' },
-        p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
-        { v: getSpazio(p), t: 's' },
-        { v: statoLabel[p.stato] || p.stato, t: 's' },
-      ];
-      cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: rowStyle }; });
-    });
-    const totalRow = sorted.length + 4;
-    const totalStyle = { font: { bold: true, sz: 10 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border: borderStyle };
-    ws[`A${totalRow}`] = { v: 'TOTALE', t: 's', s: { ...totalStyle, alignment: { horizontal: 'left' } } };
-    ['B', 'C', 'D', 'F', 'G'].forEach(c => { ws[`${c}${totalRow}`] = { v: '', t: 's', s: totalStyle }; });
-    ws[`E${totalRow}`] = { v: totale, t: 'n', z: '€ #,##0.00', s: { ...totalStyle, font: { ...totalStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
-    ws['!ref'] = `A1:G${totalRow}`;
+
+    ws['!ref'] = `A1:F${row}`;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
@@ -152,13 +182,14 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const logoUrl = centroSelezionato?.logo_url;
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+
     if (logoUrl) {
       await new Promise((resolve) => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
-          const maxH = 14;
-          const ratio = img.width / img.height;
+          const maxH = 14; const ratio = img.width / img.height;
           const imgW = Math.min(maxH * ratio, 48);
           doc.addImage(img, 'PNG', pageW - imgW - 10, 7, imgW, maxH);
           resolve();
@@ -167,79 +198,122 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         img.src = logoUrl;
       });
     }
+
     doc.setFontSize(13); doc.setFont('helvetica', 'bold');
     doc.text(`${nomeCentro.toUpperCase()} — PRENOTAZIONI ${annoFiltro}`, 14, 15);
     doc.setFontSize(8); doc.setFont('helvetica', 'normal');
     doc.setTextColor(130, 130, 130);
     doc.text(`Generato il ${format(new Date(), 'dd/MM/yyyy')}`, 14, 21);
     doc.setTextColor(0, 0, 0);
-    const colWidths = [72, 20, 24, 18, 28, 50, 28]; // ~240mm
-    const headers = ['Nome / Cliente', 'Tipo', 'Data Inizio', 'Durata', 'Costo', 'Spazio', 'Stato'];
-    const rowH = 7;
+
+    // colonne: Nome, Data Inizio, Data Fine, Durata, Costo, Spazio
+    const colWidths = [74, 24, 24, 18, 30, 60];
+    const colHeaders = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Costo', 'Spazio'];
+    const totalW = colWidths.reduce((a, b) => a + b, 0);
     const startX = 14;
+    const rowH = 7;
+
+    // Palette PDF per sezioni
+    const sezPDF = {
+      Affitto:  { bg: [219, 234, 254], header: [30, 64, 175], label: 'AFFITTI' },
+      Evento:   { bg: [237, 233, 254], header: [109, 40, 217], label: 'EVENTI' },
+      Gratuito: { bg: [209, 250, 229], header: [6, 95, 70],  label: 'SPAZI GRATUITI' },
+    };
+
+    const checkPage = (y) => {
+      if (y + rowH > pageH - 10) { doc.addPage(); return 14; }
+      return y;
+    };
+
+    const drawCell = (doc, text, cx, y, w, bg, textColor, align = 'left', bold = false) => {
+      doc.setFillColor(bg[0], bg[1], bg[2]);
+      doc.rect(cx, y, w, rowH, 'F');
+      doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
+      doc.rect(cx, y, w, rowH, 'S');
+      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      const padding = 2;
+      const textX = align === 'right' ? cx + w - padding : align === 'center' ? cx + w / 2 : cx + padding;
+      const truncated = doc.splitTextToSize(String(text ?? ''), w - padding * 2)[0] || '';
+      doc.text(truncated, textX, y + rowH * 0.65, { align });
+    };
+
     let y = 27;
-    // Header
-    doc.setFont('helvetica', 'bold');
-    let hx = startX;
-    headers.forEach((h, i) => {
-      doc.setFillColor(30, 58, 95);
-      doc.rect(hx, y, colWidths[i], rowH, 'F');
-      doc.setDrawColor(20, 40, 70); doc.setLineWidth(0.2);
-      doc.rect(hx, y, colWidths[i], rowH, 'S');
-      doc.setTextColor(255, 255, 255); doc.setFontSize(7.5);
-      doc.text(h, hx + colWidths[i] / 2, y + rowH * 0.65, { align: 'center' });
-      hx += colWidths[i];
-    });
-    doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal');
-    y += rowH;
-    const tipoBgPDF = { Gratuito: [209, 250, 229], Evento: [237, 233, 254], Affitto: [219, 234, 254] };
-    let totale = 0;
-    sorted.forEach((p) => {
-      if (y + rowH > doc.internal.pageSize.getHeight() - 10) { doc.addPage(); y = 14; }
-      const tipo = getTipo(p);
-      const bg = tipoBgPDF[tipo] || [255, 255, 255];
-      const cells = [
-        getNome(p),
-        tipo,
-        p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—',
-        getDurata(p) + ' gg',
-        p.prezzo_totale != null ? fmtEur(p.prezzo_totale) : '—',
-        getSpazio(p),
-        statoLabel[p.stato] || p.stato,
-      ];
-      totale += p.prezzo_totale || 0;
+    let totaleGenerale = 0;
+
+    for (const { tipo, label, bg, headerBg } of [
+      { tipo: 'Affitto',  label: 'AFFITTI',       bg: sezPDF.Affitto.bg,  headerBg: sezPDF.Affitto.header },
+      { tipo: 'Evento',   label: 'EVENTI',         bg: sezPDF.Evento.bg,   headerBg: sezPDF.Evento.header },
+      { tipo: 'Gratuito', label: 'SPAZI GRATUITI', bg: sezPDF.Gratuito.bg, headerBg: sezPDF.Gratuito.header },
+    ]) {
+      const items = sortByDate(filtrate.filter(p => getTipo(p) === tipo));
+      if (items.length === 0) continue;
+
+      // Riga intestazione sezione
+      y = checkPage(y);
       let cx = startX;
-      cells.forEach((text, i) => {
-        const w = colWidths[i];
-        doc.setFillColor(bg[0], bg[1], bg[2]);
-        doc.rect(cx, y, w, rowH, 'F');
-        doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.2);
-        doc.rect(cx, y, w, rowH, 'S');
-        doc.setTextColor(40, 40, 40); doc.setFontSize(7.5);
-        const isNum = i === 4;
-        const isCenter = i === 1 || i === 3 || i === 6;
-        const padding = 2;
-        const textX = isNum ? cx + w - padding : isCenter ? cx + w / 2 : cx + padding;
-        const align = isNum ? 'right' : isCenter ? 'center' : 'left';
-        const truncated = doc.splitTextToSize(String(text ?? ''), w - padding * 2)[0] || '';
-        doc.text(truncated, textX, y + rowH * 0.65, { align });
+      colWidths.forEach((w, i) => {
+        drawCell(doc, i === 0 ? label : '', cx, y, w, headerBg, [255, 255, 255], i === 0 ? 'left' : 'center', true);
         cx += w;
       });
       y += rowH;
+
+      // Header colonne
+      y = checkPage(y);
+      cx = startX;
+      colHeaders.forEach((h, i) => {
+        drawCell(doc, h, cx, y, colWidths[i], [226, 232, 240], [30, 58, 95], 'center', true);
+        cx += colWidths[i];
+      });
+      y += rowH;
+
+      // Righe dati
+      let totaleSez = 0;
+      items.forEach((p) => {
+        y = checkPage(y);
+        totaleSez += p.prezzo_totale || 0;
+        const cells = [
+          getNome(p),
+          p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—',
+          p.data_fine   ? format(new Date(p.data_fine),   'dd/MM/yyyy') : '—',
+          getDurata(p) + ' gg',
+          p.prezzo_totale != null ? fmtEur(p.prezzo_totale) : '—',
+          getSpazio(p),
+        ];
+        cx = startX;
+        cells.forEach((text, i) => {
+          const isNum = i === 4;
+          const isCenter = i === 3;
+          drawCell(doc, text, cx, y, colWidths[i], bg, [40, 40, 40], isNum ? 'right' : isCenter ? 'center' : 'left');
+          cx += colWidths[i];
+        });
+        y += rowH;
+      });
+
+      // Totale sezione
+      y = checkPage(y);
+      cx = startX;
+      colWidths.forEach((w, i) => {
+        if (i === 0) drawCell(doc, `Totale ${label.toLowerCase()}`, cx, y, w, [226, 232, 240], [30, 58, 95], 'left', true);
+        else if (i === 4) drawCell(doc, fmtEur(totaleSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', true);
+        else drawCell(doc, '', cx, y, w, [226, 232, 240], [30, 58, 95]);
+        cx += w;
+      });
+      totaleGenerale += totaleSez;
+      y += rowH + 4; // spazio tra sezioni
+    }
+
+    // Totale generale
+    y = checkPage(y);
+    let cx = startX;
+    colWidths.forEach((w, i) => {
+      if (i === 0) drawCell(doc, 'TOTALE GENERALE', cx, y, w, [30, 58, 95], [255, 255, 255], 'left', true);
+      else if (i === 4) drawCell(doc, fmtEur(totaleGenerale), cx, y, w, [30, 58, 95], [255, 255, 255], 'right', true);
+      else drawCell(doc, '', cx, y, w, [30, 58, 95], [255, 255, 255]);
+      cx += w;
     });
-    // Riga totali
-    if (y + rowH > doc.internal.pageSize.getHeight() - 10) { doc.addPage(); y = 14; }
-    doc.setFont('helvetica', 'bold');
-    const totalW = colWidths.reduce((a, b) => a + b, 0);
-    doc.setFillColor(226, 232, 240);
-    doc.rect(startX, y, totalW, rowH, 'F');
-    doc.setDrawColor(148, 163, 184); doc.setLineWidth(0.3);
-    doc.rect(startX, y, totalW, rowH, 'S');
-    doc.setTextColor(30, 58, 95); doc.setFontSize(8);
-    doc.text('TOTALE', startX + 2, y + rowH * 0.65, { align: 'left' });
-    const costoX = startX + colWidths[0] + colWidths[1] + colWidths[2] + colWidths[3] + colWidths[4] - 2;
-    doc.text(fmtEur(totale), costoX, y + rowH * 0.65, { align: 'right' });
-    doc.setTextColor(0, 0, 0); doc.setFont('helvetica', 'normal');
+
     doc.save(`${nomeFile}.pdf`);
   };
 
