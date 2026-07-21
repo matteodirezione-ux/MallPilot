@@ -54,7 +54,7 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
 
       // Forecast 7 giorni
       const meteoRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&forecast_days=7`
+        `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&forecast_days=7`
       );
       const meteoData = await meteoRes.json();
       setWeather({ place, daily: meteoData.daily });
@@ -76,6 +76,9 @@ export default function WeatherWidget({ citta, provincia, inline, indirizzo }) {
   if (error || !weather) return null;
 
   const { daily } = weather;
+  // Open-Meteo rinominato da 'weathercode' a 'weather_code' nelle versioni recenti
+  if (!daily) return null;
+  daily.weathercode = daily.weathercode ?? daily.weather_code ?? [];
   const today = new Date(); today.setHours(0,0,0,0);
 
   // Modalità inline: 7 giorni che riempiono tutta la riga
