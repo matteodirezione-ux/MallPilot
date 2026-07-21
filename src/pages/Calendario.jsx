@@ -448,6 +448,7 @@ export default function Calendario({ centroSelezionato, user }) {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 isVigilanza={isVigilanza}
+                centroSelezionato={centroSelezionato}
               />
             </TabsContent>
           </>
