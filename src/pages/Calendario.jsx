@@ -15,6 +15,7 @@ import { differenceInDays } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import DisponibilitaSpazi from '../components/calendario/DisponibilitaSpazi';
+import TabellaPrenotazioni from '../components/calendario/TabellaPrenotazioni';
 import OccupazioneSpazi from '../components/calendario/OccupazioneSpazi';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
@@ -334,6 +335,10 @@ export default function Calendario({ centroSelezionato, user }) {
                     <LayoutGrid className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Occupazione</span>
                   </TabsTrigger>
+                  <TabsTrigger value="prenotazioni" className="flex items-center gap-1 text-xs md:text-sm px-2 md:px-3">
+                    <List className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Prenotazioni</span>
+                  </TabsTrigger>
                 </>
               )}
             </TabsList>
@@ -433,6 +438,16 @@ export default function Calendario({ centroSelezionato, user }) {
                 prenotazioni={prenotazioniFiltrate}
                 spazi={spazi}
                 clienti={clienti}
+              />
+            </TabsContent>
+            <TabsContent value="prenotazioni">
+              <TabellaPrenotazioni
+                prenotazioni={prenotazioniFiltrate}
+                clienti={clienti}
+                spazi={spazi}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                isVigilanza={isVigilanza}
               />
             </TabsContent>
           </>
