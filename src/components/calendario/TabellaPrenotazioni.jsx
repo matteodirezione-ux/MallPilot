@@ -51,6 +51,8 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     return [...anni].sort((a, b) => b - a);
   }, [prenotazioni]);
 
+  const getTipo = (p) => p.is_gratuito ? 'Gratuito' : p.is_event ? 'Evento' : 'Affitto';
+
   const filtrate = useMemo(() =>
     prenotazioni.filter(p => {
       if (!p.data_inizio) return false;
@@ -91,8 +93,6 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
   };
 
   const fmtEur = (n) => new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(n || 0);
-
-  const getTipo = (p) => p.is_gratuito ? 'Gratuito' : p.is_event ? 'Evento' : 'Affitto';
 
   const SEZIONI = [
     { tipo: 'Affitto',  label: 'AFFITTI',        bg: 'DBEAFE', headerBg: '1E40AF', headerText: 'FFFFFF' },
