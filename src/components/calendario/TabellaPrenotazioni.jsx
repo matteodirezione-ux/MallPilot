@@ -140,11 +140,19 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               </tr>
             ) : sorted.map(p => (
               <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                <td className="py-2.5 px-3 font-medium text-slate-800 max-w-[180px] truncate">
-                  {p.is_event && (
-                    <span className="inline-block mr-1.5 text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase">Evento</span>
-                  )}
-                  {getNome(p)}
+                <td className="py-2.5 px-3 font-medium text-slate-800 max-w-[220px]">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {p.is_event && (
+                      <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Evento</span>
+                    )}
+                    {p.is_gratuito && (
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Gratuito</span>
+                    )}
+                    {!p.is_event && !p.is_gratuito && (
+                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Affitto</span>
+                    )}
+                    <span className="truncate">{getNome(p)}</span>
+                  </div>
                 </td>
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {p.data_inizio ? format(new Date(p.data_inizio), 'd MMM yyyy', { locale: it }) : '—'}
