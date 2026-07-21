@@ -18,6 +18,7 @@ import {
   Menu,
   X,
   TrendingUp,
+  Zap,
   Sparkles,
   HardDrive,
   Megaphone,
@@ -283,7 +284,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Tenant', page: 'Tenant', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['proprieta', 'direttore', 'tenant'] },
         { name: 'Contatori', page: 'LetturaContatori', icon: Gauge, roles: ['proprieta', 'direttore', 'vigilanza'] },
-        { name: 'Utenze', page: 'Utenze', icon: TrendingUp, roles: ['proprieta', 'direttore'] },
+        { name: 'Utenze', page: 'Utenze', icon: Zap, roles: ['proprieta', 'direttore'] },
         { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
         { name: 'Storage', page: 'StorageReport', icon: HardDrive, roles: ['proprieta'] },
       ]
