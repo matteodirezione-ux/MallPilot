@@ -19,6 +19,7 @@ import {
   X,
   TrendingUp,
   Zap,
+  Hammer,
   Sparkles,
   HardDrive,
   Megaphone,
@@ -274,7 +275,7 @@ export default function Layout({ children, currentPageName }) {
       items: [
         { name: 'Fornitori', page: 'Fornitori', icon: Users, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Pulizie', page: 'Pulizie', icon: Sparkles, roles: ['proprieta', 'direttore', 'vigilanza'] },
-        { name: 'Capex', page: 'Capex', icon: TrendingUp, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Capex', page: 'Capex', icon: Hammer, roles: ['proprieta', 'direttore', 'vigilanza'] },
       ]
     },
     {
