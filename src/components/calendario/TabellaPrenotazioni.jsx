@@ -337,6 +337,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
+              <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 whitespace-nowrap">Tipo</th>
               <Th col="nome"       label="Nome / Cliente" />
               <Th col="data_inizio" label="Data inizio" />
               <Th col="durata"     label="Durata" />
@@ -349,23 +350,23 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           <tbody className="divide-y divide-slate-50">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={isVigilanza ? 6 : 7} className="py-10 text-center text-slate-400 text-sm">
+                <td colSpan={isVigilanza ? 7 : 8} className="py-10 text-center text-slate-400 text-sm">
                   Nessuna prenotazione trovata
                 </td>
               </tr>
             ) : sorted.map(p => (
               <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                <td className="py-2.5 px-3 whitespace-nowrap">
+                  {p.is_gratuito ? (
+                    <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-semibold uppercase">Gratuito</span>
+                  ) : p.is_event ? (
+                    <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase">Evento</span>
+                  ) : (
+                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-semibold uppercase">Affitto</span>
+                  )}
+                </td>
                 <td className="py-2.5 px-3 font-medium text-slate-800 max-w-[220px]">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {p.is_gratuito ? (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Gratuito</span>
-                    ) : p.is_event ? (
-                      <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Evento</span>
-                    ) : (
-                      <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Affitto</span>
-                    )}
-                    <span className="truncate">{getNome(p)}</span>
-                  </div>
+                  <span className="truncate block">{getNome(p)}</span>
                 </td>
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {p.data_inizio ? format(new Date(p.data_inizio), 'd MMM yyyy', { locale: it }) : '—'}
