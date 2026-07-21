@@ -12,7 +12,9 @@ function SortIcon({ col, sortConfig }) {
 }
 
 export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEdit, onDelete, isVigilanza }) {
-  const [sortConfig, setSortConfig] = useState({ key: 'data_inizio', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'data_inizio', direction: 'asc' });
+  const annoCorrente = new Date().getFullYear();
+  const [annoFiltro, setAnnoFiltro] = useState(annoCorrente);
 
   const clientiMap = useMemo(() => Object.fromEntries(clienti.map(c => [c.id, c])), [clienti]);
   const spaziMap = useMemo(() => Object.fromEntries(spazi.map(s => [s.id, s])), [spazi]);
@@ -41,8 +43,21 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     );
   };
 
+  // Anni disponibili dai dati
+  const anniDisponibili = useMemo(() => {
+    const anni = new Set(prenotazioni.map(p => p.data_inizio ? new Date(p.data_inizio).getFullYear() : null).filter(Boolean));
+    return [...anni].sort((a, b) => b - a);
+  }, [prenotazioni]);
+
+  const filtrate = useMemo(() =>
+    prenotazioni.filter(p => {
+      if (!p.data_inizio) return false;
+      return new Date(p.data_inizio).getFullYear() === annoFiltro;
+    }),
+  [prenotazioni, annoFiltro]);
+
   const sorted = useMemo(() => {
-    return [...prenotazioni].sort((a, b) => {
+    return [...filtrate].sort((a, b) => {
       let va, vb;
       switch (sortConfig.key) {
         case 'nome':      va = getNome(a).toLowerCase(); vb = getNome(b).toLowerCase(); break;
@@ -56,7 +71,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       if (va > vb) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [prenotazioni, sortConfig, clientiMap, spaziMap]);
+  }, [filtrate, sortConfig, clientiMap, spaziMap]);
 
   const statoColor = {
     confermata: 'bg-blue-100 text-blue-700',
@@ -86,8 +101,22 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-100">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
         <p className="text-sm font-semibold text-slate-700">{sorted.length} prenotazioni</p>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500">Anno:</span>
+          <div className="flex gap-1">
+            {anniDisponibili.map(a => (
+              <button
+                key={a}
+                onClick={() => setAnnoFiltro(a)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${annoFiltro === a ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
