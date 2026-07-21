@@ -88,11 +88,11 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
             const isToday = isSameDay(giorno, new Date());
             return (
               <div key={dataKey} className="text-center">
-                <div className={`text-xs font-semibold uppercase mb-1 ${isToday ? 'text-blue-600' : 'text-slate-500'}`}>
+                <div className={`text-xs font-semibold uppercase mb-1 ${isToday ? 'text-red-600' : 'text-slate-500'}`}>
                   {format(giorno, 'EEE', { locale: it })}
                 </div>
                 <div className={`text-lg font-bold mb-2 w-9 h-9 flex items-center justify-center mx-auto rounded-full ${
-                  isToday ? 'bg-blue-600 text-white' : 'text-slate-700'
+                  isToday ? 'bg-red-600 text-white' : 'text-slate-700'
                 }`}>
                   {format(giorno, 'd')}
                 </div>
@@ -109,7 +109,7 @@ export default function CalendarioSettimanale({ prenotazioni, spazi, clienti, cu
               <div
                 key={`col-${dataKey}`}
                 className={`min-h-64 p-2 border rounded-lg ${
-                  isToday ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'
+                  isToday ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'
                 }`}
               >
                 {mostraDisponibili ? (() => {
