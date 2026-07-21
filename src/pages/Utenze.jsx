@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { ChevronLeft, ChevronRight, Droplet, Zap, Flame, Sun, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ExportUtenze from '@/components/utenze/ExportUtenze';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 const MESI = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
@@ -354,6 +355,17 @@ export default function Utenze({ centroSelezionato }) {
             <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{anno}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnno(a => a + 1)}><ChevronRight className="w-4 h-4" /></Button>
           </div>
+          {!loading && (
+            <ExportUtenze
+              centroSelezionato={centroSelezionato}
+              anno={anno}
+              mode={mode}
+              contatoriAnno={contatoriAnno}
+              contatoriPrev={contatoriPrev}
+              tempsCurr={tempsCurr}
+              tempsPrev={tempsPrev}
+            />
+          )}
         </div>
       </div>
 
