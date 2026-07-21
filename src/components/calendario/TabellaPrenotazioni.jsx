@@ -162,15 +162,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       row += 2; // riga vuota tra sezioni
     });
 
-    // Totale generale
-    const totStyle = { font: { bold: true, sz: 11, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E3A5F' } }, border };
-    cols.forEach((col, i) => {
-      if (i === 0) ws[`${col}${row}`] = { v: 'TOTALE GENERALE', t: 's', s: { ...totStyle, alignment: { horizontal: 'left' } } };
-      else if (i === 4) ws[`${col}${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...totStyle, alignment: { horizontal: 'right' } } };
-      else ws[`${col}${row}`] = { v: '', t: 's', s: totStyle };
-    });
-
-    ws['!ref'] = `A1:F${row}`;
+    ws['!ref'] = `A1:F${row - 2}`;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
@@ -303,16 +295,6 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       totaleGenerale += totaleSez;
       y += rowH + 4; // spazio tra sezioni
     }
-
-    // Totale generale
-    y = checkPage(y);
-    let cx = startX;
-    colWidths.forEach((w, i) => {
-      if (i === 0) drawCell(doc, 'TOTALE GENERALE', cx, y, w, [30, 58, 95], [255, 255, 255], 'left', true);
-      else if (i === 4) drawCell(doc, fmtEur(totaleGenerale), cx, y, w, [30, 58, 95], [255, 255, 255], 'right', true);
-      else drawCell(doc, '', cx, y, w, [30, 58, 95], [255, 255, 255]);
-      cx += w;
-    });
 
     doc.save(`${nomeFile}.pdf`);
   };
