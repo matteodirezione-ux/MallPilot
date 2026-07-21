@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { differenceInDays, format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronUp, ChevronDown, ChevronsUpDown, Pencil, Trash2 } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function SortIcon({ col, sortConfig }) {
@@ -103,19 +103,14 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3 flex-wrap">
         <p className="text-sm font-semibold text-slate-700">{sorted.length} prenotazioni</p>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">Anno:</span>
-          <div className="flex gap-1">
-            {anniDisponibili.map(a => (
-              <button
-                key={a}
-                onClick={() => setAnnoFiltro(a)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${annoFiltro === a ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-              >
-                {a}
-              </button>
-            ))}
-          </div>
+        <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1">
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoFiltro(a => a - 1)}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <span className="text-sm font-bold text-slate-800 min-w-[44px] text-center">{annoFiltro}</span>
+          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setAnnoFiltro(a => a + 1)}>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
       </div>
       <div className="overflow-x-auto">
