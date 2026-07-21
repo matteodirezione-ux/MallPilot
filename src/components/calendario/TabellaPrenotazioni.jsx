@@ -142,13 +142,11 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                 <td className="py-2.5 px-3 font-medium text-slate-800 max-w-[220px]">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {p.is_event && (
-                      <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Evento</span>
-                    )}
-                    {p.is_gratuito && (
+                    {p.is_gratuito ? (
                       <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Gratuito</span>
-                    )}
-                    {!p.is_event && !p.is_gratuito && (
+                    ) : p.is_event ? (
+                      <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Evento</span>
+                    ) : (
                       <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-semibold uppercase whitespace-nowrap">Affitto</span>
                     )}
                     <span className="truncate">{getNome(p)}</span>
