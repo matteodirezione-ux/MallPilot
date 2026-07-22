@@ -490,7 +490,9 @@ Deno.serve(async (req) => {
     text('LA CONDUTTRICE', rm - 40, y);
     addLine(15);
 
-    // --- CLAUSOLA ART. 1341 ---
+    // --- CLAUSOLA ART. 1341 --- (su nuova pagina per dare spazio alle firme)
+    doc.addPage();
+    y = 20;
     checkPage(35);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10.5);
