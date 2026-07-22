@@ -43,15 +43,9 @@ Deno.serve(async (req) => {
         const clientiMap = Object.fromEntries(clienti.map(c => [c.id, c]));
         const centriMap = Object.fromEntries(centri.map(c => [c.id, c]));
 
-        // Carica i direttori e le proprietà (admin) per inviare le mail
-        const [direttori, utenti] = await Promise.all([
-            base44.asServiceRole.entities.Direttore.list(),
-            base44.asServiceRole.entities.User.list(),
-        ]);
-
-        const adminEmails = utenti.filter(u => u.role === 'admin').map(u => u.email);
-        const direttoriEmails = direttori.map(d => d.email);
-        const destinatari = [...new Set([...adminEmails, ...direttoriEmails])];
+        // Carica i direttori per inviare le mail
+        const direttori = await base44.asServiceRole.entities.Direttore.list();
+        const destinatari = [...new Set(direttori.map(d => d.email))];
 
         if (destinatari.length === 0) {
             return Response.json({ success: true, email_inviate: 0, note: 'Nessun destinatario trovato' });
