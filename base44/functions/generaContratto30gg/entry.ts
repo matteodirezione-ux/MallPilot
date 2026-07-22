@@ -55,7 +55,8 @@ function sanitize(str) {
     .replace(/ú/g, 'u\'').replace(/Ú/g, 'U\'')
     .replace(/–/g, '-').replace(/—/g, '-')
     .replace(/"/g, '"').replace(/"/g, '"')
-    .replace(/'/g, '\'').replace(/'/g, '\'');
+    .replace(/'/g, '\'').replace(/'/g, '\'')
+    .replace(/[^\x00-\x7F]/g, '');
 }
 
 function formatData(dateStr) {
