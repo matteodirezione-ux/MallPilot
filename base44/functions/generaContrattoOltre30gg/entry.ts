@@ -55,9 +55,7 @@ function sanitize(str) {
     .replace(/ú/g, "u'").replace(/Ú/g, "U'")
     .replace(/–/g, '-').replace(/—/g, '-')
     .replace(/\u201c/g, '"').replace(/\u201d/g, '"')
-    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
-    // Rimuove qualsiasi carattere non-ASCII rimasto (es. simboli di encoding errato)
-    .replace(/[^\x00-\x7F]/g, '');
+    .replace(/\u2018/g, "'").replace(/\u2019/g, "'");
 }
 
 function formatData(dateStr) {
@@ -472,41 +470,12 @@ Deno.serve(async (req) => {
       addLine(4);
     }
 
-    // --- ALLEGATO: PLANIMETRIA ---
-    if (centro.piantina_url) {
-      doc.addPage();
-      y = 20;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      text('Allegato: Planimetria', lm + pw / 2, y, { align: 'center' });
-      doc.setFont('helvetica', 'normal');
-      addLine(10);
-      try {
-        const imgResp = await fetch(centro.piantina_url);
-        if (imgResp.ok) {
-          const imgBuf = await imgResp.arrayBuffer();
-          const imgBytes = new Uint8Array(imgBuf);
-          let b64 = '';
-          const chunk = 8192;
-          for (let i = 0; i < imgBytes.length; i += chunk) {
-            b64 += String.fromCharCode(...imgBytes.subarray(i, i + chunk));
-          }
-          const imgB64 = btoa(b64);
-          const ext = centro.piantina_url.toLowerCase().includes('.png') ? 'PNG' : 'JPEG';
-          const maxW = pw;
-          const maxH = 200;
-          doc.addImage(imgB64, ext, lm, y, maxW, maxH, undefined, 'FAST');
-        }
-      } catch (_e) {
-        text('(Planimetria non disponibile)', lm, y);
-      }
-    } else {
-      checkPage(10);
-      doc.setFont('helvetica', 'bold');
-      text('Si allega: Planimetria', lm, y);
-      doc.setFont('helvetica', 'normal');
-      addLine(8);
-    }
+    // --- ALLEGATO ---
+    checkPage(10);
+    doc.setFont('helvetica', 'bold');
+    text('Si allega: Planimetria', lm, y);
+    doc.setFont('helvetica', 'normal');
+    addLine(8);
 
     // --- LUOGO E FIRMA ---
     checkPage(30);

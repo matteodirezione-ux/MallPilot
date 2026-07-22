@@ -44,20 +44,18 @@ function formatEuro(importo) {
 function sanitize(str) {
   if (!str) return '';
   return str
-    .replace(/à/g, "a'").replace(/À/g, "A'")
-    .replace(/è/g, "e'").replace(/È/g, "E'")
-    .replace(/é/g, "e'").replace(/É/g, "E'")
-    .replace(/ì/g, "i'").replace(/Ì/g, "I'")
-    .replace(/í/g, "i'").replace(/Í/g, "I'")
-    .replace(/ò/g, "o'").replace(/Ò/g, "O'")
-    .replace(/ó/g, "o'").replace(/Ó/g, "O'")
-    .replace(/ù/g, "u'").replace(/Ù/g, "U'")
-    .replace(/ú/g, "u'").replace(/Ú/g, "U'")
+    .replace(/à/g, 'a\'').replace(/À/g, 'A\'')
+    .replace(/è/g, 'e\'').replace(/È/g, 'E\'')
+    .replace(/é/g, 'e\'').replace(/É/g, 'E\'')
+    .replace(/ì/g, 'i\'').replace(/Ì/g, 'I\'')
+    .replace(/í/g, 'i\'').replace(/Í/g, 'I\'')
+    .replace(/ò/g, 'o\'').replace(/Ò/g, 'O\'')
+    .replace(/ó/g, 'o\'').replace(/Ó/g, 'O\'')
+    .replace(/ù/g, 'u\'').replace(/Ù/g, 'U\'')
+    .replace(/ú/g, 'u\'').replace(/Ú/g, 'U\'')
     .replace(/–/g, '-').replace(/—/g, '-')
-    .replace(/\u201c/g, '"').replace(/\u201d/g, '"')
-    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
-    // Rimuove qualsiasi carattere non-ASCII rimasto (es. simboli di encoding errato)
-    .replace(/[^\x00-\x7F]/g, '');
+    .replace(/"/g, '"').replace(/"/g, '"')
+    .replace(/'/g, '\'').replace(/'/g, '\'');
 }
 
 function formatData(dateStr) {
@@ -451,41 +449,12 @@ Deno.serve(async (req) => {
       addLine(4);
     }
 
-    // --- ALLEGATO: PLANIMETRIA ---
-    if (centro.piantina_url) {
-      doc.addPage();
-      y = 20;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      text('Allegato A: Planimetria', lm + pw / 2, y, { align: 'center' });
-      doc.setFont('helvetica', 'normal');
-      addLine(10);
-      try {
-        const imgResp = await fetch(centro.piantina_url);
-        if (imgResp.ok) {
-          const imgBuf = await imgResp.arrayBuffer();
-          const imgBytes = new Uint8Array(imgBuf);
-          let b64 = '';
-          const chunk = 8192;
-          for (let i = 0; i < imgBytes.length; i += chunk) {
-            b64 += String.fromCharCode(...imgBytes.subarray(i, i + chunk));
-          }
-          const imgB64 = btoa(b64);
-          const ext = centro.piantina_url.toLowerCase().includes('.png') ? 'PNG' : 'JPEG';
-          const maxW = pw;
-          const maxH = 200;
-          doc.addImage(imgB64, ext, lm, y, maxW, maxH, undefined, 'FAST');
-        }
-      } catch (_e) {
-        text('(Planimetria non disponibile)', lm, y);
-      }
-    } else {
-      checkPage(15);
-      doc.setFont('helvetica', 'bold');
-      text('Allegato A: planimetria', lm, y);
-      doc.setFont('helvetica', 'normal');
-      addLine(10);
-    }
+    // --- ALLEGATO ---
+    checkPage(15);
+    doc.setFont('helvetica', 'bold');
+    text('Allegato A: planimetria', lm, y);
+    doc.setFont('helvetica', 'normal');
+    addLine(10);
 
     // --- CLAUSOLA SPECIFICA ---
     checkPage(20);
