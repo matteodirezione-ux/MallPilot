@@ -25,6 +25,7 @@ export default function Clienti({ centroSelezionato }) {
     ragione_sociale: '',
     partita_iva: '',
     codice_fiscale: '',
+    codice_sdi: '',
     email: '',
     pec: '',
     telefono: '',
@@ -154,6 +155,7 @@ export default function Clienti({ centroSelezionato }) {
       ragione_sociale: '',
       partita_iva: '',
       codice_fiscale: '',
+      codice_sdi: '',
       email: '',
       pec: '',
       telefono: '',
@@ -165,8 +167,8 @@ export default function Clienti({ centroSelezionato }) {
       referente_telefono: '',
       referente_email: '',
       note: ''
-    });
-    setEditingCliente(null);
+      });
+      setEditingCliente(null);
     setWizardStep(0);
   };
 
@@ -259,6 +261,7 @@ export default function Clienti({ centroSelezionato }) {
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
                     { label: 'Partita IVA *', key: 'partita_iva', required: true },
                     { label: 'Codice Fiscale', key: 'codice_fiscale' },
+                    { label: 'Codice SDI', key: 'codice_sdi' },
                     { label: 'Email *', key: 'email', type: 'email', required: true },
                     { label: 'PEC', key: 'pec' },
                     { label: 'Telefono', key: 'telefono' },
@@ -477,6 +480,7 @@ export default function Clienti({ centroSelezionato }) {
                   {detailCliente.partita_iva && <Row label="Partita IVA" value={detailCliente.partita_iva} />}
                   {detailCliente.codice_fiscale && <Row label="Cod. Fiscale" value={detailCliente.codice_fiscale} />}
                   {detailCliente.email && <Row label="Email" value={detailCliente.email} />}
+                  {detailCliente.codice_sdi && <Row label="Cod. SDI" value={detailCliente.codice_sdi} />}
                   {detailCliente.pec && <Row label="PEC" value={detailCliente.pec} />}
                   {detailCliente.telefono && <Row label="Telefono" value={detailCliente.telefono} />}
                 </div>

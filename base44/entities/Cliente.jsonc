@@ -18,6 +18,10 @@
       "type": "string",
       "description": "Codice fiscale"
     },
+    "codice_sdi": {
+      "type": "string",
+      "description": "Codice SDI (Sistema di Interscambio) per la fatturazione elettronica"
+    },
     "email": {
       "type": "string",
       "format": "email",
