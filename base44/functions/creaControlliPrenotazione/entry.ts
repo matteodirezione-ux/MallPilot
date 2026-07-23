@@ -53,6 +53,8 @@ Deno.serve(async (req) => {
 
         const controlloDaCreare = [];
 
+        const prenotazioneId = prenotazione.id || '';
+
         // Controllo 1: giorno di inizio — verificare arrivo
         controlloDaCreare.push({
             titolo: `Controllare "${nomeCliente}" alla ${spaziNomi}`,
@@ -60,6 +62,7 @@ Deno.serve(async (req) => {
             centro_id: centroId,
             data_scadenza: dataInizio,
             stato: 'da_fare',
+            note: `prenotazione_id:${prenotazioneId}`,
         });
 
         // Controllo 2: giorno dopo la fine — verificare liberazione
@@ -69,6 +72,7 @@ Deno.serve(async (req) => {
             centro_id: centroId,
             data_scadenza: giornoDopo,
             stato: 'da_fare',
+            note: `prenotazione_id:${prenotazioneId}`,
         });
 
         await base44.asServiceRole.entities.Manutenzione.bulkCreate(controlloDaCreare);
@@ -102,6 +106,7 @@ Deno.serve(async (req) => {
                 priorita: 'alta',
                 assegnato_a_email: assegnatoAEmail,
                 assegnato_a_nome: assegnatoANome,
+                note: `prenotazione_id:${prenotazioneId}`,
             });
 
             await base44.asServiceRole.entities.Task.bulkCreate(taskDaCreare);

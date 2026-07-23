@@ -172,8 +172,18 @@ export default function Calendario({ centroSelezionato, user }) {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Sei sicuro di voler eliminare questa prenotazione?')) return;
+    if (!confirm('Sei sicuro di voler eliminare questa prenotazione? Verranno eliminati anche i controlli e task collegati.')) return;
     try {
+      // Elimina controlli e task collegati alla prenotazione
+      const tag = `prenotazione_id:${id}`;
+      const [controlli, tasks] = await Promise.all([
+        base44.entities.Manutenzione.filter({ note: tag }),
+        base44.entities.Task.filter({ note: tag }),
+      ]);
+      await Promise.all([
+        ...controlli.map(c => base44.entities.Manutenzione.delete(c.id)),
+        ...tasks.map(t => base44.entities.Task.delete(t.id)),
+      ]);
       await base44.entities.Prenotazione.delete(id);
       toast.success('Prenotazione eliminata');
       loadData();
