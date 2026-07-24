@@ -230,6 +230,28 @@ export default function Ticket({ centroSelezionato, user }) {
       });
     }
 
+    // Email ai manutentori per sollecito
+    if (update.numero_sollecito !== undefined) {
+      const numSollecito = update.numero_sollecito;
+      const manutentori = await base44.entities.Manutentore.list();
+      await Promise.all(manutentori.map(m =>
+        base44.integrations.Core.SendEmail({
+          to: m.email,
+          subject: `Sollecito ${numSollecito} - Ticket n. ${ticket.numero_ticket}`,
+          body: `<p>Ciao,</p>
+<p>Ti inviamo un <strong>sollecito (n. ${numSollecito})</strong> per il ticket di manutenzione che richiede ancora il tuo intervento.</p>
+<ul>
+  <li><strong>N° Ticket:</strong> ${ticket.numero_ticket || '-'}</li>
+  <li><strong>Tipologia:</strong> ${ticket.tipologia === 'urgente' ? 'Urgente' : 'Ordinario'}</li>
+  <li><strong>Data apertura:</strong> ${ticket.data_apertura || '-'}</li>
+  <li><strong>Scadenza:</strong> ${ticket.scadenza || '-'}</li>
+  ${ticket.descrizione ? `<li><strong>Descrizione:</strong> ${ticket.descrizione}</li>` : ''}
+</ul>
+<p style="color:#d97706;font-weight:bold;">⚠️ Si prega di intervenire al più presto.</p>`,
+        })
+      ));
+    }
+
     // Notifica ai manutentori per approvazione o richiesta preventivo
     if (update.stato === 'approvato' || update.stato === 'approvato_con_preventivo') {
       const isPreventivo = update.stato === 'approvato_con_preventivo';
