@@ -535,12 +535,7 @@ Deno.serve(async (req) => {
         const fmt = url.includes('.png') ? 'PNG' : 'JPEG';
         const mimeType = fmt === 'PNG' ? 'image/png' : 'image/jpeg';
 
-        let binary = '';
-        const bytes = new Uint8Array(imgBuffer);
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        const base64str = btoa(binary);
+        const base64str = Buffer.from(imgBuffer).toString('base64');
         const dataUrl = `data:${mimeType};base64,${base64str}`;
 
         doc.addPage();
