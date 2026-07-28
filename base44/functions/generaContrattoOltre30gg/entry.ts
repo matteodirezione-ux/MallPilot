@@ -532,12 +532,14 @@ Deno.serve(async (req) => {
         const imgResp = await fetch(centro.piantina_url);
         const imgBuffer = await imgResp.arrayBuffer();
         const imgBytes = new Uint8Array(imgBuffer);
-        let b64 = '';
-        const chunk = 8192;
-        for (let i = 0; i < imgBytes.length; i += chunk) {
-          b64 += String.fromCharCode(...imgBytes.subarray(i, i + chunk));
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        let imgB64 = '';
+        for (let i = 0; i < imgBytes.length; i += 3) {
+          const b0 = imgBytes[i], b1 = imgBytes[i+1] ?? 0, b2 = imgBytes[i+2] ?? 0;
+          imgB64 += chars[b0 >> 2] + chars[((b0 & 3) << 4) | (b1 >> 4)] +
+                    (i+1 < imgBytes.length ? chars[((b1 & 15) << 2) | (b2 >> 6)] : '=') +
+                    (i+2 < imgBytes.length ? chars[b2 & 63] : '=');
         }
-        const imgB64 = btoa(b64);
         const url = centro.piantina_url.toLowerCase();
         const fmt = url.includes('.png') ? 'PNG' : 'JPEG';
 
