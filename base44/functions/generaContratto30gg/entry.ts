@@ -488,23 +488,23 @@ Deno.serve(async (req) => {
       try {
         const imgResp = await fetch(centro.piantina_url);
         const imgBuffer = await imgResp.arrayBuffer();
-        const imgBytes = new Uint8Array(imgBuffer);
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-        let imgB64 = '';
-        for (let i = 0; i < imgBytes.length; i += 3) {
-          const b0 = imgBytes[i], b1 = imgBytes[i+1] ?? 0, b2 = imgBytes[i+2] ?? 0;
-          imgB64 += chars[b0 >> 2] + chars[((b0 & 3) << 4) | (b1 >> 4)] +
-                    (i+1 < imgBytes.length ? chars[((b1 & 15) << 2) | (b2 >> 6)] : '=') +
-                    (i+2 < imgBytes.length ? chars[b2 & 63] : '=');
-        }
         const url = centro.piantina_url.toLowerCase();
         const fmt = url.includes('.png') ? 'PNG' : 'JPEG';
+        const mimeType = fmt === 'PNG' ? 'image/png' : 'image/jpeg';
+
+        let binary = '';
+        const bytes = new Uint8Array(imgBuffer);
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const base64str = btoa(binary);
+        const dataUrl = `data:${mimeType};base64,${base64str}`;
 
         doc.addPage();
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.text('PLANIMETRIA', 105, 20, { align: 'center' });
-        doc.addImage(imgB64, fmt, 20, 30, 170, 230, undefined, 'FAST');
+        doc.addImage(dataUrl, fmt, 20, 30, 170, 230);
       } catch (e) {
         doc.addPage();
         doc.setFont('helvetica', 'bold');
