@@ -483,40 +483,6 @@ Deno.serve(async (req) => {
     addLine(6);
     text('(Timbro e firma)', lm, y);
 
-    // --- PAGINA PLANIMETRIA ---
-    if (centro.piantina_url) {
-      try {
-        const imgResp = await fetch(centro.piantina_url, { redirect: 'follow' });
-        const imgBuffer = await imgResp.arrayBuffer();
-        const finalUrl = imgResp.url || centro.piantina_url;
-        const fmt = finalUrl.toLowerCase().includes('.png') ? 'PNG' : 'JPEG';
-        const mimeType = fmt === 'PNG' ? 'image/png' : 'image/jpeg';
-
-        const uint8 = new Uint8Array(imgBuffer);
-        let binary = '';
-        const chunkSize = 8192;
-        for (let i = 0; i < uint8.length; i += chunkSize) {
-          binary += String.fromCharCode(...uint8.subarray(i, i + chunkSize));
-        }
-        const base64str = btoa(binary);
-        const dataUrl = `data:${mimeType};base64,${base64str}`;
-
-        doc.addPage();
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.text('PLANIMETRIA', 105, 20, { align: 'center' });
-        doc.addImage(dataUrl, fmt, 20, 30, 170, 230);
-      } catch (e) {
-        doc.addPage();
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.text('PLANIMETRIA', 105, 20, { align: 'center' });
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10.5);
-        doc.text('(Planimetria non disponibile)', 105, 140, { align: 'center' });
-      }
-    }
-
     // Output
     const pdfBytes = doc.output('arraybuffer');
 
