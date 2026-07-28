@@ -529,10 +529,10 @@ Deno.serve(async (req) => {
     // --- PAGINA PLANIMETRIA ---
     if (centro.piantina_url) {
       try {
-        const imgResp = await fetch(centro.piantina_url);
+        const imgResp = await fetch(centro.piantina_url, { redirect: 'follow' });
         const imgBuffer = await imgResp.arrayBuffer();
-        const url = centro.piantina_url.toLowerCase();
-        const fmt = url.includes('.png') ? 'PNG' : 'JPEG';
+        const finalUrl = imgResp.url || centro.piantina_url;
+        const fmt = finalUrl.toLowerCase().includes('.png') ? 'PNG' : 'JPEG';
         const mimeType = fmt === 'PNG' ? 'image/png' : 'image/jpeg';
 
         const base64str = Buffer.from(imgBuffer).toString('base64');
