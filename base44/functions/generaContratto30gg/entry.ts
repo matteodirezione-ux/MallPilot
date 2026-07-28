@@ -483,6 +483,37 @@ Deno.serve(async (req) => {
     addLine(6);
     text('(Timbro e firma)', lm, y);
 
+    // --- PAGINA PLANIMETRIA ---
+    if (centro.piantina_url) {
+      try {
+        const imgResp = await fetch(centro.piantina_url);
+        const imgBuffer = await imgResp.arrayBuffer();
+        const imgBytes = new Uint8Array(imgBuffer);
+        let b64 = '';
+        const chunk = 8192;
+        for (let i = 0; i < imgBytes.length; i += chunk) {
+          b64 += String.fromCharCode(...imgBytes.subarray(i, i + chunk));
+        }
+        const imgB64 = btoa(b64);
+        const url = centro.piantina_url.toLowerCase();
+        const fmt = url.includes('.png') ? 'PNG' : 'JPEG';
+
+        doc.addPage();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.text('PLANIMETRIA', 105, 20, { align: 'center' });
+        doc.addImage(imgB64, fmt, 20, 30, 170, 230, undefined, 'FAST');
+      } catch (e) {
+        doc.addPage();
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.text('PLANIMETRIA', 105, 20, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10.5);
+        doc.text('(Planimetria non disponibile)', 105, 140, { align: 'center' });
+      }
+    }
+
     // Output
     const pdfBytes = doc.output('arraybuffer');
 
