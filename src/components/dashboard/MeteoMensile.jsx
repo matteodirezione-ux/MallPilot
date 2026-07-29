@@ -156,25 +156,115 @@ export default function MeteoMensile({ citta, provincia }) {
     const { jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    const labelC = format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it });
-    const title = `Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`;
-    doc.setFontSize(13);
-    doc.setTextColor(30, 58, 95);
-    doc.text(title, 14, 14);
-
     const todayDate = new Date(); todayDate.setHours(0,0,0,0);
-    const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
-    const dP = getDaysInMonth(new Date(meseCorrente.year - 1, meseCorrente.month - 1, 1));
+    const labelC = format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it });
+    const labelP = format(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1), 'MMMM yyyy', { locale: it });
 
-    const cols = ['Giorno', `Meteo ${meseCorrente.year}`, 'Max', 'Min', `Meteo ${meseCorrente.year - 1}`, 'Max', 'Min', 'Delta Meteo', 'Delta T'];
-    const colW = [20, 34, 12, 12, 34, 12, 12, 26, 14];
+    // --- Calcola dati card ---
+    const countDaysPdf = (data, year, month, filterFn, capToToday) => {
+      if (!data?.weather_code) return null;
+      return data.weather_code.filter((code, i) => {
+        if (capToToday) { const d = new Date(year, month - 1, i + 1); if (d > todayDate) return false; }
+        return filterFn(getWmo(code));
+      }).length;
+    };
+    const avgTempPdf = (data, year, month, capToToday) => {
+      if (!data?.temperature_2m_max || !data?.temperature_2m_min) return null;
+      let sum = 0, count = 0;
+      data.temperature_2m_max.forEach((max, i) => {
+        if (capToToday) { const d = new Date(year, month - 1, i + 1); if (d > todayDate) return; }
+        sum += (max + (data.temperature_2m_min[i] ?? max)) / 2; count++;
+      });
+      return count ? +(sum / count).toFixed(1) : null;
+    };
+    const countFromCodesPdf = (codes, filterFn) => codes ? codes.filter(c => filterFn(getWmo(c))).length : null;
+
+    const soleC = countDaysPdf(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank <= 2, true);
+    const soleP = countDaysPdf(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank <= 2, false);
+    const piogC = countDaysPdf(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5, true);
+    const piogP = countDaysPdf(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5, false);
+    const tempC = avgTempPdf(dataCorrente, meseCorrente.year, meseCorrente.month, true);
+    const tempP = avgTempPdf(dataPrecedente, mesePrecedente.year, mesePrecedente.month, false);
+    const ytdSoleC = countFromCodesPdf(progressivoCorrente, w => w.rank <= 2);
+    const ytdSoleP = countFromCodesPdf(progressivoPrecedente, w => w.rank <= 2);
+    const ytdPiogC = countFromCodesPdf(progressivoCorrente, w => w.rank >= 5);
+    const ytdPiogP = countFromCodesPdf(progressivoPrecedente, w => w.rank >= 5);
+
+    const fmtDelta = (val) => val === null ? '-' : (val > 0 ? `+${val}` : `${val}`);
+    const fmtVal = (val, unit = '') => val !== null && val !== undefined ? `${val}${unit}` : '-';
+
+    // --- Titolo ---
+    doc.setFontSize(14);
+    doc.setTextColor(30, 58, 95);
+    doc.text(`Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`, 14, 13);
+
+    // --- Card riepilogative ---
+    const cardY = 18;
+    const cardH = 22;
+    const cardW = 85;
+    const cards = [
+      {
+        label: 'Giorni Sereni/Nuvolosi',
+        curr: fmtVal(soleC, ' gg'), prev: fmtVal(soleP, ' gg'), delta: fmtDelta(soleC !== null && soleP !== null ? soleC - soleP : null),
+        ytdCurr: fmtVal(ytdSoleC, ' gg'), ytdPrev: fmtVal(ytdSoleP, ' gg'), ytdDelta: fmtDelta(ytdSoleC !== null && ytdSoleP !== null ? ytdSoleC - ytdSoleP : null),
+        r: 245, g: 158, b: 11
+      },
+      {
+        label: 'Giorni di Pioggia',
+        curr: fmtVal(piogC, ' gg'), prev: fmtVal(piogP, ' gg'), delta: fmtDelta(piogC !== null && piogP !== null ? piogC - piogP : null),
+        ytdCurr: fmtVal(ytdPiogC, ' gg'), ytdPrev: fmtVal(ytdPiogP, ' gg'), ytdDelta: fmtDelta(ytdPiogC !== null && ytdPiogP !== null ? ytdPiogC - ytdPiogP : null),
+        r: 59, g: 130, b: 246
+      },
+      {
+        label: 'Temperatura Media',
+        curr: fmtVal(tempC, '°C'), prev: fmtVal(tempP, '°C'), delta: fmtDelta(tempC !== null && tempP !== null ? +(tempC - tempP).toFixed(1) : null),
+        ytdCurr: null, ytdPrev: null, ytdDelta: null,
+        r: 249, g: 115, b: 22
+      },
+    ];
+
+    cards.forEach((card, ci) => {
+      const cx = 14 + ci * (cardW + 4);
+      // Sfondo card
+      doc.setFillColor(card.r, card.g, card.b);
+      doc.roundedRect(cx, cardY, cardW, cardH, 2, 2, 'F');
+      doc.setFillColor(255, 255, 255);
+      doc.setGState(doc.GState({ opacity: 0.15 }));
+      doc.roundedRect(cx, cardY, cardW, cardH, 2, 2, 'F');
+      doc.setGState(doc.GState({ opacity: 1 }));
+
+      // Label
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
+      doc.text(card.label.toUpperCase(), cx + 3, cardY + 5);
+
+      // Valori mese
+      doc.setFontSize(9);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${meseCorrente.year}: ${card.curr}`, cx + 3, cardY + 11);
+      doc.text(`${mesePrecedente.year}: ${card.prev}`, cx + 3, cardY + 16);
+      doc.text(`Delta: ${card.delta}`, cx + 3, cardY + 21);
+
+      // Progressivo YTD (solo sole e pioggia)
+      if (card.ytdCurr !== null) {
+        doc.setFontSize(7);
+        doc.text(`YTD ${meseCorrente.year}: ${card.ytdCurr}  |  ${mesePrecedente.year}: ${card.ytdPrev}  |  Delta: ${card.ytdDelta}`, cx + 3, cardY + 26);
+      }
+    });
+
+    // --- Tabella ---
+    const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
+    const dP = getDaysInMonth(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1));
+
+    const cols = ['Giorno', `Meteo ${meseCorrente.year}`, 'Max', 'Min', `Meteo ${mesePrecedente.year}`, 'Max', 'Min', 'Delta Meteo', 'Delta T'];
+    const colW = [20, 36, 12, 12, 36, 12, 12, 26, 12];
     const startX = 10;
     const rowH = 6;
-    let y = 22;
+    let y = cardY + cardH + 8;
 
-    // Header
+    // Header tabella
     doc.setFontSize(8);
-    doc.setFillColor(59, 130, 246);
+    doc.setFillColor(30, 58, 95);
     doc.setTextColor(255, 255, 255);
     let x = startX;
     cols.forEach((col, idx) => {
@@ -208,17 +298,16 @@ export default function MeteoMensile({ citta, provincia }) {
 
       const cells = [
         `${day} ${weekDay}`,
-        cWmo ? cWmo.label : '-',
+        cWmo ? cWmo.label : '-',        // testo descrittivo (no emoji)
         cMax !== null ? `${cMax}°` : '-',
         cMin !== null ? `${cMin}°` : '-',
-        pWmo ? pWmo.label : '-',
+        pWmo ? pWmo.label : '-',        // testo descrittivo (no emoji)
         pMax !== null ? `${pMax}°` : '-',
         pMin !== null ? `${pMin}°` : '-',
         deltaMLabel,
         deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}°` : '-',
       ];
 
-      // Sfondo riga alternato
       if (i % 2 === 0) {
         doc.setFillColor(245, 247, 250);
         x = startX;
