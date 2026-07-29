@@ -151,8 +151,118 @@ export default function MeteoMensile({ citta, provincia }) {
       )}
       {error && <div className="text-center py-6 text-red-500 text-sm">{error}</div>}
 
-      {!loading && !error && dataCorrente && dataPrecedente && (
-        <div className="overflow-x-auto">
+      {!loading && !error && dataCorrente && dataPrecedente && (() => {
+        const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+
+        // Helper: conta giornate con rank <= soglia (sole/nuv) o >= 5 (pioggia)
+        const countDays = (data, year, month, filterFn) => {
+          if (!data?.weather_code) return 0;
+          return data.weather_code.filter((code, i) => {
+            const d = new Date(year, month - 1, i + 1);
+            if (d > todayDate) return false;
+            return filterFn(getWmo(code));
+          }).length;
+        };
+
+        const avgTemp = (data, year, month) => {
+          if (!data?.temperature_2m_max || !data?.temperature_2m_min) return null;
+          let sum = 0, count = 0;
+          data.temperature_2m_max.forEach((max, i) => {
+            const d = new Date(year, month - 1, i + 1);
+            if (d > todayDate) return;
+            const min = data.temperature_2m_min[i] ?? max;
+            sum += (max + min) / 2;
+            count++;
+          });
+          return count ? +(sum / count).toFixed(1) : null;
+        };
+
+        const soleC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank <= 2);
+        const soleP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank <= 2);
+        const piogC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5);
+        const piogP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5);
+        const tempC = avgTemp(dataCorrente, meseCorrente.year, meseCorrente.month);
+        const tempP = avgTemp(dataPrecedente, mesePrecedente.year, mesePrecedente.month);
+        const deltaSole = soleC - soleP;
+        const deltaPiog = piogC - piogP;
+        const deltaTemp = (tempC !== null && tempP !== null) ? +(tempC - tempP).toFixed(1) : null;
+
+        const DeltaBadge = ({ val, invert }) => {
+          if (val === null || val === undefined) return null;
+          const positive = invert ? val < 0 : val > 0;
+          const negative = invert ? val > 0 : val < 0;
+          return (
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${val === 0 ? 'bg-slate-100 text-slate-500' : positive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+              {val > 0 ? '+' : ''}{val}{typeof val === 'number' && !Number.isInteger(val) ? '' : ''}
+            </span>
+          );
+        };
+
+        return (
+          <>
+            <div className="grid grid-cols-3 gap-4 p-4 border-b border-slate-100">
+              {/* Card Sole */}
+              <div className="rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 border border-amber-100 p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xl">☀️</span>
+                  <span className="text-xs font-semibold text-amber-700">Giorni sereni/nuvolosi</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-amber-800">{soleC}</span>
+                      <span className="text-xs text-amber-600">{meseCorrente.year}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-medium text-amber-500">{soleP}</span>
+                      <span className="text-xs text-amber-400">{mesePrecedente?.year}</span>
+                    </div>
+                  </div>
+                  <DeltaBadge val={deltaSole} invert={false} />
+                </div>
+              </div>
+              {/* Card Pioggia */}
+              <div className="rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xl">🌧️</span>
+                  <span className="text-xs font-semibold text-blue-700">Giorni di pioggia</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-blue-800">{piogC}</span>
+                      <span className="text-xs text-blue-600">{meseCorrente.year}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-medium text-blue-400">{piogP}</span>
+                      <span className="text-xs text-blue-300">{mesePrecedente?.year}</span>
+                    </div>
+                  </div>
+                  <DeltaBadge val={deltaPiog} invert={true} />
+                </div>
+              </div>
+              {/* Card Temperatura */}
+              <div className="rounded-xl bg-gradient-to-br from-orange-50 to-red-50 border border-orange-100 p-3">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xl">🌡️</span>
+                  <span className="text-xs font-semibold text-orange-700">Temperatura media</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-orange-800">{tempC !== null ? `${tempC}°` : '—'}</span>
+                      <span className="text-xs text-orange-600">{meseCorrente.year}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-base font-medium text-orange-400">{tempP !== null ? `${tempP}°` : '—'}</span>
+                      <span className="text-xs text-orange-300">{mesePrecedente?.year}</span>
+                    </div>
+                  </div>
+                  <DeltaBadge val={deltaTemp} invert={false} />
+                </div>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-slate-50">
@@ -265,7 +375,9 @@ export default function MeteoMensile({ citta, provincia }) {
             </tbody>
           </table>
         </div>
-      )}
+          </>
+        );
+      })()}
     </div>
   );
 }
