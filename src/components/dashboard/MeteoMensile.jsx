@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, getDaysInMonth, startOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sheet } from 'lucide-react';
 
 const WMO_ICONS = {
   0: { label: 'Sereno', emoji: '☀️', rank: 0 },
@@ -152,6 +152,67 @@ export default function MeteoMensile({ citta, provincia }) {
     });
   };
 
+  const exportPDF = () => {
+    const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+    const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
+    const dP = getDaysInMonth(new Date(meseCorrente.year - 1, meseCorrente.month - 1, 1));
+
+    const header = [
+      'Giorno',
+      `Meteo ${meseCorrente.year}`, `Max ${meseCorrente.year}`, `Min ${meseCorrente.year}`,
+      `Meteo ${meseCorrente.year - 1}`, `Max ${meseCorrente.year - 1}`, `Min ${meseCorrente.year - 1}`,
+      'Delta Meteo', 'Delta Temp'
+    ];
+
+    const rows = [];
+    for (let i = 0; i < Math.max(dC, dP); i++) {
+      const day = i + 1;
+      const thisDayDate = new Date(meseCorrente.year, meseCorrente.month - 1, day);
+      const isFuture = thisDayDate > todayDate;
+      const weekDay = format(thisDayDate, 'EEE', { locale: it });
+
+      const cValid = !!dataCorrente && i < dC && !isFuture && i < (dataCorrente?.time?.length ?? 0);
+      const cCode = cValid ? dataCorrente.weather_code?.[i] : null;
+      const cMax = cValid ? Math.round(dataCorrente.temperature_2m_max?.[i] ?? 0) : null;
+      const cMin = cValid ? Math.round(dataCorrente.temperature_2m_min?.[i] ?? 0) : null;
+      const cWmo = cCode !== null ? getWmo(cCode) : null;
+
+      const pValid = !!dataPrecedente && i < dP && i < (dataPrecedente?.time?.length ?? 0);
+      const pCode = pValid ? dataPrecedente.weather_code?.[i] : null;
+      const pMax = pValid ? Math.round(dataPrecedente.temperature_2m_max?.[i] ?? 0) : null;
+      const pMin = pValid ? Math.round(dataPrecedente.temperature_2m_min?.[i] ?? 0) : null;
+      const pWmo = pCode !== null ? getWmo(pCode) : null;
+
+      const deltaT = (cMax !== null && pMax !== null) ? cMax - pMax : null;
+      const deltaM = (cWmo && pWmo) ? cWmo.rank - pWmo.rank : null;
+      const deltaMLabel = deltaM === null ? '' : deltaM > 1 ? 'Peggio' : deltaM < -1 ? 'Meglio' : 'Simile';
+
+      rows.push([
+        `${day} ${weekDay}`,
+        cWmo ? cWmo.label : '',
+        cMax !== null ? `${cMax}` : '',
+        cMin !== null ? `${cMin}` : '',
+        pWmo ? pWmo.label : '',
+        pMax !== null ? `${pMax}` : '',
+        pMin !== null ? `${pMin}` : '',
+        deltaMLabel,
+        deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}` : '',
+      ]);
+    }
+
+    const csvContent = [header, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(';'))
+      .join('\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meteo_${placeName}_${meseCorrente.year}_${String(meseCorrente.month).padStart(2,'0')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!location) return null;
 
   const daysInMonth = meseCorrente ? getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1)) : 0;
@@ -171,13 +232,22 @@ export default function MeteoMensile({ citta, provincia }) {
             {placeName && <p className="text-xs text-slate-500">📍 {placeName}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/70 transition-colors">
-            <ChevronLeft className="w-4 h-4 text-slate-600" />
-          </button>
-          <span className="text-xs font-semibold text-slate-700 min-w-[120px] text-center capitalize">{labelCorrente}</span>
-          <button onClick={() => navigate(1)} className="p-1.5 rounded-lg hover:bg-white/70 transition-colors">
-            <ChevronRight className="w-4 h-4 text-slate-600" />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-white/70 transition-colors">
+              <ChevronLeft className="w-4 h-4 text-slate-600" />
+            </button>
+            <span className="text-xs font-semibold text-slate-700 min-w-[120px] text-center capitalize">{labelCorrente}</span>
+            <button onClick={() => navigate(1)} className="p-1.5 rounded-lg hover:bg-white/70 transition-colors">
+              <ChevronRight className="w-4 h-4 text-slate-600" />
+            </button>
+          </div>
+          <button
+            onClick={exportPDF}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700 shadow-sm"
+          >
+            <Sheet className="w-3.5 h-3.5" />
+            CSV
           </button>
         </div>
       </div>
