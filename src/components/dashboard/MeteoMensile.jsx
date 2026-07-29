@@ -268,13 +268,18 @@ export default function MeteoMensile({ citta, provincia }) {
                 </div>
                 {/* Progressivo YTD */}
                 <div className="mt-2 pt-2 border-t border-amber-100">
-                  <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide mb-1">Progressivo anno</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-amber-800">{ytdSoleC !== null ? ytdSoleC : '—'}</span>
-                    <span className="text-xs text-amber-500">{meseCorrente.year}</span>
-                    <span className="text-slate-300 text-xs">vs</span>
-                    <span className="text-sm font-medium text-amber-400">{ytdSoleP !== null ? ytdSoleP : '—'}</span>
-                    <span className="text-xs text-amber-300">{mesePrecedente?.year}</span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide mb-1">Progressivo anno</p>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-amber-800">{ytdSoleC !== null ? ytdSoleC : '—'}</span>
+                        <span className="text-xs text-amber-500">{meseCorrente.year}</span>
+                        <span className="text-slate-300 text-xs">vs</span>
+                        <span className="text-sm font-medium text-amber-400">{ytdSoleP !== null ? ytdSoleP : '—'}</span>
+                        <span className="text-xs text-amber-300">{mesePrecedente?.year}</span>
+                      </div>
+                    </div>
+                    <DeltaBadge val={(ytdSoleC !== null && ytdSoleP !== null) ? ytdSoleC - ytdSoleP : null} invert={false} />
                   </div>
                 </div>
               </div>
@@ -296,13 +301,18 @@ export default function MeteoMensile({ citta, provincia }) {
                 </div>
                 {/* Progressivo YTD */}
                 <div className="mt-2 pt-2 border-t border-blue-100">
-                  <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">Progressivo anno</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-bold text-blue-800">{ytdPiogC !== null ? ytdPiogC : '—'}</span>
-                    <span className="text-xs text-blue-500">{meseCorrente.year}</span>
-                    <span className="text-slate-300 text-xs">vs</span>
-                    <span className="text-sm font-medium text-blue-300">{ytdPiogP !== null ? ytdPiogP : '—'}</span>
-                    <span className="text-xs text-blue-200">{mesePrecedente?.year}</span>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">Progressivo anno</p>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-blue-800">{ytdPiogC !== null ? ytdPiogC : '—'}</span>
+                        <span className="text-xs text-blue-500">{meseCorrente.year}</span>
+                        <span className="text-slate-300 text-xs">vs</span>
+                        <span className="text-sm font-medium text-blue-300">{ytdPiogP !== null ? ytdPiogP : '—'}</span>
+                        <span className="text-xs text-blue-200">{mesePrecedente?.year}</span>
+                      </div>
+                    </div>
+                    <DeltaBadge val={(ytdPiogC !== null && ytdPiogP !== null) ? ytdPiogC - ytdPiogP : null} invert={true} />
                   </div>
                 </div>
               </div>
