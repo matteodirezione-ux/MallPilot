@@ -57,6 +57,8 @@ export default function MeteoMensile({ citta, provincia }) {
   const [placeName, setPlaceName] = useState('');
   const [dataCorrente, setDataCorrente] = useState(null);
   const [dataPrecedente, setDataPrecedente] = useState(null);
+  const [progressivoCorrente, setProgressivoCorrente] = useState(null); // dati ytd anno corrente
+  const [progressivoPrecedente, setProgressivoPrecedente] = useState(null); // dati ytd anno precedente
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -95,15 +97,47 @@ export default function MeteoMensile({ citta, provincia }) {
     setError(null);
     try {
       const now = new Date();
-      const isFutureMonth = meseCorrente.year > now.getFullYear() ||
-        (meseCorrente.year === now.getFullYear() && meseCorrente.month > now.getMonth() + 1);
+      const currentRealYear = now.getFullYear();
+      const currentRealMonth = now.getMonth() + 1;
+      const isFutureMonth = meseCorrente.year > currentRealYear ||
+        (meseCorrente.year === currentRealYear && meseCorrente.month > currentRealMonth);
 
-      const [dc, dp] = await Promise.all([
+      // Calcola progressivo YTD: dall'inizio dell'anno fino al mese visualizzato (incluso)
+      // Per anno corrente: fino al mese corrente visualizzato (o mese reale se nel futuro)
+      const ytdEndMonthC = isFutureMonth ? currentRealMonth : meseCorrente.month;
+      const ytdEndMonthP = mesePrecedente.month; // stesso mese, anno precedente
+
+      const fetchYtd = async (year, endMonth, capToToday) => {
+        const promises = [];
+        for (let m = 1; m <= endMonth; m++) {
+          promises.push(fetchMonthlyWeather(coords.lat, coords.lon, year, m));
+        }
+        const results = await Promise.all(promises);
+        // Unisci tutti i weather_code in un unico array flat
+        const codes = [];
+        results.forEach((d, idx) => {
+          if (!d?.weather_code) return;
+          d.weather_code.forEach((code, dayIdx) => {
+            if (capToToday) {
+              const dayDate = new Date(year, idx, dayIdx + 1); // idx = mese 0-based
+              if (dayDate > now) return;
+            }
+            codes.push(code);
+          });
+        });
+        return codes;
+      };
+
+      const [dc, dp, ytdC, ytdP] = await Promise.all([
         isFutureMonth ? Promise.resolve(null) : fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month),
         fetchMonthlyWeather(coords.lat, coords.lon, mesePrecedente.year, mesePrecedente.month),
+        fetchYtd(meseCorrente.year, ytdEndMonthC, true),
+        fetchYtd(mesePrecedente.year, ytdEndMonthP, false),
       ]);
       setDataCorrente(dc);
       setDataPrecedente(dp);
+      setProgressivoCorrente(ytdC);
+      setProgressivoPrecedente(ytdP);
     } catch { setError('Errore caricamento meteo'); }
     finally { setLoading(false); }
   };
@@ -189,6 +223,13 @@ export default function MeteoMensile({ citta, provincia }) {
         const soleP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank <= 2, false);
         const piogC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5, true);
         const piogP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5, false);
+
+        // Progressivo YTD
+        const countFromCodes = (codes, filterFn) => codes ? codes.filter(c => filterFn(getWmo(c))).length : null;
+        const ytdSoleC = countFromCodes(progressivoCorrente, w => w.rank <= 2);
+        const ytdSoleP = countFromCodes(progressivoPrecedente, w => w.rank <= 2);
+        const ytdPiogC = countFromCodes(progressivoCorrente, w => w.rank >= 5);
+        const ytdPiogP = countFromCodes(progressivoPrecedente, w => w.rank >= 5);
         const tempC = avgTemp(dataCorrente, meseCorrente.year, meseCorrente.month, true);
         const tempP = avgTemp(dataPrecedente, mesePrecedente.year, mesePrecedente.month, false);
         const deltaSole = (soleC !== null && soleP !== null) ? soleC - soleP : null;
@@ -228,6 +269,17 @@ export default function MeteoMensile({ citta, provincia }) {
                   </div>
                   <DeltaBadge val={deltaSole} invert={false} />
                 </div>
+                {/* Progressivo YTD */}
+                <div className="mt-2 pt-2 border-t border-amber-100">
+                  <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wide mb-1">Progressivo anno</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold text-amber-800">{ytdSoleC !== null ? ytdSoleC : '—'}</span>
+                    <span className="text-xs text-amber-500">{meseCorrente.year}</span>
+                    <span className="text-slate-300 text-xs">vs</span>
+                    <span className="text-sm font-medium text-amber-400">{ytdSoleP !== null ? ytdSoleP : '—'}</span>
+                    <span className="text-xs text-amber-300">{mesePrecedente?.year}</span>
+                  </div>
+                </div>
               </div>
               {/* Card Pioggia */}
               <div className="rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 p-3">
@@ -247,6 +299,17 @@ export default function MeteoMensile({ citta, provincia }) {
                     </div>
                   </div>
                   <DeltaBadge val={deltaPiog} invert={true} />
+                </div>
+                {/* Progressivo YTD */}
+                <div className="mt-2 pt-2 border-t border-blue-100">
+                  <p className="text-[10px] font-semibold text-blue-600 uppercase tracking-wide mb-1">Progressivo anno</p>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-bold text-blue-800">{ytdPiogC !== null ? ytdPiogC : '—'}</span>
+                    <span className="text-xs text-blue-500">{meseCorrente.year}</span>
+                    <span className="text-slate-300 text-xs">vs</span>
+                    <span className="text-sm font-medium text-blue-300">{ytdPiogP !== null ? ytdPiogP : '—'}</span>
+                    <span className="text-xs text-blue-200">{mesePrecedente?.year}</span>
+                  </div>
                 </div>
               </div>
               {/* Card Temperatura */}
