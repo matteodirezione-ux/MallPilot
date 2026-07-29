@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format, getDaysInMonth, startOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Sheet } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
 
 const WMO_ICONS = {
   0: { label: 'Sereno', emoji: '☀️', rank: 0 },
@@ -246,7 +246,7 @@ export default function MeteoMensile({ citta, provincia }) {
             onClick={exportPDF}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700 shadow-sm"
           >
-            <Sheet className="w-3.5 h-3.5" />
+            <FileDown className="w-3.5 h-3.5" />
             CSV
           </button>
         </div>
