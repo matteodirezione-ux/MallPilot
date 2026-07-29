@@ -194,62 +194,47 @@ export default function MeteoMensile({ citta, provincia }) {
     const fmtVal = (val, unit = '') => val !== null && val !== undefined ? `${val}${unit}` : '-';
 
     // --- Titolo ---
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.setTextColor(30, 58, 95);
-    doc.text(`Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`, 14, 13);
+    doc.text(`Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`, 14, 12);
 
-    // --- Card riepilogative ---
-    const cardY = 18;
-    const cardH = 22;
-    const cardW = 85;
-    const cards = [
+    // --- Card riepilogative: 3 colonne su A4 portrait (larghezza utile ~190mm) ---
+    const cardY = 17;
+    const cardH = 16;
+    const cardW = 60; // 3 × 60 + 2 × 5 = 190mm
+    const cardGap = 5;
+
+    const cardsData = [
       {
-        label: 'Giorni Sereni/Nuvolosi',
-        curr: fmtVal(soleC, ' gg'), prev: fmtVal(soleP, ' gg'), delta: fmtDelta(soleC !== null && soleP !== null ? soleC - soleP : null),
-        ytdCurr: fmtVal(ytdSoleC, ' gg'), ytdPrev: fmtVal(ytdSoleP, ' gg'), ytdDelta: fmtDelta(ytdSoleC !== null && ytdSoleP !== null ? ytdSoleC - ytdSoleP : null),
+        label: 'Giorni Sereni',
+        line1: `${meseCorrente.year}: ${fmtVal(soleC, ' gg')}   ${mesePrecedente.year}: ${fmtVal(soleP, ' gg')}   Delta: ${fmtDelta(soleC !== null && soleP !== null ? soleC - soleP : null)}`,
+        line2: `YTD: ${fmtVal(ytdSoleC, ' gg')} vs ${fmtVal(ytdSoleP, ' gg')}  Delta: ${fmtDelta(ytdSoleC !== null && ytdSoleP !== null ? ytdSoleC - ytdSoleP : null)}`,
         r: 245, g: 158, b: 11
       },
       {
-        label: 'Giorni di Pioggia',
-        curr: fmtVal(piogC, ' gg'), prev: fmtVal(piogP, ' gg'), delta: fmtDelta(piogC !== null && piogP !== null ? piogC - piogP : null),
-        ytdCurr: fmtVal(ytdPiogC, ' gg'), ytdPrev: fmtVal(ytdPiogP, ' gg'), ytdDelta: fmtDelta(ytdPiogC !== null && ytdPiogP !== null ? ytdPiogC - ytdPiogP : null),
+        label: 'Giorni Pioggia',
+        line1: `${meseCorrente.year}: ${fmtVal(piogC, ' gg')}   ${mesePrecedente.year}: ${fmtVal(piogP, ' gg')}   Delta: ${fmtDelta(piogC !== null && piogP !== null ? piogC - piogP : null)}`,
+        line2: `YTD: ${fmtVal(ytdPiogC, ' gg')} vs ${fmtVal(ytdPiogP, ' gg')}  Delta: ${fmtDelta(ytdPiogC !== null && ytdPiogP !== null ? ytdPiogC - ytdPiogP : null)}`,
         r: 59, g: 130, b: 246
       },
       {
-        label: 'Temperatura Media',
-        curr: fmtVal(tempC, '°C'), prev: fmtVal(tempP, '°C'), delta: fmtDelta(tempC !== null && tempP !== null ? +(tempC - tempP).toFixed(1) : null),
-        ytdCurr: null, ytdPrev: null, ytdDelta: null,
+        label: 'Temp. Media',
+        line1: `${meseCorrente.year}: ${fmtVal(tempC, 'C')}   ${mesePrecedente.year}: ${fmtVal(tempP, 'C')}   Delta: ${fmtDelta(tempC !== null && tempP !== null ? +(tempC - tempP).toFixed(1) : null)}`,
+        line2: null,
         r: 249, g: 115, b: 22
       },
     ];
 
-    cards.forEach((card, ci) => {
-      const cx = 14 + ci * (cardW + 4);
-      // Sfondo card
+    cardsData.forEach((card, ci) => {
+      const cx = 10 + ci * (cardW + cardGap);
       doc.setFillColor(card.r, card.g, card.b);
       doc.roundedRect(cx, cardY, cardW, cardH, 2, 2, 'F');
-      doc.setFillColor(255, 255, 255);
-      doc.setGState(doc.GState({ opacity: 0.15 }));
-      doc.roundedRect(cx, cardY, cardW, cardH, 2, 2, 'F');
-      doc.setGState(doc.GState({ opacity: 1 }));
-
-      // Label
       doc.setFontSize(7);
       doc.setTextColor(255, 255, 255);
       doc.text(card.label.toUpperCase(), cx + 3, cardY + 5);
-
-      // Valori mese
-      doc.setFontSize(9);
-      doc.setTextColor(255, 255, 255);
-      doc.text(`${meseCorrente.year}: ${card.curr}`, cx + 3, cardY + 11);
-      doc.text(`${mesePrecedente.year}: ${card.prev}`, cx + 3, cardY + 16);
-      doc.text(`Delta: ${card.delta}`, cx + 3, cardY + 21);
-
-      // Progressivo YTD (solo sole e pioggia)
-      if (card.ytdCurr !== null) {
-        doc.setFontSize(7);
-        doc.text(`YTD ${meseCorrente.year}: ${card.ytdCurr}  |  ${mesePrecedente.year}: ${card.ytdPrev}  |  Delta: ${card.ytdDelta}`, cx + 3, cardY + 26);
-      }
+      doc.setFontSize(6.5);
+      doc.text(card.line1, cx + 3, cardY + 10, { maxWidth: cardW - 4 });
+      if (card.line2) doc.text(card.line2, cx + 3, cardY + 15, { maxWidth: cardW - 4 });
     });
 
     // --- Tabella ---
@@ -257,10 +242,11 @@ export default function MeteoMensile({ citta, provincia }) {
     const dP = getDaysInMonth(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1));
 
     // Larghezze colonne: Giorno | 3 col anno corrente | 3 col anno prec | 2 col delta
-    const colW = [16, 28, 10, 10, 28, 10, 10, 22, 11];
+    // Totale: 14+28+9+9+28+9+9+20+9 = 135 → centra su 190mm utile con startX=37 oppure allarga
+    const colW = [16, 32, 10, 10, 32, 10, 10, 22, 10]; // totale = 152mm, startX=10 → fine=162
     const startX = 10;
-    const rowH = 6;
-    let y = cardY + cardH + 8;
+    const rowH = 5;
+    let y = cardY + cardH + 6;
 
     const totalW = colW.reduce((a, b) => a + b, 0);
 
@@ -364,11 +350,6 @@ export default function MeteoMensile({ citta, provincia }) {
         x += colW[idx];
       });
       y += rowH;
-
-      if (y > 195) {
-        doc.addPage();
-        y = 14;
-      }
     }
 
     doc.save(`meteo_${placeName}_${meseCorrente.year}_${String(meseCorrente.month).padStart(2,'0')}.pdf`);
