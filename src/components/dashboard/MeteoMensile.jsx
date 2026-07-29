@@ -152,19 +152,38 @@ export default function MeteoMensile({ citta, provincia }) {
     });
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+    const labelC = format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it });
+    const title = `Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`;
+    doc.setFontSize(13);
+    doc.setTextColor(30, 58, 95);
+    doc.text(title, 14, 14);
+
     const todayDate = new Date(); todayDate.setHours(0,0,0,0);
     const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
     const dP = getDaysInMonth(new Date(meseCorrente.year - 1, meseCorrente.month - 1, 1));
 
-    const header = [
-      'Giorno',
-      `Meteo ${meseCorrente.year}`, `Max ${meseCorrente.year}`, `Min ${meseCorrente.year}`,
-      `Meteo ${meseCorrente.year - 1}`, `Max ${meseCorrente.year - 1}`, `Min ${meseCorrente.year - 1}`,
-      'Delta Meteo', 'Delta Temp'
-    ];
+    const cols = ['Giorno', `Meteo ${meseCorrente.year}`, 'Max', 'Min', `Meteo ${meseCorrente.year - 1}`, 'Max', 'Min', 'Delta Meteo', 'Delta T'];
+    const colW = [20, 34, 12, 12, 34, 12, 12, 26, 14];
+    const startX = 10;
+    const rowH = 6;
+    let y = 22;
 
-    const rows = [];
+    // Header
+    doc.setFontSize(8);
+    doc.setFillColor(59, 130, 246);
+    doc.setTextColor(255, 255, 255);
+    let x = startX;
+    cols.forEach((col, idx) => {
+      doc.rect(x, y, colW[idx], rowH, 'F');
+      doc.text(col, x + 1, y + 4, { maxWidth: colW[idx] - 2 });
+      x += colW[idx];
+    });
+    y += rowH;
+
     for (let i = 0; i < Math.max(dC, dP); i++) {
       const day = i + 1;
       const thisDayDate = new Date(meseCorrente.year, meseCorrente.month - 1, day);
@@ -185,32 +204,42 @@ export default function MeteoMensile({ citta, provincia }) {
 
       const deltaT = (cMax !== null && pMax !== null) ? cMax - pMax : null;
       const deltaM = (cWmo && pWmo) ? cWmo.rank - pWmo.rank : null;
-      const deltaMLabel = deltaM === null ? '' : deltaM > 1 ? 'Peggio' : deltaM < -1 ? 'Meglio' : 'Simile';
+      const deltaMLabel = deltaM === null ? '-' : deltaM > 1 ? 'Peggio' : deltaM < -1 ? 'Meglio' : 'Simile';
 
-      rows.push([
+      const cells = [
         `${day} ${weekDay}`,
-        cWmo ? cWmo.label : '',
-        cMax !== null ? `${cMax}` : '',
-        cMin !== null ? `${cMin}` : '',
-        pWmo ? pWmo.label : '',
-        pMax !== null ? `${pMax}` : '',
-        pMin !== null ? `${pMin}` : '',
+        cWmo ? cWmo.label : '-',
+        cMax !== null ? `${cMax}°` : '-',
+        cMin !== null ? `${cMin}°` : '-',
+        pWmo ? pWmo.label : '-',
+        pMax !== null ? `${pMax}°` : '-',
+        pMin !== null ? `${pMin}°` : '-',
         deltaMLabel,
-        deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}` : '',
-      ]);
+        deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}°` : '-',
+      ];
+
+      // Sfondo riga alternato
+      if (i % 2 === 0) {
+        doc.setFillColor(245, 247, 250);
+        x = startX;
+        colW.forEach(w => { doc.rect(x, y, w, rowH, 'F'); x += w; });
+      }
+
+      doc.setTextColor(30, 41, 59);
+      x = startX;
+      cells.forEach((cell, idx) => {
+        doc.text(String(cell), x + 1, y + 4, { maxWidth: colW[idx] - 2 });
+        x += colW[idx];
+      });
+      y += rowH;
+
+      if (y > 195) {
+        doc.addPage();
+        y = 14;
+      }
     }
 
-    const csvContent = [header, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(';'))
-      .join('\n');
-
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `meteo_${placeName}_${meseCorrente.year}_${String(meseCorrente.month).padStart(2,'0')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    doc.save(`meteo_${placeName}_${meseCorrente.year}_${String(meseCorrente.month).padStart(2,'0')}.pdf`);
   };
 
   if (!location) return null;
@@ -247,7 +276,7 @@ export default function MeteoMensile({ citta, provincia }) {
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700 shadow-sm"
           >
             <FileDown className="w-3.5 h-3.5" />
-            CSV
+            PDF
           </button>
         </div>
       </div>
