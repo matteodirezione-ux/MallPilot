@@ -35,6 +35,7 @@ import TasksDashboard from '@/components/dashboard/TasksDashboard';
 import AgendaCards from '@/components/dashboard/AgendaCards';
 import WeatherWidget from '@/components/dashboard/WeatherWidget';
 import DashboardDetailModal from '@/components/dashboard/DashboardDetailModal';
+import MeteoMensile from '@/components/dashboard/MeteoMensile';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard({ centroSelezionato, user }) {
@@ -707,6 +708,13 @@ export default function Dashboard({ centroSelezionato, user }) {
             completingIds={completingIds}
             fullHeight={user?.tipo_account === 'vigilanza'}
           />
+
+          {/* Tabella Meteo Mensile */}
+          {centroSelezionato?.citta && (
+            <div className="mb-4 sm:mb-6">
+              <MeteoMensile citta={centroSelezionato.citta} provincia={centroSelezionato.provincia} />
+            </div>
+          )}
 
           {/* Bottom cards - per tutti i ruoli */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
