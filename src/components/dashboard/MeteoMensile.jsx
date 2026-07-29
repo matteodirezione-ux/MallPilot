@@ -256,18 +256,58 @@ export default function MeteoMensile({ citta, provincia }) {
     const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
     const dP = getDaysInMonth(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1));
 
-    const cols = ['Giorno', `Meteo ${meseCorrente.year}`, 'Max', 'Min', `Meteo ${mesePrecedente.year}`, 'Max', 'Min', 'Delta Meteo', 'Delta T'];
+    // Larghezze colonne: Giorno | 3 col anno corrente | 3 col anno prec | 2 col delta
     const colW = [20, 36, 12, 12, 36, 12, 12, 26, 12];
     const startX = 10;
     const rowH = 6;
     let y = cardY + cardH + 8;
 
-    // Header tabella
+    const totalW = colW.reduce((a, b) => a + b, 0);
+
+    // Header riga 1: gruppi
     doc.setFontSize(8);
+    let x = startX;
+
+    // Giorno (vuoto)
     doc.setFillColor(30, 58, 95);
     doc.setTextColor(255, 255, 255);
-    let x = startX;
-    cols.forEach((col, idx) => {
+    doc.rect(x, y, colW[0], rowH, 'F');
+    x += colW[0];
+
+    // Anno corrente (3 colonne)
+    const wC = colW[1] + colW[2] + colW[3];
+    doc.setFillColor(59, 130, 246);
+    doc.rect(x, y, wC, rowH, 'F');
+    doc.text(labelC.charAt(0).toUpperCase() + labelC.slice(1), x + wC / 2, y + 4, { align: 'center' });
+    x += wC;
+
+    // Anno precedente (3 colonne)
+    const wP = colW[4] + colW[5] + colW[6];
+    doc.setFillColor(100, 116, 139);
+    doc.rect(x, y, wP, rowH, 'F');
+    doc.text(labelP.charAt(0).toUpperCase() + labelP.slice(1), x + wP / 2, y + 4, { align: 'center' });
+    x += wP;
+
+    // Delta (2 colonne)
+    const wD = colW[7] + colW[8];
+    doc.setFillColor(234, 88, 12);
+    doc.rect(x, y, wD, rowH, 'F');
+    doc.text('Delta', x + wD / 2, y + 4, { align: 'center' });
+    y += rowH;
+
+    // Header riga 2: colonne singole
+    const subCols = ['Giorno', 'Condizione', 'Max', 'Min', 'Condizione', 'Max', 'Min', 'Stato', 'Delta T'];
+    const subColors = [
+      [30, 58, 95],
+      [59, 130, 246], [59, 130, 246], [59, 130, 246],
+      [100, 116, 139], [100, 116, 139], [100, 116, 139],
+      [234, 88, 12], [234, 88, 12],
+    ];
+    doc.setFontSize(7);
+    x = startX;
+    subCols.forEach((col, idx) => {
+      doc.setFillColor(...subColors[idx]);
+      doc.setTextColor(255, 255, 255);
       doc.rect(x, y, colW[idx], rowH, 'F');
       doc.text(col, x + 1, y + 4, { maxWidth: colW[idx] - 2 });
       x += colW[idx];
@@ -296,16 +336,19 @@ export default function MeteoMensile({ citta, provincia }) {
       const deltaM = (cWmo && pWmo) ? cWmo.rank - pWmo.rank : null;
       const deltaMLabel = deltaM === null ? '-' : deltaM > 1 ? 'Peggio' : deltaM < -1 ? 'Meglio' : 'Simile';
 
+      // Normalizza label per jsPDF (rimuovi caratteri non-latin1)
+      const safeLabel = (wmo) => wmo ? wmo.label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x00-\xFF]/g, '') : '-';
+
       const cells = [
         `${day} ${weekDay}`,
-        cWmo ? cWmo.label : '-',        // testo descrittivo (no emoji)
-        cMax !== null ? `${cMax}°` : '-',
-        cMin !== null ? `${cMin}°` : '-',
-        pWmo ? pWmo.label : '-',        // testo descrittivo (no emoji)
-        pMax !== null ? `${pMax}°` : '-',
-        pMin !== null ? `${pMin}°` : '-',
+        safeLabel(cWmo),
+        cMax !== null ? `${cMax}C` : '-',
+        cMin !== null ? `${cMin}C` : '-',
+        safeLabel(pWmo),
+        pMax !== null ? `${pMax}C` : '-',
+        pMin !== null ? `${pMin}C` : '-',
         deltaMLabel,
-        deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}°` : '-',
+        deltaT !== null ? `${deltaT > 0 ? '+' : ''}${deltaT}C` : '-',
       ];
 
       if (i % 2 === 0) {
