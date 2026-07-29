@@ -24,7 +24,8 @@ import {
   HardDrive,
   Megaphone,
   ChevronRight,
-  Gauge
+  Gauge,
+  Cloud
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import SafeImage from '@/components/ui/SafeImage';
@@ -255,6 +256,7 @@ export default function Layout({ children, currentPageName }) {
       label: 'OPERATIVITÀ',
       items: [
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Meteo', page: 'Meteo', icon: Cloud, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
         { name: 'Controlli', page: 'CalendarioManutenzioni', icon: ClipboardList, roles: ['proprieta', 'direttore', 'vigilanza'] },
