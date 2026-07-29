@@ -256,16 +256,13 @@ export default function MeteoMensile({ citta, provincia }) {
                   <span className="text-xl">☀️</span>
                   <span className="text-xs font-semibold text-amber-700">Giorni sereni/nuvolosi</span>
                 </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-amber-800">{soleC !== null ? soleC : '—'}</span>
-                      <span className="text-xs text-amber-600">{meseCorrente.year}</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-base font-medium text-amber-500">{soleP}</span>
-                      <span className="text-xs text-amber-400">{mesePrecedente?.year}</span>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-amber-800">{soleC !== null ? soleC : '—'}</span>
+                    <span className="text-xs text-amber-600">{meseCorrente.year}</span>
+                    <span className="text-slate-300 text-xs">vs</span>
+                    <span className="text-base font-medium text-amber-500">{soleP}</span>
+                    <span className="text-xs text-amber-400">{mesePrecedente?.year}</span>
                   </div>
                   <DeltaBadge val={deltaSole} invert={false} />
                 </div>
@@ -287,16 +284,13 @@ export default function MeteoMensile({ citta, provincia }) {
                   <span className="text-xl">🌧️</span>
                   <span className="text-xs font-semibold text-blue-700">Giorni di pioggia</span>
                 </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-blue-800">{piogC !== null ? piogC : '—'}</span>
-                      <span className="text-xs text-blue-600">{meseCorrente.year}</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-base font-medium text-blue-400">{piogP}</span>
-                      <span className="text-xs text-blue-300">{mesePrecedente?.year}</span>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-blue-800">{piogC !== null ? piogC : '—'}</span>
+                    <span className="text-xs text-blue-600">{meseCorrente.year}</span>
+                    <span className="text-slate-300 text-xs">vs</span>
+                    <span className="text-base font-medium text-blue-400">{piogP}</span>
+                    <span className="text-xs text-blue-300">{mesePrecedente?.year}</span>
                   </div>
                   <DeltaBadge val={deltaPiog} invert={true} />
                 </div>
