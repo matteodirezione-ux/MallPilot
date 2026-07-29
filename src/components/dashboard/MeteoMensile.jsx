@@ -322,16 +322,13 @@ export default function MeteoMensile({ citta, provincia }) {
                   <span className="text-xl">🌡️</span>
                   <span className="text-xs font-semibold text-orange-700">Temperatura media</span>
                 </div>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-orange-800">{tempC !== null ? `${tempC}°` : '—'}</span>
-                      <span className="text-xs text-orange-600">{meseCorrente.year}</span>
-                    </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-base font-medium text-orange-400">{tempP !== null ? `${tempP}°` : '—'}</span>
-                      <span className="text-xs text-orange-300">{mesePrecedente?.year}</span>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-orange-800">{tempC !== null ? `${tempC}°` : '—'}</span>
+                    <span className="text-xs text-orange-600">{meseCorrente.year}</span>
+                    <span className="text-slate-300 text-xs">vs</span>
+                    <span className="text-base font-medium text-orange-400">{tempP !== null ? `${tempP}°` : '—'}</span>
+                    <span className="text-xs text-orange-300">{mesePrecedente?.year}</span>
                   </div>
                   <DeltaBadge val={deltaTemp} invert={false} />
                 </div>
