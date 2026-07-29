@@ -94,8 +94,12 @@ export default function MeteoMensile({ citta, provincia }) {
     setLoading(true);
     setError(null);
     try {
+      const now = new Date();
+      const isFutureMonth = meseCorrente.year > now.getFullYear() ||
+        (meseCorrente.year === now.getFullYear() && meseCorrente.month > now.getMonth() + 1);
+
       const [dc, dp] = await Promise.all([
-        fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month),
+        isFutureMonth ? Promise.resolve(null) : fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month),
         fetchMonthlyWeather(coords.lat, coords.lon, mesePrecedente.year, mesePrecedente.month),
       ]);
       setDataCorrente(dc);
@@ -151,25 +155,29 @@ export default function MeteoMensile({ citta, provincia }) {
       )}
       {error && <div className="text-center py-6 text-red-500 text-sm">{error}</div>}
 
-      {!loading && !error && dataCorrente && dataPrecedente && (() => {
+      {!loading && !error && dataPrecedente && (() => {
         const todayDate = new Date(); todayDate.setHours(0,0,0,0);
 
-        // Helper: conta giornate con rank <= soglia (sole/nuv) o >= 5 (pioggia)
-        const countDays = (data, year, month, filterFn) => {
-          if (!data?.weather_code) return 0;
+        // Helper: conta giornate (filtra future solo per l'anno corrente)
+        const countDays = (data, year, month, filterFn, capToToday) => {
+          if (!data?.weather_code) return null;
           return data.weather_code.filter((code, i) => {
-            const d = new Date(year, month - 1, i + 1);
-            if (d > todayDate) return false;
+            if (capToToday) {
+              const d = new Date(year, month - 1, i + 1);
+              if (d > todayDate) return false;
+            }
             return filterFn(getWmo(code));
           }).length;
         };
 
-        const avgTemp = (data, year, month) => {
+        const avgTemp = (data, year, month, capToToday) => {
           if (!data?.temperature_2m_max || !data?.temperature_2m_min) return null;
           let sum = 0, count = 0;
           data.temperature_2m_max.forEach((max, i) => {
-            const d = new Date(year, month - 1, i + 1);
-            if (d > todayDate) return;
+            if (capToToday) {
+              const d = new Date(year, month - 1, i + 1);
+              if (d > todayDate) return;
+            }
             const min = data.temperature_2m_min[i] ?? max;
             sum += (max + min) / 2;
             count++;
@@ -177,14 +185,14 @@ export default function MeteoMensile({ citta, provincia }) {
           return count ? +(sum / count).toFixed(1) : null;
         };
 
-        const soleC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank <= 2);
-        const soleP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank <= 2);
-        const piogC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5);
-        const piogP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5);
-        const tempC = avgTemp(dataCorrente, meseCorrente.year, meseCorrente.month);
-        const tempP = avgTemp(dataPrecedente, mesePrecedente.year, mesePrecedente.month);
-        const deltaSole = soleC - soleP;
-        const deltaPiog = piogC - piogP;
+        const soleC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank <= 2, true);
+        const soleP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank <= 2, false);
+        const piogC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5, true);
+        const piogP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5, false);
+        const tempC = avgTemp(dataCorrente, meseCorrente.year, meseCorrente.month, true);
+        const tempP = avgTemp(dataPrecedente, mesePrecedente.year, mesePrecedente.month, false);
+        const deltaSole = (soleC !== null && soleP !== null) ? soleC - soleP : null;
+        const deltaPiog = (piogC !== null && piogP !== null) ? piogC - piogP : null;
         const deltaTemp = (tempC !== null && tempP !== null) ? +(tempC - tempP).toFixed(1) : null;
 
         const DeltaBadge = ({ val, invert }) => {
@@ -210,7 +218,7 @@ export default function MeteoMensile({ citta, provincia }) {
                 <div className="flex items-end justify-between">
                   <div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-amber-800">{soleC}</span>
+                      <span className="text-2xl font-bold text-amber-800">{soleC !== null ? soleC : '—'}</span>
                       <span className="text-xs text-amber-600">{meseCorrente.year}</span>
                     </div>
                     <div className="flex items-baseline gap-1">
@@ -230,7 +238,7 @@ export default function MeteoMensile({ citta, provincia }) {
                 <div className="flex items-end justify-between">
                   <div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-blue-800">{piogC}</span>
+                      <span className="text-2xl font-bold text-blue-800">{piogC !== null ? piogC : '—'}</span>
                       <span className="text-xs text-blue-600">{meseCorrente.year}</span>
                     </div>
                     <div className="flex items-baseline gap-1">
@@ -294,6 +302,7 @@ export default function MeteoMensile({ citta, provincia }) {
             </thead>
             <tbody>
               {Array.from({ length: Math.max(daysInMonth, daysInPrevMonth) }, (_, i) => {
+                // Mostra tutte le righe del mese (anche senza dati correnti, per mostrare l'anno precedente)
                 const day = i + 1;
                 const todayDate = new Date(); todayDate.setHours(0,0,0,0);
                 const thisDayDate = new Date(meseCorrente.year, meseCorrente.month - 1, day);
@@ -301,14 +310,14 @@ export default function MeteoMensile({ citta, provincia }) {
                 const isFuture = thisDayDate > todayDate;
 
                 // Dati anno corrente
-                const cIdx = day - 1;
-                const cValid = cIdx < daysInMonth && cIdx < (dataCorrente?.time?.length ?? 0) && !isFuture;
+                 const cIdx = day - 1;
+                const cValid = !!dataCorrente && cIdx < daysInMonth && cIdx < (dataCorrente?.time?.length ?? 0) && !isFuture;
                 const cCode = cValid ? dataCorrente.weather_code?.[cIdx] : null;
                 const cMax = cValid ? Math.round(dataCorrente.temperature_2m_max?.[cIdx] ?? 0) : null;
                 const cMin = cValid ? Math.round(dataCorrente.temperature_2m_min?.[cIdx] ?? 0) : null;
                 const cWmo = cCode !== null ? getWmo(cCode) : null;
 
-                // Dati anno precedente
+                // Dati anno precedente (sempre visibili, non filtrati per data futura)
                 const pIdx = day - 1;
                 const pValid = pIdx < daysInPrevMonth && pIdx < (dataPrecedente?.time?.length ?? 0);
                 const pCode = pValid ? dataPrecedente.weather_code?.[pIdx] : null;
