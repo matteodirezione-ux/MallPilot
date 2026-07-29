@@ -154,7 +154,7 @@ export default function MeteoMensile({ citta, provincia }) {
 
   const exportPDF = async () => {
     const { jsPDF } = await import('jspdf');
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
     const todayDate = new Date(); todayDate.setHours(0,0,0,0);
     const labelC = format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it });
@@ -257,7 +257,7 @@ export default function MeteoMensile({ citta, provincia }) {
     const dP = getDaysInMonth(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1));
 
     // Larghezze colonne: Giorno | 3 col anno corrente | 3 col anno prec | 2 col delta
-    const colW = [20, 36, 12, 12, 36, 12, 12, 26, 12];
+    const colW = [16, 28, 10, 10, 28, 10, 10, 22, 11];
     const startX = 10;
     const rowH = 6;
     let y = cardY + cardH + 8;
