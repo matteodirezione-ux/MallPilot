@@ -1,0 +1,48 @@
+{
+  "name": "CacheMeteo",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale (usato come chiave per il geocoding)"
+    },
+    "location_key": {
+      "type": "string",
+      "description": "Chiave luogo (citta+provincia) usata per il geocoding"
+    },
+    "lat": {
+      "type": "number",
+      "description": "Latitudine del luogo"
+    },
+    "lon": {
+      "type": "number",
+      "description": "Longitudine del luogo"
+    },
+    "place_name": {
+      "type": "string",
+      "description": "Nome del luogo restituito dal geocoder"
+    },
+    "anno": {
+      "type": "number",
+      "description": "Anno di riferimento"
+    },
+    "mese": {
+      "type": "number",
+      "description": "Mese di riferimento (1-12)"
+    },
+    "dati_json": {
+      "type": "string",
+      "description": "Dati meteo serializzati in JSON (weather_code, temperature_2m_max, temperature_2m_min, time)"
+    },
+    "aggiornato_il": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data/ora dell'ultimo aggiornamento da API"
+    }
+  },
+  "required": [
+    "location_key",
+    "anno",
+    "mese"
+  ]
+}
