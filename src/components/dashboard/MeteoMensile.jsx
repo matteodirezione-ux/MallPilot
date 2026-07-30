@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { format, getDaysInMonth, startOfMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 
 const WMO_ICONS = {
   0: { label: 'Sereno', emoji: '☀️', rank: 0 },
@@ -30,67 +29,27 @@ const WMO_ICONS = {
 
 const getWmo = (code) => WMO_ICONS[code] ?? WMO_ICONS[Math.max(...Object.keys(WMO_ICONS).map(Number).filter(k => k <= (code ?? 0)))] ?? { label: '—', emoji: '🌡️', rank: 0 };
 
-// Fetch raw da API (senza cache)
-async function fetchMonthlyWeatherFromAPI(lat, lon, year, month) {
+async function fetchMonthlyWeather(lat, lon, year, month) {
+  // month is 1-based
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
   const daysInMonth = getDaysInMonth(new Date(year, month - 1, 1));
   const endDate = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-  const now = new Date();
-  const isPast = year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1);
-  const baseUrl = isPast
-    ? `https://archive-api.open-meteo.com/v1/archive`
-    : `https://api.open-meteo.com/v1/forecast`;
-  const res = await fetch(`${baseUrl}?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`);
-  const data = await res.json();
-  return data.daily;
-}
-
-// Fetch con cache DB: per mesi passati usa la cache, per il mese corrente aggiorna se > 6 ore
-async function fetchMonthlyWeather(lat, lon, year, month, locationKey) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+  // For past months use archive
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
   const isPast = year < currentYear || (year === currentYear && month < currentMonth);
-  const isCurrentMonth = year === currentYear && month === currentMonth;
 
-  // Cerca in cache
-  const cached = await base44.entities.CacheMeteo.filter({ location_key: locationKey, anno: year, mese: month });
+  const archiveUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
 
-  if (cached.length > 0) {
-    const record = cached[0];
-    // Mesi passati: cache permanente
-    if (isPast) return JSON.parse(record.dati_json);
-    // Mese corrente: aggiorna solo se > 6 ore
-    if (isCurrentMonth && record.aggiornato_il) {
-      const ageHours = (now - new Date(record.aggiornato_il)) / 3600000;
-      if (ageHours < 6) return JSON.parse(record.dati_json);
-    }
-  }
-
-  // Scarica da API
-  const daily = await fetchMonthlyWeatherFromAPI(lat, lon, year, month);
-  if (!daily) return null;
-
-  const payload = {
-    location_key: locationKey,
-    anno: year,
-    mese: month,
-    dati_json: JSON.stringify(daily),
-    aggiornato_il: now.toISOString(),
-  };
-
-  if (cached.length > 0) {
-    await base44.entities.CacheMeteo.update(cached[0].id, payload);
-  } else {
-    await base44.entities.CacheMeteo.create(payload);
-  }
-
-  return daily;
+  const res = await fetch(isPast ? archiveUrl : url);
+  const data = await res.json();
+  return data.daily;
 }
 
 export default function MeteoMensile({ citta, provincia }) {
   const location = citta || provincia;
-  const locationKey = [citta, provincia].filter(Boolean).join('_').toLowerCase().replace(/\s+/g, '_');
   const now = new Date();
   const [meseCorrente, setMeseCorrente] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
   const [mesePrecedente, setMesePrecedente] = useState(null); // { year, month }
@@ -124,13 +83,6 @@ export default function MeteoMensile({ citta, provincia }) {
 
   const geocode = async (loc) => {
     try {
-      // Controlla se abbiamo già le coordinate in cache per questo locationKey
-      const cached = await base44.entities.CacheMeteo.filter({ location_key: locationKey });
-      if (cached.length > 0 && cached[0].lat && cached[0].lon) {
-        setPlaceName(cached[0].place_name || loc);
-        setCoords({ lat: cached[0].lat, lon: cached[0].lon });
-        return;
-      }
       const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=it&format=json`);
       const data = await res.json();
       const place = data.results?.[0];
@@ -158,7 +110,7 @@ export default function MeteoMensile({ citta, provincia }) {
       const fetchYtd = async (year, endMonth, capToToday) => {
         const promises = [];
         for (let m = 1; m <= endMonth; m++) {
-          promises.push(fetchMonthlyWeather(coords.lat, coords.lon, year, m, locationKey));
+          promises.push(fetchMonthlyWeather(coords.lat, coords.lon, year, m));
         }
         const results = await Promise.all(promises);
         // Unisci tutti i weather_code in un unico array flat
@@ -177,8 +129,8 @@ export default function MeteoMensile({ citta, provincia }) {
       };
 
       const [dc, dp, ytdC, ytdP] = await Promise.all([
-        isFutureMonth ? Promise.resolve(null) : fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month, locationKey),
-        fetchMonthlyWeather(coords.lat, coords.lon, mesePrecedente.year, mesePrecedente.month, locationKey),
+        isFutureMonth ? Promise.resolve(null) : fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month),
+        fetchMonthlyWeather(coords.lat, coords.lon, mesePrecedente.year, mesePrecedente.month),
         fetchYtd(meseCorrente.year, ytdEndMonthC, true),
         fetchYtd(mesePrecedente.year, ytdEndMonthP, false),
       ]);
