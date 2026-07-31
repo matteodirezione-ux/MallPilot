@@ -262,6 +262,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Calendario Expo', page: 'Calendario', icon: Calendar, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Report', page: 'Report', icon: BookOpen, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Meteo', page: 'Meteo', icon: Cloud, roles: ['proprieta', 'direttore', 'vigilanza'] },
+        { name: 'Consegne', page: 'Consegne', icon: BookOpen, roles: ['vigilanza'] },
       ]
     },
     {

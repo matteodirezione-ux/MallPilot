@@ -1,0 +1,31 @@
+{
+  "name": "ConsegnaVigilanza",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data della consegna"
+    },
+    "note": {
+      "type": "string",
+      "description": "Note del passaggio di consegne"
+    },
+    "autore_email": {
+      "type": "string",
+      "description": "Email di chi ha scritto la consegna"
+    },
+    "autore_nome": {
+      "type": "string",
+      "description": "Nome di chi ha scritto la consegna"
+    }
+  },
+  "required": [
+    "centro_id",
+    "data"
+  ]
+}

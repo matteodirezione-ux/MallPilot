@@ -29,6 +29,7 @@ import Corrispettivi from './pages/Corrispettivi';
 import LetturaContatori from './pages/LetturaContatori';
 import Utenze from './pages/Utenze';
 import Meteo from './pages/Meteo';
+import Consegne from './pages/Consegne';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -74,6 +75,7 @@ const AuthenticatedApp = () => {
       <Route path="/LetturaContatori" element={<Layout currentPageName="LetturaContatori"><LetturaContatori /></Layout>} />
       <Route path="/Utenze" element={<Layout currentPageName="Utenze"><Utenze /></Layout>} />
       <Route path="/Meteo" element={<Layout currentPageName="Meteo"><Meteo /></Layout>} />
+      <Route path="/Consegne" element={<Layout currentPageName="Consegne"><Consegne /></Layout>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
