@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, BookOpen, Trash2, X, Check } from 'lucide-react';
+import { Plus, BookOpen, Trash2, X, Check, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -12,6 +12,8 @@ export default function Consegne({ centroSelezionato, user }) {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ data: format(new Date(), 'yyyy-MM-dd'), note: '' });
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [editNote, setEditNote] = useState('');
 
   useEffect(() => {
     if (centroSelezionato?.id && centroSelezionato.id !== 'tutti') load();
@@ -41,6 +43,15 @@ export default function Consegne({ centroSelezionato, user }) {
     setFormData({ data: format(new Date(), 'yyyy-MM-dd'), note: '' });
     setShowForm(false);
     await load();
+    setSaving(false);
+  };
+
+  const handleEdit = async (id) => {
+    if (!editNote?.trim()) return;
+    setSaving(true);
+    await base44.entities.ConsegnaVigilanza.update(id, { note: editNote.trim() });
+    setConsegne(prev => prev.map(c => c.id === id ? { ...c, note: editNote.trim() } : c));
+    setEditingId(null);
     setSaving(false);
   };
 
@@ -127,17 +138,47 @@ export default function Consegne({ centroSelezionato, user }) {
                       {format(new Date(c.data), 'EEEE d MMMM yyyy', { locale: it })}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{c.note}</p>
+                  {editingId === c.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editNote}
+                        onChange={e => setEditNote(e.target.value)}
+                        rows={4}
+                        className="resize-none text-sm"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={() => handleEdit(c.id)} disabled={saving} className="gap-1">
+                          <Check className="w-3.5 h-3.5" /> Salva
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setEditingId(null)} className="gap-1">
+                          <X className="w-3.5 h-3.5" /> Annulla
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">{c.note}</p>
+                  )}
                   {c.autore_nome && (
                     <p className="text-xs text-slate-400 mt-2">— {c.autore_nome}</p>
                   )}
                 </div>
-                <button
-                  onClick={() => handleDelete(c.id)}
-                  className="flex-shrink-0 p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                {editingId !== c.id && (
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => { setEditingId(c.id); setEditNote(c.note); }}
+                      className="p-1.5 rounded-lg text-slate-300 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(c.id)}
+                      className="p-1.5 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
