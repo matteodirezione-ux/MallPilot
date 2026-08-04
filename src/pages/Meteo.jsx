@@ -20,7 +20,7 @@ export default function Meteo({ centroSelezionato }) {
         <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Meteo</h1>
         <p className="text-slate-500 text-sm mt-1">Confronto meteo mensile: anno corrente vs anno precedente</p>
       </div>
-      <MeteoMensile citta={centroSelezionato.citta} provincia={centroSelezionato.provincia} />
+      <MeteoMensile citta={centroSelezionato.citta} provincia={centroSelezionato.provincia} centroId={centroSelezionato.id} />
     </div>
   );
 }

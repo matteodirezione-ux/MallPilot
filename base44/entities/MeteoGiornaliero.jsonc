@@ -1,0 +1,31 @@
+{
+  "name": "MeteoGiornaliero",
+  "type": "object",
+  "properties": {
+    "centro_id": {
+      "type": "string",
+      "description": "ID del centro commerciale"
+    },
+    "data": {
+      "type": "string",
+      "format": "date",
+      "description": "Data (ISO yyyy-mm-dd)"
+    },
+    "weather_code": {
+      "type": "number",
+      "description": "Codice meteo WMO"
+    },
+    "temp_max": {
+      "type": "number",
+      "description": "Temperatura massima"
+    },
+    "temp_min": {
+      "type": "number",
+      "description": "Temperatura minima"
+    }
+  },
+  "required": [
+    "centro_id",
+    "data"
+  ]
+}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { format, getDaysInMonth, startOfMonth } from 'date-fns';
+import { format, getDaysInMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
 
 const WMO_ICONS = {
   0: { label: 'Sereno', emoji: '☀️', rank: 0 },
@@ -29,118 +30,109 @@ const WMO_ICONS = {
 
 const getWmo = (code) => WMO_ICONS[code] ?? WMO_ICONS[Math.max(...Object.keys(WMO_ICONS).map(Number).filter(k => k <= (code ?? 0)))] ?? { label: '—', emoji: '🌡️', rank: 0 };
 
-async function fetchMonthlyWeather(lat, lon, year, month) {
-  // month is 1-based
-  const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+// Costruisce un oggetto "mese" con la stessa forma della risposta daily di Open-Meteo,
+// a partire dai record archiviati (indicizzati per giorno del mese).
+function buildMonthData(records, year, month) {
   const daysInMonth = getDaysInMonth(new Date(year, month - 1, 1));
-  const endDate = `${year}-${String(month).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
-  // For past months use archive
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-  const isPast = year < currentYear || (year === currentYear && month < currentMonth);
-
-  const archiveUrl = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
-
-  const res = await fetch(isPast ? archiveUrl : url);
-  const data = await res.json();
-  return data.daily;
+  const weather_code = new Array(daysInMonth).fill(null);
+  const temperature_2m_max = new Array(daysInMonth).fill(null);
+  const temperature_2m_min = new Array(daysInMonth).fill(null);
+  const time = [];
+  for (let d = 1; d <= daysInMonth; d++) {
+    time.push(`${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+  }
+  for (const r of records) {
+    if (!r.data) continue;
+    const parts = r.data.split('-');
+    const yy = Number(parts[0]); const mm = Number(parts[1]); const dd = Number(parts[2]);
+    if (yy !== year || mm !== month) continue;
+    const idx = dd - 1;
+    if (idx < 0 || idx >= daysInMonth) continue;
+    weather_code[idx] = r.weather_code ?? null;
+    temperature_2m_max[idx] = r.temp_max ?? null;
+    temperature_2m_min[idx] = r.temp_min ?? null;
+  }
+  return { weather_code, temperature_2m_max, temperature_2m_min, time };
 }
 
-export default function MeteoMensile({ citta, provincia }) {
+// Codici meteo "piatti" da gennaio fino a endMonth (per i progressivi YTD).
+function flatCodes(records, year, endMonth, capToToday) {
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const codes = [];
+  for (let m = 1; m <= endMonth; m++) {
+    const md = buildMonthData(records, year, m);
+    md.weather_code.forEach((code, i) => {
+      if (code === null || code === undefined) return;
+      if (capToToday) {
+        const d = new Date(year, m - 1, i + 1);
+        if (d > now) return;
+      }
+      codes.push(code);
+    });
+  }
+  return codes;
+}
+
+export default function MeteoMensile({ citta, provincia, centroId }) {
   const location = citta || provincia;
   const now = new Date();
   const [meseCorrente, setMeseCorrente] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
-  const [mesePrecedente, setMesePrecedente] = useState(null); // { year, month }
-  const [coords, setCoords] = useState(null);
-  const [placeName, setPlaceName] = useState('');
+  const [mesePrecedente, setMesePrecedente] = useState(null);
+  const [records, setRecords] = useState([]);
+  const [placeName, setPlaceName] = useState(citta || '');
   const [dataCorrente, setDataCorrente] = useState(null);
   const [dataPrecedente, setDataPrecedente] = useState(null);
-  const [progressivoCorrente, setProgressivoCorrente] = useState(null); // dati ytd anno corrente
-  const [progressivoPrecedente, setProgressivoPrecedente] = useState(null); // dati ytd anno precedente
+  const [progressivoCorrente, setProgressivoCorrente] = useState(null);
+  const [progressivoPrecedente, setProgressivoPrecedente] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Calcola il mese di confronto (stesso mese anno precedente per default, ma navigabile)
+  // Mese di confronto: stesso mese dell'anno precedente
   useEffect(() => {
     if (!location) return;
-    const prevYear = meseCorrente.month === 1 ? meseCorrente.year - 1 : meseCorrente.year;
-    const prevMonth = meseCorrente.month === 1 ? 12 : meseCorrente.month - 1;
-    // Confronta con stesso mese anno precedente
     setMesePrecedente({ year: meseCorrente.year - 1, month: meseCorrente.month });
   }, [meseCorrente, location]);
 
+  // Carica tutti i record meteo archiviati per il centro (una sola volta)
   useEffect(() => {
-    if (!location) return;
-    geocode(location);
-  }, [location]);
+    if (!centroId) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const all = await base44.entities.MeteoGiornaliero.filter({ centro_id: centroId }, 'data', 2000);
+        if (cancelled) return;
+        setRecords(all);
+        setPlaceName(citta || '');
+      } catch {
+        if (!cancelled) setError('Errore caricamento dati meteo archiviati');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [centroId, citta]);
 
+  // Ricalcola i dati visualizzati a partire dai record archiviati (no chiamate API per mese)
   useEffect(() => {
-    if (!coords || !mesePrecedente) return;
-    load();
-  }, [coords, meseCorrente, mesePrecedente]);
+    if (records.length === 0) {
+      setDataCorrente(null); setDataPrecedente(null);
+      setProgressivoCorrente(null); setProgressivoPrecedente(null);
+      return;
+    }
+    const realNow = new Date();
+    const realYear = realNow.getFullYear();
+    const realMonth = realNow.getMonth() + 1;
+    const isFuture = meseCorrente.year > realYear || (meseCorrente.year === realYear && meseCorrente.month > realMonth);
+    const ytdEndC = isFuture ? realMonth : meseCorrente.month;
+    const ytdEndP = mesePrecedente ? mesePrecedente.month : 0;
 
-  const geocode = async (loc) => {
-    try {
-      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=it&format=json`);
-      const data = await res.json();
-      const place = data.results?.[0];
-      if (!place) { setError('Luogo non trovato'); return; }
-      setPlaceName(place.name);
-      setCoords({ lat: place.latitude, lon: place.longitude });
-    } catch { setError('Errore geocoding'); }
-  };
-
-  const load = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const now = new Date();
-      const currentRealYear = now.getFullYear();
-      const currentRealMonth = now.getMonth() + 1;
-      const isFutureMonth = meseCorrente.year > currentRealYear ||
-        (meseCorrente.year === currentRealYear && meseCorrente.month > currentRealMonth);
-
-      // Calcola progressivo YTD: dall'inizio dell'anno fino al mese visualizzato (incluso)
-      // Per anno corrente: fino al mese corrente visualizzato (o mese reale se nel futuro)
-      const ytdEndMonthC = isFutureMonth ? currentRealMonth : meseCorrente.month;
-      const ytdEndMonthP = mesePrecedente.month; // stesso mese, anno precedente
-
-      const fetchYtd = async (year, endMonth, capToToday) => {
-        const promises = [];
-        for (let m = 1; m <= endMonth; m++) {
-          promises.push(fetchMonthlyWeather(coords.lat, coords.lon, year, m));
-        }
-        const results = await Promise.all(promises);
-        // Unisci tutti i weather_code in un unico array flat
-        const codes = [];
-        results.forEach((d, idx) => {
-          if (!d?.weather_code) return;
-          d.weather_code.forEach((code, dayIdx) => {
-            if (capToToday) {
-              const dayDate = new Date(year, idx, dayIdx + 1); // idx = mese 0-based
-              if (dayDate > now) return;
-            }
-            codes.push(code);
-          });
-        });
-        return codes;
-      };
-
-      const [dc, dp, ytdC, ytdP] = await Promise.all([
-        isFutureMonth ? Promise.resolve(null) : fetchMonthlyWeather(coords.lat, coords.lon, meseCorrente.year, meseCorrente.month),
-        fetchMonthlyWeather(coords.lat, coords.lon, mesePrecedente.year, mesePrecedente.month),
-        fetchYtd(meseCorrente.year, ytdEndMonthC, true),
-        fetchYtd(mesePrecedente.year, ytdEndMonthP, false),
-      ]);
-      setDataCorrente(dc);
-      setDataPrecedente(dp);
-      setProgressivoCorrente(ytdC);
-      setProgressivoPrecedente(ytdP);
-    } catch { setError('Errore caricamento meteo'); }
-    finally { setLoading(false); }
-  };
+    setDataCorrente(buildMonthData(records, meseCorrente.year, meseCorrente.month));
+    setDataPrecedente(mesePrecedente ? buildMonthData(records, mesePrecedente.year, mesePrecedente.month) : null);
+    setProgressivoCorrente(flatCodes(records, meseCorrente.year, ytdEndC, true));
+    setProgressivoPrecedente(mesePrecedente ? flatCodes(records, mesePrecedente.year, ytdEndP, false) : null);
+  }, [records, meseCorrente, mesePrecedente]);
 
   const navigate = (dir) => {
     setMeseCorrente(prev => {
@@ -160,7 +152,6 @@ export default function MeteoMensile({ citta, provincia }) {
     const labelC = format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it });
     const labelP = format(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1), 'MMMM yyyy', { locale: it });
 
-    // --- Calcola dati card ---
     const countDaysPdf = (data, year, month, filterFn, capToToday) => {
       if (!data?.weather_code) return null;
       return data.weather_code.filter((code, i) => {
@@ -193,15 +184,13 @@ export default function MeteoMensile({ citta, provincia }) {
     const fmtDelta = (val) => val === null ? '-' : (val > 0 ? `+${val}` : `${val}`);
     const fmtVal = (val, unit = '') => val !== null && val !== undefined ? `${val}${unit}` : '-';
 
-    // --- Titolo ---
     doc.setFontSize(12);
     doc.setTextColor(30, 58, 95);
     doc.text(`Meteo - ${placeName} - ${labelC.charAt(0).toUpperCase() + labelC.slice(1)}`, 14, 12);
 
-    // --- Card riepilogative: 3 colonne su A4 portrait (larghezza utile ~190mm) ---
     const cardY = 17;
     const cardH = 16;
-    const cardW = 60; // 3 × 60 + 2 × 5 = 190mm
+    const cardW = 60;
     const cardGap = 5;
 
     const cardsData = [
@@ -237,51 +226,40 @@ export default function MeteoMensile({ citta, provincia }) {
       if (card.line2) doc.text(card.line2, cx + 3, cardY + 15, { maxWidth: cardW - 4 });
     });
 
-    // --- Tabella ---
     const dC = getDaysInMonth(new Date(meseCorrente.year, meseCorrente.month - 1, 1));
     const dP = getDaysInMonth(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1));
 
-    // Larghezze colonne: Giorno | 3 col anno corrente | 3 col anno prec | 2 col delta
-    // Totale: 14+28+9+9+28+9+9+20+9 = 135 → centra su 190mm utile con startX=37 oppure allarga
-    const colW = [16, 32, 10, 10, 32, 10, 10, 22, 10]; // totale = 152mm, startX=10 → fine=162
+    const colW = [16, 32, 10, 10, 32, 10, 10, 22, 10];
     const startX = 10;
     const rowH = 5;
     let y = cardY + cardH + 6;
 
-    const totalW = colW.reduce((a, b) => a + b, 0);
-
-    // Header riga 1: gruppi
     doc.setFontSize(8);
     let x = startX;
 
-    // Giorno (vuoto)
     doc.setFillColor(30, 58, 95);
     doc.setTextColor(255, 255, 255);
     doc.rect(x, y, colW[0], rowH, 'F');
     x += colW[0];
 
-    // Anno corrente (3 colonne)
     const wC = colW[1] + colW[2] + colW[3];
     doc.setFillColor(59, 130, 246);
     doc.rect(x, y, wC, rowH, 'F');
     doc.text(labelC.charAt(0).toUpperCase() + labelC.slice(1), x + wC / 2, y + 4, { align: 'center' });
     x += wC;
 
-    // Anno precedente (3 colonne)
     const wP = colW[4] + colW[5] + colW[6];
     doc.setFillColor(100, 116, 139);
     doc.rect(x, y, wP, rowH, 'F');
     doc.text(labelP.charAt(0).toUpperCase() + labelP.slice(1), x + wP / 2, y + 4, { align: 'center' });
     x += wP;
 
-    // Delta (2 colonne)
     const wD = colW[7] + colW[8];
     doc.setFillColor(234, 88, 12);
     doc.rect(x, y, wD, rowH, 'F');
     doc.text('Delta', x + wD / 2, y + 4, { align: 'center' });
     y += rowH;
 
-    // Header riga 2: colonne singole
     const subCols = ['Giorno', 'Condizione', 'Max', 'Min', 'Condizione', 'Max', 'Min', 'Stato', 'Delta T'];
     const subColors = [
       [30, 58, 95],
@@ -310,19 +288,18 @@ export default function MeteoMensile({ citta, provincia }) {
       const cCode = cValid ? dataCorrente.weather_code?.[i] : null;
       const cMax = cValid ? Math.round(dataCorrente.temperature_2m_max?.[i] ?? 0) : null;
       const cMin = cValid ? Math.round(dataCorrente.temperature_2m_min?.[i] ?? 0) : null;
-      const cWmo = cCode !== null ? getWmo(cCode) : null;
+      const cWmo = cCode !== null && cCode !== undefined ? getWmo(cCode) : null;
 
       const pValid = !!dataPrecedente && i < dP && i < (dataPrecedente?.time?.length ?? 0);
       const pCode = pValid ? dataPrecedente.weather_code?.[i] : null;
       const pMax = pValid ? Math.round(dataPrecedente.temperature_2m_max?.[i] ?? 0) : null;
       const pMin = pValid ? Math.round(dataPrecedente.temperature_2m_min?.[i] ?? 0) : null;
-      const pWmo = pCode !== null ? getWmo(pCode) : null;
+      const pWmo = pCode !== null && pCode !== undefined ? getWmo(pCode) : null;
 
       const deltaT = (cMax !== null && pMax !== null) ? cMax - pMax : null;
       const deltaM = (cWmo && pWmo) ? cWmo.rank - pWmo.rank : null;
       const deltaMLabel = deltaM === null ? '-' : deltaM > 1 ? 'Peggio' : deltaM < -1 ? 'Meglio' : 'Simile';
 
-      // Normalizza label per jsPDF (rimuovi caratteri non-latin1)
       const safeLabel = (wmo) => wmo ? wmo.label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x00-\xFF]/g, '') : '-';
 
       const cells = [
@@ -400,11 +377,16 @@ export default function MeteoMensile({ citta, provincia }) {
         </div>
       )}
       {error && <div className="text-center py-6 text-red-500 text-sm">{error}</div>}
+      {!loading && !error && records.length === 0 && (
+        <div className="text-center py-10 text-slate-400 text-sm">
+          <span className="text-2xl block mb-2">📊</span>
+          Nessun dato meteo archiviato per questo centro.
+        </div>
+      )}
 
-      {!loading && !error && dataPrecedente && (() => {
+      {!loading && !error && records.length > 0 && dataPrecedente && (() => {
         const todayDate = new Date(); todayDate.setHours(0,0,0,0);
 
-        // Helper: conta giornate (filtra future solo per l'anno corrente)
         const countDays = (data, year, month, filterFn, capToToday) => {
           if (!data?.weather_code) return null;
           return data.weather_code.filter((code, i) => {
@@ -412,6 +394,7 @@ export default function MeteoMensile({ citta, provincia }) {
               const d = new Date(year, month - 1, i + 1);
               if (d > todayDate) return false;
             }
+            if (code === null || code === undefined) return false;
             return filterFn(getWmo(code));
           }).length;
         };
@@ -424,6 +407,7 @@ export default function MeteoMensile({ citta, provincia }) {
               const d = new Date(year, month - 1, i + 1);
               if (d > todayDate) return;
             }
+            if (max === null || max === undefined) return;
             const min = data.temperature_2m_min[i] ?? max;
             sum += (max + min) / 2;
             count++;
@@ -436,7 +420,6 @@ export default function MeteoMensile({ citta, provincia }) {
         const piogC = countDays(dataCorrente, meseCorrente.year, meseCorrente.month, w => w.rank >= 5, true);
         const piogP = countDays(dataPrecedente, mesePrecedente.year, mesePrecedente.month, w => w.rank >= 5, false);
 
-        // Progressivo YTD
         const countFromCodes = (codes, filterFn) => codes ? codes.filter(c => filterFn(getWmo(c))).length : null;
         const ytdSoleC = countFromCodes(progressivoCorrente, w => w.rank <= 2);
         const ytdSoleP = countFromCodes(progressivoPrecedente, w => w.rank <= 2);
@@ -451,7 +434,6 @@ export default function MeteoMensile({ citta, provincia }) {
         const DeltaBadge = ({ val, invert }) => {
           if (val === null || val === undefined) return null;
           const positive = invert ? val < 0 : val > 0;
-          const negative = invert ? val > 0 : val < 0;
           return (
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${val === 0 ? 'bg-slate-100 text-slate-500' : positive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
               {val > 0 ? '+' : ''}{val}{typeof val === 'number' && !Number.isInteger(val) ? '' : ''}
@@ -478,7 +460,6 @@ export default function MeteoMensile({ citta, provincia }) {
                   </div>
                   <DeltaBadge val={deltaSole} invert={false} />
                 </div>
-                {/* Progressivo YTD */}
                 <div className="mt-2 pt-2 border-t border-amber-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -511,7 +492,6 @@ export default function MeteoMensile({ citta, provincia }) {
                   </div>
                   <DeltaBadge val={deltaPiog} invert={true} />
                 </div>
-                {/* Progressivo YTD */}
                 <div className="mt-2 pt-2 border-t border-blue-100">
                   <div className="flex items-center justify-between">
                     <div>
@@ -578,30 +558,26 @@ export default function MeteoMensile({ citta, provincia }) {
             </thead>
             <tbody>
               {Array.from({ length: Math.max(daysInMonth, daysInPrevMonth) }, (_, i) => {
-                // Mostra tutte le righe del mese (anche senza dati correnti, per mostrare l'anno precedente)
                 const day = i + 1;
                 const todayDate = new Date(); todayDate.setHours(0,0,0,0);
                 const thisDayDate = new Date(meseCorrente.year, meseCorrente.month - 1, day);
                 const isToday = thisDayDate.getTime() === todayDate.getTime();
                 const isFuture = thisDayDate > todayDate;
 
-                // Dati anno corrente
-                 const cIdx = day - 1;
+                const cIdx = day - 1;
                 const cValid = !!dataCorrente && cIdx < daysInMonth && cIdx < (dataCorrente?.time?.length ?? 0) && !isFuture;
                 const cCode = cValid ? dataCorrente.weather_code?.[cIdx] : null;
                 const cMax = cValid ? Math.round(dataCorrente.temperature_2m_max?.[cIdx] ?? 0) : null;
                 const cMin = cValid ? Math.round(dataCorrente.temperature_2m_min?.[cIdx] ?? 0) : null;
-                const cWmo = cCode !== null ? getWmo(cCode) : null;
+                const cWmo = cCode !== null && cCode !== undefined ? getWmo(cCode) : null;
 
-                // Dati anno precedente (sempre visibili, non filtrati per data futura)
                 const pIdx = day - 1;
                 const pValid = pIdx < daysInPrevMonth && pIdx < (dataPrecedente?.time?.length ?? 0);
                 const pCode = pValid ? dataPrecedente.weather_code?.[pIdx] : null;
                 const pMax = pValid ? Math.round(dataPrecedente.temperature_2m_max?.[pIdx] ?? 0) : null;
                 const pMin = pValid ? Math.round(dataPrecedente.temperature_2m_min?.[pIdx] ?? 0) : null;
-                const pWmo = pCode !== null ? getWmo(pCode) : null;
+                const pWmo = pCode !== null && pCode !== undefined ? getWmo(pCode) : null;
 
-                // Delta
                 const deltaTemp = (cMax !== null && pMax !== null) ? cMax - pMax : null;
                 const deltaMeteo = (cWmo && pWmo) ? cWmo.rank - pWmo.rank : null;
 
