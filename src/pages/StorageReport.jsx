@@ -61,9 +61,24 @@ export default function StorageReport({ user }) {
     try {
       const response = await base44.functions.invoke(fnName, {});
       if (response.data?.signed_url) {
-        window.open(response.data.signed_url, '_blank');
+        const ext = type === 'docs' ? 'md' : 'json';
+        const prefix = type === 'dati' ? 'backup_dati' : type === 'app' ? 'backup_app_struttura' : 'backup_documentazione';
+        try {
+          const res = await fetch(response.data.signed_url);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${prefix}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch {
+          window.location.href = response.data.signed_url;
+        }
         setBackupState(prev => ({ ...prev, [type]: response.data }));
-        toast.success('Backup generato! Download avviato in una nuova scheda.');
+        toast.success('Backup generato! Download avviato.');
       } else {
         toast.error('Nessun file ricevuto');
       }
