@@ -63,7 +63,8 @@ export default function StorageReport({ user }) {
       const ext = type === 'docs' ? 'md' : 'json';
       const prefix = type === 'dati' ? 'backup_dati' : type === 'app' ? 'backup_app_struttura' : 'backup_documentazione';
       const mimeType = type === 'docs' ? 'text/markdown' : 'application/json';
-      const blob = new Blob([response.data], { type: mimeType });
+      const content = typeof response.data === 'string' ? response.data : JSON.stringify(response.data, null, 2);
+      const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
