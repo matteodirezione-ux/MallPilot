@@ -1,7 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 
-// Backup completo di TUTTI i dati delle entità (con paginazione per superare il limite di 50 record).
-// Restituisce uno signed URL per il download del file JSON.
+// Backup completo di TUTTI i dati delle entità. Ritorna il JSON direttamente come Response.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -19,52 +18,25 @@ Deno.serve(async (req) => {
     ];
 
     const backup = { timestamp: new Date().toISOString(), type: 'full_data_backup', entities: {} };
-    let totalRecords = 0;
 
     for (const entityName of ALL_ENTITIES) {
       try {
         const entity = base44.asServiceRole.entities[entityName];
         if (!entity) { backup.entities[entityName] = { error: 'entity not found' }; continue; }
-
-        // Paginazione: fetch in batch da 500 fino a recuperare tutti i record
-        const allRecords = [];
-        let skip = 0;
-        const limit = 500;
-        while (true) {
-          const batch = await entity.filter({}, '-created_date', limit);
-          // filter non supporta skip direttamente; se il batch è < limit, abbiamo tutto
-          allRecords.push(...batch);
-          if (batch.length < limit) break;
-          // Se la entity ha più di 500 record ma filter non pagina, fermiamoci per non loopare
-          // (limite pratico: 500 record per entity nella maggior parte dei casi)
-          break;
-        }
-        backup.entities[entityName] = allRecords;
-        totalRecords += allRecords.length;
+        const records = await entity.filter({}, '-created_date', 10000);
+        backup.entities[entityName] = records;
       } catch (e) {
         backup.entities[entityName] = { error: e.message };
       }
     }
 
-    const backupJson = JSON.stringify(backup, null, 2);
-    const backupBlob = new Blob([backupJson], { type: 'application/json' });
-
-    const uploadResult = await base44.integrations.Core.UploadPrivateFile({
-      file: await backupBlob.arrayBuffer()
-    });
-
-    const signed = await base44.integrations.Core.CreateFileSignedUrl({
-      file_uri: uploadResult.file_uri,
-      expires_in: 86400
-    });
-
-    return Response.json({
-      success: true,
-      timestamp: backup.timestamp,
-      signed_url: signed.signed_url,
-      file_uri: uploadResult.file_uri,
-      entities_count: ALL_ENTITIES.length,
-      total_records: totalRecords
+    const json = JSON.stringify(backup, null, 2);
+    return new Response(json, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="backup_dati_${new Date().toISOString().slice(0, 10)}.json"`
+      }
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

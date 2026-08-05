@@ -60,28 +60,20 @@ export default function StorageReport({ user }) {
     setBackupState(prev => ({ ...prev, [type]: null }));
     try {
       const response = await base44.functions.invoke(fnName, {});
-      if (response.data?.signed_url) {
-        const ext = type === 'docs' ? 'md' : 'json';
-        const prefix = type === 'dati' ? 'backup_dati' : type === 'app' ? 'backup_app_struttura' : 'backup_documentazione';
-        try {
-          const res = await fetch(response.data.signed_url);
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${prefix}_${new Date().toISOString().slice(0, 10)}.${ext}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        } catch {
-          window.location.href = response.data.signed_url;
-        }
-        setBackupState(prev => ({ ...prev, [type]: response.data }));
-        toast.success('Backup generato! Download avviato.');
-      } else {
-        toast.error('Nessun file ricevuto');
-      }
+      const ext = type === 'docs' ? 'md' : 'json';
+      const prefix = type === 'dati' ? 'backup_dati' : type === 'app' ? 'backup_app_struttura' : 'backup_documentazione';
+      const mimeType = type === 'docs' ? 'text/markdown' : 'application/json';
+      const blob = new Blob([response.data], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${prefix}_${new Date().toISOString().slice(0, 10)}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setBackupState(prev => ({ ...prev, [type]: true }));
+      toast.success('Backup scaricato!');
     } catch (error) {
       toast.error('Errore durante il backup: ' + (error.message || 'errore sconosciuto'));
       console.error(error);
@@ -148,9 +140,7 @@ export default function StorageReport({ user }) {
                 <p className="text-xs text-slate-500 mt-1">Esporta tutti i record di tutte le entità in JSON</p>
               </div>
               {backupState.dati && (
-                <p className="text-xs text-emerald-600 font-medium">
-                  {backupState.dati.total_records} record · {backupState.dati.entities_count} entità
-                </p>
+                <p className="text-xs text-emerald-600 font-medium">✓ Ultimo backup completato</p>
               )}
               <Button
                 onClick={() => runBackup('dati', 'backupDatabase')}
@@ -176,9 +166,7 @@ export default function StorageReport({ user }) {
                 <p className="text-xs text-slate-500 mt-1">Blueprint strutturale: schemi entità + registro funzioni</p>
               </div>
               {backupState.app && (
-                <p className="text-xs text-blue-600 font-medium">
-                  {backupState.app.entities_count} entità · {backupState.app.functions_count} funzioni
-                </p>
+                <p className="text-xs text-blue-600 font-medium">✓ Ultimo backup completato</p>
               )}
               <Button
                 onClick={() => runBackup('app', 'backupAppStruttura')}

@@ -1,7 +1,6 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.40';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.41';
 
-// Esporta la "struttura" dell'app: schemi delle entità (campi inferiti da record di esempio)
-// + registro di tutte le funzioni backend. Questo è il blueprint strutturale dell'app.
+// Esporta il blueprint strutturale dell'app come JSON diretto.
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -19,12 +18,12 @@ Deno.serve(async (req) => {
     ];
 
     const ALL_FUNCTIONS = [
-      { name: 'analyzeStorageUsage', desc: 'Analizza lo spazio occupato da immagini e file nelle entità' },
-      { name: 'archiviaMeteo', desc: 'Archivia i dati meteo giornalieri dall\'API Open-Meteo (backfill + aggiornamento giornaliero)' },
-      { name: 'backupDatabase', desc: 'Backup completo di tutti i dati delle entità in formato JSON' },
-      { name: 'backupAppStruttura', desc: 'Esporta il blueprint strutturale dell\'app (schemi entità + registro funzioni)' },
+      { name: 'analyzeStorageUsage', desc: 'Analizza lo spazio occupato da immagini e file nelle entita' },
+      { name: 'archiviaMeteo', desc: 'Archivia i dati meteo giornalieri da Open-Meteo Archive (backfill + giornaliero)' },
+      { name: 'backupDatabase', desc: 'Backup completo di tutti i dati delle entita in formato JSON' },
+      { name: 'backupAppStruttura', desc: 'Esporta il blueprint strutturale dell\'app (schemi entita + registro funzioni)' },
       { name: 'backupDocumentazione', desc: 'Genera la documentazione di funzionamento dell\'app in formato markdown' },
-      { name: 'compressExistingImages', desc: 'Comprime le immagini esistenti per ridurre lo spazio di archiviazione' },
+      { name: 'compressExistingImages', desc: 'Comprime le immagini esistenti per ridurre lo spazio' },
       { name: 'creaControlliPrenotazione', desc: 'Crea automaticamente controlli/manutenzioni collegate a una prenotazione' },
       { name: 'creaNotificheVigilanza', desc: 'Crea notifiche per il personale di vigilanza' },
       { name: 'generaContratto30gg', desc: 'Genera il contratto PDF per prenotazioni con durata <= 30 giorni' },
@@ -40,17 +39,14 @@ Deno.serve(async (req) => {
       { name: 'notificaTaskCompletato', desc: 'Notifica il completamento di un task' },
       { name: 'notificaTicketInAttesa', desc: 'Notifica i ticket in attesa di approvazione' },
       { name: 'reminderBackupManuale', desc: 'Promemoria periodico per eseguire il backup manuale' },
-      { name: 'riepilogoSettimanaleDirettore', desc: 'Invia un riepilogo settimanale ai direttori con attività e scadenze' }
+      { name: 'riepilogoSettimanaleDirettore', desc: 'Invia un riepilogo settimanale ai direttori con attivita e scadenze' }
     ];
 
     const entitiesSchema = {};
-
     for (const entityName of ALL_ENTITIES) {
       try {
         const entity = base44.asServiceRole.entities[entityName];
         if (!entity) { entitiesSchema[entityName] = { error: 'not found' }; continue; }
-
-        // Inferisci i campi da un record di esempio
         const sample = await entity.filter({}, '-created_date', 1);
         const sampleRecord = sample[0] || {};
         const fields = {};
@@ -60,15 +56,8 @@ Deno.serve(async (req) => {
           if (value === null) type = 'null';
           fields[key] = { type, sample_value: value };
         }
-
-        // Conta i record totali
         const count = await entity.filter({}, '-created_date', 10000);
-
-        entitiesSchema[entityName] = {
-          fields,
-          record_count: count.length,
-          sample_id: sampleRecord.id || null
-        };
+        entitiesSchema[entityName] = { fields, record_count: count.length, sample_id: sampleRecord.id || null };
       } catch (e) {
         entitiesSchema[entityName] = { error: e.message };
       }
@@ -81,33 +70,21 @@ Deno.serve(async (req) => {
       entities: entitiesSchema,
       backend_functions: ALL_FUNCTIONS,
       restoration_notes: [
-        '1. Ricreare le entità in Base44 usando i campi elencati sopra',
+        '1. Ricreare le entita in Base44 usando i campi elencati sopra',
         '2. Ricreare le funzioni backend elencate sopra con la logica descritta',
-        '3. Configurare le automazioni (scheduled/entity) che triggersiano le funzioni',
+        '3. Configurare le automazioni (scheduled/entity) che triggerino le funzioni',
         '4. Importare i dati dal backup_dati JSON',
         '5. Verificare i permessi RLS e i ruoli utenti (admin, direttore, vigilanza, manutentore, tenant)'
       ]
     };
 
     const json = JSON.stringify(blueprint, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-
-    const uploadResult = await base44.integrations.Core.UploadPrivateFile({
-      file: await blob.arrayBuffer()
-    });
-
-    const signed = await base44.integrations.Core.CreateFileSignedUrl({
-      file_uri: uploadResult.file_uri,
-      expires_in: 86400
-    });
-
-    return Response.json({
-      success: true,
-      timestamp: blueprint.timestamp,
-      signed_url: signed.signed_url,
-      file_uri: uploadResult.file_uri,
-      entities_count: ALL_ENTITIES.length,
-      functions_count: ALL_FUNCTIONS.length
+    return new Response(json, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="backup_app_struttura_${new Date().toISOString().slice(0, 10)}.json"`
+      }
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
