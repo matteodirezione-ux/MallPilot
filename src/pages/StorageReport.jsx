@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { HardDrive, BarChart3, RefreshCw, Loader2, Zap } from 'lucide-react';
+import { HardDrive, BarChart3, RefreshCw, Loader2, Zap, Database, Code2, FileText, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function StorageReport({ user }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [compressing, setCompressing] = useState(false);
+  const [backupState, setBackupState] = useState({ dati: null, app: null, docs: null });
+  const [backupLoading, setBackupLoading] = useState({ dati: false, app: false, docs: false });
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -53,6 +55,26 @@ export default function StorageReport({ user }) {
     );
   }
 
+  const runBackup = async (type, fnName) => {
+    setBackupLoading(prev => ({ ...prev, [type]: true }));
+    setBackupState(prev => ({ ...prev, [type]: null }));
+    try {
+      const response = await base44.functions.invoke(fnName, {});
+      if (response.data?.signed_url) {
+        window.open(response.data.signed_url, '_blank');
+        setBackupState(prev => ({ ...prev, [type]: response.data }));
+        toast.success('Backup generato! Download avviato in una nuova scheda.');
+      } else {
+        toast.error('Nessun file ricevuto');
+      }
+    } catch (error) {
+      toast.error('Errore durante il backup: ' + (error.message || 'errore sconosciuto'));
+      console.error(error);
+    } finally {
+      setBackupLoading(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-8">
@@ -95,6 +117,88 @@ export default function StorageReport({ user }) {
             Aggiorna
           </Button>
         </div>
+      </div>
+
+      {/* Sezione Backup */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Backup Dati */}
+        <Card className="border-2 border-emerald-200 bg-emerald-50/50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                <Database className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800">Backup Dati</h3>
+                <p className="text-xs text-slate-500 mt-1">Esporta tutti i record di tutte le entità in JSON</p>
+              </div>
+              {backupState.dati && (
+                <p className="text-xs text-emerald-600 font-medium">
+                  {backupState.dati.total_records} record · {backupState.dati.entities_count} entità
+                </p>
+              )}
+              <Button
+                onClick={() => runBackup('dati', 'backupDatabase')}
+                disabled={backupLoading.dati}
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700 w-full"
+              >
+                {backupLoading.dati ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {backupLoading.dati ? 'Generazione...' : 'Scarica Dati'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Backup App */}
+        <Card className="border-2 border-blue-200 bg-blue-50/50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                <Code2 className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800">Backup App</h3>
+                <p className="text-xs text-slate-500 mt-1">Blueprint strutturale: schemi entità + registro funzioni</p>
+              </div>
+              {backupState.app && (
+                <p className="text-xs text-blue-600 font-medium">
+                  {backupState.app.entities_count} entità · {backupState.app.functions_count} funzioni
+                </p>
+              )}
+              <Button
+                onClick={() => runBackup('app', 'backupAppStruttura')}
+                disabled={backupLoading.app}
+                className="gap-2 bg-blue-600 hover:bg-blue-700 w-full"
+              >
+                {backupLoading.app ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {backupLoading.app ? 'Generazione...' : 'Scarica Struttura'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Backup Documentazione */}
+        <Card className="border-2 border-purple-200 bg-purple-50/50">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
+                <FileText className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800">Backup Documentazione</h3>
+                <p className="text-xs text-slate-500 mt-1">Guida completa: entità, funzioni, ruoli, ripristino</p>
+              </div>
+              <Button
+                onClick={() => runBackup('docs', 'backupDocumentazione')}
+                disabled={backupLoading.docs}
+                className="gap-2 bg-purple-600 hover:bg-purple-700 w-full"
+              >
+                {backupLoading.docs ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                {backupLoading.docs ? 'Generazione...' : 'Scarica Docs'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
