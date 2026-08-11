@@ -482,14 +482,14 @@ export default function Layout({ children, currentPageName }) {
           </div>
         </div>
         <div className="min-h-screen pt-16 md:pt-0">
-          {!user?.tipo_account ? (
+          {!user ? (
             <div className="flex items-center justify-center min-h-screen p-8">
               <div className="text-center">
                 <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-slate-600">Configurazione account...</p>
               </div>
             </div>
-          ) : user?.tipo_account === null || user?.tipo_account === undefined ? (
+          ) : !user.tipo_account ? (
             <div className="flex items-center justify-center min-h-screen p-8">
               <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-slate-200 p-8 text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-red-100">
