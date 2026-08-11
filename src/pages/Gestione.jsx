@@ -28,6 +28,8 @@ export default function Gestione({ user }) {
   const [tenantDialog, setTenantDialog] = useState({ open: false, data: null });
   const [budgetDialog, setBudgetDialog] = useState({ open: false, data: null });
 
+  const isProprieta = user?.tipo_account === 'proprieta';
+
   useEffect(() => {
     if (user?.tipo_account === 'proprieta' || user?.tipo_account === 'direttore') {
       loadData();
@@ -47,18 +49,23 @@ export default function Gestione({ user }) {
         base44.entities.Budget.list()
       ]);
 
-      // Per il direttore, filtra solo i centri assegnati
+      // Per il direttore, filtra solo i centri assegnati e gli utenti collegati
       if (user?.tipo_account === 'direttore') {
         const centriIds = assegnazioniData.filter(a => a.user_email === user.email).map(a => a.centro_id);
         setCentri(centriData.filter(c => centriIds.includes(c.id)));
+        // Email degli utenti assegnati ai centri del direttore
+        const emailAssegnate = [...new Set(assegnazioniData.filter(a => centriIds.includes(a.centro_id)).map(a => a.user_email))];
+        setDirettori(direttoriData.filter(d => emailAssegnate.includes(d.email)));
+        setVigilanze(vigilanzeData.filter(v => emailAssegnate.includes(v.email)));
+        setManutentori(manutentoriData.filter(m => emailAssegnate.includes(m.email)));
+        setTenant(tenantData.filter(t => centriIds.includes(t.centro_id)));
       } else {
         setCentri(centriData);
+        setDirettori(direttoriData);
+        setVigilanze(vigilanzeData);
+        setManutentori(manutentoriData);
+        setTenant(tenantData);
       }
-
-      setDirettori(direttoriData);
-      setVigilanze(vigilanzeData);
-      setManutentori(manutentoriData);
-      setTenant(tenantData);
       setAssegnazioni(assegnazioniData);
       setBudgets(budgetsData);
     } catch (error) {
@@ -611,9 +618,11 @@ export default function Gestione({ user }) {
                         <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setDirettoreDialog({ open: true, data: dir })}>
                           <Pencil className="w-4 h-4 text-blue-600" />
                         </Button>
+                        {isProprieta && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteDirettore(dir)}>
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -650,9 +659,11 @@ export default function Gestione({ user }) {
                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setTenantDialog({ open: true, data: ten })}>
                         <Pencil className="w-4 h-4 text-blue-600" />
                       </Button>
+                      {isProprieta && (
                       <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteTenant(ten)}>
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -709,9 +720,11 @@ export default function Gestione({ user }) {
                         <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setVigilanzaDialog({ open: true, data: vig })}>
                           <Pencil className="w-4 h-4 text-blue-600" />
                         </Button>
+                        {isProprieta && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteVigilanza(vig)}>
                           <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -777,9 +790,11 @@ export default function Gestione({ user }) {
                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => setManutentoreDialog({ open: true, data: man })}>
                          <Pencil className="w-4 h-4 text-blue-600" />
                        </Button>
+                       {isProprieta && (
                        <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10" onClick={() => deleteManutentore(man)}>
                          <Trash2 className="w-4 h-4 text-red-600" />
                        </Button>
+                       )}
                      </div>
                    </div>
                 </CardContent>
