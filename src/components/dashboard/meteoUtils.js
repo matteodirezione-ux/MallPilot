@@ -1,0 +1,25 @@
+export const WMO_ICONS = {
+  0: { label: 'Sereno', emoji: '☀️', rank: 0 },
+  1: { label: 'Prev. sereno', emoji: '🌤️', rank: 1 },
+  2: { label: 'Parz. nuvoloso', emoji: '⛅', rank: 2 },
+  3: { label: 'Nuvoloso', emoji: '☁️', rank: 3 },
+  45: { label: 'Nebbia', emoji: '🌫️', rank: 4 },
+  48: { label: 'Nebbia gelata', emoji: '🌫️', rank: 4 },
+  51: { label: 'Pioggerella', emoji: '🌦️', rank: 5 },
+  53: { label: 'Pioggerella', emoji: '🌦️', rank: 5 },
+  55: { label: 'Pioggerella int.', emoji: '🌧️', rank: 6 },
+  61: { label: 'Pioggia lieve', emoji: '🌧️', rank: 6 },
+  63: { label: 'Pioggia', emoji: '🌧️', rank: 7 },
+  65: { label: 'Pioggia int.', emoji: '🌧️', rank: 7 },
+  71: { label: 'Neve lieve', emoji: '🌨️', rank: 8 },
+  73: { label: 'Neve', emoji: '❄️', rank: 8 },
+  75: { label: 'Neve int.', emoji: '❄️', rank: 8 },
+  80: { label: 'Rovesci', emoji: '🌦️', rank: 6 },
+  81: { label: 'Rovesci', emoji: '🌧️', rank: 7 },
+  82: { label: 'Rovesci int.', emoji: '⛈️', rank: 9 },
+  95: { label: 'Temporale', emoji: '⛈️', rank: 9 },
+  96: { label: 'Temporale+gr.', emoji: '⛈️', rank: 10 },
+  99: { label: 'Temporale forte', emoji: '⛈️', rank: 10 },
+};
+
+export const getWmo = (code) => WMO_ICONS[code] ?? WMO_ICONS[Math.max(...Object.keys(WMO_ICONS).map(Number).filter(k => k <= (code ?? 0)))] ?? { label: '—', emoji: '🌡️', rank: 0 };

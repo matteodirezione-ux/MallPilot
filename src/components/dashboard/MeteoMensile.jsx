@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { format, getDaysInMonth } from 'date-fns';
+import { format, getDaysInMonth, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileDown, GitCompareArrows } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
+import MeteoConfrontoPeriodi from './MeteoConfrontoPeriodi';
 
 const WMO_ICONS = {
   0: { label: 'Sereno', emoji: '☀️', rank: 0 },
@@ -86,6 +87,10 @@ export default function MeteoMensile({ citta, provincia, centroId }) {
   const [progressivoPrecedente, setProgressivoPrecedente] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [confrontoOpen, setConfrontoOpen] = useState(false);
+  const [confrontoAttivo, setConfrontoAttivo] = useState(null);
+  const [periodoA, setPeriodoA] = useState({ start: '', end: '' });
+  const [periodoB, setPeriodoB] = useState({ start: '', end: '' });
 
   // Mese di confronto: stesso mese dell'anno precedente
   useEffect(() => {
@@ -340,6 +345,18 @@ export default function MeteoMensile({ citta, provincia, centroId }) {
   const labelCorrente = meseCorrente ? format(new Date(meseCorrente.year, meseCorrente.month - 1, 1), 'MMMM yyyy', { locale: it }) : '';
   const labelPrecedente = mesePrecedente ? format(new Date(mesePrecedente.year, mesePrecedente.month - 1, 1), 'MMMM yyyy', { locale: it }) : '';
 
+  if (confrontoAttivo) {
+    return (
+      <MeteoConfrontoPeriodi
+        records={records}
+        periodoA={confrontoAttivo.a}
+        periodoB={confrontoAttivo.b}
+        placeName={placeName}
+        onChiudi={() => setConfrontoAttivo(null)}
+      />
+    );
+  }
+
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-[0_4px_20px_rgba(0,0,0,0.12)] overflow-hidden">
       {/* Header */}
@@ -362,6 +379,13 @@ export default function MeteoMensile({ citta, provincia, centroId }) {
             </button>
           </div>
           <button
+            onClick={() => setConfrontoOpen(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700 shadow-sm"
+          >
+            <GitCompareArrows className="w-3.5 h-3.5" />
+            Confronta periodi
+          </button>
+          <button
             onClick={exportPDF}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-colors text-xs font-medium text-slate-700 shadow-sm"
           >
@@ -370,6 +394,62 @@ export default function MeteoMensile({ citta, provincia, centroId }) {
           </button>
         </div>
       </div>
+
+      {/* Dialog confronto periodi */}
+      {confrontoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setConfrontoOpen(false)}>
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full p-5" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-800">Confronta due periodi</h3>
+              <button onClick={() => setConfrontoOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">Seleziona due intervalli di date personalizzati per confrontarli.</p>
+            <div className="space-y-4">
+              <div className="rounded-lg border border-indigo-100 bg-indigo-50/40 p-3">
+                <p className="text-xs font-semibold text-indigo-700 mb-2">Periodo A</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Dal</label>
+                    <input type="date" value={periodoA.start} onChange={(e) => setPeriodoA({ ...periodoA, start: e.target.value })} className="w-full text-sm border border-slate-200 rounded-md px-2 py-1.5" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Al</label>
+                    <input type="date" value={periodoA.end} onChange={(e) => setPeriodoA({ ...periodoA, end: e.target.value })} className="w-full text-sm border border-slate-200 rounded-md px-2 py-1.5" />
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-purple-100 bg-purple-50/40 p-3">
+                <p className="text-xs font-semibold text-purple-700 mb-2">Periodo B</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Dal</label>
+                    <input type="date" value={periodoB.start} onChange={(e) => setPeriodoB({ ...periodoB, start: e.target.value })} className="w-full text-sm border border-slate-200 rounded-md px-2 py-1.5" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 uppercase">Al</label>
+                    <input type="date" value={periodoB.end} onChange={(e) => setPeriodoB({ ...periodoB, end: e.target.value })} className="w-full text-sm border border-slate-200 rounded-md px-2 py-1.5" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={() => setConfrontoOpen(false)} className="px-3 py-1.5 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50">Annulla</button>
+              <button
+                onClick={() => {
+                  if (periodoA.start && periodoA.end && periodoB.start && periodoB.end) {
+                    setConfrontoAttivo({ a: { ...periodoA }, b: { ...periodoB } });
+                    setConfrontoOpen(false);
+                  }
+                }}
+                disabled={!(periodoA.start && periodoA.end && periodoB.start && periodoB.end)}
+                className="px-3 py-1.5 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Confronta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="flex items-center justify-center py-8 text-slate-400 text-sm gap-2 animate-pulse">
