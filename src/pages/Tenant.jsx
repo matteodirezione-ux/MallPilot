@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Building2, Edit, Trash2, Upload, Search, ChevronUp, ChevronDown, Map, Loader2 } from 'lucide-react';
 import DettaglioTenantDialog from '@/components/tenant/DettaglioTenantDialog';
+import ExportTenant from '@/components/tenant/ExportTenant';
 import { toast } from 'sonner';
 import { compressImage } from '@/lib/compressImage';
 import {
@@ -134,6 +135,7 @@ export default function TenantPage({ centroSelezionato, user }) {
           <p className="text-slate-500">Gestione anagrafiche e contratti di affitto</p>
         </div>
         <div className="flex gap-2">
+          <ExportTenant tenants={filteredAndSortedTenants} centroSelezionato={centroSelezionato} canViewContractDetails={canViewContractDetails} />
           <Button onClick={() => setMappaOpen(true)} className="bg-orange-500 hover:bg-orange-600 gap-2"><Map className="w-4 h-4" /> Mappa</Button>
           <Dialog open={openForm} onOpenChange={(open) => { setOpenForm(open); if (!open) setEditingTenant(null); }}>
             <DialogTrigger asChild>
