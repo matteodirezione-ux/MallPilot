@@ -708,7 +708,7 @@ export default function MeteoMensile({ citta, provincia, centroId }) {
                       {deltaMeteoLabel}
                     </td>
                     <td className={`px-2 py-1.5 text-center bg-orange-50/40 ${deltaTempColor}`}>
-                      {deltaTemp !== null ? `${deltaTemp > 0 ? '+' : ''}${deltaTemp}°` : '—'}
+                      {deltaTemp !== null ? `${deltaTemp > 0 ? '+' : ''}${deltaTemp.toFixed(1)}°` : '—'}
                     </td>
                   </tr>
                 );
