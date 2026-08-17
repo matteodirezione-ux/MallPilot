@@ -428,7 +428,7 @@ export default function Gestione({ user }) {
                 <TabsTrigger value="tenant">Tenant</TabsTrigger>
                 <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
                 {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
-                {isPropieta && <TabsTrigger value="backup"><Database className="w-4 h-4 mr-1 inline" />Backup</TabsTrigger>}
+                {(isPropieta || isDirettore) && <TabsTrigger value="backup"><Database className="w-4 h-4 mr-1 inline" />Backup</TabsTrigger>}
               </TabsList>
             </div>
 
@@ -486,7 +486,7 @@ export default function Gestione({ user }) {
                 <option value="tenant">Tenant</option>
                 <option value="manutentori">Manutentori</option>
                 {isPropieta && <option value="budget">Budget</option>}
-                {isPropieta && <option value="backup">Backup</option>}
+                {(isPropieta || isDirettore) && <option value="backup">Backup</option>}
               </select>
             </div>
 
@@ -851,10 +851,10 @@ export default function Gestione({ user }) {
         </TabsContent>
 
         {/* === TAB BACKUP === */}
-        {isPropieta && (
+        {(isPropieta || isDirettore) && (
           <TabsContent value="backup">
             <div className="max-w-2xl">
-              <BackupSection />
+              <BackupSection user={user} centri={centri} />
             </div>
           </TabsContent>
         )}
