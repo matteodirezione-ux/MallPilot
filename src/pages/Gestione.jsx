@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2, Wrench, Store } from 'lucide-react';
+import { Plus, Building2, Users, Pencil, Trash2, UserPlus, Target, ShieldCheck, Upload, Loader2, Wrench, Store, Database } from 'lucide-react';
 import { toast } from 'sonner';
+import BackupSection from '@/components/gestione/BackupSection';
 
 export default function Gestione({ user }) {
   const [centri, setCentri] = useState([]);
@@ -427,6 +428,7 @@ export default function Gestione({ user }) {
                 <TabsTrigger value="tenant">Tenant</TabsTrigger>
                 <TabsTrigger value="manutentori">Manutentori</TabsTrigger>
                 {isPropieta && <TabsTrigger value="budget">Budget</TabsTrigger>}
+                {isPropieta && <TabsTrigger value="backup"><Database className="w-4 h-4 mr-1 inline" />Backup</TabsTrigger>}
               </TabsList>
             </div>
 
@@ -484,6 +486,7 @@ export default function Gestione({ user }) {
                 <option value="tenant">Tenant</option>
                 <option value="manutentori">Manutentori</option>
                 {isPropieta && <option value="budget">Budget</option>}
+                {isPropieta && <option value="backup">Backup</option>}
               </select>
             </div>
 
@@ -846,6 +849,15 @@ export default function Gestione({ user }) {
             })}
           </div>
         </TabsContent>
+
+        {/* === TAB BACKUP === */}
+        {isPropieta && (
+          <TabsContent value="backup">
+            <div className="max-w-2xl">
+              <BackupSection />
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
 
       {/* === DIALOGS === */}
