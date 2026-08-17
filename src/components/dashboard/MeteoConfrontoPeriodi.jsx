@@ -188,7 +188,7 @@ export default function MeteoConfrontoPeriodi({ records, periodoA, periodoB, pla
                   <td className="px-2 py-1.5 text-center bg-purple-50/40">{gb?.wmo ? <span title={gb.wmo.label}>{gb.wmo.emoji}</span> : <span className="text-slate-300">—</span>}</td>
                   <td className="px-2 py-1.5 text-center bg-purple-50/40 text-slate-500">{gb ? `${gb.tMax ?? '—'}°/${gb.tMin ?? '—'}°` : '—'}</td>
                   <td className={`px-2 py-1.5 text-center bg-orange-50/40 ${deltaMeteoColor}`}>{deltaMeteoLabel}</td>
-                  <td className={`px-2 py-1.5 text-center bg-orange-50/40 ${deltaTempColor}`}>{deltaTemp !== null ? `${deltaTemp > 0 ? '+' : ''}${deltaTemp}°` : '—'}</td>
+                  <td className={`px-2 py-1.5 text-center bg-orange-50/40 ${deltaTempColor}`}>{deltaTemp !== null ? `${deltaTemp > 0 ? '+' : ''}${deltaTemp.toFixed(1)}°` : '—'}</td>
                 </tr>
               );
             })}
