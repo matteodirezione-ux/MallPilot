@@ -10,6 +10,22 @@
       "type": "string",
       "description": "Nome della ditta fornitrice"
     },
+    "partita_iva": {
+      "type": "string",
+      "description": "Partita IVA della ditta"
+    },
+    "pec": {
+      "type": "string",
+      "description": "PEC della ditta"
+    },
+    "indirizzo": {
+      "type": "string",
+      "description": "Via/indirizzo della sede legale"
+    },
+    "citta": {
+      "type": "string",
+      "description": "Citt\u00e0 della sede legale"
+    },
     "referente_nome": {
       "type": "string",
       "description": "Nome del referente"

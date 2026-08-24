@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 
 export default function FormFornitore({ fornitore, onSubmit, onClose, onSave, centroId }) {
   const [form, setForm] = useState({
-    nome_ditta: '', referente_nome: '', referente_email: '', referente_telefono: '',
+    nome_ditta: '', partita_iva: '', pec: '', indirizzo: '', citta: '',
+    referente_nome: '', referente_email: '', referente_telefono: '',
     lavoratori: [], lavoratori_note: '', duvri_urls: [], dpi: [], subornitori: [], note: ''
   });
   const [newDpi, setNewDpi] = useState('');
@@ -111,6 +112,12 @@ export default function FormFornitore({ fornitore, onSubmit, onClose, onSave, ce
             <h3 className="font-semibold text-slate-700 mb-3">Informazioni Ditta</h3>
             <div className="space-y-3">
               <div><Label>Nome Ditta *</Label><Input value={form.nome_ditta} onChange={e => handleChange('nome_ditta', e.target.value)} placeholder="Es. Acme Cleaning" className="mt-1" /></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div><Label>Partita IVA</Label><Input value={form.partita_iva} onChange={e => handleChange('partita_iva', e.target.value)} placeholder="Es. 01234567890" className="mt-1" /></div>
+                <div><Label>PEC</Label><Input value={form.pec} onChange={e => handleChange('pec', e.target.value)} placeholder="pec@ditta.it" className="mt-1" /></div>
+                <div><Label>Via / Indirizzo</Label><Input value={form.indirizzo} onChange={e => handleChange('indirizzo', e.target.value)} placeholder="Via Roma, 10" className="mt-1" /></div>
+                <div><Label>Città</Label><Input value={form.citta} onChange={e => handleChange('citta', e.target.value)} placeholder="Es. Ancona" className="mt-1" /></div>
+              </div>
             </div>
           </div>
 

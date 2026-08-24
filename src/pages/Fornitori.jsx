@@ -120,6 +120,16 @@ export default function Fornitori({ centroSelezionato, user }) {
                   {espanso && (
                     <div className="border-t border-slate-100 p-4 space-y-3 bg-slate-50">
                       <div className="flex flex-wrap gap-6">
+                        {(fornitore.partita_iva || fornitore.pec || fornitore.indirizzo || fornitore.citta) && (
+                          <div>
+                            <p className="text-xs font-semibold text-slate-500 mb-1">Dati Aziendali:</p>
+                            <div className="space-y-0.5 text-sm text-slate-600">
+                              {fornitore.partita_iva && <p>P.IVA: {fornitore.partita_iva}</p>}
+                              {fornitore.pec && <p>PEC: {fornitore.pec}</p>}
+                              {(fornitore.indirizzo || fornitore.citta) && <p>{[fornitore.indirizzo, fornitore.citta].filter(Boolean).join(', ')}</p>}
+                            </div>
+                          </div>
+                        )}
                         {fornitore.lavoratori?.length > 0 && (
                           <div>
                             <p className="text-xs font-semibold text-slate-500 mb-1">Lavoratori:</p>
