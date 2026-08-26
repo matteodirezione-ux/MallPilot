@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { HardDrive, BarChart3, RefreshCw, Loader2, Zap, Database, Code2, FileText, Download } from 'lucide-react';
@@ -109,7 +110,7 @@ export default function StorageReport({ user }) {
         <div>
           <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
             <HardDrive className="w-8 h-8 text-blue-600" />
-            Report Spazio di Archiviazione
+            Report Spazio di Archiviazione <SectionInfoButton section="StorageReport" />
           </h1>
           <p className="text-slate-600 text-sm mt-1">
             Analizzato il {new Date(data.timestamp).toLocaleString('it-IT')}

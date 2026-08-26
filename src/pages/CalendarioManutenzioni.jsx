@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { compressImages } from '@/lib/compressImage';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -179,7 +180,7 @@ export default function CalendarioManutenzioni({ centroSelezionato, user }) {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Wrench className="w-6 h-6" /> Controlli</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><Wrench className="w-6 h-6" /> Controlli <SectionInfoButton section="CalendarioManutenzioni" /></h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-2">

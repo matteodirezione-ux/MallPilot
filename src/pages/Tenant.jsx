@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -131,7 +132,7 @@ export default function TenantPage({ centroSelezionato, user }) {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Tenant - Amministrazione</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">Tenant - Amministrazione <SectionInfoButton section="Tenant" /></h1>
           <p className="text-slate-500">Gestione anagrafiche e contratti di affitto</p>
         </div>
         <div className="flex gap-2">

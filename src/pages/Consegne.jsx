@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Plus, BookOpen, Trash2, X, Check, Pencil } from 'lucide-react';
@@ -70,7 +71,7 @@ export default function Consegne({ centroSelezionato, user }) {
             <BookOpen className="w-5 h-5 text-indigo-600" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-800">Passaggio Consegne</h1>
+            <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">Passaggio Consegne <SectionInfoButton section="Consegne" /></h1>
             <p className="text-xs text-slate-500">{centroSelezionato?.nome}</p>
           </div>
         </div>

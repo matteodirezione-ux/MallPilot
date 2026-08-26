@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { ChevronLeft, ChevronRight, Droplet, Zap, Flame, Sun, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ExportUtenze from '@/components/utenze/ExportUtenze';
@@ -339,7 +340,7 @@ export default function Utenze({ centroSelezionato }) {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Utenze</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">Utenze <SectionInfoButton section="Utenze" /></h1>
           <p className="text-slate-500 text-sm">Confronto {anno} vs {anno - 1} — {centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">

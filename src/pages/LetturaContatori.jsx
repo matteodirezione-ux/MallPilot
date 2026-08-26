@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Button } from '@/components/ui/button';
 import { Plus, ChevronLeft, ChevronRight, Droplet, Flame, Sun, ClipboardEdit, Zap } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -202,7 +203,7 @@ export default function LetturaContatori({ centroSelezionato, user }) {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Lettura Contatori</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">Lettura Contatori <SectionInfoButton section="LetturaContatori" /></h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-3">

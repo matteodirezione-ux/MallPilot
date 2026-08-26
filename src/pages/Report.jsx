@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { compressImages } from '@/lib/compressImage';
@@ -150,7 +151,7 @@ export default function Report({ centroSelezionato, user }) {
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6 flex-col md:flex-row gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Report</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">Report <SectionInfoButton section="Report" /></h1>
           <p className="text-slate-500 text-sm">Gestione report giornalieri</p>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto flex-col md:flex-row">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -412,7 +413,7 @@ export default function Gestione({ user }) {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">Gestione</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">Gestione <SectionInfoButton section="Gestione" /></h1>
         <p className="text-slate-600 text-sm">Amministra centri, direttori e budget</p>
       </div>
 

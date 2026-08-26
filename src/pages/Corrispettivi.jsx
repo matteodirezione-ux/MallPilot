@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -111,7 +112,7 @@ export default function Corrispettivi({ centroSelezionato, user }) {
       <div className="p-3 sm:p-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
           <TrendingUp className="w-6 h-6" />
-          Corrispettivi
+          Corrispettivi <SectionInfoButton section="Corrispettivi" />
         </h1>
         <CorrispettiviBoard centroSelezionato={centroSelezionato} user={user} />
       </div>
@@ -164,7 +165,7 @@ export default function Corrispettivi({ centroSelezionato, user }) {
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <TrendingUp className="w-6 h-6" />
-            Corrispettivi
+            Corrispettivi <SectionInfoButton section="Corrispettivi" />
           </h1>
           <p className="text-slate-500 text-sm mt-1">
             {selectedTenant.ragione_sociale} - Negozio {selectedTenant.numero_negozio}

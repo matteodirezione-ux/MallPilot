@@ -1,6 +1,7 @@
 import React from 'react';
 import MeteoMensile from '@/components/dashboard/MeteoMensile';
 import { Cloud } from 'lucide-react';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 
 export default function Meteo({ centroSelezionato }) {
   if (!centroSelezionato?.citta) {
@@ -17,7 +18,7 @@ export default function Meteo({ centroSelezionato }) {
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-800">Meteo</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">Meteo <SectionInfoButton section="Meteo" /></h1>
         <p className="text-slate-500 text-sm mt-1">Confronto meteo mensile: anno corrente vs anno precedente</p>
       </div>
       <MeteoMensile citta={centroSelezionato.citta} provincia={centroSelezionato.provincia} centroId={centroSelezionato.id} />
