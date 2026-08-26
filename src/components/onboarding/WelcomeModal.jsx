@@ -85,7 +85,9 @@ export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 
                   <h2 className="text-xl font-bold text-slate-900 leading-tight">{section.label}</h2>
                 </div>
               </div>
-              <p className="text-sm text-slate-600 leading-relaxed">{section.text}</p>
+              <ul className="text-sm text-slate-600 leading-relaxed space-y-1.5 list-disc pl-5">
+                {section.points.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
             </div>
           )}
 

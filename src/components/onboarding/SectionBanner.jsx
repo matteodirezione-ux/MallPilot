@@ -31,7 +31,9 @@ export default function SectionBanner({ section, userId }) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-blue-900 text-sm">{info.label}</p>
-            <p className="text-sm text-blue-800/90 mt-0.5 leading-relaxed">{info.text}</p>
+            <ul className="text-sm text-blue-800/90 mt-1 leading-relaxed space-y-1 list-disc pl-5">
+              {info.points.map((p, i) => <li key={i}>{p}</li>)}
+            </ul>
           </div>
           <button
             onClick={dismiss}
@@ -60,7 +62,9 @@ export default function SectionBanner({ section, userId }) {
                 </div>
                 <div>
                   <p className="font-semibold text-slate-900 text-sm">{info.label}</p>
-                  <p className="text-sm text-slate-600 mt-1 leading-relaxed">{info.text}</p>
+                  <ul className="text-sm text-slate-600 mt-1 leading-relaxed space-y-1 list-disc pl-5">
+                    {info.points.map((p, i) => <li key={i}>{p}</li>)}
+                  </ul>
                 </div>
               </div>
             </PopoverContent>
