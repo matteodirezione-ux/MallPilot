@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ChevronRight, ChevronLeft, Check } from 'lucide-react';
-import { sectionInfo, sectionOrder } from './onboardingContent';
+import { sectionInfo, getSectionsForRole } from './onboardingContent';
 
-export default function WelcomeModal({ userId }) {
+export default function WelcomeModal({ userId, tipoAccount }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+
+  const visibleSections = useMemo(() => getSectionsForRole(tipoAccount), [tipoAccount]);
 
   useEffect(() => {
     if (userId && localStorage.getItem(`mp_onb_${userId}_welcome`) !== '1') {
@@ -15,11 +17,11 @@ export default function WelcomeModal({ userId }) {
     }
   }, [userId]);
 
-  const totalSteps = sectionOrder.length; // section steps (intro is step 0, sections 1..totalSteps, end = totalSteps+1)
-  const lastStep = totalSteps + 1;
+  const totalSteps = visibleSections.length;
+  const lastStep = totalSteps + 1; // intro + sections + end
   const isIntro = step === 0;
   const isEnd = step === lastStep;
-  const sectionKey = !isIntro && !isEnd ? sectionOrder[step - 1] : null;
+  const sectionKey = !isIntro && !isEnd ? visibleSections[step - 1] : null;
   const section = sectionKey ? sectionInfo[sectionKey] : null;
 
   const next = () => setStep(s => Math.min(s + 1, lastStep));
@@ -43,7 +45,7 @@ export default function WelcomeModal({ userId }) {
           />
         </div>
 
-        <div className="overflow-y-auto max-h-[calc(88vh-1.5rem-4rem)]">
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(88vh - 1.5rem - 4rem)' }}>
           {isIntro && (
             <div className="p-8 text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white mb-5 shadow-lg shadow-blue-500/30">
@@ -52,11 +54,11 @@ export default function WelcomeModal({ userId }) {
               <h2 className="text-2xl font-bold text-slate-900">Benvenuto in Mall Pilot</h2>
               <p className="text-slate-500 mt-1">La piattaforma di gestione dei centri commerciali</p>
               <p className="text-sm text-slate-600 mt-5 max-w-md mx-auto leading-relaxed">
-                Scopriamo insieme le sezioni dell'app. Usa i pulsanti per scorrere: in ogni sezione troverai
-                poi un banner di spiegazione che potrai chiudere e rivedere quando vuoi.
+                Scopriamo insieme le sezioni dell'app che ti riguardano. Usa i pulsanti per scorrere: in ogni
+                sezione troverai poi un banner di spiegazione che potrai chiudere e rivedere quando vuoi.
               </p>
               <div className="flex items-center justify-center gap-2 mt-6 text-xs text-slate-400">
-                <span>{sectionOrder.length} sezioni</span>
+                <span>{totalSteps} sezioni</span>
                 <span>•</span>
                 <span>~1 minuto</span>
               </div>
@@ -87,8 +89,8 @@ export default function WelcomeModal({ userId }) {
               </div>
               <h2 className="text-2xl font-bold text-slate-900">Tutto pronto!</h2>
               <p className="text-sm text-slate-600 mt-3 max-w-md mx-auto leading-relaxed">
-                Hai visto tutte le sezioni. Ricorda: su ogni sezione troverai un banner informativo e,
-                una volta chiuso, l'icona info per rivederlo in qualsiasi momento.
+                Hai visto tutte le sezioni che ti competono. Ricorda: su ogni sezione troverai un banner
+                informativo e, una volta chiuso, l'icona info per rivederlo in qualsiasi momento.
               </p>
             </div>
           )}

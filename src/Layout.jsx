@@ -516,7 +516,7 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <SectionBanner section={currentPageName} userId={user?.id} />
               {React.cloneElement(children, { centroSelezionato, user })}
-              <WelcomeModal userId={user?.id} />
+              <WelcomeModal userId={user?.id} tipoAccount={user?.tipo_account} />
             </div>
           )}
         </div>
