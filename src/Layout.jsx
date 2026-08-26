@@ -25,7 +25,8 @@ import {
   Megaphone,
   ChevronRight,
   Gauge,
-  Cloud
+  Cloud,
+  GraduationCap
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import SafeImage from '@/components/ui/SafeImage';
@@ -44,6 +45,7 @@ export default function Layout({ children, currentPageName }) {
   const [centroSelezionato, setCentroSelezionato] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [tutorialSignal, setTutorialSignal] = useState(0);
 
   useEffect(() => {
     loadUserAndCentri();
@@ -445,7 +447,16 @@ export default function Layout({ children, currentPageName }) {
                   <ChevronRight className={`w-4 h-4 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {userMenuOpen && (
-                  <div className="pl-14 pr-2">
+                  <div className="pl-14 pr-2 space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => { setTutorialSignal(s => s + 1); setUserMenuOpen(false); }}
+                      className="w-full justify-start gap-2 bg-black/50 text-white hover:bg-blue-600 hover:text-white border-slate-600"
+                    >
+                      <GraduationCap className="w-4 h-4" />
+                      Tutorial
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -516,7 +527,7 @@ export default function Layout({ children, currentPageName }) {
             <div>
               <SectionBanner section={currentPageName} userId={user?.id} />
               {React.cloneElement(children, { centroSelezionato, user })}
-              <WelcomeModal userId={user?.id} tipoAccount={user?.tipo_account} />
+              <WelcomeModal userId={user?.id} tipoAccount={user?.tipo_account} forceOpenSignal={tutorialSignal} />
             </div>
           )}
         </div>

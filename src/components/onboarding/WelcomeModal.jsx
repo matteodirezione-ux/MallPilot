@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Sparkles, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { sectionInfo, getSectionsForRole } from './onboardingContent';
 
-export default function WelcomeModal({ userId, tipoAccount }) {
+export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
@@ -16,6 +16,13 @@ export default function WelcomeModal({ userId, tipoAccount }) {
       setStep(0);
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (forceOpenSignal > 0) {
+      setOpen(true);
+      setStep(0);
+    }
+  }, [forceOpenSignal]);
 
   const totalSteps = visibleSections.length;
   const lastStep = totalSteps + 1; // intro + sections + end
