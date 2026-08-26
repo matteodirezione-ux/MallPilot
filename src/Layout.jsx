@@ -30,6 +30,8 @@ import {
 import NotificaBell from '@/components/NotificaBell';
 import SafeImage from '@/components/ui/SafeImage';
 import { Button } from '@/components/ui/button';
+import WelcomeModal from '@/components/onboarding/WelcomeModal';
+import SectionBanner from '@/components/onboarding/SectionBanner';
 
 export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
@@ -511,7 +513,11 @@ export default function Layout({ children, currentPageName }) {
               </div>
             </div>
           ) : (
-            React.cloneElement(children, { centroSelezionato, user })
+            <div>
+              <SectionBanner section={currentPageName} userId={user?.id} />
+              {React.cloneElement(children, { centroSelezionato, user })}
+              <WelcomeModal userId={user?.id} />
+            </div>
           )}
         </div>
       </main>
