@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -281,7 +282,7 @@ export default function Documenti({ centroSelezionato }) {
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
          <div>
-           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2">Documenti</h1>
+           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">Documenti <SectionInfoButton section="Documenti" /></h1>
            <p className="text-slate-600 text-sm">Contratti di affitto spazi</p>
          </div>
          <div className="flex items-center gap-2 w-full md:w-auto flex-col md:flex-row">

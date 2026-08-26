@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import CalendarioMensile from '../components/calendario/CalendarioMensile';
@@ -219,7 +220,7 @@ export default function Calendario({ centroSelezionato, user }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 md:mb-8">
         <div>
-          <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2">Calendario Expo</h1>
+          <h1 className="text-lg md:text-3xl font-bold text-slate-800 mb-0.5 md:mb-2 flex items-center gap-2">Calendario Expo <SectionInfoButton section="Calendario" /></h1>
           <p className="text-xs md:text-base text-slate-600">Occupazione spazi in galleria per affitti o eventi</p>
         </div>
         <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import FormTask from '@/components/tasks/FormTask';
@@ -460,7 +461,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         <div className="hidden sm:flex items-center gap-4">
           <div className="shrink-0 flex items-center gap-3">
             <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800">Dashboard</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">Dashboard <SectionInfoButton section="Dashboard" /></h1>
               <p className="text-slate-600 text-xs sm:text-sm mt-0.5">{centroSelezionato?.nome}</p>
             </div>
             {user?.tipo_account === 'direttore' && (
@@ -502,7 +503,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         <div className="sm:hidden space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-slate-800">Dashboard</h1>
+              <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">Dashboard <SectionInfoButton section="Dashboard" /></h1>
               <p className="text-slate-600 text-xs mt-0.5">{centroSelezionato?.nome}</p>
             </div>
             <div className="shrink-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl px-3 py-1.5 shadow-md min-w-[80px]">

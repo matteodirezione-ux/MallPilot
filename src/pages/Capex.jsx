@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx-js-style';
 import { jsPDF } from 'jspdf';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -437,7 +438,7 @@ export default function CapexPage({ centroSelezionato, user }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Capex</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">Capex <SectionInfoButton section="Capex" /></h1>
           <p className="text-slate-500 text-sm">{centroSelezionato?.nome}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">

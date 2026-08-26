@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -184,7 +185,7 @@ export default function TaskPage({ centroSelezionato, user }) {
     <div className="p-4 md:p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><ListTodo className="w-6 h-6" /> Task</h1>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2"><ListTodo className="w-6 h-6" /> Task <SectionInfoButton section="Task" /></h1>
           <p className="text-slate-500 text-sm mt-1">Gestione attività e scadenze</p>
         </div>
         <Button onClick={() => { setTaskSelezionato(null); setDialogOpen(true); }} className="bg-blue-600 hover:bg-blue-700 gap-2">

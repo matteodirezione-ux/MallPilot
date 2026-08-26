@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -224,7 +225,7 @@ export default function Clienti({ centroSelezionato }) {
     <div className="p-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Clienti</h1>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center gap-2">Clienti <SectionInfoButton section="Clienti" /></h1>
           <p className="text-slate-600">Gestione anagrafica clienti business</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => {
