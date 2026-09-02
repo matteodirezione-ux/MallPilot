@@ -224,8 +224,8 @@ export const sectionInfo = {
     points: [
       "Gestione delle utenze del centro (elettricità, gas, acqua).",
       "Riferimenti dei contratti di fornitura, consumi e costi.",
-      "Quadro complessivo delle spese ricorrenti.",
-      "Supporto al controllo dei costi fissi."
+      "Delta delle temperature anno precedente con quello in corso.",
+      "Quadro complessivo delle spese ricorrenti."
     ]
   },
   Gestione: {
