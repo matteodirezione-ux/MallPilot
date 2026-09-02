@@ -152,6 +152,7 @@ export const sectionInfo = {
     icon: Sparkles,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
+      "Gestione delle segnalazioni da parte della vigilanza o direzione.",
       "Gestione delle pulizie periodiche del centro.",
       "Per ogni attività: frequenza, fornitore, ultima esecuzione, prossima scadenza, foto.",
       "Frequenze: giornaliera, settimanale, quindicinale, mensile, trimestrale, semestrale, annuale.",
