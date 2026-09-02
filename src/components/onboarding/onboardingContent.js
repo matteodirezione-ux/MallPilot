@@ -15,7 +15,8 @@ export const sectionInfo = {
       "Tutto ciò che conta, sotto controllo in un unico colpo d'occhio.",
       "Visualizza controlli, task, ticket, prenotazioni, eventi, pulizie periodiche in corso o in scadenza, insieme alle condizioni meteo.",
       "Utilizza le card rapide per creare in pochi secondi prenotazioni, task, controlli e report.",
-      "Hai ogni giorno una visione immediata delle attività che richiedono attenzione, con priorità e scadenze sempre a portata di mano."
+      "Hai ogni giorno una visione immediata delle attività che richiedono attenzione, con priorità e scadenze sempre a portata di mano.",
+      "Hai anche tutte le statistiche sugli eventi e incassi degli spazi expo."
     ]
   },
   Task: {
