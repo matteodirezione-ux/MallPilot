@@ -60,11 +60,12 @@ export const sectionInfo = {
     icon: Calendar,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
-      "Prenotazioni degli spazi espositivi del centro.",
-      "Tre tipologie: affitto (genera contratto), evento, spazio gratuito.",
+      "Qui hai la situazione degli spazi expo in galleria.",
+      "Ricorda: prima di iniziare inserisci gli spazi a disposizione del tuo centro nella sezione Spazi Expo.",
+      "Puoi inserire tre tipologie: affitto (genera contratto), evento, spazio gratuito.",
       "Si scelgono spazi, cliente, date, materiale e necessità elettrica; prezzo calcolato in automatico.",
-      "Verifica disponibilità e generazione contratto con un clic.",
-      "Prenotazioni >30 giorni attivano contratto e notifiche di scadenza automatiche."
+      "Verifica disponibilità e, una volta prenotato lo spazio, si creerà in automatico il contratto di affitto già compilato pronto da firmare.",
+      "Le prenotazioni attivano controlli di entrata e uscita del cliente in automatico nella sezione Controlli; la richiesta di elettricità crea un task in automatico."
     ]
   },
   Report: {
