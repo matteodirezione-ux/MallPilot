@@ -177,9 +177,9 @@ export const sectionInfo = {
     icon: FileText,
     roles: ['proprieta', 'direttore'],
     points: [
-      "Archivio documentale del centro: contratti, fatture, ricevute.",
-      "Documenti collegabili a prenotazione e cliente.",
-      "Caricamento del contratto firmato dal cliente.",
+      "Qui hai tutto l'archivio documentale dei contratti expo.",
+      "Quando inserisci una prenotazione qui puoi generare il contratto.",
+      "Puoi caricare il contratto firmato dal cliente.",
       "Archivio centralizzato, niente più documenti sparsi tra email."
     ]
   },
