@@ -48,10 +48,11 @@ export const sectionInfo = {
     icon: ClipboardList,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
+      "Qui l'obiettivo è avere una situazione chiara e immediata dei controlli periodici.",
+      "Si possono inserire controlli spot o ricorrenti.",
       "Calendario delle manutenzioni e dei controlli periodici.",
       "Vista per mese o settimana, con filtri per stato.",
-      "Molti controlli sono generati in automatico da prenotazioni e pulizie ricorrenti.",
-      "Da qui si monitora e chiude ogni intervento, con foto e note."
+      "Molti controlli sono generati in automatico da prenotazioni e pulizie ricorrenti."
     ]
   },
   Calendario: {
