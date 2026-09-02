@@ -100,6 +100,18 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     }
   }, [formData.data_inizio, formData.data_fine, formData.spazi_ids]);
 
+  // Calcola automaticamente il prezzo totale dal prezzo mensile in base al periodo
+  useEffect(() => {
+    if (!formData.data_inizio || !formData.data_fine || !formData.prezzo_mensile) return;
+    const inizio = new Date(formData.data_inizio);
+    const fine = new Date(formData.data_fine);
+    const mesi = (fine.getFullYear() - inizio.getFullYear()) * 12 + (fine.getMonth() - inizio.getMonth()) + 1;
+    if (mesi > 0) {
+      const totale = (parseFloat(formData.prezzo_mensile) * mesi).toFixed(2);
+      setFormData(prev => ({ ...prev, prezzo_totale: totale }));
+    }
+  }, [formData.prezzo_mensile, formData.data_inizio, formData.data_fine]);
+
   const verificaDisponibilita = () => {
     const dataInizio = new Date(formData.data_inizio);
     const dataFine = new Date(formData.data_fine);
@@ -269,13 +281,35 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       toast.error('Inserisci le date di inizio e fine');
       return;
     }
-    if (!isEvent && !isGratuito && (formData.prezzo_totale === '' || isNaN(parseFloat(formData.prezzo_totale)))) {
-      toast.error('Inserisci un prezzo totale valido');
-      return;
+    if (!isEvent && !isGratuito) {
+      const haTotale = formData.prezzo_totale !== '' && !isNaN(parseFloat(formData.prezzo_totale));
+      const haMensile = formData.prezzo_mensile !== '' && !isNaN(parseFloat(formData.prezzo_mensile));
+      if (!haTotale && !haMensile) {
+        toast.error('Inserisci un prezzo totale o un prezzo mensile');
+        return;
+      }
+      // Se manca il totale ma c'è il mensile, lo calcoliamo ora
+      if (!haTotale && haMensile && formData.data_inizio && formData.data_fine) {
+        const inizio = new Date(formData.data_inizio);
+        const fine = new Date(formData.data_fine);
+        const mesi = (fine.getFullYear() - inizio.getFullYear()) * 12 + (fine.getMonth() - inizio.getMonth()) + 1;
+        if (mesi > 0) {
+          setFormData(prev => ({ ...prev, prezzo_totale: (parseFloat(formData.prezzo_mensile) * mesi).toFixed(2) }));
+        }
+      }
     }
     if (!isEvent && !isGratuito && !formData.materiale_dimostrativo) {
       toast.error('Inserisci il materiale dimostrativo');
       return;
+    }
+
+    // Calcola il totale dal mensile se non è stato inserito direttamente
+    let prezzoTotaleFinale = formData.prezzo_totale ? parseFloat(formData.prezzo_totale) : 0;
+    if (!prezzoTotaleFinale && formData.prezzo_mensile && formData.data_inizio && formData.data_fine) {
+      const inizio = new Date(formData.data_inizio);
+      const fine = new Date(formData.data_fine);
+      const mesi = (fine.getFullYear() - inizio.getFullYear()) * 12 + (fine.getMonth() - inizio.getMonth()) + 1;
+      if (mesi > 0) prezzoTotaleFinale = parseFloat(formData.prezzo_mensile) * mesi;
     }
 
     const dataToSave = {
@@ -283,7 +317,7 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
       is_event: isEvent || isGratuito,
       is_gratuito: isGratuito,
       spazio_id: formData.spazi_ids[0],
-      prezzo_totale: formData.prezzo_totale ? parseFloat(formData.prezzo_totale) : 0,
+      prezzo_totale: prezzoTotaleFinale,
       prezzo_mensile: formData.prezzo_mensile ? parseFloat(formData.prezzo_mensile) : null
     };
 
@@ -448,13 +482,13 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
           {!isVigilanza && (
             <>
               <div className={rowClass}>
-                <label className={labelClass}>Prezzo totale *</label>
+                <label className={labelClass}>Prezzo totale <span className="text-xs text-slate-400 font-normal">(o mensile)</span></label>
                 <div className={fieldClass}>
                   <Input type="number" step="0.01" value={formData.prezzo_totale} onChange={(e) => setFormData({ ...formData, prezzo_totale: e.target.value })} placeholder="€" className="h-8 text-sm" />
                 </div>
               </div>
               <div className={rowClass}>
-                <label className={labelClass}>Prezzo mensile</label>
+                <label className={labelClass}>Prezzo mensile <span className="text-xs text-slate-400 font-normal">(calcola totale)</span></label>
                 <div className={fieldClass}>
                   <Input type="number" step="0.01" value={formData.prezzo_mensile} onChange={(e) => setFormData({ ...formData, prezzo_mensile: e.target.value })} placeholder="€" className="h-8 text-sm" />
                 </div>
