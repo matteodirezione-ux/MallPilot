@@ -36,7 +36,7 @@ export const sectionInfo = {
     roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'],
     points: [
       "Richieste di intervento manutentivo tra direzione e manutentore.",
-      "Il direttore apre il ticket con descrizione, foto, tipologia (ordinario/urgente) e scadenza.",
+      "Il direttore e la vigilanza aprono il ticket con descrizione, foto, tipologia (ordinario/urgente) e scadenza.",
       "Il manutentore riceve la notifica, interviene e inserisce preventivo, allegati e note.",
       "Il direttore approva, sollecita o rifiuta motivando.",
       "Notifiche automatiche a ogni cambio di stato."
