@@ -34,10 +34,12 @@ export const sectionInfo = {
     icon: Ticket,
     roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'],
     points: [
-      "Richieste di intervento manutentivo tra direzione e manutentore.",
-      "Il direttore e la vigilanza aprono il ticket con descrizione, foto, tipologia (ordinario/urgente) e scadenza.",
-      "Il manutentore riceve la notifica, interviene e inserisce preventivo, allegati e note.",
+      "Qui puoi aprire i ticket di intervento per la manutenzione.",
+      "Il direttore o la vigilanza aprono il ticket con descrizione, foto, tipologia (ordinario/urgente) e scadenza.",
       "Il direttore approva, sollecita o rifiuta motivando.",
+      "Il manutentore riceve la notifica, interviene e inserisce preventivo, allegati e note, quando ha terminato l'intervento cambia lo stato da controllare.",
+      "Il direttore o la vigilanza controllano e chiudono il ticket.",
+      "Si può scaricare un report Excel con i ticket raggruppati per mese.",
       "Notifiche automatiche a ogni cambio di stato."
     ]
   },
