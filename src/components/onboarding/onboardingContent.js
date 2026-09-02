@@ -12,10 +12,10 @@ export const sectionInfo = {
     icon: LayoutDashboard,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
-      "Centrale operativa del centro: riunisce in una schermata le info per iniziare la giornata.",
-      "Mostra prenotazioni in corso e in scadenza, task e ticket del giorno, meteo e agenda.",
-      "Card rapide per creare al volo prenotazioni, task, controlli e report.",
-      "Punto di partenza quotidiano per capire cosa richiede attenzione."
+      "Tutto ciò che conta, sotto controllo in un unico colpo d'occhio.",
+      "Visualizza controlli, task, ticket, prenotazioni, eventi, pulizie periodiche in corso o in scadenza, insieme alle condizioni meteo.",
+      "Utilizza le card rapide per creare in pochi secondi prenotazioni, task, controlli e report.",
+      "Hai ogni giorno una visione immediata delle attività che richiedono attenzione, con priorità e scadenze sempre a portata di mano."
     ]
   },
   Task: {
