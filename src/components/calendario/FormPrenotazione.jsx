@@ -150,6 +150,23 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
     .filter(s => !formData.spazi_ids.includes(s.id))
     .sort((a, b) => (a.numero_spazio || '').localeCompare(b.numero_spazio || '', 'it', { numeric: true }));
 
+  // Verifica se uno spazio è disponibile nelle date selezionate
+  const isSpazioLibero = (spazioId) => {
+    if (!formData.data_inizio || !formData.data_fine) return true;
+    const dataInizio = new Date(formData.data_inizio);
+    const dataFine = new Date(formData.data_fine);
+    const conflitto = allPrenotazioni.some(p => {
+      if (prenotazione && p.id === prenotazione.id) return false;
+      if (p.stato === 'cancellata') return false;
+      const spazioConflitto = p.spazi_ids?.includes(spazioId) || p.spazio_id === spazioId;
+      if (!spazioConflitto) return false;
+      const pInizio = new Date(p.data_inizio);
+      const pFine = new Date(p.data_fine);
+      return dataInizio <= pFine && dataFine >= pInizio;
+    });
+    return !conflitto;
+  };
+
   const handleCreateNewCliente = async () => {
     try {
       const newCliente = await base44.entities.Cliente.create({
@@ -356,11 +373,18 @@ export default function FormPrenotazione({ prenotazione, spazi, clienti, onSave,
               <SelectValue placeholder={formData.spazi_ids.length === 0 ? "Seleziona spazio" : "Aggiungi spazio..."} />
             </SelectTrigger>
             <SelectContent>
-              {spaziDisponibili.map((spazio) => (
-                <SelectItem key={spazio.id} value={spazio.id}>
-                  Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}
-                </SelectItem>
-              ))}
+              {spaziDisponibili.map((spazio) => {
+                const libero = isSpazioLibero(spazio.id);
+                return (
+                  <SelectItem
+                    key={spazio.id}
+                    value={spazio.id}
+                    className={!libero ? "text-slate-400" : ""}
+                  >
+                    Spazio {spazio.numero_spazio} {spazio.nome ? `- ${spazio.nome}` : ''}{spazio.superficie_mq ? ` (${spazio.superficie_mq} mq)` : ''}{!libero ? ' — occupato' : ''}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         )}
