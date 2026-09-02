@@ -23,10 +23,9 @@ export const sectionInfo = {
     icon: ListTodo,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
-      "Attività operative assegnate al personale del centro.",
+      "Qui crei le attività operative assegnate al personale del centro.",
       "Per ogni task: titolo, descrizione, priorità (bassa→urgente), scadenza e assegnatario.",
-      "Organizzati in colonne Kanban (da fare, in corso, completato, annullato).",
-      "Ricorrenze automatiche: giornaliere, settimanali, mensili, annuali o personalizzate.",
+      "Crea Task ricorrenti automatici: giornaliere, settimanali, mensili, annuali o personalizzate.",
       "Alcuni task sono generati in automatico dalle prenotazioni."
     ]
   },
