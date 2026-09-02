@@ -164,11 +164,12 @@ export const sectionInfo = {
     icon: Hammer,
     roles: ['proprieta', 'direttore', 'vigilanza'],
     points: [
-      "Interventi di investimento (Capex) del centro.",
+      "Qui hai la situazione sugli interventi di investimento (Capex) del centro.",
+      "Puoi creare capex da proporre, monitorare quelli da pianificare, pianificato e completato.",
       "Per ogni intervento: anno, descrizione, date, costi previsti ed effettivi, stato.",
       "Categorie: strutturale, impiantistico, tecnologico, estetico, sicurezza, altro.",
       "Gestione sicurezza: DUVRI, lavoratori, DPI, CSE, allegati.",
-      "Gli interventi pianificati compaiono nel calendario manutenzioni."
+      "Gli interventi pianificati compaiono nel calendario capex nella dashboard."
     ]
   },
   Documenti: {
