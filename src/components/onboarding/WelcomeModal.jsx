@@ -126,17 +126,24 @@ export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 
             ))}
           </div>
 
-          {isEnd ? (
-            <Button size="sm" onClick={finish} className="gap-1 bg-gradient-to-r from-blue-600 to-blue-700">
-              Inizia
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          ) : (
-            <Button size="sm" onClick={next} className="gap-1">
-              {isIntro ? 'Inizia il tour' : 'Avanti'}
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {!isEnd && (
+              <Button variant="ghost" size="sm" onClick={finish} className="text-slate-500 hover:text-slate-700">
+                Salta
+              </Button>
+            )}
+            {isEnd ? (
+              <Button size="sm" onClick={finish} className="gap-1 bg-gradient-to-r from-blue-600 to-blue-700">
+                Inizia
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button size="sm" onClick={next} className="gap-1">
+                {isIntro ? 'Inizia il tour' : 'Avanti'}
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
