@@ -42,6 +42,7 @@ export default function Calendario({ centroSelezionato, user }) {
   const [mostraDisponibili, setMostraDisponibili] = useState(false);
   const [searchText, setSearchText] = useState('');
   const isVigilanza = user?.tipo_account === 'vigilanza';
+  const [confermaSovrapposizione, setConfermaSovrapposizione] = useState(null);
 
   // Spazi occupati oggi (per il filtro disponibilità)
   const oggi = new Date();
@@ -123,23 +124,28 @@ export default function Calendario({ centroSelezionato, user }) {
   };
 
   const handleSavePrenotazione = async (data) => {
+    const sovrapposizioni = prenotazioni.filter(p => {
+      if (editingPrenotazione && p.id === editingPrenotazione.id) return false;
+      if (p.stato === 'cancellata') return false;
+      const spazioMatch = (p.spazi_ids?.includes(data.spazio_id)) || p.spazio_id === data.spazio_id;
+      if (!spazioMatch) return false;
+      const dataInizio = new Date(data.data_inizio);
+      const dataFine = new Date(data.data_fine);
+      const pInizio = new Date(p.data_inizio);
+      const pFine = new Date(p.data_fine);
+      return (dataInizio <= pFine && dataFine >= pInizio);
+    });
+
+    if (sovrapposizioni.length > 0) {
+      setConfermaSovrapposizione({ data, sovrapposizioni });
+      return;
+    }
+
+    await salvaPrenotazione(data);
+  };
+
+  const salvaPrenotazione = async (data) => {
     try {
-      const sovrapposizioni = prenotazioni.filter(p => {
-        if (editingPrenotazione && p.id === editingPrenotazione.id) return false;
-        if (p.spazio_id !== data.spazio_id) return false;
-        if (p.stato === 'cancellata') return false;
-        const dataInizio = new Date(data.data_inizio);
-        const dataFine = new Date(data.data_fine);
-        const pInizio = new Date(p.data_inizio);
-        const pFine = new Date(p.data_fine);
-        return (dataInizio <= pFine && dataFine >= pInizio);
-      });
-
-      if (sovrapposizioni.length > 0) {
-        toast.error('Lo spazio è già prenotato in questo periodo');
-        return;
-      }
-
       let centro_id;
       if (centroSelezionato?.id === 'tutti') {
         const spazio = spazi.find(s => s.id === data.spazio_id);
@@ -160,6 +166,7 @@ export default function Calendario({ centroSelezionato, user }) {
 
       setDialogOpen(false);
       setEditingPrenotazione(null);
+      setConfermaSovrapposizione(null);
       loadData();
     } catch (error) {
       console.error('Errore salvataggio prenotazione:', error);
@@ -315,6 +322,39 @@ export default function Calendario({ centroSelezionato, user }) {
                 {uploadingMappa && <p className="text-xs text-slate-500 mt-1">Caricamento in corso...</p>}
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Conferma Sovrapposizione */}
+      <Dialog open={!!confermaSovrapposizione} onOpenChange={(open) => { if (!open) setConfermaSovrapposizione(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Spazio già occupato in questo periodo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-slate-600">
+              Lo spazio selezionato risulta già prenotato nelle date scelte. Vuoi comunque forzare la prenotazione?
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1">
+              {confermaSovrapposizione?.sovrapposizioni.map(p => {
+                const spazio = spazi.find(s => s.id === p.spazio_id || p.spazi_ids?.includes(s.id));
+                const cliente = clienti.find(c => c.id === p.cliente_id);
+                return (
+                  <div key={p.id} className="text-xs text-amber-800">
+                    {spazio ? `Spazio ${spazio.numero_spazio}` : ''} — {cliente?.ragione_sociale || p.nome_evento || 'Evento'} ({new Date(p.data_inizio).toLocaleDateString('it-IT')} - {new Date(p.data_fine).toLocaleDateString('it-IT')})
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" size="sm" onClick={() => setConfermaSovrapposizione(null)}>
+              Annulla
+            </Button>
+            <Button size="sm" className="bg-amber-600 hover:bg-amber-700" onClick={() => salvaPrenotazione(confermaSovrapposizione.data)}>
+              Forza prenotazione
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
