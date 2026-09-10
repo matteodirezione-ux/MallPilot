@@ -1,28 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Plus, Send, MessageSquare, Trash2, Sparkles, X, Menu, Bot } from 'lucide-react';
+import { Send, Trash2, Sparkles, X, Bot } from 'lucide-react';
 import MessageBubble from '@/components/assistente/MessageBubble';
 
 const AGENT_NAME = 'assistente_mallpilot';
 
 export default function AssistenteWidget({ centroSelezionato, user }) {
   const [open, setOpen] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
-  const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [loadingConversations, setLoadingConversations] = useState(true);
   const [animateLastIndex, setAnimateLastIndex] = useState(-1);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (user) loadConversations();
-  }, [user]);
 
   useEffect(() => {
     if (activeConversationId) {
@@ -52,78 +44,14 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     }
   }, [open]);
 
-  const loadConversations = async () => {
-    try {
-      const list = await base44.agents.listConversations({ agent_name: AGENT_NAME });
-      setConversations(list || []);
-      if (list && list.length > 0 && !activeConversationId) {
-        setActiveConversationId(list[0].id);
-        setMessages(list[0].messages || []);
-      }
-    } catch (e) {
-      console.error('Errore caricamento conversazioni:', e);
-    } finally {
-      setLoadingConversations(false);
-    }
-  };
-
-  const handleNewConversation = async () => {
-    try {
-      const conv = await base44.agents.createConversation({
-        agent_name: AGENT_NAME,
-        metadata: { name: 'Nuova conversazione', description: '' }
-      });
-      setConversations(prev => [conv, ...prev]);
-      setActiveConversationId(conv.id);
-      setMessages([]);
-      setShowSidebar(false);
-      inputRef.current?.focus();
-    } catch (e) {
-      console.error('Errore creazione conversazione:', e);
-    }
-  };
-
-  const handleSelectConversation = (conv) => {
-    setActiveConversationId(conv.id);
-    setMessages(conv.messages || []);
-    setShowSidebar(false);
-  };
-
   const handleClearConversation = async () => {
     if (!activeConversationId) return;
     try {
       await base44.agents.updateConversation(activeConversationId, { metadata: { deleted: true } });
-      const remaining = conversations.filter(c => c.id !== activeConversationId);
-      setConversations(remaining);
-      if (remaining.length > 0) {
-        setActiveConversationId(remaining[0].id);
-        setMessages(remaining[0].messages || []);
-      } else {
-        setActiveConversationId(null);
-        setMessages([]);
-      }
+      setActiveConversationId(null);
+      setMessages([]);
     } catch (e) {
       console.error('Errore pulizia conversazione:', e);
-    }
-  };
-
-  const handleDeleteConversation = async (e, convId) => {
-    e.stopPropagation();
-    try {
-      await base44.agents.updateConversation(convId, { metadata: { deleted: true } });
-      const remaining = conversations.filter(c => c.id !== convId);
-      setConversations(remaining);
-      if (activeConversationId === convId) {
-        if (remaining.length > 0) {
-          setActiveConversationId(remaining[0].id);
-          setMessages(remaining[0].messages || []);
-        } else {
-          setActiveConversationId(null);
-          setMessages([]);
-        }
-      }
-    } catch (e) {
-      console.error('Errore eliminazione conversazione:', e);
     }
   };
 
@@ -140,7 +68,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     const fullContent = content + centerContext;
 
     let convId = activeConversationId;
-    let conv = conversations.find(c => c.id === convId);
+    let conv = null;
 
     if (!convId) {
       try {
@@ -149,16 +77,11 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
           metadata: { name: content.slice(0, 40), description: '' }
         });
         convId = conv.id;
-        setConversations(prev => [conv, ...prev]);
         setActiveConversationId(convId);
       } catch (e) {
         console.error('Errore creazione conversazione:', e);
         return;
       }
-    }
-
-    if (conv && (!conv.metadata?.name || conv.metadata.name === 'Nuova conversazione')) {
-      base44.agents.updateConversation(convId, { metadata: { name: content.slice(0, 40), description: '' } }).catch(() => {});
     }
 
     setLoading(true);
@@ -201,9 +124,6 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
         <div className="fixed bottom-0 right-0 z-50 w-full sm:w-[420px] h-[100vh] sm:h-[600px] sm:max-h-[85vh] sm:bottom-5 sm:right-5 bg-white sm:rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-            <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={() => setShowSidebar(!showSidebar)}>
-              <Menu className="w-5 h-5" />
-            </button>
             <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
               <Sparkles className="w-5 h-5" />
             </div>
@@ -214,53 +134,12 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
             <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={handleClearConversation} title="Pulisci conversazione">
               <Trash2 className="w-5 h-5" />
             </button>
-            <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={() => { setOpen(false); setShowSidebar(false); }}>
+            <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={() => setOpen(false)}>
               <X className="w-5 h-5" />
             </button>
           </div>
 
           <div className="flex flex-1 overflow-hidden relative">
-            {/* Sidebar conversazioni */}
-            {showSidebar && (
-              <>
-                <div className="absolute inset-0 bg-black/20 z-10 sm:hidden" onClick={() => setShowSidebar(false)} />
-                <div className="absolute sm:relative z-20 h-full w-64 bg-white border-r border-slate-200 flex flex-col">
-                  <div className="p-2 border-b border-slate-200">
-                    <Button onClick={handleNewConversation} size="sm" className="w-full gap-2">
-                      <Plus className="w-4 h-4" />
-                      Nuova
-                    </Button>
-                  </div>
-                  <ScrollArea className="flex-1">
-                    <div className="p-2 space-y-1">
-                      {loadingConversations ? (
-                        <p className="text-sm text-slate-400 text-center py-4">Caricamento...</p>
-                      ) : conversations.length === 0 ? (
-                        <p className="text-sm text-slate-400 text-center py-4">Nessuna conversazione</p>
-                      ) : (
-                        conversations.map(conv => (
-                          <button
-                            key={conv.id}
-                            onClick={() => handleSelectConversation(conv)}
-                            className={`w-full group flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors ${activeConversationId === conv.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-slate-100 text-slate-700'}`}
-                          >
-                            <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 opacity-60" />
-                            <span className="text-xs truncate flex-1">{conv.metadata?.name || 'Senza titolo'}</span>
-                            <span
-                              onClick={(e) => handleDeleteConversation(e, conv.id)}
-                              className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-100 rounded transition-all"
-                            >
-                              <Trash2 className="w-3 h-3 text-red-500" />
-                            </span>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </>
-            )}
-
             {/* Area chat */}
             <div className="flex-1 flex flex-col bg-slate-50 min-w-0">
               {/* Messaggi */}
