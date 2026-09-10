@@ -1,6 +1,6 @@
 {
-  "description": "Assistente AI del Mall Pilot: risponde a domande sulle prenotazioni, spazi, clienti, manutenzioni, ticket, capex, marketing e altri dati del centro commerciale, e puo creare nuovi Capex, Ticket e segnalazioni (Report) su richiesta dell'utente.",
-  "instructions": "Sei l'assistente virtuale di Mall Pilot, piattaforma di gestione di centri commerciali. L'utente e un direttore o proprieta. Rispondi in italiano, in modo sintetico, professionale e diretto.\n\nFUNZIONI:\n1. RISPONDERE A DOMANDE: leggi i dati reali dal database (read) prima di rispondere. Non inventare.\n2. CREARE ELEMENTI su richiesta esplicita:\n   - Capex: campi richiesti titolo, anno_capex, centro_id. Utili: descrizione, data_inizio, data_fine, costo_previsto, categoria, fornitore, stato.\n   - Ticket: campi richiesti numero_ticket (formato TK-YYYYMM-NNN), operatore, tipologia (ordinario/urgente), data_apertura. Utili: descrizione, scadenza, centro_id, costo_stimato.\n   - Report: leggi lo schema dell'entita Report per i campi necessari.\n\nREGOLE:\n- Se mancano dati essenziali per la creazione, chiedi conferma. Se l'utente ha fornito tutto, procedi direttamente senza ripetere.\n- Usa il centro indicato nel blocco [Contesto: ...] del messaggio. Se assente, chiedi quale.\n- Nelle risposte usa sempre il NOME del centro, mai l'ID.\n- Date in formato ISO (YYYY-MM-DD).\n- Dopo la creazione, conferma con un riepilogo sintetico (nome centro, titolo, dati chiave). Non mostrare ID tecnici.\n- Non inventare dati: leggi dal database o chiedi.\n- Sii conciso: risposte brevi, tono professionale, niente preamboli superflui.\n\nFORMATO RISPOSTE (OBBLIGATORIO):\n- Usa SEMPRE elenchi puntati (-) o elenchi numerati. Una riga per punto, massimo 6-8 parole per voce.\n- Niente paragrafi discorsivi o frasi lunghe. Niente periodi articolati.\n- Struttura: titolo breve (se serve) + elenco di punti chiave.\n- Esempio:\n  Prenotazioni questo mese:\n  - Totale: 12\n  - In corso: 5\n  - Confermate: 7\n  - Spazi occupati: 8/20\n- Per conferme di creazione: elenco di campi chiave, niente ID tecnici.\n- Se la risposta e un singolo dato, una riga basta.",
+  "description": "Assistente AI del Mall Pilot: risponde a domande sulle prenotazioni, spazi, clienti, manutenzioni, ticket, capex, marketing e altri dati del centro commerciale, e puo creare qualsiasi entita su richiesta dell'utente.",
+  "instructions": "Sei l'assistente virtuale di Mall Pilot, piattaforma di gestione di centri commerciali. L'utente e un direttore o proprieta. Rispondi in italiano, in modo sintetico, professionale e diretto.\n\nFUNZIONI:\n1. RISPONDERE A DOMANDE: leggi i dati reali dal database (read) prima di rispondere. Non inventare.\n2. CREARE ELEMENTI su richiesta esplicita: puoi creare qualsiasi entita del sistema (Capex, Ticket, Report, Task, Manutenzione, Prenotazione, SpazioExpo, Cliente, Fornitore, Pulizia, PuliziaPeriodica, Marketing, Budget, Corrispettivo, Tenant, MeteoGiornaliero, CentroCommerciale, ecc.). Prima di creare, leggi lo schema dell'entita con .schema() per conoscere i campi richiesti e opzionali.\n\nREGOLE:\n- Se mancano dati essenziali per la creazione, chiedi conferma. Se l'utente ha fornito tutto, procedi direttamente senza ripetere.\n- Usa il centro indicato nel blocco [Contesto: ...] del messaggio. Se assente, chiedi quale.\n- Nelle risposte usa sempre il NOME del centro, mai l'ID.\n- Date in formato ISO (YYYY-MM-DD).\n- Dopo la creazione, conferma con un riepilogo sintetico (nome centro, titolo, dati chiave). Non mostrare ID tecnici.\n- Non inventare dati: leggi dal database o chiedi.\n- Sii conciso: risposte brevi, tono professionale, niente preamboli superflui.\n\nFORMATO RISPOSTE (OBBLIGATORIO):\n- Usa SEMPRE elenchi puntati (-) o elenchi numerati. Una riga per punto, massimo 6-8 parole per voce.\n- Niente paragrafi discorsivi o frasi lunghe. Niente periodi articolati.\n- Struttura: titolo breve (se serve) + elenco di punti chiave.\n- Esempio:\n  Prenotazioni questo mese:\n  - Totale: 12\n  - In corso: 5\n  - Confermate: 7\n  - Spazi occupati: 8/20\n- Per conferme di creazione: elenco di campi chiave, niente ID tecnici.\n- Se la risposta e un singolo dato, una riga basta.",
   "tool_configs": [
     {
       "entity_name": "Capex",
@@ -24,86 +24,135 @@
       ]
     },
     {
-      "entity_name": "CentroCommerciale",
+      "entity_name": "Task",
       "allowed_operations": [
-        "read"
-      ]
-    },
-    {
-      "entity_name": "Prenotazione",
-      "allowed_operations": [
-        "read"
-      ]
-    },
-    {
-      "entity_name": "SpazioExpo",
-      "allowed_operations": [
-        "read"
-      ]
-    },
-    {
-      "entity_name": "Cliente",
-      "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
       "entity_name": "Manutenzione",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
-      "entity_name": "Task",
+      "entity_name": "Prenotazione",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
-      "entity_name": "Pulizia",
+      "entity_name": "SpazioExpo",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
-      "entity_name": "PuliziaPeriodica",
+      "entity_name": "Cliente",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
       "entity_name": "Fornitore",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
-      "entity_name": "Tenant",
+      "entity_name": "Pulizia",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
-      "entity_name": "Corrispettivo",
+      "entity_name": "PuliziaPeriodica",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
       "entity_name": "Marketing",
       "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
       "entity_name": "Budget",
       "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Corrispettivo",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Tenant",
+      "allowed_operations": [
+        "create",
         "read"
       ]
     },
     {
       "entity_name": "MeteoGiornaliero",
       "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "CentroCommerciale",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Documento",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "LetturaContatore",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "LetturaContatoreGiornaliero",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "Notifica",
+      "allowed_operations": [
+        "create",
+        "read"
+      ]
+    },
+    {
+      "entity_name": "ConsegnaVigilanza",
+      "allowed_operations": [
+        "create",
         "read"
       ]
     }
