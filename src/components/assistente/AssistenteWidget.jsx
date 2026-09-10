@@ -16,6 +16,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
+  const [animateLastIndex, setAnimateLastIndex] = useState(-1);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -25,6 +26,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
 
   useEffect(() => {
     if (activeConversationId) {
+      setAnimateLastIndex(-1);
       const unsubscribe = base44.agents.subscribeToConversation(activeConversationId, (data) => {
         setMessages(data.messages || []);
         setLoading(false);
@@ -32,6 +34,13 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
       return () => unsubscribe();
     }
   }, [activeConversationId]);
+
+  // Track which message to animate with typewriter (last assistant message while/after loading)
+  useEffect(() => {
+    if (loading && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
+      setAnimateLastIndex(messages.length - 1);
+    }
+  }, [loading, messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -104,6 +113,13 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     if (!input.trim() || loading) return;
     const content = input.trim();
     setInput('');
+    setAnimateLastIndex(-1);
+
+    // Prepend center context so the agent knows which center to use (stripped from display in MessageBubble)
+    const centerContext = centroSelezionato?.id && centroSelezionato.id !== 'tutti'
+      ? `\n\n[Contesto: centro commerciale selezionato = "${centroSelezionato.nome}" (ID: ${centroSelezionato.id}). Usa sempre questo centro per le operazioni. Nelle risposte usa il nome del centro, non l'ID.]`
+      : '';
+    const fullContent = content + centerContext;
 
     let convId = activeConversationId;
     let conv = conversations.find(c => c.id === convId);
@@ -129,7 +145,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
 
     setLoading(true);
     try {
-      await base44.agents.addMessage({ ...conv, id: convId }, { role: 'user', content });
+      await base44.agents.addMessage({ ...conv, id: convId }, { role: 'user', content: fullContent });
     } catch (e) {
       console.error('Errore invio messaggio:', e);
       setLoading(false);
@@ -256,7 +272,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                 ) : (
                   <>
                     {messages.map((msg, i) => (
-                      <MessageBubble key={i} message={msg} />
+                      <MessageBubble key={i} message={msg} animate={i === animateLastIndex && msg.role === 'assistant'} />
                     ))}
                     {loading && messages[messages.length - 1]?.role === 'user' && (
                       <div className="flex justify-start mb-4">
