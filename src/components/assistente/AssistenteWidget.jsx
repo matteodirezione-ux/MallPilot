@@ -52,13 +52,13 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
         const allMsgs = data.messages || [];
         const msgs = allMsgs.filter(m => m.type !== 'thinking' && m.type !== 'reasoning');
         if (pendingUserContentRef.current) {
-          const pendingContent = pendingUserContentRef.current;
-          const hasPending = msgs.some(m => m.role === 'user' && m.content === pendingContent);
+          const { question, fullContent } = pendingUserContentRef.current;
+          const hasPending = msgs.some(m => m.role === 'user' && m.content && (m.content === fullContent || m.content.includes(question)));
           if (hasPending) {
             pendingUserContentRef.current = null;
             setMessages(msgs);
           } else {
-            setMessages([...msgs, { role: 'user', content: pendingContent }]);
+            setMessages([...msgs, { role: 'user', content: fullContent }]);
           }
         } else {
           setMessages(msgs);
@@ -137,7 +137,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
       }
     }
 
-    pendingUserContentRef.current = fullContent;
+    pendingUserContentRef.current = { question: content, fullContent };
     setMessages(prev => [...prev, { role: 'user', content: fullContent }]);
     setLoading(true);
     try {
