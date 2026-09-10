@@ -29,7 +29,6 @@ export default function Marketing({ centroSelezionato, user }) {
   const [budgetInput, setBudgetInput] = useState('');
   const [budgetSaved, setBudgetSaved] = useState(0);
   const [collapsed, setCollapsed] = useState({ iniziativa: true, comunicazione_online: true, comunicazione_offline: true, costo_fisso: true });
-  const [ordinaPerMese, setOrdinaPerMese] = useState(false);
 
   const centroId = centroSelezionato?.id;
 
@@ -39,9 +38,7 @@ export default function Marketing({ centroSelezionato, user }) {
     }
     return 12;
   };
-  const ordinaRows = (list) => ordinaPerMese
-    ? [...list].sort((a, b) => primoMeseAttivo(a) - primoMeseAttivo(b))
-    : list;
+  const ordinaRows = (list) => [...list].sort((a, b) => primoMeseAttivo(a) - primoMeseAttivo(b));
 
   useEffect(() => {
     if (centroId && centroId !== 'tutti') {
@@ -132,15 +129,6 @@ export default function Marketing({ centroSelezionato, user }) {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-          <Button
-            variant={ordinaPerMese ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setOrdinaPerMese(v => !v)}
-            className={ordinaPerMese ? 'bg-purple-600 hover:bg-purple-700' : ''}
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">Ordina per mese</span>
-          </Button>
           <ExportMarketing rows={rows} anno={anno} centroNome={centroSelezionato?.nome} centroLogo={centroSelezionato?.logo_url} budgetSaved={budgetSaved} />
         </div>
       </div>
