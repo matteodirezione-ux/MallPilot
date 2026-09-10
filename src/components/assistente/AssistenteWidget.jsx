@@ -108,9 +108,10 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const content = input.trim();
+  const handleSend = async (overrideText) => {
+    const text = overrideText ?? input;
+    if (!text.trim() || loading) return;
+    const content = text.trim();
     setInput('');
     setAnimateIndex(-1);
 
@@ -212,7 +213,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                       {shuffledSuggestions.map((s, i) => (
                         <button
                           key={i}
-                          onClick={() => { setInput(s); inputRef.current?.focus(); }}
+                          onClick={() => handleSend(s)}
                           className="w-full text-left text-xs px-3 py-2 rounded-lg border border-slate-200 bg-white hover:border-blue-300 hover:bg-blue-50 transition-colors text-slate-700"
                         >
                           {s}
