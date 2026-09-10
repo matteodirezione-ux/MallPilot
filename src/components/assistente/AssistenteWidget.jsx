@@ -17,6 +17,27 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   const inputRef = useRef(null);
   const activeConvRef = useRef(null);
 
+  const SUGGESTED_QUESTIONS = [
+    'Quante prenotazioni ci sono questo mese?',
+    'Crea un capex per ristrutturazione bagni',
+    'Apri un ticket urgente per guasto ascensore',
+    'Qual è il tasso di occupazione degli spazi expo?',
+    'Mostrami i task in scadenza questa settimana',
+    'Quanti ticket aperti ci sono adesso?',
+    'Crea una segnalazione per pulizia area food court',
+    'Quali manutenzioni sono in corso?',
+    'Dammi un riepilogo delle entrate di questo mese',
+    'Aggiungi un task di controllo impianti elettrici',
+  ];
+  const [shuffledSuggestions, setShuffledSuggestions] = useState([]);
+
+  useEffect(() => {
+    if (messages.length === 0 && !loading) {
+      const shuffled = [...SUGGESTED_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 5);
+      setShuffledSuggestions(shuffled);
+    }
+  }, [messages.length, loading, open]);
+
   useEffect(() => {
     activeConvRef.current = activeConversationId;
   }, [activeConversationId]);
@@ -164,11 +185,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                       Chiedi info o fai creare Capex, Ticket, segnalazioni
                     </p>
                     <div className="space-y-1.5">
-                      {[
-                        'Quante prenotazioni ci sono questo mese?',
-                        'Crea un capex per ristrutturazione bagni',
-                        'Apri un ticket urgente per guasto ascensore',
-                      ].map((s, i) => (
+                      {shuffledSuggestions.map((s, i) => (
                         <button
                           key={i}
                           onClick={() => { setInput(s); inputRef.current?.focus(); }}
