@@ -69,7 +69,11 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
         } else {
           setMessages(msgs);
         }
-        setLoading(false);
+        // Only stop loading when an actual assistant message arrives (not thinking/reasoning)
+        const hasAssistant = msgs.some(m => m.role === 'assistant');
+        if (hasAssistant) {
+          setLoading(false);
+        }
         if (msgs.length > 0) {
           const lastIdx = msgs.length - 1;
           const lastMsg = msgs[lastIdx];
