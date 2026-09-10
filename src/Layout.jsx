@@ -33,6 +33,7 @@ import SafeImage from '@/components/ui/SafeImage';
 import { Button } from '@/components/ui/button';
 import WelcomeModal from '@/components/onboarding/WelcomeModal';
 import SectionBanner from '@/components/onboarding/SectionBanner';
+import AssistenteWidget from '@/components/assistente/AssistenteWidget';
 
 export default function Layout({ children, currentPageName }) {
   const navigate = useNavigate();
@@ -259,7 +260,6 @@ export default function Layout({ children, currentPageName }) {
     {
       label: 'OPERATIVITÀ',
       items: [
-        { name: 'Assistente AI', page: 'AssistenteAI', icon: Sparkles, roles: ['proprieta', 'direttore'] },
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
@@ -529,6 +529,7 @@ export default function Layout({ children, currentPageName }) {
               <SectionBanner section={currentPageName} userId={user?.id} />
               {React.cloneElement(children, { centroSelezionato, user })}
               <WelcomeModal userId={user?.id} tipoAccount={user?.tipo_account} forceOpenSignal={tutorialSignal} />
+              <AssistenteWidget centroSelezionato={centroSelezionato} user={user} />
             </div>
           )}
         </div>
