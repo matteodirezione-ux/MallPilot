@@ -15,11 +15,17 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   const [animateLastIndex, setAnimateLastIndex] = useState(-1);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const activeConvRef = useRef(null);
+
+  useEffect(() => {
+    activeConvRef.current = activeConversationId;
+  }, [activeConversationId]);
 
   useEffect(() => {
     if (activeConversationId) {
       setAnimateLastIndex(-1);
       const unsubscribe = base44.agents.subscribeToConversation(activeConversationId, (data) => {
+        if (activeConvRef.current !== activeConversationId) return;
         setMessages(data.messages || []);
         setLoading(false);
       });
@@ -45,13 +51,17 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   }, [open]);
 
   const handleClearConversation = async () => {
-    if (!activeConversationId) return;
-    try {
-      await base44.agents.updateConversation(activeConversationId, { metadata: { deleted: true } });
-      setActiveConversationId(null);
-      setMessages([]);
-    } catch (e) {
-      console.error('Errore pulizia conversazione:', e);
+    const convId = activeConversationId;
+    setActiveConversationId(null);
+    setMessages([]);
+    setLoading(false);
+    activeConvRef.current = null;
+    if (convId) {
+      try {
+        await base44.agents.updateConversation(convId, { metadata: { deleted: true } });
+      } catch (e) {
+        console.error('Errore pulizia conversazione:', e);
+      }
     }
   };
 
