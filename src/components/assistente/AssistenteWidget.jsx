@@ -89,6 +89,24 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     setShowSidebar(false);
   };
 
+  const handleClearConversation = async () => {
+    if (!activeConversationId) return;
+    try {
+      await base44.agents.updateConversation(activeConversationId, { metadata: { deleted: true } });
+      const remaining = conversations.filter(c => c.id !== activeConversationId);
+      setConversations(remaining);
+      if (remaining.length > 0) {
+        setActiveConversationId(remaining[0].id);
+        setMessages(remaining[0].messages || []);
+      } else {
+        setActiveConversationId(null);
+        setMessages([]);
+      }
+    } catch (e) {
+      console.error('Errore pulizia conversazione:', e);
+    }
+  };
+
   const handleDeleteConversation = async (e, convId) => {
     e.stopPropagation();
     try {
@@ -193,6 +211,9 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
               <h1 className="font-semibold text-sm truncate">Assistente Mall Pilot</h1>
               <p className="text-xs text-white/80 truncate">Online · Chiedi o fai creare</p>
             </div>
+            <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={handleClearConversation} title="Pulisci conversazione">
+              <Trash2 className="w-5 h-5" />
+            </button>
             <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={() => { setOpen(false); setShowSidebar(false); }}>
               <X className="w-5 h-5" />
             </button>
