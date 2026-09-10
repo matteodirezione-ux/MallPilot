@@ -259,6 +259,7 @@ export default function Layout({ children, currentPageName }) {
     {
       label: 'OPERATIVITÀ',
       items: [
+        { name: 'Assistente AI', page: 'AssistenteAI', icon: Sparkles, roles: ['proprieta', 'direttore'] },
         { name: 'Dashboard', page: 'Dashboard', icon: LayoutDashboard, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Task', page: 'Task', icon: ListTodo, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Ticket', page: 'Ticket', icon: Ticket, roles: ['proprieta', 'direttore', 'vigilanza', 'manutentore'] },
