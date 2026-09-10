@@ -29,8 +29,19 @@ export default function Marketing({ centroSelezionato, user }) {
   const [budgetInput, setBudgetInput] = useState('');
   const [budgetSaved, setBudgetSaved] = useState(0);
   const [collapsed, setCollapsed] = useState({ iniziativa: true, comunicazione_online: true, comunicazione_offline: true, costo_fisso: true });
+  const [ordinaPerMese, setOrdinaPerMese] = useState(false);
 
   const centroId = centroSelezionato?.id;
+
+  const primoMeseAttivo = (row) => {
+    for (let i = 0; i < MESI.length; i++) {
+      if (row[MESI[i]] && row[MESI[i]] > 0) return i;
+    }
+    return 12;
+  };
+  const ordinaRows = (list) => ordinaPerMese
+    ? [...list].sort((a, b) => primoMeseAttivo(a) - primoMeseAttivo(b))
+    : list;
 
   useEffect(() => {
     if (centroId && centroId !== 'tutti') {
@@ -77,10 +88,10 @@ export default function Marketing({ centroSelezionato, user }) {
     loadData();
   };
 
-  const iniziative = rows.filter(r => r.sezione === 'iniziativa');
-  const online = rows.filter(r => r.sezione === 'comunicazione_online');
-  const offline = rows.filter(r => r.sezione === 'comunicazione_offline');
-  const fissi = rows.filter(r => r.sezione === 'costo_fisso');
+  const iniziative = ordinaRows(rows.filter(r => r.sezione === 'iniziativa'));
+  const online = ordinaRows(rows.filter(r => r.sezione === 'comunicazione_online'));
+  const offline = ordinaRows(rows.filter(r => r.sezione === 'comunicazione_offline'));
+  const fissi = ordinaRows(rows.filter(r => r.sezione === 'costo_fisso'));
 
   const totaleComunicazioneMese = (m) => sum(online, m) + sum(offline, m);
   const totaleBudgetMese = (m) => sum(iniziative, m) + totaleComunicazioneMese(m) + sum(fissi, m);
@@ -121,6 +132,15 @@ export default function Marketing({ centroSelezionato, user }) {
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
+          <Button
+            variant={ordinaPerMese ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setOrdinaPerMese(v => !v)}
+            className={ordinaPerMese ? 'bg-purple-600 hover:bg-purple-700' : ''}
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">Ordina per mese</span>
+          </Button>
           <ExportMarketing rows={rows} anno={anno} centroNome={centroSelezionato?.nome} centroLogo={centroSelezionato?.logo_url} budgetSaved={budgetSaved} />
         </div>
       </div>
