@@ -58,7 +58,13 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
             pendingUserContentRef.current = null;
             setMessages(msgs);
           } else {
-            setMessages([...msgs, { role: 'user', content: fullContent }]);
+            // Insert the pending user message BEFORE the last assistant message (correct chronological order)
+            const lastIdx = msgs.length - 1;
+            if (lastIdx >= 0 && msgs[lastIdx].role === 'assistant') {
+              setMessages([...msgs.slice(0, lastIdx), { role: 'user', content: fullContent }, msgs[lastIdx]]);
+            } else {
+              setMessages([...msgs, { role: 'user', content: fullContent }]);
+            }
           }
         } else {
           setMessages(msgs);
