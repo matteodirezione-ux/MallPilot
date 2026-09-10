@@ -12,7 +12,8 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [animateLastIndex, setAnimateLastIndex] = useState(-1);
+  const [animateIndex, setAnimateIndex] = useState(-1);
+  const animatedKeysRef = useRef(new Set());
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const activeConvRef = useRef(null);
@@ -44,22 +45,27 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
 
   useEffect(() => {
     if (activeConversationId) {
-      setAnimateLastIndex(-1);
+      setAnimateIndex(-1);
       const unsubscribe = base44.agents.subscribeToConversation(activeConversationId, (data) => {
         if (activeConvRef.current !== activeConversationId) return;
-        setMessages(data.messages || []);
+        const msgs = data.messages || [];
+        setMessages(msgs);
         setLoading(false);
+        if (msgs.length > 0) {
+          const lastIdx = msgs.length - 1;
+          const lastMsg = msgs[lastIdx];
+          const key = lastMsg.id || `idx-${lastIdx}`;
+          if (lastMsg.role === 'assistant' && !animatedKeysRef.current.has(key)) {
+            animatedKeysRef.current.add(key);
+            setAnimateIndex(lastIdx);
+          } else if (lastMsg.role === 'user') {
+            setAnimateIndex(-1);
+          }
+        }
       });
       return () => unsubscribe();
     }
   }, [activeConversationId]);
-
-  // Track which message to animate with typewriter (last assistant message while/after loading)
-  useEffect(() => {
-    if (loading && messages.length > 0 && messages[messages.length - 1]?.role === 'assistant') {
-      setAnimateLastIndex(messages.length - 1);
-    }
-  }, [loading, messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,6 +83,8 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     setMessages([]);
     setLoading(false);
     activeConvRef.current = null;
+    animatedKeysRef.current = new Set();
+    setAnimateIndex(-1);
     if (convId) {
       try {
         await base44.agents.updateConversation(convId, { metadata: { deleted: true } });
@@ -90,7 +98,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
     if (!input.trim() || loading) return;
     const content = input.trim();
     setInput('');
-    setAnimateLastIndex(-1);
+    setAnimateIndex(-1);
 
     // Prepend center context so the agent knows which center to use (stripped from display in MessageBubble)
     const centerContext = centroSelezionato?.id && centroSelezionato.id !== 'tutti'
@@ -199,7 +207,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                 ) : (
                   <>
                     {messages.map((msg, i) => (
-                      <MessageBubble key={i} message={msg} animate={i === animateLastIndex && msg.role === 'assistant'} />
+                      <MessageBubble key={i} message={msg} animate={i === animateIndex && msg.role === 'assistant'} />
                     ))}
                     {loading && messages[messages.length - 1]?.role === 'user' && (
                       <div className="flex justify-start mb-4">
