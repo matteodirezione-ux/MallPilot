@@ -48,7 +48,8 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
       setAnimateIndex(-1);
       const unsubscribe = base44.agents.subscribeToConversation(activeConversationId, (data) => {
         if (activeConvRef.current !== activeConversationId) return;
-        const msgs = data.messages || [];
+        const allMsgs = data.messages || [];
+        const msgs = allMsgs.filter(m => m.type !== 'thinking' && m.type !== 'reasoning');
         setMessages(msgs);
         setLoading(false);
         if (msgs.length > 0) {
@@ -211,12 +212,11 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                     ))}
                     {loading && messages[messages.length - 1]?.role === 'user' && (
                       <div className="flex justify-start mb-4">
-                        <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
-                          <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                            <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                            <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                          </div>
+                        <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-2.5 shadow-sm">
+                          <p className="text-sm text-slate-400 italic flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                            Sto pensando...
+                          </p>
                         </div>
                       </div>
                     )}
