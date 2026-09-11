@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
-import { Send, RefreshCw, Sparkles, X, Bot } from 'lucide-react';
+import { Send, RefreshCw, Sparkles, X, Bot, Eye } from 'lucide-react';
 import MessageBubble from '@/components/assistente/MessageBubble';
 
 const AGENT_NAME = 'assistente_mallpilot';
@@ -19,23 +19,48 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
   const inputRef = useRef(null);
   const activeConvRef = useRef(null);
 
+  const FEATURED_QUESTION = 'Cosa non sto vedendo?';
+
   const SUGGESTED_QUESTIONS = [
-    'Quante prenotazioni ci sono questo mese?',
-    'Crea un capex per ristrutturazione bagni',
-    'Apri un ticket urgente per guasto ascensore',
-    'Qual è il tasso di occupazione degli spazi expo?',
-    'Mostrami i task in scadenza questa settimana',
-    'Quanti ticket aperti ci sono adesso?',
-    'Crea una segnalazione per pulizia area food court',
-    'Quali manutenzioni sono in corso?',
-    'Dammi un riepilogo delle entrate di questo mese',
-    'Aggiungi un task di controllo impianti elettrici',
+    // Panoramica
+    'Cosa devo sapere oggi?',
+    'Fammi il punto del centro',
+    'Quali sono le priorità di oggi?',
+    'Ci sono criticità da attenzionare?',
+    'Cosa rischia di essere dimenticato?',
+    'Cosa è cambiato dall\'ultima volta che ho controllato?',
+    // Facility
+    'Quali problemi di facility sono aperti?',
+    'Quali manutenzioni sono in ritardo?',
+    'Quali interventi devo sollecitare?',
+    'Quali ticket sono aperti da più tempo?',
+    'Ci sono problemi ricorrenti?',
+    'Quali fornitori stanno lavorando in ritardo?',
+    // Sicurezza
+    'Ci sono criticità sulla sicurezza?',
+    'Quali controlli sono in scadenza?',
+    'Quali controlli risultano scaduti?',
+    'Ci sono anomalie ancora da risolvere?',
+    'Fammi il punto sulla sicurezza del centro',
+    'Ci sono documenti o attività dei fornitori da verificare?',
+    // Scadenze
+    'Cosa scade nei prossimi 7 giorni?',
+    'Cosa scade nei prossimi 30 giorni?',
+    'Quali attività sono già scadute?',
+    'Fammi vedere tutte le scadenze critiche',
+    'Quali documenti devo rinnovare?',
+    // Eventi
+    'Come siamo messi con i prossimi eventi?',
+    'Cosa manca per il prossimo evento?',
+    'Fammi la checklist del prossimo evento',
+    'Ci sono attività in ritardo per gli eventi?',
+    'Quali fornitori devo sollecitare per gli eventi?',
   ];
   const [shuffledSuggestions, setShuffledSuggestions] = useState([]);
 
   useEffect(() => {
     if (messages.length === 0 && !loading) {
-      const shuffled = [...SUGGESTED_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 5);
+      const shuffled = [...SUGGESTED_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 4);
       setShuffledSuggestions(shuffled);
     }
   }, [messages.length, loading, open]);
@@ -220,6 +245,13 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
                       Chiedi info o fai creare Capex, Ticket, segnalazioni
                     </p>
                     <div className="space-y-1.5">
+                      <button
+                        onClick={() => handleSend(FEATURED_QUESTION)}
+                        className="w-full text-left text-xs px-3 py-2.5 rounded-lg border border-blue-300 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors text-slate-800 font-medium flex items-center gap-2 shadow-sm"
+                      >
+                        <Eye className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <span>{FEATURED_QUESTION}</span>
+                      </button>
                       {shuffledSuggestions.map((s, i) => (
                         <button
                           key={i}
