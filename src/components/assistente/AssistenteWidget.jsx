@@ -194,7 +194,7 @@ export default function AssistenteWidget({ centroSelezionato, user }) {
               <Sparkles className="w-5 h-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="font-semibold text-sm truncate">Assistente Mall Pilot</h1>
+              <h1 className="font-semibold text-sm truncate">Assistente MAX</h1>
               <p className="text-xs text-white/80 truncate">Online · Chiedi o fai creare</p>
             </div>
             <button className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" onClick={handleClearConversation} title="Nuova conversazione">
