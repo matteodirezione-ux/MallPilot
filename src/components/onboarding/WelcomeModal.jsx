@@ -39,10 +39,17 @@ export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 
     setOpen(false);
   };
 
+  const handleOpenChange = (nextOpen) => {
+    if (!nextOpen && userId && localStorage.getItem(`mp_onb_${userId}_welcome`) !== '1') {
+      localStorage.setItem(`mp_onb_${userId}_welcome`, '1');
+    }
+    setOpen(nextOpen);
+  };
+
   const progress = Math.round((step / lastStep) * 100);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[88vh] overflow-hidden p-0 gap-0">
         {/* Progress bar */}
         <div className="h-1.5 w-full bg-slate-100">
