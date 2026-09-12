@@ -3,19 +3,21 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { sectionInfo, getSectionsForRole } from './onboardingContent';
+import { isWelcomeDone, markWelcomeDone } from '@/lib/onboarding';
 
-export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 }) {
+export default function WelcomeModal({ user, forceOpenSignal = 0 }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
 
+  const tipoAccount = user?.tipo_account;
   const visibleSections = useMemo(() => getSectionsForRole(tipoAccount), [tipoAccount]);
 
   useEffect(() => {
-    if (userId && localStorage.getItem(`mp_onb_${userId}_welcome`) !== '1') {
+    if (user && !isWelcomeDone(user)) {
       setOpen(true);
       setStep(0);
     }
-  }, [userId]);
+  }, [user]);
 
   useEffect(() => {
     if (forceOpenSignal > 0) {
@@ -35,13 +37,13 @@ export default function WelcomeModal({ userId, tipoAccount, forceOpenSignal = 0 
   const prev = () => setStep(s => Math.max(s - 1, 0));
 
   const finish = () => {
-    if (userId) localStorage.setItem(`mp_onb_${userId}_welcome`, '1');
+    if (user) markWelcomeDone(user.id);
     setOpen(false);
   };
 
   const handleOpenChange = (nextOpen) => {
-    if (!nextOpen && userId && localStorage.getItem(`mp_onb_${userId}_welcome`) !== '1') {
-      localStorage.setItem(`mp_onb_${userId}_welcome`, '1');
+    if (!nextOpen && user && !isWelcomeDone(user)) {
+      markWelcomeDone(user.id);
     }
     setOpen(nextOpen);
   };

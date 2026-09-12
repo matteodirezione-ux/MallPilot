@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { sectionInfo } from './onboardingContent';
+import { isSectionDone, markSectionDone } from '@/lib/onboarding';
 
-export default function SectionBanner({ section, userId }) {
+export default function SectionBanner({ section, user }) {
   const info = sectionInfo[section];
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
-    setDismissed(!userId ? true : localStorage.getItem(`mp_onb_${userId}_sec_${section}`) === '1');
-  }, [section, userId]);
+    setDismissed(!user ? true : isSectionDone(user, section));
+  }, [section, user]);
 
   if (!info || dismissed) return null;
 
   const Icon = info.icon;
 
   const dismiss = () => {
-    if (userId) localStorage.setItem(`mp_onb_${userId}_sec_${section}`, '1');
+    if (user) markSectionDone(user, section);
     setDismissed(true);
   };
 
