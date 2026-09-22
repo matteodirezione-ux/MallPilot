@@ -26,7 +26,8 @@ import {
   ChevronRight,
   Gauge,
   Cloud,
-  GraduationCap
+  GraduationCap,
+  ArrowRightLeft
 } from 'lucide-react';
 import NotificaBell from '@/components/NotificaBell';
 import SafeImage from '@/components/ui/SafeImage';
@@ -292,6 +293,7 @@ export default function Layout({ children, currentPageName }) {
         { name: 'Documenti', page: 'Documenti', icon: FileText, roles: ['proprieta', 'direttore'] },
         { name: 'Tenant', page: 'Tenant', icon: Building2, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Corrispettivi', page: 'Corrispettivi', icon: TrendingUp, roles: ['proprieta', 'direttore', 'tenant'] },
+        { name: 'Conversione File', page: 'ConversioneFile', icon: ArrowRightLeft, roles: ['proprieta', 'direttore'] },
         { name: 'Contatori', page: 'LetturaContatori', icon: Gauge, roles: ['proprieta', 'direttore', 'vigilanza'] },
         { name: 'Utenze', page: 'Utenze', icon: Zap, roles: ['proprieta', 'direttore'] },
         { name: 'Gestione', page: 'Gestione', icon: Settings, roles: ['proprieta', 'direttore'] },
