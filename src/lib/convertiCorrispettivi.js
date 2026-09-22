@@ -271,6 +271,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
 
   const matched = new Set();
   let matchedWithData = 0;
+  let withoutData = 0;
   const prevYear = year - 1;
 
   const dataRows = stores.map(store => {
@@ -280,6 +281,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     const data = byUnit[store.locale] || { fatturato: 0, scontrini: 0 };
     matched.add(store.locale);
     if (byUnit[store.locale]) matchedWithData++;
+    else withoutData++;
     return [
       store.locale,
       store.insegna,
@@ -340,7 +342,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     stats: {
       total: stores.filter(s => !s.isSpacer).length + unmatchedCount,
       matched: matchedWithData,
-      unmatched: unmatchedCount,
+      unmatched: withoutData,
       year,
       matrixCount,
     },
