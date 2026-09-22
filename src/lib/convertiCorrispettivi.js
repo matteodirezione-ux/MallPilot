@@ -214,13 +214,17 @@ async function parseMatrixTemplate(file) {
   } catch (e) { /* use defaults */ }
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
-    if (!row || !row[0]) {
+    const hasLocale = row && row[0] && String(row[0]).trim();
+    const hasInsegna = row && row[3] && String(row[3]).trim();
+    if (!hasLocale && !hasInsegna) {
       // Preserve empty/subtotal separator rows as spacers
       stores.push({ locale: '', insegna: '', isSpacer: true });
       continue;
     }
-    const locale = String(row[0]).trim().toUpperCase();
-    const insegna = row[3] ? String(row[3]).trim() : '';
+    let locale = hasLocale ? String(row[0]).trim().toUpperCase() : '';
+    const insegna = hasInsegna ? String(row[3]).trim() : '';
+    // Se il Unit No è vuoto ma c'è l'insegna, usa il nome normalizzato come chiave locale
+    if (!locale && insegna) locale = normalizeName(insegna).toUpperCase();
     stores.push({ locale, insegna });
     if (insegna) {
       const norm = normalizeName(insegna);
