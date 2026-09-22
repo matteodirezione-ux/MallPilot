@@ -214,7 +214,11 @@ async function parseMatrixTemplate(file) {
   } catch (e) { /* use defaults */ }
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
-    if (!row || !row[0]) continue;
+    if (!row || !row[0]) {
+      // Preserve empty/subtotal separator rows as spacers
+      stores.push({ locale: '', insegna: '', isSpacer: true });
+      continue;
+    }
     const locale = String(row[0]).trim().toUpperCase();
     const insegna = row[3] ? String(row[3]).trim() : '';
     stores.push({ locale, insegna });
@@ -248,8 +252,8 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     stores = result.stores;
     nameToLocale = result.nameToLocale;
     nameLocaleList = result.nameLocaleList;
-    matrixLocales = new Set(stores.map(s => s.locale));
-    matrixCount = stores.length;
+    matrixLocales = new Set(stores.filter(s => !s.isSpacer).map(s => s.locale));
+    matrixCount = stores.filter(s => !s.isSpacer).length;
     fontName = result.fontName;
     fontSize = result.fontSize;
   }
@@ -265,6 +269,9 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
   const prevYear = year - 1;
 
   const dataRows = stores.map(store => {
+    if (store.isSpacer) {
+      return [null, null, null, null, null, null, null, null, null, null];
+    }
     const data = byUnit[store.locale] || { fatturato: 0, scontrini: 0 };
     matched.add(store.locale);
     return [
@@ -326,7 +333,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     filename,
     stats: {
       total: dataRows.length,
-      matched: stores.length,
+      matched: stores.filter(s => !s.isSpacer).length,
       unmatched: unmatchedCount,
       year,
       matrixCount,
