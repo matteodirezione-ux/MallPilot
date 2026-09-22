@@ -303,7 +303,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     }
     const data = byUnit[store.locale] || { fatturato: 0, scontrini: 0 };
     matched.add(store.locale);
-    if (byUnit[store.locale]) matchedWithData++;
+    if (data.fatturato > 0) matchedWithData++;
     else withoutData++;
     return [
       store.locale,
