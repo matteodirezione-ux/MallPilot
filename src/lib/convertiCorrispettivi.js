@@ -127,9 +127,12 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     if (!centre) centre = String(getField(row, 'Centre') || '');
     if (!formName) formName = String(getField(row, 'Form_Name') || '');
     const ttc = parseFloat(getField(row, 'DeclaredTurnoverTTC')) || 0;
+    const ht = parseFloat(getField(row, 'DeclaredTurnoverHT')) || 0;
+    // Fatturato = importo senza IVA (il più basso tra TTC e HT)
+    const fatturato = (ttc > 0 && ht > 0) ? Math.min(ttc, ht) : (ttc || ht);
     const transactions = parseInt(getField(row, 'transactions')) || 0;
     if (!byUnit[unitNo]) byUnit[unitNo] = { fatturato: 0, scontrini: 0, insegna: store };
-    byUnit[unitNo].fatturato += ttc;
+    byUnit[unitNo].fatturato += fatturato;
     byUnit[unitNo].scontrini += transactions;
   });
   return { byUnit, year: year || new Date().getFullYear(), centre, formName };
