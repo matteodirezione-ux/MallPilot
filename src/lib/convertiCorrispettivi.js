@@ -303,7 +303,11 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     }
     const data = byUnit[store.locale] || { fatturato: 0, scontrini: 0 };
     matched.add(store.locale);
-    if (data.fatturato > 0) matchedWithData++;
+    // Salta le righe di totali/subtotali dal conteggio
+    const isTotal = /total|subtotale|totale/i.test(store.insegna) || /total|subtotale|totale/i.test(store.locale);
+    if (isTotal) {
+      // non conteggiare
+    } else if (data.fatturato > 0) matchedWithData++;
     else withoutData++;
     return [
       store.locale,
