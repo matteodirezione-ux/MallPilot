@@ -270,6 +270,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
   }
 
   const matched = new Set();
+  let matchedWithData = 0;
   const prevYear = year - 1;
 
   const dataRows = stores.map(store => {
@@ -278,6 +279,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     }
     const data = byUnit[store.locale] || { fatturato: 0, scontrini: 0 };
     matched.add(store.locale);
+    if (byUnit[store.locale]) matchedWithData++;
     return [
       store.locale,
       store.insegna,
@@ -336,8 +338,8 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
     blob: new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
     filename,
     stats: {
-      total: dataRows.length,
-      matched: stores.filter(s => !s.isSpacer).length,
+      total: stores.filter(s => !s.isSpacer).length + unmatchedCount,
+      matched: matchedWithData,
       unmatched: unmatchedCount,
       year,
       matrixCount,
