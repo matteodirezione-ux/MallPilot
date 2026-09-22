@@ -43,6 +43,11 @@ function getField(row, ...names) {
   return '';
 }
 
+// --- Normalize store name for fuzzy matching (uppercase, remove spaces/punctuation) ---
+function normalizeName(name) {
+  return String(name || '').toUpperCase().replace(/[\s'\-\.]/g, '').replace(/[^A-Z0-9]/g, '');
+}
+
 // --- Source file parser (CSV or XLSX) ---
 async function parseSourceFile(file) {
   const name = file.name.toLowerCase();
@@ -57,20 +62,27 @@ async function parseSourceFile(file) {
 }
 
 // --- Aggregate CSV rows by Unit No (sum multiple entries per store) ---
-function aggregateData(rows) {
+// nameToLocale: optional mapping from normalized store name → locale (from matrix template)
+function aggregateData(rows, nameToLocale) {
   const byUnit = {};
   let year = null;
   let centre = '';
   let formName = '';
   rows.forEach(row => {
-    const unitNo = String(getField(row, 'Unit No', 'Unit_No', 'Locale') || '').trim().toUpperCase();
+    let unitNo = String(getField(row, 'Unit No', 'Unit_No', 'Locale') || '').trim().toUpperCase();
+    const store = String(getField(row, 'Store') || '').trim();
+    // Fallback 1: if Unit No is empty, try matching by Store name to matrix locale
+    if (!unitNo && nameToLocale && store) {
+      unitNo = nameToLocale[normalizeName(store)] || '';
+    }
+    // Fallback 2: if still no unitNo, use Store name as key
+    if (!unitNo) unitNo = store.toUpperCase();
     if (!unitNo) return;
     if (!year) year = parseInt(getField(row, 'Year')) || new Date().getFullYear();
     if (!centre) centre = String(getField(row, 'Centre') || '');
     if (!formName) formName = String(getField(row, 'Form_Name') || '');
     const ttc = parseFloat(getField(row, 'DeclaredTurnoverTTC')) || 0;
     const transactions = parseInt(getField(row, 'transactions')) || 0;
-    const store = String(getField(row, 'Store') || '');
     if (!byUnit[unitNo]) byUnit[unitNo] = { fatturato: 0, scontrini: 0, insegna: store };
     byUnit[unitNo].fatturato += ttc;
     byUnit[unitNo].scontrini += transactions;
@@ -78,22 +90,25 @@ function aggregateData(rows) {
   return { byUnit, year: year || new Date().getFullYear(), centre, formName };
 }
 
-// --- Matrix template parser (extracts store order) ---
+// --- Matrix template parser (extracts store order + name→locale mapping) ---
 async function parseMatrixTemplate(file) {
   const data = await file.arrayBuffer();
   const wb = XLSX.read(data, { type: 'array' });
   const ws = wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
   const stores = [];
+  const nameToLocale = {};
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     if (!row || !row[0]) continue;
-    stores.push({
-      locale: String(row[0]).trim().toUpperCase(),
-      insegna: row[3] ? String(row[3]).trim() : '',
-    });
+    const locale = String(row[0]).trim().toUpperCase();
+    const insegna = row[3] ? String(row[3]).trim() : '';
+    stores.push({ locale, insegna });
+    if (insegna) {
+      nameToLocale[normalizeName(insegna)] = locale;
+    }
   }
-  return stores;
+  return { stores, nameToLocale };
 }
 
 // --- Main conversion function ---
@@ -101,14 +116,21 @@ export async function convertiFile(csvFile, matriceFile) {
   const rows = await parseSourceFile(csvFile);
   if (!rows.length) throw new Error('Nessun dato trovato nel file');
 
-  const { byUnit, year, centre, formName } = aggregateData(rows);
-
-  let stores;
+  // Parse matrix template first (if provided) to get store order + name mapping
+  let stores = [];
+  let nameToLocale = {};
   let matrixCount = 0;
   if (matriceFile) {
-    stores = await parseMatrixTemplate(matriceFile);
+    const result = await parseMatrixTemplate(matriceFile);
+    stores = result.stores;
+    nameToLocale = result.nameToLocale;
     matrixCount = stores.length;
-  } else {
+  }
+
+  // Aggregate CSV data, using name mapping as fallback for empty Unit No
+  const { byUnit, year, centre, formName } = aggregateData(rows, nameToLocale);
+
+  if (!matriceFile) {
     stores = Object.entries(byUnit).map(([locale, d]) => ({ locale, insegna: d.insegna }));
   }
 
