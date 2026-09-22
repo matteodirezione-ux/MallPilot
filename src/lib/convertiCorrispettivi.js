@@ -246,6 +246,10 @@ async function parseMatrixTemplate(file) {
     }
     let locale = hasLocale ? String(row[0]).trim().toUpperCase() : '';
     const insegna = hasInsegna ? String(row[3]).trim() : '';
+    // Salta le righe di intestazione ripetute (es. "LOCALE" / "Merceologia/Insegna")
+    if (locale === 'LOCALE' || /^merceologia/i.test(insegna)) {
+      continue;
+    }
     // Se il Unit No è vuoto ma c'è l'insegna, usa il nome normalizzato come chiave locale
     if (!locale && insegna) locale = normalizeName(insegna).toUpperCase();
     stores.push({ locale, insegna });
