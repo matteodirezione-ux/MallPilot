@@ -153,21 +153,54 @@ async function parseMatrixTemplate(file) {
   const stores = [];
   const nameToLocale = {};
   const nameLocaleList = [];
-  // Extract default font from styles.xml
+  // Extract font from data cells (fatturato area) via styles.xml
   let fontName = 'Calibri';
   let fontSize = 11;
   try {
     const files = unzipSync(new Uint8Array(data));
     const stylesXml = new TextDecoder().decode(files['xl/styles.xml']);
+    // Parse fonts
     const fontsMatch = stylesXml.match(/<fonts[^>]*>([\s\S]*?)<\/fonts>/);
-    if (fontsMatch) {
-      const firstFont = fontsMatch[1].match(/<font>[\s\S]*?<\/font>/);
-      if (firstFont) {
-        const nameMatch = firstFont[0].match(/<name val="([^"]*)"/);
-        const szMatch = firstFont[0].match(/<sz val="([^"]*)"/);
-        if (nameMatch) fontName = nameMatch[1];
-        if (szMatch) fontSize = parseFloat(szMatch[1]);
+    const fonts = fontsMatch
+      ? fontsMatch[1].match(/<font>[\s\S]*?<\/font>/g).map(f => {
+          const name = f.match(/<name val="([^"]*)"/);
+          const sz = f.match(/<sz val="([^"]*)"/);
+          return { name: name?.[1] || 'Calibri', sz: sz ? parseFloat(sz[1]) : 11, bold: f.includes('<b/>') };
+        })
+      : [];
+    // Parse cellXfs (style index -> fontId)
+    const cellXfsMatch = stylesXml.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
+    const xfs = cellXfsMatch
+      ? cellXfsMatch[1].match(/<xf[^>]*>/g).map(xf => {
+          const fid = xf.match(/fontId="(\d+)"/);
+          return fid ? parseInt(fid[1]) : 0;
+        })
+      : [];
+    // Scan data cells (columns E-L, rows 4-50) to find most common font
+    const sheetXml = new TextDecoder().decode(files['xl/worksheets/sheet1.xml']);
+    const fontCounts = {};
+    for (let row = 4; row <= 50; row++) {
+      for (const col of ['E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']) {
+        const cellMatch = sheetXml.match(new RegExp(`<c r="${col}${row}"[^>]*>`));
+        if (cellMatch) {
+          const sm = cellMatch[0].match(/\ss="(\d+)"/);
+          const idx = sm ? parseInt(sm[1]) : 0;
+          if (idx < xfs.length) {
+            const font = fonts[xfs[idx]];
+            if (font) {
+              const key = `${font.name}|${font.sz}`;
+              fontCounts[key] = (fontCounts[key] || 0) + 1;
+            }
+          }
+        }
       }
+    }
+    // Pick most common font
+    const top = Object.entries(fontCounts).sort((a, b) => b[1] - a[1])[0];
+    if (top) {
+      const [name, sz] = top[0].split('|');
+      fontName = name;
+      fontSize = parseFloat(sz);
     }
   } catch (e) { /* use defaults */ }
   for (let i = 2; i < rows.length; i++) {
