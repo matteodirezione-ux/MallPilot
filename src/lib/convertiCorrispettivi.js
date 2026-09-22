@@ -52,6 +52,16 @@ function getField(row, ...names) {
   return '';
 }
 
+// --- Convert numeric month (1-12) to Italian month name ---
+const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+function normalizeMonth(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  const n = parseInt(s);
+  if (!isNaN(n) && n >= 1 && n <= 12) return MESI_IT[n - 1];
+  return s;
+}
+
 // --- Normalize store name for fuzzy matching (uppercase, remove spaces/punctuation) ---
 function normalizeName(name) {
   return String(name || '').toUpperCase().replace(/[\s'\-\.]/g, '').replace(/[^A-Z0-9]/g, '');
@@ -138,7 +148,12 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     if (!year) year = parseInt(getField(row, 'Year')) || new Date().getFullYear();
     if (!centre) centre = String(getField(row, 'Centre') || '');
     if (!formName) formName = String(getField(row, 'Form_Name') || '');
-    if (!month) month = String(getField(row, 'Month', 'Mese', 'month') || '').trim();
+    if (!month) {
+      // Cerca qualsiasi colonna il cui nome contiene "month" o "mese"
+      const keys = Object.keys(row);
+      const monthKey = keys.find(k => /month|mese/i.test(k));
+      if (monthKey) month = String(row[monthKey] || '').trim();
+    }
     const ttc = parseFloat(getField(row, 'DeclaredTurnoverTTC')) || 0;
     const ht = parseFloat(getField(row, 'DeclaredTurnoverHT')) || 0;
     // Fatturato = importo senza IVA (il più basso tra TTC e HT)
@@ -152,6 +167,12 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     byUnit[unitNo].fatturato += fatturato;
     byUnit[unitNo].scontrini += transactions;
   });
+  // Fallback: se il mese non è in una colonna dedicata, prova a estrarlo dal Form_Name
+  if (!month && formName) {
+    const found = MESI_IT.find(m => formName.toLowerCase().includes(m.toLowerCase()));
+    if (found) month = found;
+  }
+  month = normalizeMonth(month);
   return { byUnit, anomalies, year: year || new Date().getFullYear(), centre, formName, month };
 }
 
