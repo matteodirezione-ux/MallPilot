@@ -109,6 +109,7 @@ async function parseSourceFile(file) {
 // matrixLocales: Set of valid matrix locales (to detect non-matching Unit No)
 function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
   const byUnit = {};
+  const anomalies = [];
   let year = null;
   let centre = '';
   let formName = '';
@@ -130,12 +131,16 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     const ht = parseFloat(getField(row, 'DeclaredTurnoverHT')) || 0;
     // Fatturato = importo senza IVA (il più basso tra TTC e HT)
     const fatturato = (ttc > 0 && ht > 0) ? Math.min(ttc, ht) : (ttc || ht);
+    // Segnala se HT > TTC (possibile errore di inserimento)
+    if (ttc > 0 && ht > 0 && ht > ttc) {
+      anomalies.push({ store: store || unitNo, ttc, ht });
+    }
     const transactions = parseInt(getField(row, 'transactions')) || 0;
     if (!byUnit[unitNo]) byUnit[unitNo] = { fatturato: 0, scontrini: 0, insegna: store };
     byUnit[unitNo].fatturato += fatturato;
     byUnit[unitNo].scontrini += transactions;
   });
-  return { byUnit, year: year || new Date().getFullYear(), centre, formName };
+  return { byUnit, anomalies, year: year || new Date().getFullYear(), centre, formName };
 }
 
 // --- Matrix template parser (extracts store order + name→locale mappings) ---
@@ -183,7 +188,7 @@ export async function convertiFile(csvFile, matriceFile) {
   }
 
   // Aggregate CSV data, using name matching as fallback for empty/non-matching Unit No
-  const { byUnit, year, centre, formName } = aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales);
+  const { byUnit, anomalies, year, centre, formName } = aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales);
 
   if (!matriceFile) {
     stores = Object.entries(byUnit).map(([locale, d]) => ({ locale, insegna: d.insegna }));
@@ -248,5 +253,6 @@ export async function convertiFile(csvFile, matriceFile) {
       year,
       matrixCount,
     },
+    anomalies,
   };
 }

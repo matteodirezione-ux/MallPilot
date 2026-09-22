@@ -130,6 +130,28 @@ export default function ConversioneFile({ centroSelezionato, user }) {
         </div>
       )}
 
+      {result?.anomalies?.length > 0 && (
+        <div className="border border-amber-300 bg-amber-50 rounded-xl p-4 space-y-2">
+          <div className="flex items-center gap-2 text-amber-800 font-medium">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>Possibile errore di inserimento ({result.anomalies.length})</span>
+          </div>
+          <p className="text-xs text-amber-700">
+            Il fatturato senza IVA risulta più alto di quello con IVA. Verificare con l'operatore:
+          </p>
+          <div className="space-y-1 max-h-48 overflow-y-auto">
+            {result.anomalies.map((a, i) => (
+              <div key={i} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 text-sm border border-amber-200">
+                <span className="font-medium text-slate-700">{a.store}</span>
+                <span className="text-xs text-slate-500">
+                  Senza IVA: <b className="text-red-600">€{a.ht.toLocaleString('it-IT')}</b> · Con IVA: €{a.ttc.toLocaleString('it-IT')}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {result && (
         <Card className="border-green-200 bg-green-50/50">
           <CardContent className="pt-6 space-y-4">
