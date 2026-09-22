@@ -195,8 +195,8 @@ export default function ConversioneFile({ centroSelezionato, user }) {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-white rounded-lg p-3 border border-slate-200">
-                <p className="text-slate-500 text-xs">Negozi totali</p>
-                <p className="text-lg font-bold text-slate-800">{result.stats.total}</p>
+                <p className="text-slate-500 text-xs">Mese di riferimento</p>
+                <p className="text-lg font-bold text-slate-800">{result.stats.month || '—'}</p>
               </div>
               <div className="bg-white rounded-lg p-3 border border-slate-200">
                 <p className="text-slate-500 text-xs">Anno</p>

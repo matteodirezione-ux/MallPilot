@@ -123,6 +123,7 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
   let year = null;
   let centre = '';
   let formName = '';
+  let month = '';
   rows.forEach(row => {
     let unitNo = String(getField(row, 'Unit No', 'Unit_No', 'Locale') || '').trim().toUpperCase();
     const store = String(getField(row, 'Store') || '').trim();
@@ -137,6 +138,7 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     if (!year) year = parseInt(getField(row, 'Year')) || new Date().getFullYear();
     if (!centre) centre = String(getField(row, 'Centre') || '');
     if (!formName) formName = String(getField(row, 'Form_Name') || '');
+    if (!month) month = String(getField(row, 'Month', 'Mese', 'month') || '').trim();
     const ttc = parseFloat(getField(row, 'DeclaredTurnoverTTC')) || 0;
     const ht = parseFloat(getField(row, 'DeclaredTurnoverHT')) || 0;
     // Fatturato = importo senza IVA (il più basso tra TTC e HT)
@@ -150,7 +152,7 @@ function aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales) {
     byUnit[unitNo].fatturato += fatturato;
     byUnit[unitNo].scontrini += transactions;
   });
-  return { byUnit, anomalies, year: year || new Date().getFullYear(), centre, formName };
+  return { byUnit, anomalies, year: year || new Date().getFullYear(), centre, formName, month };
 }
 
 // --- Matrix template parser (extracts store order + name→locale mappings) ---
@@ -263,7 +265,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
   }
 
   // Aggregate CSV data, using name matching as fallback for empty/non-matching Unit No
-  const { byUnit, anomalies, year, centre, formName } = aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales);
+  const { byUnit, anomalies, year, centre, formName, month } = aggregateData(rows, nameToLocale, nameLocaleList, matrixLocales);
 
   if (!matriceFile) {
     stores = Object.entries(byUnit).map(([locale, d]) => ({ locale, insegna: d.insegna }));
@@ -344,6 +346,7 @@ export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
       matched: matchedWithData,
       unmatched: withoutData,
       year,
+      month,
       matrixCount,
     },
     anomalies,
