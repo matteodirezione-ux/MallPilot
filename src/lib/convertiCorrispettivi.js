@@ -1,4 +1,5 @@
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
+import { unzipSync } from 'fflate';
 
 // --- CSV parser (semicolon-delimited, handles quoted fields) ---
 function parseCSVLine(line) {
@@ -152,6 +153,23 @@ async function parseMatrixTemplate(file) {
   const stores = [];
   const nameToLocale = {};
   const nameLocaleList = [];
+  // Extract default font from styles.xml
+  let fontName = 'Calibri';
+  let fontSize = 11;
+  try {
+    const files = unzipSync(new Uint8Array(data));
+    const stylesXml = new TextDecoder().decode(files['xl/styles.xml']);
+    const fontsMatch = stylesXml.match(/<fonts[^>]*>([\s\S]*?)<\/fonts>/);
+    if (fontsMatch) {
+      const firstFont = fontsMatch[1].match(/<font>[\s\S]*?<\/font>/);
+      if (firstFont) {
+        const nameMatch = firstFont[0].match(/<name val="([^"]*)"/);
+        const szMatch = firstFont[0].match(/<sz val="([^"]*)"/);
+        if (nameMatch) fontName = nameMatch[1];
+        if (szMatch) fontSize = parseFloat(szMatch[1]);
+      }
+    }
+  } catch (e) { /* use defaults */ }
   for (let i = 2; i < rows.length; i++) {
     const row = rows[i];
     if (!row || !row[0]) continue;
@@ -164,7 +182,7 @@ async function parseMatrixTemplate(file) {
       nameLocaleList.push({ norm, locale });
     }
   }
-  return { stores, nameToLocale, nameLocaleList };
+  return { stores, nameToLocale, nameLocaleList, fontName, fontSize };
 }
 
 // --- Main conversion function ---
@@ -178,6 +196,8 @@ export async function convertiFile(csvFile, matriceFile) {
   let nameLocaleList = [];
   let matrixLocales = null;
   let matrixCount = 0;
+  let fontName = 'Calibri';
+  let fontSize = 11;
   if (matriceFile) {
     const result = await parseMatrixTemplate(matriceFile);
     stores = result.stores;
@@ -185,6 +205,8 @@ export async function convertiFile(csvFile, matriceFile) {
     nameLocaleList = result.nameLocaleList;
     matrixLocales = new Set(stores.map(s => s.locale));
     matrixCount = stores.length;
+    fontName = result.fontName;
+    fontSize = result.fontSize;
   }
 
   // Aggregate CSV data, using name matching as fallback for empty/non-matching Unit No
@@ -236,6 +258,17 @@ export async function convertiFile(csvFile, matriceFile) {
     { wch: 10 }, { wch: 14 }, { wch: 10 }, { wch: 10 },
     { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 10 },
   ];
+
+  // Apply font from matrix template to all cells
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    for (let C = range.s.c; C <= range.e.c; C++) {
+      const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
+      if (ws[cellRef]) {
+        ws[cellRef].s = { font: { name: fontName, sz: fontSize } };
+      }
+    }
+  }
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Matrice');
