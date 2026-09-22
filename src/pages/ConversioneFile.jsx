@@ -6,19 +6,22 @@ import { ArrowRightLeft, Upload, Download, FileSpreadsheet, CheckCircle2, AlertC
 
 export default function ConversioneFile({ centroSelezionato, user }) {
   const [csvFile, setCsvFile] = useState(null);
+  const [rawCsvFile, setRawCsvFile] = useState(null);
   const [matriceFile, setMatriceFile] = useState(null);
   const [converting, setConverting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  const hasSource = csvFile || rawCsvFile;
+
   const handleConvert = async () => {
-    if (!csvFile) return;
+    if (!hasSource) return;
     setConverting(true);
     setError(null);
     if (result?.url) URL.revokeObjectURL(result.url);
     setResult(null);
     try {
-      const res = await convertiFile(csvFile, matriceFile);
+      const res = await convertiFile(csvFile, matriceFile, rawCsvFile);
       const url = URL.createObjectURL(res.blob);
       setResult({ ...res, url });
     } catch (e) {
@@ -80,6 +83,37 @@ export default function ConversioneFile({ centroSelezionato, user }) {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-lg">1b. File grezzo CSV (virgola)</CardTitle>
+          <CardDescription>
+            Carica il file CSV grezzo exportato da Mallcomm (delimitato da virgola). Verrà convertito automaticamente con lo stesso metodo.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-xl p-8 cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition-colors">
+            <input
+              type="file"
+              accept=".csv"
+              className="hidden"
+              onChange={(e) => setRawCsvFile(e.target.files[0])}
+            />
+            {rawCsvFile ? (
+              <div className="flex items-center gap-2 text-blue-600">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="font-medium">{rawCsvFile.name}</span>
+              </div>
+            ) : (
+              <>
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm font-medium text-slate-600">Clicca per caricare il file grezzo</span>
+                <span className="text-xs text-slate-400 mt-1">CSV (virgola)</span>
+              </>
+            )}
+          </label>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-lg">2. Matrice template (opzionale)</CardTitle>
           <CardDescription>
             Carica la matrice per mantenere l'ordine dei negozi. Senza, verrà usato l'ordine del file.
@@ -109,7 +143,7 @@ export default function ConversioneFile({ centroSelezionato, user }) {
         </CardContent>
       </Card>
 
-      <Button onClick={handleConvert} disabled={!csvFile || converting} className="w-full gap-2">
+      <Button onClick={handleConvert} disabled={!hasSource || converting} className="w-full gap-2">
         {converting ? (
           <>
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

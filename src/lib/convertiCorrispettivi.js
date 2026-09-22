@@ -1,8 +1,8 @@
 import * as XLSX from 'xlsx-js-style';
 import { unzipSync } from 'fflate';
 
-// --- CSV parser (semicolon-delimited, handles quoted fields) ---
-function parseCSVLine(line) {
+// --- CSV parser (handles quoted fields, configurable delimiter) ---
+function parseCSVLine(line, delim = ';') {
   const result = [];
   let current = '';
   let inQuotes = false;
@@ -11,7 +11,7 @@ function parseCSVLine(line) {
     if (char === '"') {
       if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
       else inQuotes = !inQuotes;
-    } else if (char === ';' && !inQuotes) {
+    } else if (char === delim && !inQuotes) {
       result.push(current);
       current = '';
     } else {
@@ -22,16 +22,24 @@ function parseCSVLine(line) {
   return result;
 }
 
-function parseSemicolonCSV(text) {
+function parseDelimitedCSV(text, delim) {
   const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
-  const headers = parseCSVLine(lines[0]);
+  const headers = parseCSVLine(lines[0], delim);
   return lines.slice(1).map(line => {
-    const values = parseCSVLine(line);
+    const values = parseCSVLine(line, delim);
     const obj = {};
     headers.forEach((h, i) => { obj[(h || '').trim()] = (values[i] || '').trim(); });
     return obj;
   });
+}
+
+function parseSemicolonCSV(text) {
+  return parseDelimitedCSV(text, ';');
+}
+
+function parseCommaCSV(text) {
+  return parseDelimitedCSV(text, ',');
 }
 
 // --- Flexible field getter (case-insensitive) ---
@@ -92,11 +100,12 @@ function findLocaleByName(store, nameToLocale, nameLocaleList) {
 }
 
 // --- Source file parser (CSV or XLSX) ---
-async function parseSourceFile(file) {
+// rawCsv=true → parse as comma-delimited (file grezzo da Mallcomm)
+async function parseSourceFile(file, rawCsv = false) {
   const name = file.name.toLowerCase();
   if (name.endsWith('.csv')) {
     const text = (await file.text()).replace(/^\ufeff/, '');
-    return parseSemicolonCSV(text);
+    return rawCsv ? parseCommaCSV(text) : parseSemicolonCSV(text);
   }
   const data = await file.arrayBuffer();
   const wb = XLSX.read(data, { type: 'array' });
@@ -219,8 +228,11 @@ async function parseMatrixTemplate(file) {
 }
 
 // --- Main conversion function ---
-export async function convertiFile(csvFile, matriceFile) {
-  const rows = await parseSourceFile(csvFile);
+// rawCsvFile: optional raw comma-delimited CSV (file grezzo da Mallcomm)
+export async function convertiFile(csvFile, matriceFile, rawCsvFile) {
+  const sourceFile = rawCsvFile || csvFile;
+  if (!sourceFile) throw new Error('Nessun file da convertire');
+  const rows = await parseSourceFile(sourceFile, !!rawCsvFile);
   if (!rows.length) throw new Error('Nessun dato trovato nel file');
 
   // Parse matrix template first (if provided) to get store order + name mappings
