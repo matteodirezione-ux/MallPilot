@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import SectionInfoButton from '@/components/onboarding/SectionInfoButton';
-import { ChevronLeft, ChevronRight, Droplet, Zap, Flame, Sun, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Droplet, Zap, Flame, Sun, TrendingUp, TrendingDown, Minus, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ExportUtenze from '@/components/utenze/ExportUtenze';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
@@ -81,6 +81,23 @@ const mediaAnno = (fn) => {
   return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
 };
 
+// Previsionale fine anno: proietta il totale corrente sui mesi mancanti
+// usando la distribuzione (pesi) mensile dell'anno precedente.
+// forecast = (somma curr mesi con dati) × (totale prev) / (somma prev stessi mesi)
+const previsionaleFineAnno = (getCurr, getPrev) => {
+  let sumCurr = 0, sumPrevSame = 0, sumPrevTot = 0;
+  let hasRatio = false, hasForecastable = false;
+  MESI.forEach((_, i) => {
+    const c = getCurr(i), p = getPrev(i);
+    if (p != null) sumPrevTot += p;
+    if (c != null && p != null) { sumCurr += c; sumPrevSame += p; hasRatio = true; }
+    else if (c != null) { sumCurr += c; }
+    else if (p != null) { hasForecastable = true; }
+  });
+  if (!hasRatio || !hasForecastable || sumPrevSame === 0 || sumPrevTot === 0) return null;
+  return sumCurr * sumPrevTot / sumPrevSame;
+};
+
 const pct = (curr, prev) => {
   if (curr == null || prev == null || prev === 0) return null;
   return ((curr - prev) / prev) * 100;
@@ -127,6 +144,7 @@ function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
 
   const aggFn = mode === 'costo_unitario' ? mediaComune : totaleComune;
   const { curr: totCurr, prev: totPrev } = aggFn(getCurr, getPrev);
+  const previsionale = mode === 'costo_unitario' ? null : previsionaleFineAnno(getCurr, getPrev);
 
   const chartData = MESI_LABEL.map((m, i) => ({
     mese: m,
@@ -149,7 +167,7 @@ function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
         <DeltaBadge curr={totCurr} prev={totPrev} invertPositive={isFoto && mode !== 'costi'} />
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-slate-50 rounded-lg p-3">
           <p className="text-xs text-slate-500 mb-1">Anno corrente</p>
           <p className="text-lg font-bold text-slate-800">{fmtVal(totCurr)}</p>
@@ -168,6 +186,14 @@ function CardUtenza({ tipo, curr, prev, mode, anno, tempsCurr, tempsPrev }) {
               <DeltaBadge curr={totCurr} prev={totPrev} invertPositive={isFoto && mode !== 'costi'} />
             </>
           ) : <p className="text-base font-bold text-slate-400">—</p>}
+        </div>
+        <div className="bg-blue-50 rounded-lg p-3">
+          <div className="flex items-center gap-1 mb-1">
+            <Target className="w-3 h-3 text-blue-500" />
+            <p className="text-xs text-blue-500">Previsionale fine anno</p>
+          </div>
+          <p className="text-lg font-bold text-blue-700">{fmtVal(previsionale)}</p>
+          <p className="text-[10px] text-blue-400">basato pesi anno prec.</p>
         </div>
       </div>
 
