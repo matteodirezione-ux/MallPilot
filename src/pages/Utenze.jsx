@@ -13,7 +13,7 @@ const TIPI_UTENZE = [
   { key: 'acqua',        label: 'Acqua',        icon: Droplet, color: '#3b82f6', unit: 'm³',  direct: false },
   { key: 'energia',      label: 'Energia',      icon: Zap,     color: '#9333ea', unit: 'kWh', direct: true  },
   { key: 'gas',          label: 'Gas',          icon: Flame,   color: '#ea580c', unit: 'm³',  direct: false },
-  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun,     color: '#eab308', unit: 'kWh', direct: true  },
+  { key: 'fotovoltaico', label: 'Fotovoltaico', icon: Sun,     color: '#eab308', unit: 'kWh', direct: false },
 ];
 
 // ── helpers ──────────────────────────────────────────────────────────────────
