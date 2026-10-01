@@ -81,21 +81,18 @@ const mediaAnno = (fn) => {
   return vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : null;
 };
 
-// Previsionale fine anno: proietta il totale corrente sui mesi mancanti
-// usando la distribuzione (pesi) mensile dell'anno precedente.
-// forecast = (somma curr mesi con dati) × (totale prev) / (somma prev stessi mesi)
+// Previsionale fine anno: per i mesi con dato corrente usa il valore reale
+// (anche 0), per i mesi ancora vuoti usa il valore del mese dell'anno precedente.
+// forecast = somma curr mesi con dati + somma prev mesi mancanti
 const previsionaleFineAnno = (getCurr, getPrev) => {
-  let sumCurr = 0, sumPrevSame = 0, sumPrevTot = 0;
-  let hasRatio = false, hasForecastable = false;
+  let sumCurr = 0, sumPrevMissing = 0, hasAny = false;
   MESI.forEach((_, i) => {
     const c = getCurr(i), p = getPrev(i);
-    if (p != null) sumPrevTot += p;
-    if (c != null && p != null) { sumCurr += c; sumPrevSame += p; hasRatio = true; }
-    else if (c != null) { sumCurr += c; }
-    else if (p != null) { hasForecastable = true; }
+    if (c != null) { sumCurr += c; hasAny = true; }
+    else if (p != null) { sumPrevMissing += p; hasAny = true; }
   });
-  if (!hasRatio || !hasForecastable || sumPrevSame === 0 || sumPrevTot === 0) return null;
-  return sumCurr * sumPrevTot / sumPrevSame;
+  if (!hasAny) return null;
+  return sumCurr + sumPrevMissing;
 };
 
 const pct = (curr, prev) => {
