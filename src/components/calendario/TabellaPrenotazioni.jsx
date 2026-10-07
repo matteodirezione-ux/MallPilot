@@ -131,10 +131,10 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const nomeFile = `${nomeCentro}_PRENOTAZIONI_${annoFiltro}`;
     const titolo = `${nomeCentro} - PRENOTAZIONI ${annoFiltro}`;
     const border = { top: { style: 'thin', color: { rgb: '94A3B8' } }, bottom: { style: 'thin', color: { rgb: '94A3B8' } }, left: { style: 'thin', color: { rgb: '94A3B8' } }, right: { style: 'thin', color: { rgb: '94A3B8' } } };
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 16 }, { wch: 20 }] };
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 14 }, { wch: 16 }, { wch: 20 }] };
     ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
-    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Costo', 'Spazio'];
+    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Quota', 'Costo', 'Spazio'];
     let row = 3;
     let totaleGenerale = 0;
 
@@ -171,6 +171,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
           { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
           { v: getDurata(p) + ' gg', t: 's' },
+          getQuotaAnno(p) != null ? { v: getQuotaAnno(p), t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
           p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
           { v: getSpazio(p), t: 's' },
         ];
@@ -181,13 +182,13 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       // Totale sezione
       const sezStyle = { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border };
       ws[`A${row}`] = { v: `Totale ${label.toLowerCase()}`, t: 's', s: { ...sezStyle, alignment: { horizontal: 'left' } } };
-      ['B', 'C', 'D', 'F'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
-      ws[`E${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ['B', 'C', 'D', 'E', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
+      ws[`F${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
       totaleGenerale += totaleSez;
       row += 2; // riga vuota tra sezioni
     });
 
-    ws['!ref'] = `A1:F${row - 2}`;
+    ws['!ref'] = `A1:G${row - 2}`;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
@@ -224,8 +225,8 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     doc.setTextColor(0, 0, 0);
 
     // colonne: Nome, Data Inizio, Data Fine, Durata, Costo, Spazio
-    const colWidths = [74, 24, 24, 18, 30, 60];
-    const colHeaders = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Costo', 'Spazio'];
+    const colWidths = [68, 22, 22, 16, 28, 28, 52];
+    const colHeaders = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Quota', 'Costo', 'Spazio'];
     const totalW = colWidths.reduce((a, b) => a + b, 0);
     const startX = 14;
     const rowH = 7;
@@ -295,12 +296,13 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—',
           p.data_fine   ? format(new Date(p.data_fine),   'dd/MM/yyyy') : '—',
           getDurata(p) + ' gg',
+          getQuotaAnno(p) != null ? fmtEur(getQuotaAnno(p)) : '—',
           p.prezzo_totale != null ? fmtEur(p.prezzo_totale) : '—',
           getSpazio(p),
         ];
         cx = startX;
         cells.forEach((text, i) => {
-          const isNum = i === 4;
+          const isNum = i === 5;
           const isCenter = i === 3;
           drawCell(doc, text, cx, y, colWidths[i], bg, [40, 40, 40], isNum ? 'right' : isCenter ? 'center' : 'left');
           cx += colWidths[i];
@@ -313,7 +315,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       cx = startX;
       colWidths.forEach((w, i) => {
         if (i === 0) drawCell(doc, `Totale ${label.toLowerCase()}`, cx, y, w, [226, 232, 240], [30, 58, 95], 'left', true);
-        else if (i === 4) drawCell(doc, fmtEur(totaleSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', true);
+        else if (i === 5) drawCell(doc, fmtEur(totaleSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', true);
         else drawCell(doc, '', cx, y, w, [226, 232, 240], [30, 58, 95]);
         cx += w;
       });
