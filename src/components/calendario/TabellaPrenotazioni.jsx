@@ -61,8 +61,12 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
   // Anni disponibili dai dati
   const anniDisponibili = useMemo(() => {
-    const anni = new Set(prenotazioni.map(p => p.data_inizio ? new Date(p.data_inizio).getFullYear() : null).filter(Boolean));
-    return [...anni].sort((a, b) => b - a);
+    const anni = new Set();
+    prenotazioni.forEach(p => {
+      if (p.data_inizio) anni.add(new Date(p.data_inizio).getFullYear());
+      if (p.data_fine) anni.add(new Date(p.data_fine).getFullYear());
+    });
+    return [...anni].filter(Boolean).sort((a, b) => b - a);
   }, [prenotazioni]);
 
   const getTipo = (p) => p.is_gratuito ? 'Gratuito' : p.is_event ? 'Evento' : 'Affitto';
@@ -70,7 +74,11 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
   const filtrate = useMemo(() =>
     prenotazioni.filter(p => {
       if (!p.data_inizio) return false;
-      return new Date(p.data_inizio).getFullYear() === annoFiltro;
+      const inizio = new Date(p.data_inizio);
+      const fine = p.data_fine ? new Date(p.data_fine) : inizio;
+      const inizioAnno = new Date(annoFiltro, 0, 1);
+      const fineAnno = new Date(annoFiltro, 11, 31);
+      return fine >= inizioAnno && inizio <= fineAnno;
     }),
   [prenotazioni, annoFiltro]);
 
