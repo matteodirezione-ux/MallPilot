@@ -42,7 +42,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const inizio = new Date(p.data_inizio);
     const fine = new Date(p.data_fine);
     const inizioAnno = new Date(annoFiltro, 0, 1);
-    const fineAnno = new Date(annoFiltro, 11, 31);
+    const fineAnno = new Date(annoFiltro, 11, 31, 23, 59, 59, 999);
     if (fine < inizioAnno || inizio > fineAnno) return 0;
     const giorniTotali = Math.max(differenceInDays(fine, inizio) + 1, 1);
     const inizioEff = new Date(Math.max(inizio, inizioAnno));
