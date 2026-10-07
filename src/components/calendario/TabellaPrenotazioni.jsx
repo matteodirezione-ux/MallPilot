@@ -92,6 +92,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         case 'quotaAnno': va = getQuotaAnno(a) ?? 0;     vb = getQuotaAnno(b) ?? 0;     break;
         case 'durata':    va = getDurata(a);              vb = getDurata(b);              break;
         case 'data_inizio': va = a.data_inizio ?? '';    vb = b.data_inizio ?? '';       break;
+        case 'data_fine':   va = a.data_fine ?? '';      vb = b.data_fine ?? '';         break;
         case 'stato':     va = a.stato ?? '';             vb = b.stato ?? '';             break;
         default: return 0;
       }
@@ -364,6 +365,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               <Th col="tipo" label="Tipo" />
               <Th col="nome"       label="Nome / Cliente" />
               <Th col="data_inizio" label="Data inizio" />
+              <Th col="data_fine"   label="Data fine" />
               <Th col="durata"     label="Durata" />
               <Th col="costo"      label="Costo" />
               <Th col="quotaAnno"  label={`Quota ${annoFiltro}`} />
@@ -375,7 +377,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           <tbody className="divide-y divide-slate-50">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={isVigilanza ? 8 : 9} className="py-10 text-center text-slate-400 text-sm">
+                <td colSpan={isVigilanza ? 9 : 10} className="py-10 text-center text-slate-400 text-sm">
                   Nessuna prenotazione trovata
                 </td>
               </tr>
@@ -395,6 +397,9 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                 </td>
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {p.data_inizio ? format(new Date(p.data_inizio), 'd MMM yyyy', { locale: it }) : '—'}
+                </td>
+                <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                  {p.data_fine ? format(new Date(p.data_fine), 'd MMM yyyy', { locale: it }) : '—'}
                 </td>
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {getDurata(p)} gg
