@@ -37,6 +37,20 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     return differenceInDays(new Date(p.data_fine), new Date(p.data_inizio)) + 1;
   };
 
+  const getQuotaAnno = (p) => {
+    if (p.prezzo_totale == null || !p.data_inizio || !p.data_fine) return null;
+    const inizio = new Date(p.data_inizio);
+    const fine = new Date(p.data_fine);
+    const inizioAnno = new Date(annoFiltro, 0, 1);
+    const fineAnno = new Date(annoFiltro, 11, 31);
+    if (fine < inizioAnno || inizio > fineAnno) return 0;
+    const giorniTotali = Math.max(differenceInDays(fine, inizio) + 1, 1);
+    const inizioEff = new Date(Math.max(inizio, inizioAnno));
+    const fineEff = new Date(Math.min(fine, fineAnno));
+    const giorniAnno = Math.max(differenceInDays(fineEff, inizioEff) + 1, 0);
+    return p.prezzo_totale * (giorniAnno / giorniTotali);
+  };
+
   const toggleSort = (key) => {
     setSortConfig(prev =>
       prev.key === key
@@ -67,6 +81,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         case 'tipo':      va = getTipo(a);                vb = getTipo(b);                break;
         case 'nome':      va = getNome(a).toLowerCase(); vb = getNome(b).toLowerCase(); break;
         case 'costo':     va = a.prezzo_totale ?? 0;     vb = b.prezzo_totale ?? 0;     break;
+        case 'quotaAnno': va = getQuotaAnno(a) ?? 0;     vb = getQuotaAnno(b) ?? 0;     break;
         case 'durata':    va = getDurata(a);              vb = getDurata(b);              break;
         case 'data_inizio': va = a.data_inizio ?? '';    vb = b.data_inizio ?? '';       break;
         case 'stato':     va = a.stato ?? '';             vb = b.stato ?? '';             break;
@@ -343,6 +358,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               <Th col="data_inizio" label="Data inizio" />
               <Th col="durata"     label="Durata" />
               <Th col="costo"      label="Costo" />
+              <Th col="quotaAnno"  label={`Quota ${annoFiltro}`} />
               <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 whitespace-nowrap">Spazio</th>
               <Th col="stato"      label="Stato" />
               {!isVigilanza && <th className="py-2.5 px-3" />}
@@ -351,7 +367,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           <tbody className="divide-y divide-slate-50">
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={isVigilanza ? 7 : 8} className="py-10 text-center text-slate-400 text-sm">
+                <td colSpan={isVigilanza ? 8 : 9} className="py-10 text-center text-slate-400 text-sm">
                   Nessuna prenotazione trovata
                 </td>
               </tr>
@@ -379,6 +395,14 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                   {p.prezzo_totale != null
                     ? '€ ' + p.prezzo_totale.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     : '—'}
+                </td>
+                <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                  {(() => {
+                    const quota = getQuotaAnno(p);
+                    return quota != null
+                      ? '€ ' + quota.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                      : '—';
+                  })()}
                 </td>
                 <td className="py-2.5 px-3 text-slate-500 whitespace-nowrap">{getSpazio(p)}</td>
                 <td className="py-2.5 px-3 whitespace-nowrap">
