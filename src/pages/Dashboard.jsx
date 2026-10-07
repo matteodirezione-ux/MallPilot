@@ -276,12 +276,22 @@ export default function Dashboard({ centroSelezionato, user }) {
         })
         .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
 
+      const fineAnno = endOfYear(now);
       const incassiAnno = prenotazioni
-        .filter(p => {
-          const dataInizio = new Date(p.data_inizio);
-          return !p.is_event && dataInizio >= inizioAnno && p.stato !== 'cancellata';
-        })
-        .reduce((sum, p) => sum + (p.prezzo_totale || 0), 0);
+        .filter(p => !p.is_event && p.stato !== 'cancellata')
+        .reduce((sum, p) => {
+          const inizio = new Date(p.data_inizio);
+          const fine = new Date(p.data_fine);
+          // Salta se non si sovrappone all'anno corrente
+          if (fine < inizioAnno || inizio > fineAnno) return sum;
+          const giorniTotali = Math.max(differenceInDays(fine, inizio) + 1, 1);
+          // Giorni che ricadono nell'anno corrente
+          const inizioEff = new Date(Math.max(inizio, inizioAnno));
+          const fineEff = new Date(Math.min(fine, fineAnno));
+          const giorniAnnoCorrente = Math.max(differenceInDays(fineEff, inizioEff) + 1, 0);
+          const quota = (p.prezzo_totale || 0) * (giorniAnnoCorrente / giorniTotali);
+          return sum + quota;
+        }, 0);
 
       const budgetAnno = isAll
         ? budgets.reduce((sum, b) => sum + (b.importo_budget || 0), 0)
