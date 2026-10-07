@@ -367,8 +367,8 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               <Th col="data_inizio" label="Data inizio" />
               <Th col="data_fine"   label="Data fine" />
               <Th col="durata"     label="Durata" />
-              <Th col="costo"      label="Costo" />
               <Th col="quotaAnno"  label={`Quota ${annoFiltro}`} />
+              <Th col="costo"      label="Costo totale" />
               <th className="text-left py-2.5 px-3 text-xs font-semibold text-slate-500 whitespace-nowrap">Spazio</th>
               <Th col="stato"      label="Stato" />
               {!isVigilanza && <th className="py-2.5 px-3" />}
@@ -404,11 +404,6 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {getDurata(p)} gg
                 </td>
-                <td className="py-2.5 px-3 text-slate-700 font-semibold whitespace-nowrap">
-                  {p.prezzo_totale != null
-                    ? '€ ' + p.prezzo_totale.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                    : '—'}
-                </td>
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {(() => {
                     const quota = getQuotaAnno(p);
@@ -416,6 +411,11 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                       ? '€ ' + quota.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                       : '—';
                   })()}
+                </td>
+                <td className="py-2.5 px-3 text-slate-700 font-semibold whitespace-nowrap">
+                  {p.prezzo_totale != null
+                    ? '€ ' + p.prezzo_totale.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    : '—'}
                 </td>
                 <td className="py-2.5 px-3 text-slate-500 whitespace-nowrap">{getSpazio(p)}</td>
                 <td className="py-2.5 px-3 whitespace-nowrap">
