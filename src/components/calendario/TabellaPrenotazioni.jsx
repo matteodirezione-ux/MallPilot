@@ -404,7 +404,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                 <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
                   {getDurata(p)} gg
                 </td>
-                <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                <td className="py-2.5 px-3 text-slate-700 font-bold whitespace-nowrap">
                   {(() => {
                     const quota = getQuotaAnno(p);
                     return quota != null
@@ -412,7 +412,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
                       : '—';
                   })()}
                 </td>
-                <td className="py-2.5 px-3 text-slate-700 font-semibold whitespace-nowrap">
+                <td className="py-2.5 px-3 text-slate-700 whitespace-nowrap">
                   {p.prezzo_totale != null
                     ? '€ ' + p.prezzo_totale.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     : '—'}
