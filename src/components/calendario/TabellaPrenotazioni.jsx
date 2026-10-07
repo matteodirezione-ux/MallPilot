@@ -134,9 +134,10 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
     const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 14 }, { wch: 16 }, { wch: 20 }] };
     ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
-    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Quota', 'Costo', 'Spazio'];
+    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', `Quota ${annoFiltro}`, 'Costo', 'Spazio'];
     let row = 3;
     let totaleGenerale = 0;
+    let totaleQuotaGenerale = 0;
 
     SEZIONI.forEach(({ tipo, label, bg, headerBg, headerText }) => {
       const items = sortByDate(filtrate.filter(p => getTipo(p) === tipo));
@@ -163,8 +164,10 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
       // Righe dati
       let totaleSez = 0;
+      let totaleQuotaSez = 0;
       items.forEach(p => {
         totaleSez += p.prezzo_totale || 0;
+        totaleQuotaSez += getQuotaAnno(p) || 0;
         const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
         const rowData = [
           { v: getNome(p), t: 's' },
@@ -175,20 +178,29 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
           { v: getSpazio(p), t: 's' },
         ];
-        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: rowStyle }; });
+        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 4 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
         row++;
       });
 
       // Totale sezione
       const sezStyle = { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border };
       ws[`A${row}`] = { v: `Totale ${label.toLowerCase()}`, t: 's', s: { ...sezStyle, alignment: { horizontal: 'left' } } };
-      ['B', 'C', 'D', 'E', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
-      ws[`F${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
+      ws[`E${row}`] = { v: totaleQuotaSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ws[`F${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { bold: false, sz: 9, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
       totaleGenerale += totaleSez;
+      totaleQuotaGenerale += totaleQuotaSez;
       row += 2; // riga vuota tra sezioni
     });
 
-    ws['!ref'] = `A1:G${row - 2}`;
+    // Totale generale
+    const genStyle = { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E3A5F' } }, border };
+    ws[`A${row}`] = { v: 'TOTALE GENERALE', t: 's', s: { ...genStyle, alignment: { horizontal: 'left' } } };
+    ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: genStyle }; });
+    ws[`E${row}`] = { v: totaleQuotaGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
+    ws[`F${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, font: { bold: false, sz: 10, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'right' } } };
+
+    ws['!ref'] = `A1:G${row}`;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
@@ -226,7 +238,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
     // colonne: Nome, Data Inizio, Data Fine, Durata, Costo, Spazio
     const colWidths = [68, 22, 22, 16, 28, 28, 52];
-    const colHeaders = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', 'Quota', 'Costo', 'Spazio'];
+    const colHeaders = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', `Quota ${annoFiltro}`, 'Costo', 'Spazio'];
     const totalW = colWidths.reduce((a, b) => a + b, 0);
     const startX = 14;
     const rowH = 7;
@@ -259,6 +271,7 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
     let y = 27;
     let totaleGenerale = 0;
+    let totaleQuotaGenerale = 0;
 
     for (const { tipo, label, bg, headerBg } of [
       { tipo: 'Affitto',  label: 'AFFITTI',       bg: sezPDF.Affitto.bg,  headerBg: sezPDF.Affitto.header },
@@ -288,9 +301,11 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
 
       // Righe dati
       let totaleSez = 0;
+      let totaleQuotaSez = 0;
       items.forEach((p) => {
         y = checkPage(y);
         totaleSez += p.prezzo_totale || 0;
+        totaleQuotaSez += getQuotaAnno(p) || 0;
         const cells = [
           getNome(p),
           p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—',
@@ -304,7 +319,8 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         cells.forEach((text, i) => {
           const isNum = i === 5;
           const isCenter = i === 3;
-          drawCell(doc, text, cx, y, colWidths[i], bg, [40, 40, 40], isNum ? 'right' : isCenter ? 'center' : 'left');
+          const isBold = i === 4;
+          drawCell(doc, text, cx, y, colWidths[i], bg, [40, 40, 40], isNum ? 'right' : isCenter ? 'center' : 'left', isBold);
           cx += colWidths[i];
         });
         y += rowH;
@@ -315,13 +331,26 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       cx = startX;
       colWidths.forEach((w, i) => {
         if (i === 0) drawCell(doc, `Totale ${label.toLowerCase()}`, cx, y, w, [226, 232, 240], [30, 58, 95], 'left', true);
-        else if (i === 5) drawCell(doc, fmtEur(totaleSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', true);
+        else if (i === 4) drawCell(doc, fmtEur(totaleQuotaSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', true);
+        else if (i === 5) drawCell(doc, fmtEur(totaleSez), cx, y, w, [226, 232, 240], [30, 58, 95], 'right', false);
         else drawCell(doc, '', cx, y, w, [226, 232, 240], [30, 58, 95]);
         cx += w;
       });
       totaleGenerale += totaleSez;
+      totaleQuotaGenerale += totaleQuotaSez;
       y += rowH + 4; // spazio tra sezioni
     }
+
+    // Totale generale
+    y = checkPage(y + 2);
+    let cx = startX;
+    colWidths.forEach((w, i) => {
+      if (i === 0) drawCell(doc, 'TOTALE GENERALE', cx, y, w, [30, 58, 95], [255, 255, 255], 'left', true);
+      else if (i === 4) drawCell(doc, fmtEur(totaleQuotaGenerale), cx, y, w, [30, 58, 95], [255, 255, 255], 'right', true);
+      else if (i === 5) drawCell(doc, fmtEur(totaleGenerale), cx, y, w, [30, 58, 95], [255, 255, 255], 'right', false);
+      else drawCell(doc, '', cx, y, w, [30, 58, 95], [255, 255, 255]);
+      cx += w;
+    });
 
     doc.save(`${nomeFile}.pdf`);
   };
@@ -440,6 +469,18 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="bg-slate-50 border-t-2 border-slate-200">
+              <td colSpan={5} className="py-2.5 px-3 text-right font-bold text-slate-700 text-sm">TOTALE</td>
+              <td className="py-2.5 px-3 font-bold text-slate-800 whitespace-nowrap text-sm">
+                € {sorted.reduce((sum, p) => sum + (getQuotaAnno(p) || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </td>
+              <td className="py-2.5 px-3 text-slate-700 whitespace-nowrap text-sm">
+                € {sorted.reduce((sum, p) => sum + (p.prezzo_totale || 0), 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </td>
+              <td colSpan={isVigilanza ? 3 : 4}></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
