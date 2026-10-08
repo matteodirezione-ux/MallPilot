@@ -1,6 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { jsPDF } from 'npm:jspdf@4.0.0';
-import { registerContrattoFont } from '../../shared/contrattoFont.ts';
 
 function numeroInLettere(num) {
   const unita = ['', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove',
@@ -44,16 +43,20 @@ function formatEuro(importo) {
 
 function sanitize(str) {
   if (!str) return '';
-  const accenti = { a:'à', e:'è', i:'ì', o:'ò', u:'ù', A:'À', E:'È', I:'Ì', O:'Ò', U:'Ù' };
   return str
-    // Normalizza smart quotes e lineette
+    .replace(/à/g, "a'").replace(/À/g, "A'")
+    .replace(/è/g, "e'").replace(/È/g, "E'")
+    .replace(/é/g, "e'").replace(/É/g, "E'")
+    .replace(/ì/g, "i'").replace(/Ì/g, "I'")
+    .replace(/í/g, "i'").replace(/Í/g, "I'")
+    .replace(/ò/g, "o'").replace(/Ò/g, "O'")
+    .replace(/ó/g, "o'").replace(/Ó/g, "O'")
+    .replace(/ù/g, "u'").replace(/Ù/g, "U'")
+    .replace(/ú/g, "u'").replace(/Ú/g, "U'")
     .replace(/–/g, '-').replace(/—/g, '-')
     .replace(/\u201c/g, '"').replace(/\u201d/g, '"')
     .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
-    // Converti "che'" in "ché" (poiché, perché, affinché, benché, ...)
-    .replace(/che'/g, 'ché').replace(/CHE'/g, 'CHÉ')
-    // Converti apostrofi finali di parola in accenti (es. "sara'" -> "sarà", "e'" -> "è")
-    .replace(/([aeiouAEIOU])'(?=[\s,.;:!?)\n]|$)/g, (m, v) => accenti[v] || m);
+    .replace(/[^\x00-\x7F]/g, '');
 }
 
 function formatData(dateStr) {
@@ -139,7 +142,6 @@ Deno.serve(async (req) => {
 
     // === GENERA PDF ===
     const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-    await registerContrattoFont(doc);
     const lm = 20;
     const rm = 190;
     const pw = rm - lm;
@@ -161,7 +163,7 @@ Deno.serve(async (req) => {
         const words = sanitize(seg.text || '').split(' ').filter(w => w !== '');
         for (const word of words) tokens.push({ word, bold: !!seg.bold });
       }
-      doc.setFont('Roboto', 'normal');
+      doc.setFont('helvetica', 'normal');
       const spaceW = doc.getTextWidth(' ');
       let lineTokens = [];
       let lineW = 0;
@@ -169,16 +171,16 @@ Deno.serve(async (req) => {
       const flushLine = (toks) => {
         let cx = lm;
         for (let i = 0; i < toks.length; i++) {
-          doc.setFont('Roboto', toks[i].bold ? 'bold' : 'normal');
+          doc.setFont('helvetica', toks[i].bold ? 'bold' : 'normal');
           doc.text(toks[i].word, cx, y);
           cx += doc.getTextWidth(toks[i].word);
-          if (i < toks.length - 1) { doc.setFont('Roboto', 'normal'); cx += spaceW; }
+          if (i < toks.length - 1) { doc.setFont('helvetica', 'normal'); cx += spaceW; }
         }
       };
 
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
-        doc.setFont('Roboto', t.bold ? 'bold' : 'normal');
+        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
         const ww = doc.getTextWidth(t.word);
         const gap = lineTokens.length > 0 ? spaceW : 0;
         if (lineTokens.length > 0 && lineW + gap + ww > pw) {
@@ -197,42 +199,42 @@ Deno.serve(async (req) => {
         flushLine(lineTokens);
         y += lineH;
       }
-      doc.setFont('Roboto', 'normal');
+      doc.setFont('helvetica', 'normal');
     };
 
     const printParagraph = (str) => {
       doc.setFontSize(10.5);
-      doc.setFont('Roboto', 'normal');
+      doc.setFont('helvetica', 'normal');
       const lines = doc.splitTextToSize(sanitize(str.replace(/\n/g, ' ')), pw);
       checkPage(lines.length * 5.5 + 3);
       doc.text(lines, lm, y);
       y += lines.length * 5.5;
     };
 
-    doc.setFont('Roboto');
+    doc.setFont('helvetica');
 
     // --- TITOLO ---
     doc.setFontSize(13);
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('helvetica', 'bold');
     text('CONTRATTO DI LOCAZIONE PER ESIGENZE DI NATURA TRANSITORIA', lm + pw / 2, y, { align: 'center' });
     addLine(7);
     doc.setFontSize(11);
     text("ex art. 27, V comma, L. n. 392/78", lm + pw / 2, y, { align: 'center' });
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     addLine(10);
 
     // --- TRA LE PARTI ---
     doc.setFontSize(10.5);
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('helvetica', 'bold');
     text('Tra le parti', lm, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     addLine(8);
 
     // Locatrice (fissa)
     const locatriceText = "GESTIONE COMPLESSI COMMERCIALI SRL, con sede in Forli' (FC), via Dei Mercanti n.3, numero di iscrizione presso il Registro delle Imprese di Forli'-Cesena e cod. fisc. e p. IVA 03067290365, qui rappresentata dal Presidente del Consiglio di Amministrazione Dott. Panzavolta Luca, Cod. Fisc. PNZLCU64T30C573L, nato a Cesena (FC) il 30/12/1964 ed ivi residente in Via Romea n. 530, all'uopo debitamente autorizzato, in seguito, per brevita', chiamata \"Locatrice\",";
     printParagraph(locatriceText);
     addLine(5);
-    doc.setFont('Roboto', 'bold'); text('e', lm, y); doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'bold'); text('e', lm, y); doc.setFont('helvetica', 'normal');
     addLine(8);
 
     // Conduttrice (dati cliente in grassetto)
@@ -253,9 +255,9 @@ Deno.serve(async (req) => {
     addLine(10);
 
     // --- PREMESSO ---
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('helvetica', 'bold');
     text('premesso', lm, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     addLine(8);
 
     printMixedParagraph([
@@ -279,9 +281,9 @@ Deno.serve(async (req) => {
     printParagraph("- che le Parti intendono a tal fine richiamarsi alla facolta' di stipulare il contratto di locazione per periodi piu' brevi, prevista dall'art. 27, V comma L. n. 392/78, ricorrendone la fattispecie ivi prevista, anche alla luce della precisa ed impegnativa dichiarazione resa in tal senso della Conduttrice, dichiarazione la cui verita' viene espressamente garantita dalla Conduttrice stessa e costituisce elemento essenziale e determinante del consenso alla stipula da parte della Locatrice;");
     addLine(6);
 
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('helvetica', 'bold');
     text("si conviene e si stipula quanto segue", lm, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     addLine(10);
 
     // --- ARTICOLI ---
@@ -451,10 +453,10 @@ Deno.serve(async (req) => {
 
     for (const art of articoli) {
       checkPage(15);
-      doc.setFont('Roboto', 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.setFontSize(10.5);
       text(art.titolo, lm, y);
-      doc.setFont('Roboto', 'normal');
+      doc.setFont('helvetica', 'normal');
       addLine(6);
 
       for (const par of art.paragrafi) {
@@ -471,9 +473,9 @@ Deno.serve(async (req) => {
 
     // --- ALLEGATO ---
     checkPage(10);
-    doc.setFont('Roboto', 'bold');
+    doc.setFont('helvetica', 'bold');
     text('Si allega: Planimetria', lm, y);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     addLine(8);
 
     // --- LUOGO E FIRMA ---
@@ -492,7 +494,7 @@ Deno.serve(async (req) => {
     doc.addPage();
     y = 20;
     checkPage(35);
-    doc.setFont('Roboto', 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10.5);
     const clausola1341 = "Ai sensi e per gli effetti di cui all'art. 1341 c.c., per quanto occorrer possa, la Conduttrice dichiara di aver attentamente letto e, pertanto, di approvare specificatamente per iscritto le seguenti clausole:";
     const c1341lines = doc.splitTextToSize(sanitize(clausola1341), pw);
