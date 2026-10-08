@@ -43,20 +43,16 @@ function formatEuro(importo) {
 
 function sanitize(str) {
   if (!str) return '';
+  const accenti = { a:'à', e:'è', i:'ì', o:'ò', u:'ù', A:'À', E:'È', I:'Ì', O:'Ò', U:'Ù' };
   return str
-    .replace(/à/g, 'a\'').replace(/À/g, 'A\'')
-    .replace(/è/g, 'e\'').replace(/È/g, 'E\'')
-    .replace(/é/g, 'e\'').replace(/É/g, 'E\'')
-    .replace(/ì/g, 'i\'').replace(/Ì/g, 'I\'')
-    .replace(/í/g, 'i\'').replace(/Í/g, 'I\'')
-    .replace(/ò/g, 'o\'').replace(/Ò/g, 'O\'')
-    .replace(/ó/g, 'o\'').replace(/Ó/g, 'O\'')
-    .replace(/ù/g, 'u\'').replace(/Ù/g, 'U\'')
-    .replace(/ú/g, 'u\'').replace(/Ú/g, 'U\'')
+    // Normalizza smart quotes e lineette
     .replace(/–/g, '-').replace(/—/g, '-')
-    .replace(/"/g, '"').replace(/"/g, '"')
-    .replace(/'/g, '\'').replace(/'/g, '\'')
-    .replace(/[^\x00-\x7F]/g, '');
+    .replace(/\u201c/g, '"').replace(/\u201d/g, '"')
+    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
+    // Converti "che'" in "ché" (poiché, perché, affinché, benché, ...)
+    .replace(/che'/g, 'ché').replace(/CHE'/g, 'CHÉ')
+    // Converti apostrofi finali di parola in accenti (es. "sara'" -> "sarà", "e'" -> "è")
+    .replace(/([aeiouAEIOU])'(?=[\s,.;:!?)\n]|$)/g, (m, v) => accenti[v] || m);
 }
 
 function formatData(dateStr) {
