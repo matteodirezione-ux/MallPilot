@@ -1,5 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { jsPDF } from 'npm:jspdf@4.0.0';
+import { registerContrattoFont } from '../../shared/contrattoFont.ts';
 
 function numeroInLettere(num) {
   const unita = ['', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove',
@@ -118,6 +119,7 @@ Deno.serve(async (req) => {
 
     // === GENERA PDF ===
     const doc = new jsPDF({ format: 'a4', unit: 'mm' });
+    await registerContrattoFont(doc);
     const lm = 20; // left margin
     const rm = 190; // right margin
     const pw = rm - lm; // page width
@@ -142,12 +144,12 @@ Deno.serve(async (req) => {
       doc.setFontSize(fontSize);
       let cx = x;
       for (const seg of segments) {
-        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
+        doc.setFont('Roboto', seg.bold ? 'bold' : 'normal');
         const str = sanitize(seg.text || '');
         doc.text(str, cx, yy);
         cx += doc.getTextWidth(str);
       }
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
     };
 
     // Stampa paragrafo con segmenti bold inline, con word-wrap
@@ -163,49 +165,49 @@ Deno.serve(async (req) => {
       doc.setFontSize(10.5);
       let lineTokens = [];
       let lineW = 0;
-      const spaceW = doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
+      const spaceW = doc.setFont('Roboto', 'normal') && doc.getTextWidth(' ');
 
       const flushLine = (toks, ly) => {
         let cx = x;
         for (let i = 0; i < toks.length; i++) {
           const t = toks[i];
-          doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+          doc.setFont('Roboto', t.bold ? 'bold' : 'normal');
           doc.text(t.word, cx, ly);
           cx += doc.getTextWidth(t.word);
-          if (i < toks.length - 1) cx += doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
+          if (i < toks.length - 1) cx += doc.setFont('Roboto', 'normal') && doc.getTextWidth(' ');
         }
       };
 
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
-        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+        doc.setFont('Roboto', t.bold ? 'bold' : 'normal');
         const ww = doc.getTextWidth(t.word);
-        const needSpace = lineTokens.length > 0 ? doc.setFont('helvetica','normal') && doc.getTextWidth(' ') : 0;
+        const needSpace = lineTokens.length > 0 ? doc.setFont('Roboto','normal') && doc.getTextWidth(' ') : 0;
         if (lineTokens.length > 0 && lineW + needSpace + ww > maxW) {
           flushLine(lineTokens, yy);
           yy += lineH;
           lineTokens = [t];
           lineW = ww;
         } else {
-          if (lineTokens.length > 0) lineW += doc.setFont('helvetica','normal') && doc.getTextWidth(' ');
+          if (lineTokens.length > 0) lineW += doc.setFont('Roboto','normal') && doc.getTextWidth(' ');
           lineTokens.push(t);
           lineW += ww;
         }
       }
       if (lineTokens.length > 0) flushLine(lineTokens, yy);
       // conta le righe usate
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       return yy;
     };
 
     // Font
-    doc.setFont('helvetica');
+    doc.setFont('Roboto');
 
     // --- INTESTAZIONE CLIENTE (mittente) ---
     doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     text(cliente.ragione_sociale, lm, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     addLine(6);
     text(cliente.indirizzo || '', lm, y);
     addLine(6);
@@ -220,11 +222,11 @@ Deno.serve(async (req) => {
     doc.setFontSize(11);
     text(`${cittaOggi}, lì ${dataOggi}`, rm, y, { align: 'right' });
     addLine(8);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     text('Spettabile', rm - 60, y);
     addLine(6);
     text('GESTIONE COMPLESSI COMMERCIALI', rm - 60, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     addLine(6);
     text('VIA DEI MERCANTI 3', rm - 60, y);
     addLine(6);
@@ -232,14 +234,14 @@ Deno.serve(async (req) => {
     addLine(10);
 
     // --- OGGETTO ---
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     doc.setFontSize(11);
     text('Oggetto: richiesta di autorizzazione all\'utilizzo promiscuo di una porzione', lm, y);
     addLine(6);
     text('              di parti comuni e dei relativi servizi accessori', lm, y);
     addLine(6);
     text('              Proposta contrattuale', lm, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     addLine(10);
 
     // --- TESTO INTRODUTTIVO ---
@@ -251,9 +253,9 @@ Deno.serve(async (req) => {
     doc.text(introLines, lm, y);
     y += introLines.length * 5.5;
     addLine(4);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     text('condizioni', lm, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     addLine(10);
 
     // Helper: stampa paragrafo con segmenti {text, bold}, con word-wrap manuale
@@ -267,7 +269,7 @@ Deno.serve(async (req) => {
           tokens.push({ word, bold: !!seg.bold });
         }
       }
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       const spaceW = doc.getTextWidth(' ');
       let lineTokens = [];
       let lineW = 0;
@@ -275,16 +277,16 @@ Deno.serve(async (req) => {
       const flushLine = (toks) => {
         let cx = lm;
         for (let i = 0; i < toks.length; i++) {
-          doc.setFont('helvetica', toks[i].bold ? 'bold' : 'normal');
+          doc.setFont('Roboto', toks[i].bold ? 'bold' : 'normal');
           doc.text(toks[i].word, cx, y);
           cx += doc.getTextWidth(toks[i].word);
-          if (i < toks.length - 1) { doc.setFont('helvetica','normal'); cx += spaceW; }
+          if (i < toks.length - 1) { doc.setFont('Roboto','normal'); cx += spaceW; }
         }
       };
 
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
-        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
+        doc.setFont('Roboto', t.bold ? 'bold' : 'normal');
         const ww = doc.getTextWidth(t.word);
         const gap = lineTokens.length > 0 ? spaceW : 0;
         if (lineTokens.length > 0 && lineW + gap + ww > pw) {
@@ -303,13 +305,13 @@ Deno.serve(async (req) => {
         flushLine(lineTokens);
         y += lineH;
       }
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
     };
 
     // Helper: stampa testo semplice (normale) con wrap
     const printParagraph = (str) => {
       doc.setFontSize(10.5);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       const lines = doc.splitTextToSize(sanitize(str.replace(/\n/g, ' ')), pw);
       checkPage(lines.length * 5.5 + 3);
       doc.text(lines, lm, y);
@@ -428,10 +430,10 @@ Deno.serve(async (req) => {
 
     for (const art of articoli) {
       checkPage(15);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont('Roboto', 'bold');
       doc.setFontSize(10.5);
       text(art.titolo, lm, y);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont('Roboto', 'normal');
       addLine(6);
 
       for (const par of art.paragrafi) {
@@ -448,9 +450,9 @@ Deno.serve(async (req) => {
 
     // --- ALLEGATO ---
     checkPage(15);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Roboto', 'bold');
     text('Allegato A: planimetria', lm, y);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('Roboto', 'normal');
     addLine(10);
 
     // --- CLAUSOLA SPECIFICA ---
