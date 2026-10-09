@@ -124,6 +124,13 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     { tipo: 'Gratuito', label: 'SPAZI GRATUITI',  bg: 'D1FAE5', headerBg: '065F46', headerText: 'FFFFFF' },
   ];
 
+  const TRIMESTRI = [
+    { label: '1° Trimestre (Gen-Mar)', mesi: [0, 1, 2] },
+    { label: '2° Trimestre (Apr-Giu)', mesi: [3, 4, 5] },
+    { label: '3° Trimestre (Lug-Set)', mesi: [6, 7, 8] },
+    { label: '4° Trimestre (Ott-Dic)', mesi: [9, 10, 11] },
+  ];
+
   const sortByDate = (arr) => [...arr].sort((a, b) => (a.data_inizio ?? '') < (b.data_inizio ?? '') ? -1 : 1);
 
   const handleExportExcel = () => {
@@ -162,23 +169,49 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       });
       row++;
 
-      // Righe dati
       let totaleSez = 0;
       let totaleQuotaSez = 0;
-      items.forEach(p => {
-        totaleSez += p.prezzo_totale || 0;
-        totaleQuotaSez += getQuotaAnno(p) || 0;
-        const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
-        const rowData = [
-          { v: getNome(p), t: 's' },
-          { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
-          { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
-          { v: getDurata(p) + ' gg', t: 's' },
-          getQuotaAnno(p) != null ? { v: getQuotaAnno(p), t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
-          p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
-          { v: getSpazio(p), t: 's' },
-        ];
-        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 4 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
+
+      // Suddivisione per trimestre
+      TRIMESTRI.forEach(({ label: trimLabel, mesi }) => {
+        const trimItems = items.filter(p => mesi.includes(new Date(p.data_inizio).getMonth()));
+        if (trimItems.length === 0) return;
+
+        // Sottointestazione trimestre
+        const trimStyle = { font: { bold: true, italic: true, sz: 9, color: { rgb: '475569' } }, fill: { fgColor: { rgb: 'F1F5F9' } }, border };
+        cols.forEach((col, i) => {
+          ws[`${col}${row}`] = { v: i === 0 ? trimLabel : '', t: 's', s: { ...trimStyle, alignment: { horizontal: 'left' } } };
+        });
+        row++;
+
+        // Righe dati
+        let totaleTrim = 0;
+        let totaleQuotaTrim = 0;
+        trimItems.forEach(p => {
+          totaleTrim += p.prezzo_totale || 0;
+          totaleQuotaTrim += getQuotaAnno(p) || 0;
+          const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
+          const rowData = [
+            { v: getNome(p), t: 's' },
+            { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
+            { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
+            { v: getDurata(p) + ' gg', t: 's' },
+            getQuotaAnno(p) != null ? { v: getQuotaAnno(p), t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+            p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+            { v: getSpazio(p), t: 's' },
+          ];
+          cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 4 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
+          row++;
+        });
+
+        // Subtotale trimestre
+        const subStyle = { font: { bold: true, sz: 9, color: { rgb: '475569' } }, fill: { fgColor: { rgb: 'F8FAFC' } }, border };
+        ws[`A${row}`] = { v: `Subtotale ${trimLabel.toLowerCase()}`, t: 's', s: { ...subStyle, alignment: { horizontal: 'left' } } };
+        ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: subStyle }; });
+        ws[`E${row}`] = { v: totaleQuotaTrim, t: 'n', z: '€ #,##0.00', s: { ...subStyle, alignment: { horizontal: 'right' } } };
+        ws[`F${row}`] = { v: totaleTrim, t: 'n', z: '€ #,##0.00', s: { ...subStyle, alignment: { horizontal: 'right' } } };
+        totaleSez += totaleTrim;
+        totaleQuotaSez += totaleQuotaTrim;
         row++;
       });
 
