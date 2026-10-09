@@ -124,13 +124,6 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     { tipo: 'Gratuito', label: 'SPAZI GRATUITI',  bg: 'D1FAE5', headerBg: '065F46', headerText: 'FFFFFF' },
   ];
 
-  const TRIMESTRI = [
-    { label: '1° Trimestre (Gen-Mar)', mesi: [0, 1, 2] },
-    { label: '2° Trimestre (Apr-Giu)', mesi: [3, 4, 5] },
-    { label: '3° Trimestre (Lug-Set)', mesi: [6, 7, 8] },
-    { label: '4° Trimestre (Ott-Dic)', mesi: [9, 10, 11] },
-  ];
-
   const sortByDate = (arr) => [...arr].sort((a, b) => (a.data_inizio ?? '') < (b.data_inizio ?? '') ? -1 : 1);
 
   const handleExportExcel = () => {
@@ -139,12 +132,30 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const titolo = `${nomeCentro} - PRENOTAZIONI ${annoFiltro}`;
     const border = { top: { style: 'thin', color: { rgb: '94A3B8' } }, bottom: { style: 'thin', color: { rgb: '94A3B8' } }, left: { style: 'thin', color: { rgb: '94A3B8' } }, right: { style: 'thin', color: { rgb: '94A3B8' } } };
     const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 14 }, { wch: 14 }, { wch: 9 }, { wch: 14 }, { wch: 16 }, { wch: 20 }] };
+    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 16 }, { wch: 16 }] };
     ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
-    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Durata', `Quota ${annoFiltro}`, 'Costo', 'Spazio'];
+    const headers = ['Nome / Cliente', '1° Trim (Gen-Mar)', '2° Trim (Apr-Giu)', '3° Trim (Lug-Set)', '4° Trim (Ott-Dic)', `Totale ${annoFiltro}`, 'Costo'];
+    const trimDateRanges = [
+      { start: new Date(annoFiltro, 0, 1), end: new Date(annoFiltro, 2, 31, 23, 59, 59, 999) },
+      { start: new Date(annoFiltro, 3, 1), end: new Date(annoFiltro, 5, 30, 23, 59, 59, 999) },
+      { start: new Date(annoFiltro, 6, 1), end: new Date(annoFiltro, 8, 30, 23, 59, 59, 999) },
+      { start: new Date(annoFiltro, 9, 1), end: new Date(annoFiltro, 11, 31, 23, 59, 59, 999) },
+    ];
+    const getQuotaTrim = (p, idx) => {
+      if (p.prezzo_totale == null || !p.data_inizio || !p.data_fine) return null;
+      const inizio = new Date(p.data_inizio);
+      const fine = new Date(p.data_fine);
+      const { start: tStart, end: tEnd } = trimDateRanges[idx];
+      if (fine < tStart || inizio > tEnd) return 0;
+      const giorniTotali = Math.max(differenceInDays(fine, inizio) + 1, 1);
+      const inizioEff = new Date(Math.max(inizio, tStart));
+      const fineEff = new Date(Math.min(fine, tEnd));
+      const giorniTrim = Math.max(differenceInDays(fineEff, inizioEff) + 1, 0);
+      return p.prezzo_totale * (giorniTrim / giorniTotali);
+    };
     let row = 3;
     let totaleGenerale = 0;
-    let totaleQuotaGenerale = 0;
+    const totaleTrimGenerale = [0, 0, 0, 0];
 
     SEZIONI.forEach(({ tipo, label, bg, headerBg, headerText }) => {
       const items = sortByDate(filtrate.filter(p => getTipo(p) === tipo));
@@ -169,69 +180,47 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
       });
       row++;
 
+      // Righe dati
       let totaleSez = 0;
-      let totaleQuotaSez = 0;
-
-      // Suddivisione per trimestre
-      TRIMESTRI.forEach(({ label: trimLabel, mesi }) => {
-        const trimItems = items.filter(p => mesi.includes(new Date(p.data_inizio).getMonth()));
-        if (trimItems.length === 0) return;
-
-        // Sottointestazione trimestre
-        const trimStyle = { font: { bold: true, italic: true, sz: 9, color: { rgb: '475569' } }, fill: { fgColor: { rgb: 'F1F5F9' } }, border };
-        cols.forEach((col, i) => {
-          ws[`${col}${row}`] = { v: i === 0 ? trimLabel : '', t: 's', s: { ...trimStyle, alignment: { horizontal: 'left' } } };
-        });
-        row++;
-
-        // Righe dati
-        let totaleTrim = 0;
-        let totaleQuotaTrim = 0;
-        trimItems.forEach(p => {
-          totaleTrim += p.prezzo_totale || 0;
-          totaleQuotaTrim += getQuotaAnno(p) || 0;
-          const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
-          const rowData = [
-            { v: getNome(p), t: 's' },
-            { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
-            { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
-            { v: getDurata(p) + ' gg', t: 's' },
-            getQuotaAnno(p) != null ? { v: getQuotaAnno(p), t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
-            p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
-            { v: getSpazio(p), t: 's' },
-          ];
-          cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 4 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
-          row++;
-        });
-
-        // Subtotale trimestre
-        const subStyle = { font: { bold: true, sz: 9, color: { rgb: '475569' } }, fill: { fgColor: { rgb: 'F8FAFC' } }, border };
-        ws[`A${row}`] = { v: `Subtotale ${trimLabel.toLowerCase()}`, t: 's', s: { ...subStyle, alignment: { horizontal: 'left' } } };
-        ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: subStyle }; });
-        ws[`E${row}`] = { v: totaleQuotaTrim, t: 'n', z: '€ #,##0.00', s: { ...subStyle, alignment: { horizontal: 'right' } } };
-        ws[`F${row}`] = { v: totaleTrim, t: 'n', z: '€ #,##0.00', s: { ...subStyle, alignment: { horizontal: 'right' } } };
-        totaleSez += totaleTrim;
-        totaleQuotaSez += totaleQuotaTrim;
+      const totaleTrimSez = [0, 0, 0, 0];
+      items.forEach(p => {
+        totaleSez += p.prezzo_totale || 0;
+        const rowStyle = { border, fill: { fgColor: { rgb: bg } } };
+        const quote = [0, 1, 2, 3].map(i => getQuotaTrim(p, i));
+        quote.forEach((q, i) => { if (q != null) { totaleTrimSez[i] += q; totaleTrimGenerale[i] += q; } });
+        const rowData = [
+          { v: getNome(p), t: 's' },
+          quote[0] != null ? { v: quote[0], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+          quote[1] != null ? { v: quote[1], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+          quote[2] != null ? { v: quote[2], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+          quote[3] != null ? { v: quote[3], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+          { v: quote.reduce((s, q) => s + (q || 0), 0), t: 'n', z: '€ #,##0.00' },
+          p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
+        ];
+        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 5 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
         row++;
       });
 
       // Totale sezione
       const sezStyle = { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border };
       ws[`A${row}`] = { v: `Totale ${label.toLowerCase()}`, t: 's', s: { ...sezStyle, alignment: { horizontal: 'left' } } };
-      ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
-      ws[`E${row}`] = { v: totaleQuotaSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
-      ws[`F${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { bold: false, sz: 9, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      [0, 1, 2, 3].forEach(i => {
+        ws[`${cols[i + 1]}${row}`] = { v: totaleTrimSez[i], t: 'n', z: '€ #,##0.00', s: { ...sezStyle, alignment: { horizontal: 'right' } } };
+      });
+      ws[`F${row}`] = { v: totaleTrimSez.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ws[`G${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { bold: false, sz: 9, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
       totaleGenerale += totaleSez;
-      totaleQuotaGenerale += totaleQuotaSez;
       row += 2; // riga vuota tra sezioni
     });
 
     // Totale generale
     const genStyle = { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E3A5F' } }, border };
     ws[`A${row}`] = { v: 'TOTALE GENERALE', t: 's', s: { ...genStyle, alignment: { horizontal: 'left' } } };
-    ['B', 'C', 'D', 'G'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: genStyle }; });
-    ws[`E${row}`] = { v: totaleQuotaGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
-    ws[`F${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, font: { bold: false, sz: 10, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'right' } } };
+    [0, 1, 2, 3].forEach(i => {
+      ws[`${cols[i + 1]}${row}`] = { v: totaleTrimGenerale[i], t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
+    });
+    ws[`F${row}`] = { v: totaleTrimGenerale.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
+    ws[`G${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, font: { bold: false, sz: 10, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'right' } } };
 
     ws['!ref'] = `A1:G${row}`;
     const wb = XLSX.utils.book_new();
