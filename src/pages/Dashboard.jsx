@@ -307,13 +307,14 @@ export default function Dashboard({ centroSelezionato, user }) {
 
       // Event stats (riuso prenotazioni già caricate)
       const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-      const eventiCorrentiList = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
-      const prossimiEventi = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
+      const isEvento = (p) => p.is_event && !p.is_gratuito && p.stato !== 'cancellata';
+      const eventiCorrentiList = prenotazioni.filter(p => isEvento(p) && new Date(p.data_inizio) <= hoje && new Date(p.data_fine) >= hoje);
+      const prossimiEventi = prenotazioni.filter(p => isEvento(p) && new Date(p.data_inizio) > hoje).sort((a, b) => new Date(a.data_inizio) - new Date(b.data_inizio)).slice(0, 3);
 
       let giorniEvento = 0;
       let costoEventiAnno = 0;
       prenotazioni.forEach(p => {
-        if (p.is_event && p.stato !== 'cancellata') {
+        if (isEvento(p)) {
           const inizio = new Date(p.data_inizio);
           const fine = new Date(p.data_fine);
           if (p.stato === 'confermata' || p.stato === 'in_corso') {
@@ -325,7 +326,7 @@ export default function Dashboard({ centroSelezionato, user }) {
         }
       });
       const costoMedioGiornoEvento = giorniEvento > 0 ? costoEventiAnno / giorniEvento : 0;
-      const numeroEventiAnno = prenotazioni.filter(p => p.is_event && p.stato !== 'cancellata' && new Date(p.data_inizio).getFullYear() === annoCorrente).length;
+      const numeroEventiAnno = prenotazioni.filter(p => isEvento(p) && new Date(p.data_inizio).getFullYear() === annoCorrente).length;
 
       const eventStats = { giorniEvento, eventiCorrenti: eventiCorrentiList.length, eventiCorrentiList, prossimiEventi, costoEventiAnno, costoMedioGiornoEvento, numeroEventiAnno };
 
