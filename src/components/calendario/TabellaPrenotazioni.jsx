@@ -131,10 +131,10 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     const nomeFile = `${nomeCentro}_PRENOTAZIONI_${annoFiltro}`;
     const titolo = `${nomeCentro} - PRENOTAZIONI ${annoFiltro}`;
     const border = { top: { style: 'thin', color: { rgb: '94A3B8' } }, bottom: { style: 'thin', color: { rgb: '94A3B8' } }, left: { style: 'thin', color: { rgb: '94A3B8' } }, right: { style: 'thin', color: { rgb: '94A3B8' } } };
-    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 16 }, { wch: 16 }] };
+    const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const ws = { '!ref': '', '!cols': [{ wch: 38 }, { wch: 12 }, { wch: 12 }, { wch: 9 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 16 }, { wch: 16 }] };
     ws['A1'] = { v: titolo, t: 's', s: { font: { bold: true, sz: 14 } } };
-    const headers = ['Nome / Cliente', '1° Trim (Gen-Mar)', '2° Trim (Apr-Giu)', '3° Trim (Lug-Set)', '4° Trim (Ott-Dic)', `Totale ${annoFiltro}`, 'Costo'];
+    const headers = ['Nome / Cliente', 'Data Inizio', 'Data Fine', 'Giorni', '1° Trim (Gen-Mar)', '2° Trim (Apr-Giu)', '3° Trim (Lug-Set)', '4° Trim (Ott-Dic)', `Totale ${annoFiltro}`, 'Costo'];
     const trimDateRanges = [
       { start: new Date(annoFiltro, 0, 1), end: new Date(annoFiltro, 2, 31, 23, 59, 59, 999) },
       { start: new Date(annoFiltro, 3, 1), end: new Date(annoFiltro, 5, 30, 23, 59, 59, 999) },
@@ -190,6 +190,9 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
         quote.forEach((q, i) => { if (q != null) { totaleTrimSez[i] += q; totaleTrimGenerale[i] += q; } });
         const rowData = [
           { v: getNome(p), t: 's' },
+          { v: p.data_inizio ? format(new Date(p.data_inizio), 'dd/MM/yyyy') : '—', t: 's' },
+          { v: p.data_fine ? format(new Date(p.data_fine), 'dd/MM/yyyy') : '—', t: 's' },
+          { v: getDurata(p), t: 'n' },
           quote[0] != null ? { v: quote[0], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
           quote[1] != null ? { v: quote[1], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
           quote[2] != null ? { v: quote[2], t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
@@ -197,18 +200,19 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
           { v: quote.reduce((s, q) => s + (q || 0), 0), t: 'n', z: '€ #,##0.00' },
           p.prezzo_totale != null ? { v: p.prezzo_totale, t: 'n', z: '€ #,##0.00' } : { v: '—', t: 's' },
         ];
-        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 5 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
+        cols.forEach((col, ci) => { ws[`${col}${row}`] = { ...rowData[ci], s: ci === 8 ? { ...rowStyle, font: { bold: true } } : rowStyle }; });
         row++;
       });
 
       // Totale sezione
       const sezStyle = { font: { bold: true, sz: 9 }, fill: { fgColor: { rgb: 'E2E8F0' } }, border };
       ws[`A${row}`] = { v: `Totale ${label.toLowerCase()}`, t: 's', s: { ...sezStyle, alignment: { horizontal: 'left' } } };
+      ['B', 'C', 'D'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: sezStyle }; });
       [0, 1, 2, 3].forEach(i => {
-        ws[`${cols[i + 1]}${row}`] = { v: totaleTrimSez[i], t: 'n', z: '€ #,##0.00', s: { ...sezStyle, alignment: { horizontal: 'right' } } };
+        ws[`${cols[i + 4]}${row}`] = { v: totaleTrimSez[i], t: 'n', z: '€ #,##0.00', s: { ...sezStyle, alignment: { horizontal: 'right' } } };
       });
-      ws[`F${row}`] = { v: totaleTrimSez.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
-      ws[`G${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { bold: false, sz: 9, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ws[`I${row}`] = { v: totaleTrimSez.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { ...sezStyle.font, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
+      ws[`J${row}`] = { v: totaleSez, t: 'n', z: '€ #,##0.00', s: { ...sezStyle, font: { bold: false, sz: 9, color: { rgb: '1E3A5F' } }, alignment: { horizontal: 'right' } } };
       totaleGenerale += totaleSez;
       row += 2; // riga vuota tra sezioni
     });
@@ -216,13 +220,14 @@ export default function TabellaPrenotazioni({ prenotazioni, clienti, spazi, onEd
     // Totale generale
     const genStyle = { font: { bold: true, sz: 10, color: { rgb: 'FFFFFF' } }, fill: { fgColor: { rgb: '1E3A5F' } }, border };
     ws[`A${row}`] = { v: 'TOTALE GENERALE', t: 's', s: { ...genStyle, alignment: { horizontal: 'left' } } };
+    ['B', 'C', 'D'].forEach(c => { ws[`${c}${row}`] = { v: '', t: 's', s: genStyle }; });
     [0, 1, 2, 3].forEach(i => {
-      ws[`${cols[i + 1]}${row}`] = { v: totaleTrimGenerale[i], t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
+      ws[`${cols[i + 4]}${row}`] = { v: totaleTrimGenerale[i], t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
     });
-    ws[`F${row}`] = { v: totaleTrimGenerale.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
-    ws[`G${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, font: { bold: false, sz: 10, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'right' } } };
+    ws[`I${row}`] = { v: totaleTrimGenerale.reduce((s, q) => s + q, 0), t: 'n', z: '€ #,##0.00', s: { ...genStyle, alignment: { horizontal: 'right' } } };
+    ws[`J${row}`] = { v: totaleGenerale, t: 'n', z: '€ #,##0.00', s: { ...genStyle, font: { bold: false, sz: 10, color: { rgb: 'FFFFFF' } }, alignment: { horizontal: 'right' } } };
 
-    ws['!ref'] = `A1:G${row}`;
+    ws['!ref'] = `A1:J${row}`;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Prenotazioni');
     XLSX.writeFile(wb, `${nomeFile}.xlsx`);
