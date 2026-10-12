@@ -62,11 +62,9 @@ Deno.serve(async (req) => {
             assegnazioniPerUtente[a.user_email].add(a.centro_id);
         });
 
-        let emailInviate = 0;
-
-        for (const direttore of direttori) {
+        const risultati = await Promise.all(direttori.map(async (direttore) => {
             const centriSet = assegnazioniPerUtente[direttore.email] || new Set();
-            if (centriSet.size === 0) continue;
+            if (centriSet.size === 0) return 0;
 
             const filtraPerCentri = (items) =>
                 items.filter(item => centriSet.has(item.centro_id));
@@ -274,7 +272,7 @@ Deno.serve(async (req) => {
             }
 
             // Nessun dato, salta
-            if (datiPerCentro.length === 0) continue;
+            if (datiPerCentro.length === 0) return 0;
 
             const datiJson = JSON.stringify(datiPerCentro, null, 2);
 
@@ -338,8 +336,10 @@ Produci SOLO il corpo in HTML (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>), senza
                 subject: `Briefing settimanale ${inizioFormattato} – ${fineFormattato}`,
                 body: corpoHtml,
             });
-            emailInviate++;
-        }
+            return 1;
+        }));
+
+        const emailInviate = risultati.reduce((s, n) => s + n, 0);
 
         return Response.json({ success: true, emails_sent: emailInviate, periodo: `${inizio} → ${fine}` });
     } catch (error) {
