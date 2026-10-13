@@ -14,6 +14,10 @@
       "type": "string",
       "description": "Nome e cognome del legale rappresentante"
     },
+    "legale_rappresentante_cf": {
+      "type": "string",
+      "description": "Codice fiscale del legale rappresentante"
+    },
     "partita_iva": {
       "type": "string",
       "description": "Partita IVA"

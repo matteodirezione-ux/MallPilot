@@ -248,6 +248,7 @@ Deno.serve(async (req) => {
       ...(cliente.partita_iva ? [{ text: ' e cod. fisc./ p. IVA ' }, { text: cliente.partita_iva, bold: true }] : []),
       { text: ', qui rappresentata dal Sig./Sig.ra ' },
       { text: cliente.legale_rappresentante || '_______________', bold: true },
+      ...(cliente.legale_rappresentante_cf ? [{ text: ', cod. fisc. ' }, { text: cliente.legale_rappresentante_cf, bold: true }] : []),
       { text: ', in qualita\' di Rappresentante Legale, in seguito, per brevita\', chiamata "Conduttrice",' }
     ]);
     addLine(5);

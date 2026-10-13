@@ -25,6 +25,7 @@ export default function Clienti({ centroSelezionato }) {
   const [formData, setFormData] = useState({
     ragione_sociale: '',
     legale_rappresentante: '',
+    legale_rappresentante_cf: '',
     partita_iva: '',
     codice_fiscale: '',
     codice_sdi: '',
@@ -264,6 +265,7 @@ export default function Clienti({ centroSelezionato }) {
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
                     { label: 'Partita IVA *', key: 'partita_iva', required: true },
                     { label: 'Legale Rappresentante *', key: 'legale_rappresentante', required: true },
+                    { label: 'CF Legale Rappresentante', key: 'legale_rappresentante_cf' },
                     { label: 'Codice Fiscale', key: 'codice_fiscale' },
                     { label: 'Codice SDI', key: 'codice_sdi' },
                     { label: 'Email *', key: 'email', type: 'email', required: true },
@@ -483,6 +485,7 @@ export default function Clienti({ centroSelezionato }) {
                 <div className="space-y-1.5">
                   {detailCliente.partita_iva && <Row label="Partita IVA" value={detailCliente.partita_iva} />}
                   {detailCliente.legale_rappresentante && <Row label="Leg. Rappresentante" value={detailCliente.legale_rappresentante} />}
+                  {detailCliente.legale_rappresentante_cf && <Row label="CF Leg. Rapp." value={detailCliente.legale_rappresentante_cf} />}
                   {detailCliente.codice_fiscale && <Row label="Cod. Fiscale" value={detailCliente.codice_fiscale} />}
                   {detailCliente.email && <Row label="Email" value={detailCliente.email} />}
                   {detailCliente.codice_sdi && <Row label="Cod. SDI" value={detailCliente.codice_sdi} />}
