@@ -263,7 +263,7 @@ export default function Clienti({ centroSelezionato }) {
                   {[
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
                     { label: 'Partita IVA *', key: 'partita_iva', required: true },
-                    { label: 'Legale Rappresentante', key: 'legale_rappresentante' },
+                    { label: 'Legale Rappresentante *', key: 'legale_rappresentante', required: true },
                     { label: 'Codice Fiscale', key: 'codice_fiscale' },
                     { label: 'Codice SDI', key: 'codice_sdi' },
                     { label: 'Email *', key: 'email', type: 'email', required: true },

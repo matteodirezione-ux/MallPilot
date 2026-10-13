@@ -247,7 +247,7 @@ Deno.serve(async (req) => {
       { text: ', numero di iscrizione presso il Registro delle Imprese' },
       ...(cliente.partita_iva ? [{ text: ' e cod. fisc./ p. IVA ' }, { text: cliente.partita_iva, bold: true }] : []),
       { text: ', qui rappresentata dal Sig./Sig.ra ' },
-      { text: cliente.referente_nome || '_______________', bold: true },
+      { text: cliente.legale_rappresentante || '_______________', bold: true },
       { text: ', in qualita\' di Rappresentante Legale, in seguito, per brevita\', chiamata "Conduttrice",' }
     ]);
     addLine(5);

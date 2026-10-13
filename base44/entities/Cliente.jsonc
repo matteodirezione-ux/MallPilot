@@ -75,6 +75,7 @@
   "required": [
     "centro_id",
     "ragione_sociale",
+    "legale_rappresentante",
     "email"
   ]
 }
