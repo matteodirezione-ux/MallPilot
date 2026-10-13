@@ -24,6 +24,7 @@ export default function Clienti({ centroSelezionato }) {
 
   const [formData, setFormData] = useState({
     ragione_sociale: '',
+    legale_rappresentante: '',
     partita_iva: '',
     codice_fiscale: '',
     codice_sdi: '',
@@ -154,6 +155,7 @@ export default function Clienti({ centroSelezionato }) {
   const resetForm = () => {
     setFormData({
       ragione_sociale: '',
+      legale_rappresentante: '',
       partita_iva: '',
       codice_fiscale: '',
       codice_sdi: '',
@@ -260,6 +262,7 @@ export default function Clienti({ centroSelezionato }) {
                 <div className="space-y-3">
                   {[
                     { label: 'Ragione Sociale *', key: 'ragione_sociale', required: true },
+                    { label: 'Legale Rappresentante', key: 'legale_rappresentante' },
                     { label: 'Partita IVA *', key: 'partita_iva', required: true },
                     { label: 'Codice Fiscale', key: 'codice_fiscale' },
                     { label: 'Codice SDI', key: 'codice_sdi' },
@@ -478,6 +481,7 @@ export default function Clienti({ centroSelezionato }) {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Dati Azienda</p>
                 <div className="space-y-1.5">
+                  {detailCliente.legale_rappresentante && <Row label="Leg. Rappresentante" value={detailCliente.legale_rappresentante} />}
                   {detailCliente.partita_iva && <Row label="Partita IVA" value={detailCliente.partita_iva} />}
                   {detailCliente.codice_fiscale && <Row label="Cod. Fiscale" value={detailCliente.codice_fiscale} />}
                   {detailCliente.email && <Row label="Email" value={detailCliente.email} />}

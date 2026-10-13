@@ -10,6 +10,10 @@
       "type": "string",
       "description": "Ragione sociale dell'azienda"
     },
+    "legale_rappresentante": {
+      "type": "string",
+      "description": "Nome e cognome del legale rappresentante"
+    },
     "partita_iva": {
       "type": "string",
       "description": "Partita IVA"
