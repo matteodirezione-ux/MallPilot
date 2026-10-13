@@ -217,6 +217,7 @@ Deno.serve(async (req) => {
     addLine(6);
     if (cliente.partita_iva) { text(`P.IVA ${cliente.partita_iva}`, lm, y); addLine(6); }
     if (cliente.pec) { text(`PEC: ${cliente.pec}`, lm, y); addLine(6); }
+    if (cliente.legale_rappresentante) { text(`Leg. Rapp.: ${cliente.legale_rappresentante}${cliente.legale_rappresentante_cf ? ' - CF: ' + cliente.legale_rappresentante_cf : ''}`, lm, y); addLine(6); }
 
     addLine(8);
 
