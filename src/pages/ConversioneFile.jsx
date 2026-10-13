@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { convertiFile } from '@/lib/convertiCorrispettivi';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,40 @@ export default function ConversioneFile({ centroSelezionato, user }) {
   const [converting, setConverting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+
+  const matriceStorageKey = `matrice_${centroSelezionato?.id || 'default'}`;
+
+  // Carica la matrice salvata in memoria al montaggio / cambio centro
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(matriceStorageKey);
+      if (saved) {
+        const { name, base64 } = JSON.parse(saved);
+        const bytes = atob(base64);
+        const arr = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        setMatriceFile(new File([arr], name, { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+      } else {
+        setMatriceFile(null);
+      }
+    } catch { setMatriceFile(null); }
+  }, [matriceStorageKey]);
+
+  const handleMatriceUpload = async (file) => {
+    setMatriceFile(file);
+    try {
+      const bytes = await file.arrayBuffer();
+      let binary = '';
+      const arr = new Uint8Array(bytes);
+      for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
+      localStorage.setItem(matriceStorageKey, JSON.stringify({ name: file.name, base64: btoa(binary) }));
+    } catch { /* ignora errori di storage */ }
+  };
+
+  const handleMatriceDelete = () => {
+    setMatriceFile(null);
+    localStorage.removeItem(matriceStorageKey);
+  };
 
   const hasSource = csvFile || rawCsvFile;
 
@@ -125,18 +159,25 @@ export default function ConversioneFile({ centroSelezionato, user }) {
               type="file"
               accept=".xlsx,.xls"
               className="hidden"
-              onChange={(e) => setMatriceFile(e.target.files[0])}
+              onChange={(e) => e.target.files[0] && handleMatriceUpload(e.target.files[0])}
             />
             {matriceFile ? (
               <div className="flex items-center gap-2 text-blue-600">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="font-medium">{matriceFile.name}</span>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMatriceDelete(); }}
+                  className="ml-2 text-red-500 hover:text-red-700 text-xs underline"
+                >
+                  Elimina
+                </button>
               </div>
             ) : (
               <>
                 <FileSpreadsheet className="w-8 h-8 text-slate-400 mb-2" />
                 <span className="text-sm font-medium text-slate-600">Clicca per caricare la matrice</span>
-                <span className="text-xs text-slate-400 mt-1">Excel (.xlsx)</span>
+                <span className="text-xs text-slate-400 mt-1">Excel (.xlsx) - rimane salvata</span>
               </>
             )}
           </label>
