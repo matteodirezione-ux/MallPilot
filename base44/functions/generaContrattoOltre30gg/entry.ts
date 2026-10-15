@@ -1,82 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { jsPDF } from 'npm:jspdf@4.0.0';
-
-function numeroInLettere(num) {
-  const unita = ['', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove',
-    'dieci', 'undici', 'dodici', 'tredici', 'quattordici', 'quindici', 'sedici', 'diciassette', 'diciotto', 'diciannove'];
-  const decine = ['', '', 'venti', 'trenta', 'quaranta', 'cinquanta', 'sessanta', 'settanta', 'ottanta', 'novanta'];
-
-  if (num === 0) return 'zero';
-  if (num < 0) return 'meno ' + numeroInLettere(-num);
-
-  let risultato = '';
-  if (num >= 1000) {
-    const migliaia = Math.floor(num / 1000);
-    risultato += (migliaia === 1 ? 'mille' : numeroInLettere(migliaia) + 'mila');
-    num %= 1000;
-  }
-  if (num >= 100) {
-    const centinaia = Math.floor(num / 100);
-    risultato += (centinaia === 1 ? 'cento' : unita[centinaia] + 'cento');
-    num %= 100;
-  }
-  if (num >= 20) {
-    const d = Math.floor(num / 10);
-    const u = num % 10;
-    risultato += (u === 1 || u === 8) ? decine[d].slice(0, -1) + unita[u] : decine[d] + unita[u];
-  } else if (num > 0) {
-    risultato += unita[num];
-  }
-  return risultato;
-}
-
-function formatEuro(importo) {
-  const intero = Math.floor(importo);
-  const centesimi = Math.round((importo - intero) * 100);
-  const lettere = numeroInLettere(intero);
-  const centStr = centesimi > 0 ? `/${String(centesimi).padStart(2, '0')}` : '/00';
-  return {
-    numerico: importo.toFixed(2).replace('.', ','),
-    lettere: `${lettere}${centStr}`
-  };
-}
-
-function sanitize(str) {
-  if (!str) return '';
-  return str
-    .replace(/à/g, "a'").replace(/À/g, "A'")
-    .replace(/è/g, "e'").replace(/È/g, "E'")
-    .replace(/é/g, "e'").replace(/É/g, "E'")
-    .replace(/ì/g, "i'").replace(/Ì/g, "I'")
-    .replace(/í/g, "i'").replace(/Í/g, "I'")
-    .replace(/ò/g, "o'").replace(/Ò/g, "O'")
-    .replace(/ó/g, "o'").replace(/Ó/g, "O'")
-    .replace(/ù/g, "u'").replace(/Ù/g, "U'")
-    .replace(/ú/g, "u'").replace(/Ú/g, "U'")
-    .replace(/–/g, '-').replace(/—/g, '-')
-    .replace(/\u201c/g, '"').replace(/\u201d/g, '"')
-    .replace(/\u2018/g, "'").replace(/\u2019/g, "'")
-    .replace(/[^\x00-\x7F]/g, '');
-}
-
-function formatData(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
-
-// Calcola rate mensili tra due date
-function calcolaRate(dataInizio, dataFine, prezzoTotale) {
-  const start = new Date(dataInizio);
-  const end = new Date(dataFine);
-  const mesi = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1;
-  const rataImporto = prezzoTotale / mesi;
-  const rate = [];
-  for (let i = 0; i < mesi; i++) {
-    const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
-    rate.push(d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }));
-  }
-  return { rate, rataImporto, mesi };
-}
+import { formatEuro, formatData, sanitize, calcolaRate, renderPDF, renderWord } from '../../shared/contrattoUtils.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -84,7 +7,7 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { prenotazione_id } = await req.json();
+    const { prenotazione_id, format = 'pdf' } = await req.json();
     if (!prenotazione_id) return Response.json({ error: 'prenotazione_id richiesto' }, { status: 400 });
 
     const prenotazioni = await base44.entities.Prenotazione.filter({ id: prenotazione_id });
@@ -114,14 +37,12 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Dati mancanti' }, { status: 400 });
     }
 
-    // Superficie totale
     const superficieTotale = spaziPrenotati.reduce((acc, s) => acc + (s.superficie_mq || 0), 0);
     const spaziStr = spaziPrenotati
       .map(s => `N.${s.numero_spazio}${s.superficie_mq ? ' di ' + s.superficie_mq + ' mq' : ''}`)
       .join(' + ');
     const numeroSpaziStr = spaziPrenotati.map(s => `n. ${s.numero_spazio}`).join(' e ');
 
-    // Calcoli economici
     const prezzoNetto = prenotazione.prezzo_totale;
     const iva = Math.round(prezzoNetto * 22) / 100;
     const prezzoTotale = prezzoNetto + iva;
@@ -129,166 +50,13 @@ Deno.serve(async (req) => {
     const ivaFmt = formatEuro(iva);
     const prezzoTotaleFmt = formatEuro(prezzoTotale);
 
-    // Rate mensili
     const { rate, rataImporto, mesi } = calcolaRate(prenotazione.data_inizio, prenotazione.data_fine, prezzoNetto);
-    const rataFmt = formatEuro(rataImporto);
-    const rateStr = rate.map((d, i) => `la ${i === 0 ? 'prima rata al' : (i === rate.length - 1 ? 'ultima rata al' : '')} ${d}`).join('; ').replace(/; ;/g, ';');
-    // Versione compatta delle rate: "al 01/01/2024; al 01/02/2024; ..."
     const rateDateStr = rate.map((d, i) => (i === 0 ? `la prima rata al ${d}` : `al ${d}`)).join('; ');
 
     const dataOggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const cittaOggi = centro.citta?.toUpperCase() || '';
     const materiale = prenotazione.materiale_dimostrativo || '';
 
-    // === GENERA PDF ===
-    const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-    const lm = 20;
-    const rm = 190;
-    const pw = rm - lm;
-    let y = 20;
-
-    const addLine = (h = 6) => { y += h; };
-    const checkPage = (needed = 10) => {
-      if (y + needed > 275) { doc.addPage(); y = 20; }
-    };
-    const text = (str, x, yy, opts = {}) => {
-      doc.text(sanitize(str || ''), x, yy, opts);
-    };
-
-    // Stampa paragrafo con segmenti bold inline, con word-wrap
-    const printMixedParagraph = (segments, lineH = 5.5) => {
-      doc.setFontSize(10.5);
-      const tokens = [];
-      for (const seg of segments) {
-        const words = sanitize(seg.text || '').split(' ').filter(w => w !== '');
-        for (const word of words) tokens.push({ word, bold: !!seg.bold });
-      }
-      doc.setFont('helvetica', 'normal');
-      const spaceW = doc.getTextWidth(' ');
-      let lineTokens = [];
-      let lineW = 0;
-
-      const flushLine = (toks) => {
-        let cx = lm;
-        for (let i = 0; i < toks.length; i++) {
-          doc.setFont('helvetica', toks[i].bold ? 'bold' : 'normal');
-          doc.text(toks[i].word, cx, y);
-          cx += doc.getTextWidth(toks[i].word);
-          if (i < toks.length - 1) { doc.setFont('helvetica', 'normal'); cx += spaceW; }
-        }
-      };
-
-      for (let i = 0; i < tokens.length; i++) {
-        const t = tokens[i];
-        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
-        const ww = doc.getTextWidth(t.word);
-        const gap = lineTokens.length > 0 ? spaceW : 0;
-        if (lineTokens.length > 0 && lineW + gap + ww > pw) {
-          checkPage(lineH + 3);
-          flushLine(lineTokens);
-          y += lineH;
-          lineTokens = [t];
-          lineW = ww;
-        } else {
-          lineW += gap + ww;
-          lineTokens.push(t);
-        }
-      }
-      if (lineTokens.length > 0) {
-        checkPage(lineH + 3);
-        flushLine(lineTokens);
-        y += lineH;
-      }
-      doc.setFont('helvetica', 'normal');
-    };
-
-    const printParagraph = (str) => {
-      doc.setFontSize(10.5);
-      doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(sanitize(str.replace(/\n/g, ' ')), pw);
-      checkPage(lines.length * 5.5 + 3);
-      doc.text(lines, lm, y);
-      y += lines.length * 5.5;
-    };
-
-    doc.setFont('helvetica');
-
-    // --- TITOLO ---
-    doc.setFontSize(13);
-    doc.setFont('helvetica', 'bold');
-    text('CONTRATTO DI LOCAZIONE PER ESIGENZE DI NATURA TRANSITORIA', lm + pw / 2, y, { align: 'center' });
-    addLine(7);
-    doc.setFontSize(11);
-    text("ex art. 27, V comma, L. n. 392/78", lm + pw / 2, y, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    addLine(10);
-
-    // --- TRA LE PARTI ---
-    doc.setFontSize(10.5);
-    doc.setFont('helvetica', 'bold');
-    text('Tra le parti', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(8);
-
-    // Locatrice (fissa)
-    const locatriceText = "GESTIONE COMPLESSI COMMERCIALI SRL, con sede in Forli' (FC), via Dei Mercanti n.3, numero di iscrizione presso il Registro delle Imprese di Forli'-Cesena e cod. fisc. e p. IVA 03067290365, qui rappresentata dal Presidente del Consiglio di Amministrazione Dott. Panzavolta Luca, Cod. Fisc. PNZLCU64T30C573L, nato a Cesena (FC) il 30/12/1964 ed ivi residente in Via Romea n. 530, all'uopo debitamente autorizzato, in seguito, per brevita', chiamata \"Locatrice\",";
-    printParagraph(locatriceText);
-    addLine(5);
-    doc.setFont('helvetica', 'bold'); text('e', lm, y); doc.setFont('helvetica', 'normal');
-    addLine(8);
-
-    // Conduttrice (dati cliente in grassetto)
-    printMixedParagraph([
-      { text: cliente.ragione_sociale, bold: true },
-      { text: ' con sede in ' },
-      { text: `${cliente.citta || ''}${cliente.provincia ? ' (' + cliente.provincia + ')' : ''}${cliente.cap ? ' CAP ' + cliente.cap : ''}`, bold: true },
-      { text: ', ' },
-      { text: cliente.indirizzo || '', bold: true },
-      { text: ', numero di iscrizione presso il Registro delle Imprese' },
-      ...(cliente.partita_iva ? [{ text: ' e cod. fisc./ p. IVA ' }, { text: cliente.partita_iva, bold: true }] : []),
-      { text: ', qui rappresentata dal Sig./Sig.ra ' },
-      { text: cliente.legale_rappresentante || '_______________', bold: true },
-      { text: ', cod. fisc. ' },
-      { text: cliente.legale_rappresentante_cf || '_______________', bold: true },
-      { text: ', in qualita\' di Rappresentante Legale, in seguito, per brevita\', chiamata "Conduttrice",' }
-    ]);
-    addLine(5);
-    text("congiuntamente indicate come le \"Parti,\"", lm, y);
-    addLine(10);
-
-    // --- PREMESSO ---
-    doc.setFont('helvetica', 'bold');
-    text('premesso', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(8);
-
-    printMixedParagraph([
-      { text: 'che la Locatrice ha la disponibilita\' all\'interno del Centro Commerciale ' },
-      { text: centro.nome.toUpperCase(), bold: true },
-      { text: ' sito in ' },
-      { text: `${centro.citta?.toUpperCase() || ''}${centro.indirizzo ? ', ' + centro.indirizzo : ''}`, bold: true },
-      { text: ', delle aree nude prospicienti i diversi negozi ivi insediati e costituenti la c.d. galleria del complesso;' }
-    ]);
-    addLine(4);
-
-    printMixedParagraph([
-      { text: '- che la Conduttrice ha chiesto di condurre in locazione l\'area nuda identificata al successivo art. 3, specificando di avere la necessita\' di utilizzarla esclusivamente per il periodo di seguito convenuto ed al fine di svolgervi l\'attivita\' di esposizione di materiale pubblicitario e dimostrativo e presentazione di prodotti e servizi ' },
-      ...(materiale ? [{ text: 'a: ' }, { text: materiale, bold: true }] : [{ text: '(materiale dimostrativo da specificare);' }]),
-    ]);
-    addLine(4);
-
-    printParagraph("- che la convenzione di una durata inferiore ai 6 anni di cui al primo comma dell'art. 27 L. n. 392/78 viene effettuata su espressa e specifica richiesta della Conduttrice per sovvenire alle sue temporanee e transitorie esigenze locative, in ragione di verificare il carattere sperimentale dell'attivita' dalla stessa svolta;");
-    addLine(4);
-
-    printParagraph("- che le Parti intendono a tal fine richiamarsi alla facolta' di stipulare il contratto di locazione per periodi piu' brevi, prevista dall'art. 27, V comma L. n. 392/78, ricorrendone la fattispecie ivi prevista, anche alla luce della precisa ed impegnativa dichiarazione resa in tal senso della Conduttrice, dichiarazione la cui verita' viene espressamente garantita dalla Conduttrice stessa e costituisce elemento essenziale e determinante del consenso alla stipula da parte della Locatrice;");
-    addLine(6);
-
-    doc.setFont('helvetica', 'bold');
-    text("si conviene e si stipula quanto segue", lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(10);
-
-    // --- ARTICOLI ---
     const articoli = [
       {
         titolo: "1 - CONDIZIONE RISOLUTIVA EX ART. 1353 c.c.",
@@ -453,57 +221,6 @@ Deno.serve(async (req) => {
       }
     ];
 
-    for (const art of articoli) {
-      checkPage(15);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      text(art.titolo, lm, y);
-      doc.setFont('helvetica', 'normal');
-      addLine(6);
-
-      for (const par of art.paragrafi) {
-        checkPage(10);
-        if (Array.isArray(par)) {
-          printMixedParagraph(par);
-        } else {
-          printParagraph(par);
-        }
-        addLine(3);
-      }
-      addLine(4);
-    }
-
-    // --- ALLEGATO ---
-    checkPage(10);
-    doc.setFont('helvetica', 'bold');
-    text('Si allega: Planimetria', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(8);
-
-    // --- LUOGO E FIRMA ---
-    checkPage(30);
-    printMixedParagraph([
-      { text: `${cittaOggi} (FC), li' ` },
-      { text: dataOggi, bold: true }
-    ]);
-    addLine(12);
-
-    text('LA LOCATRICE', lm, y);
-    text('LA CONDUTTRICE', rm - 40, y);
-    addLine(15);
-
-    // --- CLAUSOLA ART. 1341 --- (su nuova pagina per dare spazio alle firme)
-    doc.addPage();
-    y = 20;
-    checkPage(35);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10.5);
-    const clausola1341 = "Ai sensi e per gli effetti di cui all'art. 1341 c.c., per quanto occorrer possa, la Conduttrice dichiara di aver attentamente letto e, pertanto, di approvare specificatamente per iscritto le seguenti clausole:";
-    const c1341lines = doc.splitTextToSize(sanitize(clausola1341), pw);
-    doc.text(c1341lines, lm, y);
-    y += c1341lines.length * 5.5;
-    addLine(6);
-
     const clausoleAppr = [
       "Art.  6 - Corrispettivo;",
       "Art.  9 - Esonero da responsabilita';",
@@ -512,32 +229,87 @@ Deno.serve(async (req) => {
       "Art. 13 - Clausola risolutiva espressa;",
       "Art. 14 - Registrazione-Spese."
     ];
-    for (const c of clausoleAppr) {
-      checkPage(8);
-      text(c, lm + 5, y);
-      addLine(6);
+
+    const blocchi = [
+      { type: 'paragraph', text: 'CONTRATTO DI LOCAZIONE PER ESIGENZE DI NATURA TRANSITORIA', bold: true, align: 'center', size: 13 },
+      { type: 'spacer', h: 1.5 },
+      { type: 'paragraph', text: "ex art. 27, V comma, L. n. 392/78", align: 'center', size: 11 },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: 'Tra le parti', bold: true },
+      { type: 'spacer', h: 2 },
+      { type: 'paragraph', text: "GESTIONE COMPLESSI COMMERCIALI SRL, con sede in Forli' (FC), via Dei Mercanti n.3, numero di iscrizione presso il Registro delle Imprese di Forli'-Cesena e cod. fisc. e p. IVA 03067290365, qui rappresentata dal Presidente del Consiglio di Amministrazione Dott. Panzavolta Luca, Cod. Fisc. PNZLCU64T30C573L, nato a Cesena (FC) il 30/12/1964 ed ivi residente in Via Romea n. 530, all'uopo debitamente autorizzato, in seguito, per brevita', chiamata \"Locatrice\"," },
+      { type: 'spacer', h: 1 },
+      { type: 'paragraph', text: 'e', bold: true },
+      { type: 'spacer', h: 2 },
+      { type: 'mixed', segments: [
+        { text: cliente.ragione_sociale, bold: true },
+        { text: ' con sede in ' },
+        { text: `${cliente.citta || ''}${cliente.provincia ? ' (' + cliente.provincia + ')' : ''}${cliente.cap ? ' CAP ' + cliente.cap : ''}`, bold: true },
+        { text: ', ' },
+        { text: cliente.indirizzo || '', bold: true },
+        { text: ', numero di iscrizione presso il Registro delle Imprese' },
+        ...(cliente.partita_iva ? [{ text: ' e cod. fisc./ p. IVA ' }, { text: cliente.partita_iva, bold: true }] : []),
+        { text: ', qui rappresentata dal Sig./Sig.ra ' },
+        { text: cliente.legale_rappresentante || '_______________', bold: true },
+        { text: ', cod. fisc. ' },
+        { text: cliente.legale_rappresentante_cf || '_______________', bold: true },
+        { text: ', in qualita\' di Rappresentante Legale, in seguito, per brevita\', chiamata "Conduttrice",' }
+      ]},
+      { type: 'spacer', h: 1 },
+      { type: 'paragraph', text: 'congiuntamente indicate come le "Parti,"' },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: 'premesso', bold: true },
+      { type: 'spacer', h: 2 },
+      { type: 'mixed', segments: [
+        { text: 'che la Locatrice ha la disponibilita\' all\'interno del Centro Commerciale ' },
+        { text: centro.nome.toUpperCase(), bold: true },
+        { text: ' sito in ' },
+        { text: `${centro.citta?.toUpperCase() || ''}${centro.indirizzo ? ', ' + centro.indirizzo : ''}`, bold: true },
+        { text: ', delle aree nude prospicienti i diversi negozi ivi insediati e costituenti la c.d. galleria del complesso;' }
+      ]},
+      { type: 'spacer', h: 1 },
+      { type: 'mixed', segments: [
+        { text: '- che la Conduttrice ha chiesto di condurre in locazione l\'area nuda identificata al successivo art. 3, specificando di avere la necessita\' di utilizzarla esclusivamente per il periodo di seguito convenuto ed al fine di svolgervi l\'attivita\' di esposizione di materiale pubblicitario e dimostrativo e presentazione di prodotti e servizi ' },
+        ...(materiale ? [{ text: 'a: ' }, { text: materiale, bold: true }] : [{ text: '(materiale dimostrativo da specificare);' }]),
+      ]},
+      { type: 'spacer', h: 1 },
+      { type: 'paragraph', text: "- che la convenzione di una durata inferiore ai 6 anni di cui al primo comma dell'art. 27 L. n. 392/78 viene effettuata su espressa e specifica richiesta della Conduttrice per sovvenire alle sue temporanee e transitorie esigenze locative, in ragione di verificare il carattere sperimentale dell'attivita' dalla stessa svolta;" },
+      { type: 'spacer', h: 1 },
+      { type: 'paragraph', text: "- che le Parti intendono a tal fine richiamarsi alla facolta' di stipulare il contratto di locazione per periodi piu' brevi, prevista dall'art. 27, V comma L. n. 392/78, ricorrendone la fattispecie ivi prevista, anche alla luce della precisa ed impegnativa dichiarazione resa in tal senso della Conduttrice, dichiarazione la cui verita' viene espressamente garantita dalla Conduttrice stessa e costituisce elemento essenziale e determinante del consenso alla stipula da parte della Locatrice;" },
+      { type: 'spacer', h: 2 },
+      { type: 'paragraph', text: "si conviene e si stipula quanto segue", bold: true },
+      { type: 'spacer', h: 4 },
+      ...articoli.flatMap(art => [{ type: 'article', titolo: art.titolo, paragrafi: art.paragrafi }]),
+      { type: 'paragraph', text: 'Si allega: Planimetria', bold: true },
+      { type: 'spacer', h: 4 },
+      { type: 'mixed', segments: [
+        { text: `${cittaOggi} (FC), li' ` },
+        { text: dataOggi, bold: true }
+      ]},
+      { type: 'spacer', h: 6 },
+      { type: 'twoCol', left: 'LA LOCATRICE', right: 'LA CONDUTTRICE' },
+      { type: 'spacer', h: 6 },
+      { type: 'pagebreak' },
+      { type: 'paragraph', text: "Ai sensi e per gli effetti di cui all'art. 1341 c.c., per quanto occorrer possa, la Conduttrice dichiara di aver attentamente letto e, pertanto, di approvare specificatamente per iscritto le seguenti clausole:" },
+      { type: 'spacer', h: 3 },
+      { type: 'list', items: clausoleAppr, indent: 5 },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: 'Letto, approvato e sottoscritto' },
+      { type: 'spacer', h: 4 },
+      { type: 'mixed', segments: [
+        { text: `${cittaOggi} (FC), li' ` },
+        { text: dataOggi, bold: true }
+      ]},
+      { type: 'spacer', h: 6 },
+      { type: 'paragraph', text: 'LA CONDUTTRICE' },
+    ];
+
+    const fileName = `Contratto_${cliente.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}`;
+
+    if (format === 'word') {
+      return renderWord(blocchi, fileName);
     }
-
-    addLine(8);
-    text('Letto, approvato e sottoscritto', lm, y);
-    addLine(10);
-    printMixedParagraph([
-      { text: `${cittaOggi} (FC), li' ` },
-      { text: dataOggi, bold: true }
-    ]);
-    addLine(12);
-    text('LA CONDUTTRICE', lm, y);
-
-    // Output
-    const pdfBytes = doc.output('arraybuffer');
-
-    return new Response(pdfBytes, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Contratto_${sanitize(cliente.ragione_sociale?.replace(/\s+/g, '_'))}_${prenotazione.data_inizio}.pdf"`
-      }
-    });
+    return renderPDF(blocchi, fileName);
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

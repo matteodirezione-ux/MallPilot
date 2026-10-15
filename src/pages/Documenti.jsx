@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { FileText, Upload, Download, Trash2, FileCheck, Plus, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Upload, Download, Trash2, FileCheck, Plus, CheckCircle2, XCircle, ChevronLeft, ChevronRight, FileType } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -23,6 +23,8 @@ export default function Documenti({ centroSelezionato }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [generatingContract, setGeneratingContract] = useState(false);
+  const [genFormat, setGenFormat] = useState('pdf');
+  const [downloadingWord, setDownloadingWord] = useState(null);
   const [selectedPrenotazione, setSelectedPrenotazione] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingDoc, setEditingDoc] = useState(null);
@@ -101,27 +103,49 @@ export default function Documenti({ centroSelezionato }) {
     }
   };
 
-  const handleGeneraContratto = async (prenotazione) => {
+  const getFunctionName = (prenotazione) => {
+    const dataInizio = new Date(prenotazione.data_inizio);
+    const dataFine = new Date(prenotazione.data_fine);
+    const durataGiorni = Math.round((dataFine - dataInizio) / (1000 * 60 * 60 * 24));
+    return durataGiorni > 30 ? 'generaContrattoOltre30gg' : 'generaContratto30gg';
+  };
+
+  const handleGeneraContratto = async (prenotazione, fmt = genFormat) => {
     try {
       setGeneratingContract(true);
       const cliente = clienti.find(c => c.id === prenotazione.cliente_id);
-
-      // Sceglie il modello in base alla durata: oltre 30 giorni → contratto di locazione
-      const dataInizio = new Date(prenotazione.data_inizio);
-      const dataFine = new Date(prenotazione.data_fine);
-      const durataGiorni = Math.round((dataFine - dataInizio) / (1000 * 60 * 60 * 24));
-      const functionName = durataGiorni > 30 ? 'generaContrattoOltre30gg' : 'generaContratto30gg';
+      const functionName = getFunctionName(prenotazione);
 
       const response = await base44.functions.invoke(functionName, {
-        prenotazione_id: prenotazione.id
+        prenotazione_id: prenotazione.id,
+        format: fmt
       });
 
-      const pdfBlob = new Blob([response.data], { type: 'application/pdf' });
-      const fileName = `Contratto_${cliente?.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}.pdf`;
+      const isWord = fmt === 'word';
+      const mimeType = isWord ? 'application/msword' : 'application/pdf';
+      const ext = isWord ? 'doc' : 'pdf';
+      const blob = new Blob([response.data], { type: mimeType });
+      const fileName = `Contratto_${cliente?.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}.${ext}`;
 
-      // Carica il PDF su storage
-      const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      // Carica il file su storage (salva sempre come PDF per l'archiviazione)
+      let fileUrl = blob;
+      let storedFileName = fileName;
+      if (isWord) {
+        // Per Word, salva comunque una versione PDF per l'archivio
+        const pdfResponse = await base44.functions.invoke(functionName, {
+          prenotazione_id: prenotazione.id,
+          format: 'pdf'
+        });
+        const pdfBlob = new Blob([pdfResponse.data], { type: 'application/pdf' });
+        storedFileName = `Contratto_${cliente?.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}.pdf`;
+        const file = new File([pdfBlob], storedFileName, { type: 'application/pdf' });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        fileUrl = file_url;
+      } else {
+        const file = new File([blob], fileName, { type: 'application/pdf' });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        fileUrl = file_url;
+      }
 
       // Crea il documento nel database
       await base44.entities.Documento.create({
@@ -129,8 +153,8 @@ export default function Documenti({ centroSelezionato }) {
         prenotazione_id: prenotazione.id,
         cliente_id: prenotazione.cliente_id,
         tipo_documento: 'contratto',
-        nome_file: fileName,
-        file_url: file_url
+        nome_file: storedFileName,
+        file_url: fileUrl
       });
 
       // Aggiorna la prenotazione
@@ -139,8 +163,8 @@ export default function Documenti({ centroSelezionato }) {
         contratto_generato: true
       });
 
-      // Scarica il PDF
-      const url = window.URL.createObjectURL(pdfBlob);
+      // Scarica il file nel formato scelto
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
@@ -149,13 +173,46 @@ export default function Documenti({ centroSelezionato }) {
       window.URL.revokeObjectURL(url);
       a.remove();
 
-      toast.success('Contratto PDF generato e archiviato');
+      toast.success(`Contratto ${isWord ? 'Word' : 'PDF'} generato e archiviato`);
       loadData();
     } catch (error) {
       console.error('Errore generazione contratto:', error);
       toast.error('Errore nella generazione del contratto');
     } finally {
       setGeneratingContract(false);
+    }
+  };
+
+  const handleDownloadWord = async (doc) => {
+    const prenotazione = prenotazioni.find(p => p.id === doc.prenotazione_id);
+    if (!prenotazione) {
+      toast.error('Prenotazione non trovata');
+      return;
+    }
+    try {
+      setDownloadingWord(doc.id);
+      const functionName = getFunctionName(prenotazione);
+      const cliente = clienti.find(c => c.id === prenotazione.cliente_id);
+      const response = await base44.functions.invoke(functionName, {
+        prenotazione_id: prenotazione.id,
+        format: 'word'
+      });
+      const blob = new Blob([response.data], { type: 'application/msword' });
+      const fileName = `Contratto_${cliente?.ragione_sociale?.replace(/\s+/g, '_')}_${prenotazione.data_inizio}.doc`;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success('Contratto Word scaricato');
+    } catch (error) {
+      console.error('Errore download Word:', error);
+      toast.error('Errore nel download del contratto Word');
+    } finally {
+      setDownloadingWord(null);
     }
   };
 
@@ -499,6 +556,23 @@ export default function Documenti({ centroSelezionato }) {
             <p className="text-sm text-blue-800 mb-4">
               Prenotazioni senza contratto generato:
             </p>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm font-medium text-blue-900">Formato:</span>
+              <div className="flex bg-white rounded-lg border border-blue-200 p-0.5">
+                <button
+                  onClick={() => setGenFormat('pdf')}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${genFormat === 'pdf' ? 'bg-blue-600 text-white' : 'text-blue-700 hover:bg-blue-50'}`}
+                >
+                  PDF
+                </button>
+                <button
+                  onClick={() => setGenFormat('word')}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${genFormat === 'word' ? 'bg-blue-600 text-white' : 'text-blue-700 hover:bg-blue-50'}`}
+                >
+                  Word
+                </button>
+              </div>
+            </div>
             <div className="space-y-2">
               {prenotazioniSenzaContratto.map(p => {
                 const cliente = clienti.find(c => c.id === p.cliente_id);
@@ -591,25 +665,37 @@ export default function Documenti({ centroSelezionato }) {
                            </label>
                          )}
                          {isFirmato && (
-                           <Button
-                             variant="ghost"
-                             size="icon"
-                             onClick={() => window.open(doc.contratto_firmato_url, '_blank')}
-                             className="h-8 w-8 md:h-9 md:w-9 text-green-600 hover:bg-green-50"
-                             title="Scarica contratto firmato"
-                           >
-                             <Download className="w-4 h-4" />
-                           </Button>
-                         )}
-                         <Button
-                           variant="ghost"
-                           size="icon"
-                           onClick={() => window.open(doc.file_url, '_blank')}
-                           className="h-8 w-8 md:h-9 md:w-9 text-slate-600 hover:bg-slate-200"
-                           title="Scarica documento originale"
-                         >
-                           <Download className="w-4 h-4" />
-                         </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => window.open(doc.contratto_firmato_url, '_blank')}
+                              className="h-8 w-8 md:h-9 md:w-9 text-green-600 hover:bg-green-50"
+                              title="Scarica contratto firmato"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {isContratto && doc.prenotazione_id && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDownloadWord(doc)}
+                              disabled={downloadingWord === doc.id}
+                              className="h-8 w-8 md:h-9 md:w-9 text-blue-600 hover:bg-blue-50"
+                              title="Scarica come Word"
+                            >
+                              <FileType className="w-4 h-4" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => window.open(doc.file_url, '_blank')}
+                            className="h-8 w-8 md:h-9 md:w-9 text-slate-600 hover:bg-slate-200"
+                            title="Scarica documento originale"
+                          >
+                            <Download className="w-4 h-4" />
+                          </Button>
                          <Button
                            variant="ghost"
                            size="icon"

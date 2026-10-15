@@ -1,68 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import { jsPDF } from 'npm:jspdf@4.0.0';
-
-function numeroInLettere(num) {
-  const unita = ['', 'uno', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette', 'otto', 'nove',
-    'dieci', 'undici', 'dodici', 'tredici', 'quattordici', 'quindici', 'sedici', 'diciassette', 'diciotto', 'diciannove'];
-  const decine = ['', '', 'venti', 'trenta', 'quaranta', 'cinquanta', 'sessanta', 'settanta', 'ottanta', 'novanta'];
-
-  if (num === 0) return 'zero';
-  if (num < 0) return 'meno ' + numeroInLettere(-num);
-
-  let risultato = '';
-  if (num >= 1000) {
-    const migliaia = Math.floor(num / 1000);
-    risultato += (migliaia === 1 ? 'mille' : numeroInLettere(migliaia) + 'mila');
-    num %= 1000;
-  }
-  if (num >= 100) {
-    const centinaia = Math.floor(num / 100);
-    risultato += (centinaia === 1 ? 'cento' : unita[centinaia] + 'cento');
-    num %= 100;
-  }
-  if (num >= 20) {
-    const d = Math.floor(num / 10);
-    const u = num % 10;
-    risultato += (u === 1 || u === 8) ? decine[d].slice(0, -1) + unita[u] : decine[d] + unita[u];
-  } else if (num > 0) {
-    risultato += unita[num];
-  }
-  return risultato;
-}
-
-function formatEuro(importo) {
-  const intero = Math.floor(importo);
-  const centesimi = Math.round((importo - intero) * 100);
-  const lettere = numeroInLettere(intero);
-  const centStr = centesimi > 0 ? `/${String(centesimi).padStart(2, '0')}` : '/00';
-  return {
-    numerico: importo.toFixed(2).replace('.', ','),
-    lettere: `${lettere}${centStr}`
-  };
-}
-
-function sanitize(str) {
-  if (!str) return '';
-  return str
-    .replace(/à/g, 'a\'').replace(/À/g, 'A\'')
-    .replace(/è/g, 'e\'').replace(/È/g, 'E\'')
-    .replace(/é/g, 'e\'').replace(/É/g, 'E\'')
-    .replace(/ì/g, 'i\'').replace(/Ì/g, 'I\'')
-    .replace(/í/g, 'i\'').replace(/Í/g, 'I\'')
-    .replace(/ò/g, 'o\'').replace(/Ò/g, 'O\'')
-    .replace(/ó/g, 'o\'').replace(/Ó/g, 'O\'')
-    .replace(/ù/g, 'u\'').replace(/Ù/g, 'U\'')
-    .replace(/ú/g, 'u\'').replace(/Ú/g, 'U\'')
-    .replace(/–/g, '-').replace(/—/g, '-')
-    .replace(/"/g, '"').replace(/"/g, '"')
-    .replace(/'/g, '\'').replace(/'/g, '\'')
-    .replace(/[^\x00-\x7F]/g, '');
-}
-
-function formatData(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+import { formatEuro, formatData, sanitize, renderPDF, renderWord } from '../../shared/contrattoUtils.ts';
 
 Deno.serve(async (req) => {
   try {
@@ -70,15 +7,13 @@ Deno.serve(async (req) => {
     const user = await base44.auth.me();
     if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { prenotazione_id } = await req.json();
+    const { prenotazione_id, format = 'pdf' } = await req.json();
     if (!prenotazione_id) return Response.json({ error: 'prenotazione_id richiesto' }, { status: 400 });
 
-    // Carica dati
     const prenotazioni = await base44.entities.Prenotazione.filter({ id: prenotazione_id });
     const prenotazione = prenotazioni[0];
     if (!prenotazione) return Response.json({ error: 'Prenotazione non trovata' }, { status: 404 });
 
-    // Determina gli ID degli spazi (supporta spazi_ids multipli o il vecchio spazio_id)
     const spaziIds = (prenotazione.spazi_ids && prenotazione.spazi_ids.length > 0)
       ? prenotazione.spazi_ids
       : (prenotazione.spazio_id ? [prenotazione.spazio_id] : []);
@@ -95,20 +30,17 @@ Deno.serve(async (req) => {
 
     const cliente = clientiArr[0];
     const centro = centriArr[0];
-    // Filtra solo gli spazi della prenotazione, nell'ordine corretto
     const spaziPrenotati = spaziIds.map(id => tuttiSpaziArr.find(s => s.id === id)).filter(Boolean);
-    const spazio = spaziPrenotati[0]; // spazio principale (per compatibilità)
+    const spazio = spaziPrenotati[0];
 
     if (!cliente || spaziPrenotati.length === 0 || !centro) {
       return Response.json({ error: 'Dati mancanti' }, { status: 400 });
     }
 
-    // Stringa descrittiva degli spazi: "N.2 di 25 mq + N.1 di 25 mq"
     const spaziStr = spaziPrenotati
       .map(s => `N.${s.numero_spazio}${s.superficie_mq ? ' di ' + s.superficie_mq + ' mq' : ''}`)
       .join(' + ');
 
-    // Calcoli economici
     const prezzoNetto = prenotazione.prezzo_totale;
     const iva = Math.round(prezzoNetto * 22) / 100;
     const prezzoTotale = prezzoNetto + iva;
@@ -119,211 +51,8 @@ Deno.serve(async (req) => {
 
     const dataOggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const cittaOggi = centro.citta?.toUpperCase() || '';
-
-    // === GENERA PDF ===
-    const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-    const lm = 20; // left margin
-    const rm = 190; // right margin
-    const pw = rm - lm; // page width
-    let y = 20;
-
-    const addLine = (h = 6) => { y += h; };
-
-    const checkPage = (needed = 10) => {
-      if (y + needed > 275) {
-        doc.addPage();
-        y = 20;
-      }
-    };
-
-    const text = (str, x, yy, opts = {}) => {
-      doc.text(sanitize(str || ''), x, yy, opts);
-    };
-
-    // Stampa una riga mista con segmenti [{text, bold}], restituisce la larghezza totale usata
-    // Usata per evidenziare i valori variabili in grassetto inline
-    const textMixed = (segments, x, yy, fontSize = 10.5) => {
-      doc.setFontSize(fontSize);
-      let cx = x;
-      for (const seg of segments) {
-        doc.setFont('helvetica', seg.bold ? 'bold' : 'normal');
-        const str = sanitize(seg.text || '');
-        doc.text(str, cx, yy);
-        cx += doc.getTextWidth(str);
-      }
-      doc.setFont('helvetica', 'normal');
-    };
-
-    // Stampa paragrafo con segmenti bold inline, con word-wrap
-    const textMixedWrapped = (segments, x, yy, maxW, lineH = 5.5) => {
-      // Costruisce una lista di token {word, bold, space}
-      const tokens = [];
-      for (const seg of segments) {
-        const words = sanitize(seg.text || '').split(' ');
-        for (let i = 0; i < words.length; i++) {
-          tokens.push({ word: words[i], bold: !!seg.bold, space: i < words.length - 1 });
-        }
-      }
-      doc.setFontSize(10.5);
-      let lineTokens = [];
-      let lineW = 0;
-      const spaceW = doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
-
-      const flushLine = (toks, ly) => {
-        let cx = x;
-        for (let i = 0; i < toks.length; i++) {
-          const t = toks[i];
-          doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
-          doc.text(t.word, cx, ly);
-          cx += doc.getTextWidth(t.word);
-          if (i < toks.length - 1) cx += doc.setFont('helvetica', 'normal') && doc.getTextWidth(' ');
-        }
-      };
-
-      for (let i = 0; i < tokens.length; i++) {
-        const t = tokens[i];
-        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
-        const ww = doc.getTextWidth(t.word);
-        const needSpace = lineTokens.length > 0 ? doc.setFont('helvetica','normal') && doc.getTextWidth(' ') : 0;
-        if (lineTokens.length > 0 && lineW + needSpace + ww > maxW) {
-          flushLine(lineTokens, yy);
-          yy += lineH;
-          lineTokens = [t];
-          lineW = ww;
-        } else {
-          if (lineTokens.length > 0) lineW += doc.setFont('helvetica','normal') && doc.getTextWidth(' ');
-          lineTokens.push(t);
-          lineW += ww;
-        }
-      }
-      if (lineTokens.length > 0) flushLine(lineTokens, yy);
-      // conta le righe usate
-      doc.setFont('helvetica', 'normal');
-      return yy;
-    };
-
-    // Font
-    doc.setFont('helvetica');
-
-    // --- INTESTAZIONE CLIENTE (mittente) ---
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    text(cliente.ragione_sociale, lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(6);
-    text(cliente.indirizzo || '', lm, y);
-    addLine(6);
-    text(`${cliente.cap || ''} ${cliente.citta || ''}${cliente.provincia ? ' (' + cliente.provincia + ')' : ''}`, lm, y);
-    addLine(6);
-    if (cliente.partita_iva) { text(`P.IVA ${cliente.partita_iva}`, lm, y); addLine(6); }
-    if (cliente.pec) { text(`PEC: ${cliente.pec}`, lm, y); addLine(6); }
-    if (cliente.legale_rappresentante) { text(`Leg. Rapp.: ${cliente.legale_rappresentante}${cliente.legale_rappresentante_cf ? ' - CF: ' + cliente.legale_rappresentante_cf : ''}`, lm, y); addLine(6); }
-
-    addLine(8);
-
-    // --- DATA E DESTINATARIO (a destra) ---
-    doc.setFontSize(11);
-    text(`${cittaOggi}, lì ${dataOggi}`, rm, y, { align: 'right' });
-    addLine(8);
-    doc.setFont('helvetica', 'bold');
-    text('Spettabile', rm - 60, y);
-    addLine(6);
-    text('GESTIONE COMPLESSI COMMERCIALI', rm - 60, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(6);
-    text('VIA DEI MERCANTI 3', rm - 60, y);
-    addLine(6);
-    text("47122 FORLI' (FC)", rm - 60, y);
-    addLine(10);
-
-    // --- OGGETTO ---
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    text('Oggetto: richiesta di autorizzazione all\'utilizzo promiscuo di una porzione', lm, y);
-    addLine(6);
-    text('              di parti comuni e dei relativi servizi accessori', lm, y);
-    addLine(6);
-    text('              Proposta contrattuale', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(10);
-
-    // --- TESTO INTRODUTTIVO ---
-    doc.setFontSize(10.5);
-    const introLines = doc.splitTextToSize(
-      sanitize(`Facendo seguito ai colloqui intercorsi e premesso che avete la disponibilita' e la gestione di spazi e servizi comuni siti all'interno della "galleria" del Centro Commerciale ${centro.nome.toUpperCase()} posto in ${centro.citta?.toUpperCase() || ''} ${centro.indirizzo ? centro.indirizzo : ''}, siamo con la presente a chiederVi l'autorizzazione ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione ${spaziStr}, indicati nella planimetria in allegato sub A, alle seguenti`),
-      pw
-    );
-    doc.text(introLines, lm, y);
-    y += introLines.length * 5.5;
-    addLine(4);
-    doc.setFont('helvetica', 'bold');
-    text('condizioni', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(10);
-
-    // Helper: stampa paragrafo con segmenti {text, bold}, con word-wrap manuale
-    const printMixedParagraph = (segments, lineH = 5.5) => {
-      doc.setFontSize(10.5);
-      // Tokenizza in parole mantenendo il flag bold
-      const tokens = [];
-      for (const seg of segments) {
-        const words = sanitize(seg.text || '').split(' ').filter(w => w !== '');
-        for (const word of words) {
-          tokens.push({ word, bold: !!seg.bold });
-        }
-      }
-      doc.setFont('helvetica', 'normal');
-      const spaceW = doc.getTextWidth(' ');
-      let lineTokens = [];
-      let lineW = 0;
-
-      const flushLine = (toks) => {
-        let cx = lm;
-        for (let i = 0; i < toks.length; i++) {
-          doc.setFont('helvetica', toks[i].bold ? 'bold' : 'normal');
-          doc.text(toks[i].word, cx, y);
-          cx += doc.getTextWidth(toks[i].word);
-          if (i < toks.length - 1) { doc.setFont('helvetica','normal'); cx += spaceW; }
-        }
-      };
-
-      for (let i = 0; i < tokens.length; i++) {
-        const t = tokens[i];
-        doc.setFont('helvetica', t.bold ? 'bold' : 'normal');
-        const ww = doc.getTextWidth(t.word);
-        const gap = lineTokens.length > 0 ? spaceW : 0;
-        if (lineTokens.length > 0 && lineW + gap + ww > pw) {
-          checkPage(lineH + 3);
-          flushLine(lineTokens);
-          y += lineH;
-          lineTokens = [t];
-          lineW = ww;
-        } else {
-          lineW += gap + ww;
-          lineTokens.push(t);
-        }
-      }
-      if (lineTokens.length > 0) {
-        checkPage(lineH + 3);
-        flushLine(lineTokens);
-        y += lineH;
-      }
-      doc.setFont('helvetica', 'normal');
-    };
-
-    // Helper: stampa testo semplice (normale) con wrap
-    const printParagraph = (str) => {
-      doc.setFontSize(10.5);
-      doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(sanitize(str.replace(/\n/g, ' ')), pw);
-      checkPage(lines.length * 5.5 + 3);
-      doc.text(lines, lm, y);
-      y += lines.length * 5.5;
-    };
-
-    // Struttura articoli: array di {titolo, paragrafi}
-    // Ogni paragrafo è: string (testo normale) oppure array di segmenti [{text, bold}] (misto)
     const materiale = prenotazione.materiale_dimostrativo || '';
+
     const articoli = [
       {
         titolo: '1) Oggetto.',
@@ -431,69 +160,57 @@ Deno.serve(async (req) => {
       }
     ];
 
-    for (const art of articoli) {
-      checkPage(15);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10.5);
-      text(art.titolo, lm, y);
-      doc.setFont('helvetica', 'normal');
-      addLine(6);
+    const blocchi = [
+      { type: 'paragraph', text: cliente.ragione_sociale, bold: true, size: 11 },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: cliente.indirizzo || '', size: 11 },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: `${cliente.cap || ''} ${cliente.citta || ''}${cliente.provincia ? ' (' + cliente.provincia + ')' : ''}`, size: 11 },
+      { type: 'spacer', h: 0.5 },
+      ...(cliente.partita_iva ? [{ type: 'paragraph', text: `P.IVA ${cliente.partita_iva}`, size: 11 }, { type: 'spacer', h: 0.5 }] : []),
+      ...(cliente.pec ? [{ type: 'paragraph', text: `PEC: ${cliente.pec}`, size: 11 }, { type: 'spacer', h: 0.5 }] : []),
+      ...(cliente.legale_rappresentante ? [{ type: 'paragraph', text: `Leg. Rapp.: ${cliente.legale_rappresentante}${cliente.legale_rappresentante_cf ? ' - CF: ' + cliente.legale_rappresentante_cf : ''}`, size: 11 }, { type: 'spacer', h: 0.5 }] : []),
+      { type: 'spacer', h: 3 },
+      { type: 'paragraph', text: `${cittaOggi}, lì ${dataOggi}`, align: 'right', size: 11 },
+      { type: 'spacer', h: 2.5 },
+      { type: 'paragraph', text: 'Spettabile', bold: true, size: 11, indent: 110 },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: 'GESTIONE COMPLESSI COMMERCIALI', bold: true, size: 11, indent: 110 },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: 'VIA DEI MERCANTI 3', size: 11, indent: 110 },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: "47122 FORLI' (FC)", size: 11, indent: 110 },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: "Oggetto: richiesta di autorizzazione all'utilizzo promiscuo di una porzione", bold: true, size: 11 },
+      { type: 'paragraph', text: '              di parti comuni e dei relativi servizi accessori', bold: true, size: 11 },
+      { type: 'paragraph', text: '              Proposta contrattuale', bold: true, size: 11 },
+      { type: 'spacer', h: 4 },
+      { type: 'mixed', segments: [
+        { text: `Facendo seguito ai colloqui intercorsi e premesso che avete la disponibilita' e la gestione di spazi e servizi comuni siti all'interno della "galleria" del Centro Commerciale ${centro.nome.toUpperCase()} posto in ${centro.citta?.toUpperCase() || ''} ${centro.indirizzo ? centro.indirizzo : ''}, siamo con la presente a chiederVi l'autorizzazione ad esporre il seguente materiale pubblicitario e dimostrativo nella galleria del Centro Commerciale nella posizione ${spaziStr}, indicati nella planimetria in allegato sub A, alle seguenti` }
+      ]},
+      { type: 'spacer', h: 2 },
+      { type: 'paragraph', text: 'condizioni', bold: true },
+      { type: 'spacer', h: 4 },
+      ...articoli.flatMap(art => [{ type: 'article', titolo: art.titolo, paragrafi: art.paragrafi }]),
+      { type: 'paragraph', text: 'Allegato A: planimetria', bold: true },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: "Ai sensi e per gli effetti degli artt.1341 e 1342 del Cod.Civ. (se ed in quanto applicabili alla presente fattispecie), dichiariamo di accettare specificatamente gli articoli: art. 2 (Uso), art. 3 (Durata e penale), art. 5 (Allestimento), art. 7 (Esonero-Assicurazione), art. 10 (Clausola risolutiva espressa)." },
+      { type: 'spacer', h: 4 },
+      { type: 'paragraph', text: "La sua stessa proposta rimarra' ferma ed irrevocabile per il termine di quindici giorni dal ricevimento della presente da parte Vostra; decorso tale termine senza che ci pervenga la Vostra formale accettazione, la stessa sara' ritenuta automaticamente revocata." },
+      { type: 'spacer', h: 2 },
+      { type: 'paragraph', text: "Costituira' accettazione della presente proposta anche il ritiro dell'assegno da parte di persona autorizzata o comunque l'incasso del corrispettivo di cui alla clausola 4, salvo che, qualora il pagamento sia effettuato con disposizione di bonifico bancario, la somma accreditata ci venga restituita nel termine di 8 (otto) giorni dall'accredito stesso." },
+      { type: 'spacer', h: 6 },
+      { type: 'paragraph', text: '_________________________' },
+      { type: 'spacer', h: 0.5 },
+      { type: 'paragraph', text: '(Timbro e firma)' },
+    ];
 
-      for (const par of art.paragrafi) {
-        checkPage(10);
-        if (Array.isArray(par)) {
-          printMixedParagraph(par);
-        } else {
-          printParagraph(par);
-        }
-        addLine(3);
-      }
-      addLine(4);
+    const fileName = `Contratto_${cliente.ragione_sociale?.replace(/\s+/g, '_')}_${spazio.numero_spazio}_${prenotazione.data_inizio}`;
+
+    if (format === 'word') {
+      return renderWord(blocchi, fileName);
     }
-
-    // --- ALLEGATO ---
-    checkPage(15);
-    doc.setFont('helvetica', 'bold');
-    text('Allegato A: planimetria', lm, y);
-    doc.setFont('helvetica', 'normal');
-    addLine(10);
-
-    // --- CLAUSOLA SPECIFICA ---
-    checkPage(20);
-    const clausolaLines = doc.splitTextToSize(
-      sanitize('Ai sensi e per gli effetti degli artt.1341 e 1342 del Cod.Civile (se ed in quanto applicabili alla presente fattispecie), dichiariamo di accettare specificatamente gli articoli: art. 2 (Uso), art. 3 (Durata e penale), art. 5 (Allestimento), art. 7 (Esonero-Assicurazione), art. 10 (Clausola risolutiva espressa).'),
-      pw
-    );
-    doc.text(clausolaLines, lm, y);
-    y += clausolaLines.length * 5.5;
-    addLine(8);
-
-    // --- TESTO FINALE ---
-    checkPage(30);
-    const finaleLines = doc.splitTextToSize(
-      sanitize("La sua stessa proposta rimarra' ferma ed irrevocabile per il termine di quindici giorni dal ricevimento della presente da parte Vostra; decorso tale termine senza che ci pervenga la Vostra formale accettazione, la stessa sara' ritenuta automaticamente revocata.\n\nCostituira' accettazione della presente proposta anche il ritiro dell'assegno da parte di persona autorizzata o comunque l'incasso del corrispettivo di cui alla clausola 4, salvo che, qualora il pagamento sia effettuato con disposizione di bonifico bancario, la somma accreditata ci venga restituita nel termine di 8 (otto) giorni dall'accredito stesso."),
-      pw
-    );
-    doc.text(finaleLines, lm, y);
-    y += finaleLines.length * 5.5;
-    addLine(15);
-
-    // --- FIRMA ---
-    checkPage(25);
-    text('_________________________', lm, y);
-    addLine(6);
-    text('(Timbro e firma)', lm, y);
-
-    // Output
-    const pdfBytes = doc.output('arraybuffer');
-
-    return new Response(pdfBytes, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="Contratto_${cliente.ragione_sociale?.replace(/\s+/g, '_')}_${spazio.numero_spazio}_${prenotazione.data_inizio}.pdf"`
-      }
-    });
+    return renderPDF(blocchi, fileName);
 
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
