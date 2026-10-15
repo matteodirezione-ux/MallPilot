@@ -225,8 +225,8 @@ export function renderWord(blocchi, filename) {
 
   let html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="utf-8"><style>
-body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; margin: 1cm 1cm; }
-@page WordDocument { margin: 1cm 1cm 1cm 1cm; }
+body { font-family: 'Times New Roman', serif; font-size: 11pt; line-height: 1.5; margin: 0; }
+@page WordDocument { margin: 0 0 0 0; }
 p { margin: 0 0 4pt 0; }
 .r { text-align: right; }
 .c { text-align: center; }
