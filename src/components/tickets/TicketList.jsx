@@ -9,6 +9,7 @@ export const STATI_CONFIG = {
   approvato_con_preventivo: { label: 'Richiesta preventivo', color: 'bg-purple-100 text-purple-700', dot: 'bg-purple-500', cardBg: 'bg-purple-50 border-transparent', leftBar: 'bg-purple-500' },
   preventivo_inserito:    { label: 'Preventivo inserito',    color: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500', cardBg: 'bg-yellow-50 border-transparent', leftBar: 'bg-yellow-500' },
   da_controllare:         { label: 'Da controllare',         color: 'bg-orange-100 text-orange-700', dot: 'bg-orange-500', cardBg: 'bg-orange-50 border-transparent', leftBar: 'bg-orange-500' },
+  appartato:              { label: 'Appartato',              color: 'bg-slate-200 text-slate-700', dot: 'bg-slate-500', cardBg: 'bg-slate-100 border-transparent', leftBar: 'bg-slate-500' },
   chiuso:                 { label: 'Chiuso',                 color: 'bg-green-100 text-green-700',  dot: 'bg-green-500',  cardBg: 'bg-green-50 border-transparent',  leftBar: 'bg-green-500' },
   rifiutato:              { label: 'Rifiutato',              color: 'bg-red-100 text-red-700',      dot: 'bg-red-500',    cardBg: 'bg-red-50 border-transparent',    leftBar: 'bg-red-500' },
 };
@@ -219,6 +220,7 @@ const STATI_ORDER = [
   'approvato_con_preventivo',
   'preventivo_inserito',
   'da_controllare',
+  'appartato',
   'chiuso',
   'rifiutato',
 ];

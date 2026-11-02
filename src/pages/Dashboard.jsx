@@ -846,7 +846,7 @@ export default function Dashboard({ centroSelezionato, user }) {
           <CardContent className="max-h-64 sm:max-h-96 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full">
             {(() => {
               const oggi = new Date(); oggi.setHours(0,0,0,0);
-              const aperti = stats.ticketsList.filter(t => t.stato !== 'chiuso');
+              const aperti = stats.ticketsList.filter(t => !['chiuso', 'appartato'].includes(t.stato));
               if (aperti.length === 0) return <p className="text-slate-500 text-center py-3 text-xs sm:text-sm">Nessun ticket aperto</p>;
 
               const scaduti = aperti.filter(t => t.scadenza && new Date(t.scadenza) < oggi);

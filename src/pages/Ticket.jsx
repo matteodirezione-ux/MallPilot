@@ -440,7 +440,7 @@ export default function Ticket({ centroSelezionato, user }) {
     const matchMese = isTicketInMese(t, inizio, fine);
 
     let matchStato = true;
-    if (filtroStato === 'attivi') matchStato = !['chiuso', 'rifiutato'].includes(t.stato);
+    if (filtroStato === 'attivi') matchStato = !['chiuso', 'rifiutato', 'appartato'].includes(t.stato);
     else if (filtroStato === 'chiuso') matchStato = t.stato === 'chiuso';
     else if (filtroStato === 'rifiutato') matchStato = t.stato === 'rifiutato';
     else if (filtroStato !== 'tutti') matchStato = t.stato === filtroStato;
@@ -455,11 +455,12 @@ export default function Ticket({ centroSelezionato, user }) {
     approvati: ticketsMese.filter(t => ['approvato', 'approvato_con_preventivo', 'preventivo_inserito'].includes(t.stato)).length,
     daControllare: ticketsMese.filter(t => t.stato === 'da_controllare').length,
     chiusi: ticketsMese.filter(t => t.stato === 'chiuso').length,
-    urgenti: ticketsMese.filter(t => t.tipologia === 'urgente' && t.stato !== 'chiuso').length,
+    urgenti: ticketsMese.filter(t => t.tipologia === 'urgente' && !['chiuso', 'appartato'].includes(t.stato)).length,
   };
 
   const filtriStato = [
     { key: 'attivi', label: 'Attivi', activeClass: 'bg-blue-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
+    { key: 'appartato', label: 'Appartati', activeClass: 'bg-slate-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
     { key: 'chiuso', label: 'Chiusi', activeClass: 'bg-green-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
     { key: 'rifiutato', label: 'Rifiutati', activeClass: 'bg-red-600 text-white', inactiveClass: 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50' },
   ];

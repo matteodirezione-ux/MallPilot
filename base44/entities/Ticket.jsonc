@@ -45,6 +45,7 @@
         "approvato_con_preventivo",
         "preventivo_inserito",
         "da_controllare",
+        "appartato",
         "chiuso",
         "rifiutato"
       ],
