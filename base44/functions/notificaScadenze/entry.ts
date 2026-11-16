@@ -1,6 +1,10 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+// Notifiche in-app disattivate: restano attive solo quelle via email.
+const IN_APP_NOTIFICATIONS: boolean = false;
+
 Deno.serve(async (req) => {
+    if (!IN_APP_NOTIFICATIONS) return Response.json({ success: true, disabled: true });
     try {
         const base44 = createClientFromRequest(req);
         const oggi = new Date().toISOString().split('T')[0];

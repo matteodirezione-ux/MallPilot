@@ -253,28 +253,7 @@ export default function Ticket({ centroSelezionato, user }) {
       ));
     }
 
-    // Notifica ai manutentori per approvazione o richiesta preventivo
-    if (update.stato === 'approvato' || update.stato === 'approvato_con_preventivo') {
-      const isPreventivo = update.stato === 'approvato_con_preventivo';
-      const titolo = isPreventivo
-        ? `Richiesta preventivo: ticket n. ${ticket.numero_ticket}`
-        : `Ticket approvato: n. ${ticket.numero_ticket}`;
-      const messaggio = isPreventivo
-        ? `È richiesto un preventivo per il ticket n. ${ticket.numero_ticket}: ${ticket.descrizione || ''}`
-        : `Il ticket n. ${ticket.numero_ticket} è stato approvato ed è pronto per l'intervento: ${ticket.descrizione || ''}`;
-
-      const manutentori = await base44.entities.Manutentore.list();
-      const notifiche = manutentori.map(m => ({
-        destinatario_email: m.email,
-        tipo: 'ticket',
-        titolo,
-        messaggio,
-        centro_id: ticket.centro_id || '',
-        entity_id: ticket.id,
-        letta: false,
-      }));
-      if (notifiche.length > 0) await base44.entities.Notifica.bulkCreate(notifiche);
-    }
+    // Notifiche in-app disattivate: il manutentore viene avvisato via email.
 
     setAzioneDialog(null);
   };
