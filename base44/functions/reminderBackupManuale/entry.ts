@@ -3,47 +3,29 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
 
-    if (user?.role !== 'admin') {
+    // Chiamata manuale: solo un admin può lanciarla. Da workflow schedulato non c'è utente.
+    const chiamante = await base44.auth.me().catch(() => null);
+    if (chiamante && chiamante.role !== 'admin') {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    // Genera il backup
-    const entities = [
-      'CentroCommerciale', 'SpazioExpo', 'Cliente', 'Prenotazione', 'Documento',
-      'Task', 'Manutenzione', 'Ticket', 'Report', 'Capex', 'Pulizia', 'PuliziaPeriodica',
-      'Notifica', 'Assegnazione', 'Budget', 'Direttore', 'Vigilanza', 'Manutentore'
-    ];
+    // Destinatari: tutti gli amministratori dell'app
+    const utenti = await base44.asServiceRole.entities.User.list();
+    const amministratori = utenti.filter((u) => u.role === 'admin');
 
-    const backup = { timestamp: new Date().toISOString(), data: {} };
-    for (const entityName of entities) {
-      const entity = base44.asServiceRole.entities[entityName];
-      if (entity) {
-        const allData = await entity.list();
-        backup.data[entityName] = allData;
-      }
+    for (const amministratore of amministratori) {
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: amministratore.email,
+        template_name: 'ReminderBackupManuale',
+        variables: {
+          first_name: amministratore.full_name?.split(' ')[0] || ''
+        },
+        category: 'transactional'
+      });
     }
 
-    const backupJson = JSON.stringify(backup, null, 2);
-    const backupBlob = new Blob([backupJson], { type: 'application/json' });
-    const uploadResult = await base44.integrations.Core.UploadPrivateFile({
-      file: await backupBlob.arrayBuffer()
-    });
-
-    // Genera URL firmato per il download
-    const signedUrl = await base44.integrations.Core.CreateFileSignedUrl({
-      file_uri: uploadResult.file_uri,
-      expires_in: 2592000 // 30 giorni
-    });
-
-    await base44.integrations.Core.SendEmail({
-      to: user.email,
-      subject: '📋 Promemoria: Backup manuale del database',
-      body: `Ciao,\n\nnon dimenticare di fare un backup manuale dei tuoi dati questo mese.\n\nRicorda: stai già ricevendo backup automatici ogni notte, ma un backup manuale aggiuntivo è sempre una buona pratica.\n\n📥 Scarica il backup: ${signedUrl.signed_url}\n\nA presto!`
-    });
-
-    return Response.json({ success: true });
+    return Response.json({ success: true, email_inviate: amministratori.length });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
