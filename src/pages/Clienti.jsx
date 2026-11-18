@@ -12,6 +12,7 @@ import { Plus, Users, Pencil, Trash2, TrendingUp, Calendar, DollarSign, ArrowUpD
 import { toast } from 'sonner';
 import { format, differenceInDays } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { cercaCap } from '@/lib/capLookup';
 
 export default function Clienti({ centroSelezionato }) {
   const [clienti, setClienti] = useState([]);
@@ -131,6 +132,15 @@ export default function Clienti({ centroSelezionato }) {
     } catch (error) {
       console.error('Errore salvataggio cliente:', error);
       toast.error('Errore nel salvataggio del cliente');
+    }
+  };
+
+  const handleCapChange = async (value) => {
+    setFormData(prev => ({ ...prev, cap: value }));
+    if (!/^\d{5}$/.test(value)) return;
+    const risultato = await cercaCap(value);
+    if (risultato) {
+      setFormData(prev => prev.cap !== value ? prev : { ...prev, citta: risultato.citta, provincia: risultato.provincia });
     }
   };
 
@@ -291,24 +301,54 @@ export default function Clienti({ centroSelezionato }) {
               {/* Step 1: Indirizzo */}
               {wizardStep === 1 && (
                 <div className="space-y-3">
-                  {[
-                    { label: 'Indirizzo *', key: 'indirizzo', required: true },
-                    { label: 'Città *', key: 'citta', required: true },
-                    { label: 'Provincia *', key: 'provincia', required: true },
-                    { label: 'CAP *', key: 'cap', required: true },
-                  ].map(({ label, key, required }) => (
-                    <div key={key} className="flex items-center gap-3">
-                      <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">{label}</label>
-                      <div className="flex-1 min-w-0">
-                        <Input
-                          value={formData[key] || ''}
-                          onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
-                          required={required}
-                          className="h-8 text-sm"
-                        />
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">Indirizzo *</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={formData.indirizzo || ''}
+                        onChange={(e) => setFormData({ ...formData, indirizzo: e.target.value })}
+                        required
+                        className="h-8 text-sm"
+                      />
                     </div>
-                  ))}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">CAP *</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={formData.cap || ''}
+                        onChange={(e) => handleCapChange(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                        inputMode="numeric"
+                        maxLength={5}
+                        required
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">Città *</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={formData.citta || ''}
+                        onChange={(e) => setFormData({ ...formData, citta: e.target.value })}
+                        required
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="w-36 flex-shrink-0 text-sm font-medium text-slate-700">Provincia *</label>
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        value={formData.provincia || ''}
+                        onChange={(e) => setFormData({ ...formData, provincia: e.target.value.toUpperCase() })}
+                        maxLength={2}
+                        required
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 ml-36 pl-3">Inserisci il CAP: città e provincia si compilano da sole.</p>
                 </div>
               )}
 
